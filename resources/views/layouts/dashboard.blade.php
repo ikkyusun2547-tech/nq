@@ -29,10 +29,7 @@
             <div class="flex h-16 items-center justify-between gap-4">
                 <a href="{{ $isAdmin ? route('admin.dashboard') : route('dashboard') }}" class="flex shrink-0 items-center gap-2.5">
                     <img src="{{ asset('images/logo.png') }}" alt="SRRU" class="h-11 w-11 shrink-0 object-contain drop-shadow">
-                    <span class="hidden whitespace-nowrap text-sm font-semibold leading-tight text-white sm:block">
-                        <span class="xl:hidden">ระบบเช็กชื่อกิจกรรม SRRU</span>
-                        <span class="hidden xl:inline">ระบบเช็กชื่อกิจกรรม<br> มหาวิทยาลัยราชภัฏสุรินทร์</span>
-                    </span>
+                    <span class="hidden whitespace-nowrap text-sm font-semibold leading-tight text-white sm:block">SRRU Check</span>
                 </a>
 
                 <div class="hidden flex-1 items-center justify-center gap-1 md:flex">
