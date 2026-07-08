@@ -22,9 +22,9 @@
         <div class="pointer-events-none absolute -left-24 -top-24 h-80 w-80 rounded-full bg-white/10 blur-3xl"></div>
         <div class="pointer-events-none absolute -bottom-32 -right-16 h-80 w-80 rounded-full bg-brand-green-500/10 blur-3xl"></div>
 
-        <div class="relative flex items-center gap-3">
-            <img src="{{ asset('images/logo.png') }}" alt="SRRU" class="h-11 w-11 object-contain drop-shadow">
-            <span class="text-sm font-semibold tracking-wide text-white">SRRU Check</span>
+        <div class="relative flex items-center gap-4">
+            <img src="{{ asset('images/logo.png') }}" alt="SRRU" class="h-16 w-16 object-contain drop-shadow">
+            <span class="text-xl font-bold tracking-wide text-white">SRRU Check</span>
         </div>
 
         <div class="relative">
