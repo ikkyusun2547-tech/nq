@@ -22,8 +22,8 @@
         </span>
     </div>
 
-    <form method="GET" action="{{ route('admin.students.index') }}" class="mt-4 flex flex-col gap-3 sm:flex-row">
-        <div class="relative sm:flex-1">
+    <form method="GET" action="{{ route('admin.students.index') }}" class="mt-4 space-y-3">
+        <div class="relative">
             <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
                 <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
             </span>
@@ -32,25 +32,71 @@
                 class="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-3.5 text-sm text-slate-700 placeholder:text-slate-400 shadow-soft transition-all duration-200 focus:border-brand-purple-500 focus:outline-none focus:ring-4 focus:ring-brand-purple-500/10"
             >
         </div>
-        <div class="relative sm:w-64">
-            <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
-                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 21V9.75l8.25-4.5 8.25 4.5V21M8.25 21v-6h7.5v6M3 21h18"/></svg>
-            </span>
-            <select
-                name="faculty_id" onchange="this.form.submit()"
-                class="w-full appearance-none rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-9 text-sm text-slate-700 shadow-soft transition-all duration-200 focus:border-brand-purple-500 focus:outline-none focus:ring-4 focus:ring-brand-purple-500/10"
-            >
-                <option value="">-- ทุกคณะ --</option>
-                @foreach ($faculties as $faculty)
-                    <option value="{{ $faculty->id }}" @selected(request('faculty_id') == $faculty->id)>{{ $faculty->name_th }}</option>
-                @endforeach
-            </select>
-            <span class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3.5 text-slate-400">
-                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
-            </span>
+
+        <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
+            <div class="relative">
+                <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 21V9.75l8.25-4.5 8.25 4.5V21M8.25 21v-6h7.5v6M3 21h18"/></svg>
+                </span>
+                <select
+                    name="faculty_id" onchange="this.form.submit()"
+                    class="w-full appearance-none rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-9 text-sm text-slate-700 shadow-soft transition-all duration-200 focus:border-brand-purple-500 focus:outline-none focus:ring-4 focus:ring-brand-purple-500/10"
+                >
+                    <option value="">-- ทุกคณะ --</option>
+                    @foreach ($faculties as $faculty)
+                        <option value="{{ $faculty->id }}" @selected(request('faculty_id') == $faculty->id)>{{ $faculty->name_th }}</option>
+                    @endforeach
+                </select>
+                <span class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3.5 text-slate-400">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
+                </span>
+            </div>
+
+            <div class="relative">
+                <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25"/></svg>
+                </span>
+                <select
+                    name="major_id" onchange="this.form.submit()"
+                    class="w-full appearance-none rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-9 text-sm text-slate-700 shadow-soft transition-all duration-200 focus:border-brand-purple-500 focus:outline-none focus:ring-4 focus:ring-brand-purple-500/10"
+                >
+                    <option value="">-- ทุกสาขา --</option>
+                    @foreach ($faculties as $faculty)
+                        @if ($faculty->majors->isNotEmpty())
+                            <optgroup label="{{ $faculty->name_th }}">
+                                @foreach ($faculty->majors as $major)
+                                    <option value="{{ $major->id }}" @selected(request('major_id') == $major->id)>{{ $major->name_th }}</option>
+                                @endforeach
+                            </optgroup>
+                        @endif
+                    @endforeach
+                </select>
+                <span class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3.5 text-slate-400">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
+                </span>
+            </div>
+
+            <div class="relative">
+                <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.26 10.147a60.436 60.436 0 00-.491 6.347A48.627 48.627 0 0112 20.904a48.627 48.627 0 018.232-4.41 60.46 60.46 0 00-.491-6.347M4.26 10.147a48.474 48.474 0 017.748-3.909m0 0a48.94 48.94 0 013.98 0M4.26 10.147L2.16 8.42m9.828-2.182a48.94 48.94 0 013.98 0m0 0l2.09-1.727m-2.09 1.727l2.09 1.727M4.26 10.147L2.16 11.874m17.68-1.727l2.1 1.727"/></svg>
+                </span>
+                <select
+                    name="year_level" onchange="this.form.submit()"
+                    class="w-full appearance-none rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-9 text-sm text-slate-700 shadow-soft transition-all duration-200 focus:border-brand-purple-500 focus:outline-none focus:ring-4 focus:ring-brand-purple-500/10"
+                >
+                    <option value="">-- ทุกชั้นปี --</option>
+                    @foreach ([1, 2, 3, 4] as $year)
+                        <option value="{{ $year }}" @selected((string) request('year_level') === (string) $year)>ชั้นปีที่ {{ $year }}</option>
+                    @endforeach
+                </select>
+                <span class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3.5 text-slate-400">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
+                </span>
+            </div>
         </div>
+
         <button type="submit"
-            class="rounded-xl bg-brand-purple-600 px-5 py-2.5 text-sm font-semibold text-white shadow-soft transition-all duration-300 hover:-translate-y-0.5 hover:bg-brand-purple-700 hover:shadow-lg">
+            class="w-full rounded-xl bg-brand-purple-600 px-5 py-2.5 text-sm font-semibold text-white shadow-soft transition-all duration-300 hover:-translate-y-0.5 hover:bg-brand-purple-700 hover:shadow-lg sm:w-auto">
             ค้นหา
         </button>
     </form>

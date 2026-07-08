@@ -25,11 +25,13 @@ class StudentController extends Controller
                 });
             })
             ->when($request->filled('faculty_id'), fn ($query) => $query->where('faculty_id', $request->input('faculty_id')))
+            ->when($request->filled('major_id'), fn ($query) => $query->where('major_id', $request->input('major_id')))
+            ->when($request->filled('year_level'), fn ($query) => $query->where('year_level', $request->input('year_level')))
             ->orderBy('name_thai')
             ->paginate(20)
             ->withQueryString();
 
-        $faculties = Faculty::orderBy('name_th')->get();
+        $faculties = Faculty::with(['majors' => fn ($query) => $query->orderBy('name_th')])->orderBy('name_th')->get();
 
         return view('admin.students.index', compact('students', 'faculties'));
     }
