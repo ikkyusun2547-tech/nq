@@ -30,6 +30,7 @@ class User extends Authenticatable
         'faculty_id',
         'major_id',
         'enrollment_year',
+        'year_level',
         'program_type',
         'account_status',
     ];
@@ -55,6 +56,7 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'enrollment_year' => 'integer',
+            'year_level' => 'integer',
         ];
     }
 
@@ -84,20 +86,13 @@ class User extends Authenticatable
     }
 
     /**
-     * Current year of study, derived from enrollment_year (Buddhist Era, Thai
-     * academic year starts June).
+     * Current year of study, self-reported at profile setup rather than
+     * derived from enrollment_year — students who repeated a year or took
+     * a leave of absence would otherwise show the wrong year.
      */
     public function getCurrentYearAttribute(): ?int
     {
-        if (! $this->enrollment_year) {
-            return null;
-        }
-
-        $now = now();
-        $currentBuddhistYear = $now->year + 543;
-        $academicYear = $now->month >= 6 ? $currentBuddhistYear : $currentBuddhistYear - 1;
-
-        return max(1, ($academicYear - $this->enrollment_year) + 1);
+        return $this->year_level;
     }
 
     public function isStudent(): bool
@@ -112,6 +107,6 @@ class User extends Authenticatable
 
     public function hasCompletedProfile(): bool
     {
-        return ! is_null($this->faculty_id) && ! is_null($this->student_id);
+        return ! is_null($this->faculty_id) && ! is_null($this->student_id) && ! is_null($this->year_level);
     }
 }

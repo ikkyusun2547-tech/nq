@@ -189,17 +189,38 @@
                         </div>
 
                         <div>
-                            <label class="mb-2 block text-sm font-medium text-slate-600">ประเภทหลักสูตร</label>
-                            <div class="grid grid-cols-2 gap-2.5">
-                                <label class="flex cursor-pointer items-center justify-center rounded-xl border border-slate-200 bg-white px-2 py-2.5 text-sm shadow-soft transition-all duration-200 has-[:checked]:border-brand-purple-500 has-[:checked]:bg-brand-purple-50 has-[:checked]:text-brand-purple-700 has-[:checked]:shadow-none has-[:focus-visible]:ring-4 has-[:focus-visible]:ring-brand-purple-500/10">
-                                    <input type="radio" name="program_type" value="normal" required class="sr-only">
-                                    ภาคปกติ
-                                </label>
-                                <label class="flex cursor-pointer items-center justify-center rounded-xl border border-slate-200 bg-white px-2 py-2.5 text-sm shadow-soft transition-all duration-200 has-[:checked]:border-brand-purple-500 has-[:checked]:bg-brand-purple-50 has-[:checked]:text-brand-purple-700 has-[:checked]:shadow-none has-[:focus-visible]:ring-4 has-[:focus-visible]:ring-brand-purple-500/10">
-                                    <input type="radio" name="program_type" value="special" required class="sr-only">
-                                    กศ.บป.
-                                </label>
+                            <label class="mb-2 block text-sm font-medium text-slate-600">ชั้นปีปัจจุบัน</label>
+                            <div class="relative">
+                                <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
+                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.26 10.147a60.436 60.436 0 00-.491 6.347A48.627 48.627 0 0112 20.904a48.627 48.627 0 018.232-4.41 60.46 60.46 0 00-.491-6.347M4.26 10.147a48.474 48.474 0 017.748-3.909m0 0a48.94 48.94 0 013.98 0M4.26 10.147L2.16 8.42m9.828-2.182a48.94 48.94 0 013.98 0m0 0l2.09-1.727m-2.09 1.727l2.09 1.727M4.26 10.147L2.16 11.874m17.68-1.727l2.1 1.727"/></svg>
+                                </span>
+                                <select
+                                    name="year_level" required
+                                    class="w-full appearance-none rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-9 text-sm text-slate-700 shadow-soft transition-all duration-200 focus:border-brand-purple-500 focus:outline-none focus:ring-4 focus:ring-brand-purple-500/10"
+                                >
+                                    <option value="">-- เลือกชั้นปี --</option>
+                                    @foreach ([1, 2, 3, 4] as $year)
+                                        <option value="{{ $year }}" @selected((int) old('year_level') === $year)>ชั้นปีที่ {{ $year }}</option>
+                                    @endforeach
+                                </select>
+                                <span class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3.5 text-slate-400">
+                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
+                                </span>
                             </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="mb-2 block text-sm font-medium text-slate-600">ประเภทหลักสูตร</label>
+                        <div class="grid grid-cols-2 gap-2.5">
+                            <label class="flex cursor-pointer items-center justify-center rounded-xl border border-slate-200 bg-white px-2 py-2.5 text-sm shadow-soft transition-all duration-200 has-[:checked]:border-brand-purple-500 has-[:checked]:bg-brand-purple-50 has-[:checked]:text-brand-purple-700 has-[:checked]:shadow-none has-[:focus-visible]:ring-4 has-[:focus-visible]:ring-brand-purple-500/10">
+                                <input type="radio" name="program_type" value="normal" required class="sr-only">
+                                ภาคปกติ
+                            </label>
+                            <label class="flex cursor-pointer items-center justify-center rounded-xl border border-slate-200 bg-white px-2 py-2.5 text-sm shadow-soft transition-all duration-200 has-[:checked]:border-brand-purple-500 has-[:checked]:bg-brand-purple-50 has-[:checked]:text-brand-purple-700 has-[:checked]:shadow-none has-[:focus-visible]:ring-4 has-[:focus-visible]:ring-brand-purple-500/10">
+                                <input type="radio" name="program_type" value="special" required class="sr-only">
+                                กศ.บป.
+                            </label>
                         </div>
                     </div>
 
