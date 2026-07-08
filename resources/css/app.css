@@ -3,6 +3,9 @@
 @source "../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php";
 @source "../../resources/views";
 
+/* Class-based dark mode (toggled via .dark on <html>), not tied to OS preference. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 /* SRRU premium palette — deep violet (structural) + emerald (accent/action).
    Matches Tailwind's stock violet/emerald scales so `brand-*` tokens stay
    swappable in one place without hardcoding hue names across every view. */
@@ -57,6 +60,19 @@
     border: 1px solid rgb(139 92 246 / 0.10);
 }
 
+.dark .glass-card {
+    background-color: rgb(30 27 51 / 0.6);
+    border: 1px solid rgb(139 92 246 / 0.15);
+}
+
 .glow-emerald {
     box-shadow: 0 0 12px rgb(16 185 129 / 0.35);
+}
+
+.dark .shadow-soft {
+    box-shadow: 0 8px 30px rgb(0 0 0 / 0.25);
+}
+
+.dark .shadow-soft-lg {
+    box-shadow: 0 20px 50px rgb(0 0 0 / 0.35);
 }

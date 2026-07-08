@@ -6,9 +6,14 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $title ?? __('ระบบเช็กชื่อกิจกรรมนักศึกษา SRRU') }}</title>
     <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}">
+    <script>
+        if (localStorage.theme === 'dark' || (! ('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        }
+    </script>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="min-h-screen bg-slate-50 text-slate-900 antialiased">
+<body class="min-h-screen bg-slate-50 text-slate-900 antialiased dark:bg-slate-950 dark:text-slate-100">
     @php
         $isAdmin = auth()->user()?->isAdmin();
         $navItems = $isAdmin
@@ -79,6 +84,7 @@
                 <div class="mt-2 flex items-center justify-between border-t border-white/10 pt-3">
                     <span class="text-sm text-violet-200/70">{{ auth()->user()->name_thai ?? auth()->user()->name }}</span>
                     <div class="flex items-center gap-3">
+                        @include('partials.theme-toggle')
                         @include('partials.locale-switch')
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
@@ -92,13 +98,13 @@
 
     <main class="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
         @if (session('status'))
-            <div class="mb-4 rounded-xl bg-brand-green-50 px-4 py-3 text-sm text-brand-green-700 ring-1 ring-brand-green-100">
+            <div class="mb-4 rounded-xl bg-brand-green-50 px-4 py-3 text-sm text-brand-green-700 ring-1 ring-brand-green-100 dark:bg-brand-green-500/10 dark:text-brand-green-400 dark:ring-brand-green-500/20">
                 {{ session('status') }}
             </div>
         @endif
 
         @if (session('error'))
-            <div class="mb-4 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700 ring-1 ring-red-100">
+            <div class="mb-4 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700 ring-1 ring-red-100 dark:bg-red-500/10 dark:text-red-400 dark:ring-red-500/20">
                 {{ session('error') }}
             </div>
         @endif
