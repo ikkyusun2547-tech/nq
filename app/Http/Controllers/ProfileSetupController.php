@@ -24,7 +24,7 @@ class ProfileSetupController extends Controller
             'title_prefix' => ['required', Rule::in(['นาย', 'นาง', 'นางสาว'])],
             'full_name' => ['required', 'string', 'max:150'],
             'student_id' => [
-                'required', 'digits:8',
+                'required', 'digits:11',
                 Rule::unique('users', 'student_id')->ignore($user->id),
             ],
             'enrollment_year' => ['required', 'integer', 'min:2540', 'max:'.((int) date('Y') + 543)],

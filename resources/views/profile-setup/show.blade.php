@@ -65,9 +65,9 @@
             <label class="mb-1 block text-sm font-medium text-gray-700">รหัสนักศึกษา</label>
             <input
                 type="text" name="student_id" value="{{ old('student_id') }}" required
-                inputmode="numeric" pattern="\d{8}" maxlength="8"
+                inputmode="numeric" pattern="\d{11}" maxlength="11"
                 class="w-full rounded-xl border-gray-300 text-sm focus:border-brand-green-500 focus:ring-brand-green-500"
-                placeholder="รหัส 8 หลัก"
+                placeholder="รหัส 11 หลัก"
             >
         </div>
 
