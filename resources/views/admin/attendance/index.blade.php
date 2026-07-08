@@ -59,11 +59,11 @@
         <span class="text-sm text-slate-500">เลือกแล้ว <span class="font-semibold text-brand-purple-700" x-text="selected.length"></span> รายการ</span>
         <button @click="approveAllValid()" type="button"
             class="rounded-xl bg-brand-green-500 px-4 py-2 text-sm font-semibold text-brand-purple-950 shadow-soft transition-all duration-300 hover:-translate-y-0.5 hover:bg-brand-green-400 hover:shadow-lg">
-            Approve All Valid
+            อนุมัติทั้งหมดที่ถูกต้อง
         </button>
         <button @click="forceBypassSelected()" type="button"
             class="rounded-xl bg-red-500 px-4 py-2 text-sm font-semibold text-white shadow-soft transition-all duration-300 hover:-translate-y-0.5 hover:bg-red-600 hover:shadow-lg">
-            Force Bypass Selected
+            บังคับอนุมัติที่เลือก
         </button>
         <span class="text-xs text-slate-400">ใช้ "Force Bypass" เมื่อพบปัญหาหน้างาน เช่น GPS คลาดเคลื่อนทั้งอาคาร</span>
     </div>
