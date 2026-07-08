@@ -3,23 +3,23 @@
 @section('content')
 <div class="mx-auto max-w-md" x-data="checkinApp()" x-init="init()">
     <div class="mb-4 flex items-center justify-between">
-        <h1 class="text-lg font-semibold text-gray-900">{{ __('เช็กชื่อเข้าร่วมกิจกรรม') }}</h1>
-        <a href="{{ route('dashboard') }}" class="text-sm text-gray-400 hover:text-gray-600">&larr; {{ __('กลับ') }}</a>
+        <h1 class="text-lg font-semibold text-gray-900 dark:text-slate-100">{{ __('เช็กชื่อเข้าร่วมกิจกรรม') }}</h1>
+        <a href="{{ route('dashboard') }}" class="text-sm text-gray-400 hover:text-gray-600 dark:text-slate-500 dark:hover:text-slate-300">&larr; {{ __('กลับ') }}</a>
     </div>
 
-    <div class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
+    <div class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200 dark:bg-slate-900 dark:ring-slate-700">
         <!-- Step indicator -->
-        <div class="flex border-b border-gray-100 text-xs">
-            <div class="flex-1 py-2 text-center" :class="step === 'scan' ? 'font-semibold text-brand-green-700' : 'text-gray-400'">1. {{ __('สแกน QR') }}</div>
-            <div class="flex-1 py-2 text-center" :class="step === 'selfie' ? 'font-semibold text-brand-green-700' : 'text-gray-400'">2. {{ __('ถ่ายเซลฟี') }}</div>
-            <div class="flex-1 py-2 text-center" :class="['submitting','done','error'].includes(step) ? 'font-semibold text-brand-green-700' : 'text-gray-400'">3. {{ __('ยืนยัน') }}</div>
+        <div class="flex border-b border-gray-100 text-xs dark:border-slate-800">
+            <div class="flex-1 py-2 text-center" :class="step === 'scan' ? 'font-semibold text-brand-green-700' : 'text-gray-400 dark:text-slate-500'">1. {{ __('สแกน QR') }}</div>
+            <div class="flex-1 py-2 text-center" :class="step === 'selfie' ? 'font-semibold text-brand-green-700' : 'text-gray-400 dark:text-slate-500'">2. {{ __('ถ่ายเซลฟี') }}</div>
+            <div class="flex-1 py-2 text-center" :class="['submitting','done','error'].includes(step) ? 'font-semibold text-brand-green-700' : 'text-gray-400 dark:text-slate-500'">3. {{ __('ยืนยัน') }}</div>
         </div>
 
         <div class="p-5">
             <!-- Step 1: Scan QR -->
             <template x-if="step === 'scan'">
                 <div>
-                    <p class="mb-3 text-sm text-gray-500">{{ __('เล็งกล้องไปที่ QR Code ที่แสดงหน้างาน') }}</p>
+                    <p class="mb-3 text-sm text-gray-500 dark:text-slate-400">{{ __('เล็งกล้องไปที่ QR Code ที่แสดงหน้างาน') }}</p>
                     <div id="qr-reader" class="overflow-hidden rounded-xl"></div>
                     <p class="mt-3 text-xs text-red-500" x-show="scanError" x-text="scanError"></p>
                 </div>
@@ -28,7 +28,7 @@
             <!-- Step 2: Front-camera selfie only, no gallery upload -->
             <template x-if="step === 'selfie'">
                 <div>
-                    <p class="mb-3 text-sm text-gray-500">{{ __('ถ่ายภาพเซลฟีเพื่อยืนยันตัวตน (ใช้กล้องหน้าเท่านั้น)') }}</p>
+                    <p class="mb-3 text-sm text-gray-500 dark:text-slate-400">{{ __('ถ่ายภาพเซลฟีเพื่อยืนยันตัวตน (ใช้กล้องหน้าเท่านั้น)') }}</p>
                     <div class="relative overflow-hidden rounded-xl bg-black">
                         <video x-ref="video" autoplay playsinline muted class="w-full -scale-x-100"></video>
                     </div>
@@ -44,24 +44,24 @@
 
             <!-- Step 3: submitting / done / error -->
             <template x-if="step === 'submitting'">
-                <div class="py-10 text-center text-sm text-gray-500">{{ __('กำลังตรวจสอบตำแหน่งและส่งข้อมูล...') }}</div>
+                <div class="py-10 text-center text-sm text-gray-500 dark:text-slate-400">{{ __('กำลังตรวจสอบตำแหน่งและส่งข้อมูล...') }}</div>
             </template>
 
             <template x-if="step === 'done'">
                 <div class="py-6 text-center">
                     <div class="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full"
-                        :class="resultStatus === 'auto_approved' ? 'bg-brand-green-100 text-brand-green-600' : 'bg-amber-100 text-amber-600'">
+                        :class="resultStatus === 'auto_approved' ? 'bg-brand-green-100 text-brand-green-600 dark:bg-brand-green-500/10 dark:text-brand-green-400' : 'bg-amber-100 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400'">
                         <span x-text="resultStatus === 'auto_approved' ? '✓' : '!'" class="text-2xl"></span>
                     </div>
-                    <p class="text-sm font-medium text-gray-900" x-text="resultMessage"></p>
-                    <a href="{{ route('dashboard') }}" class="mt-4 inline-block text-sm text-brand-purple-600 hover:underline">{{ __('กลับหน้าแดชบอร์ด') }}</a>
+                    <p class="text-sm font-medium text-gray-900 dark:text-slate-100" x-text="resultMessage"></p>
+                    <a href="{{ route('dashboard') }}" class="mt-4 inline-block text-sm text-brand-purple-600 hover:underline dark:text-brand-purple-400 dark:hover:text-brand-purple-300">{{ __('กลับหน้าแดชบอร์ด') }}</a>
                 </div>
             </template>
 
             <template x-if="step === 'error'">
                 <div class="py-6 text-center">
                     <p class="text-sm font-medium text-red-600" x-text="resultMessage"></p>
-                    <button @click="resetToScan()" class="mt-4 text-sm text-brand-purple-600 hover:underline">{{ __('สแกนใหม่อีกครั้ง') }}</button>
+                    <button @click="resetToScan()" class="mt-4 text-sm text-brand-purple-600 hover:underline dark:text-brand-purple-400 dark:hover:text-brand-purple-300">{{ __('สแกนใหม่อีกครั้ง') }}</button>
                 </div>
             </template>
         </div>

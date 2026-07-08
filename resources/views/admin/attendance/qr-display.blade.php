@@ -13,10 +13,10 @@
 
     <div
         id="qr-container"
-        class="relative flex flex-col items-center rounded-3xl bg-white p-8 shadow-xl"
+        class="relative flex flex-col items-center rounded-3xl bg-white dark:bg-slate-900 p-8 shadow-xl"
         data-fragment-url="{{ route('admin.attendance.qr-fragment', $activity) }}"
     >
-        <p class="text-sm text-gray-400">{{ __('กำลังโหลด QR...') }}</p>
+        <p class="text-sm text-gray-400 dark:text-slate-500">{{ __('กำลังโหลด QR...') }}</p>
     </div>
 
     <p class="relative mt-4 text-xs text-white/70">{{ __('QR จะเปลี่ยนรหัสอัตโนมัติทุก 15 วินาทีเพื่อความปลอดภัย') }}</p>

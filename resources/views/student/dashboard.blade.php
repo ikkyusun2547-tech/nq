@@ -47,14 +47,14 @@
             {{ __('สแกน QR เช็กชื่อ') }}
         </a>
         <a href="{{ route('external-activities.index') }}"
-            class="flex items-center justify-center gap-2 rounded-2xl bg-white p-4 text-center text-sm font-semibold text-brand-purple-700 shadow-soft ring-1 ring-brand-purple-100 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg">
+            class="flex items-center justify-center gap-2 rounded-2xl bg-white p-4 text-center text-sm font-semibold text-brand-purple-700 shadow-soft ring-1 ring-brand-purple-100 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg dark:bg-slate-900 dark:text-brand-purple-400 dark:ring-brand-purple-500/20">
             {{ __('ยื่นคำร้องกิจกรรมภายนอก') }}
         </a>
     </div>
 
     <!-- Clearance status tile: icon + label carries meaning, never color alone -->
     <div class="mt-4 flex items-center gap-3 rounded-2xl p-5 shadow-soft ring-1
-        {{ $summary['is_cleared'] ? 'bg-brand-green-50 ring-brand-green-100' : 'bg-amber-50 ring-amber-200' }}">
+        {{ $summary['is_cleared'] ? 'bg-brand-green-50 ring-brand-green-100 dark:bg-brand-green-500/10 dark:ring-brand-green-500/20' : 'bg-amber-50 ring-amber-200 dark:bg-amber-500/10 dark:ring-amber-500/20' }}">
         <span class="relative flex h-10 w-10 shrink-0 items-center justify-center">
             <span @class([
                 'absolute inline-flex h-full w-full animate-ping rounded-full opacity-40',
@@ -69,11 +69,11 @@
         </span>
         <div>
             @if ($summary['is_cleared'])
-                <p class="text-sm font-semibold text-brand-green-800">{{ __('ผ่านเกณฑ์รับใบรับรองกิจกรรมแล้ว') }}</p>
-                <p class="text-xs text-brand-green-700">{{ __('สะสมครบ :activities กิจกรรม / :hours ชั่วโมง', ['activities' => $summary['total_activities'], 'hours' => $summary['total_hours']]) }}</p>
+                <p class="text-sm font-semibold text-brand-green-800 dark:text-brand-green-400">{{ __('ผ่านเกณฑ์รับใบรับรองกิจกรรมแล้ว') }}</p>
+                <p class="text-xs text-brand-green-700 dark:text-brand-green-400">{{ __('สะสมครบ :activities กิจกรรม / :hours ชั่วโมง', ['activities' => $summary['total_activities'], 'hours' => $summary['total_hours']]) }}</p>
             @else
-                <p class="text-sm font-semibold text-amber-800">{{ __('ยังไม่ผ่านเกณฑ์') }}</p>
-                <p class="text-xs text-amber-700">
+                <p class="text-sm font-semibold text-amber-800 dark:text-amber-400">{{ __('ยังไม่ผ่านเกณฑ์') }}</p>
+                <p class="text-xs text-amber-700 dark:text-amber-400">
                     {{ __('ขาดอีก :activities กิจกรรม และ :hours ชั่วโมง', [
                         'activities' => max(0, $summary['required_activities'] - $summary['total_activities']),
                         'hours' => max(0, $summary['required_hours'] - $summary['total_hours']),
@@ -88,24 +88,24 @@
         <div class="space-y-5 rounded-2xl glass-card p-5 shadow-soft">
             <div>
                 <div class="mb-1.5 flex items-baseline justify-between text-sm">
-                    <span class="font-medium text-slate-700">{{ __('ชั่วโมงสะสมรวม') }}</span>
-                    <span class="text-slate-400">{{ $summary['total_hours'] }} <span class="text-slate-300">/ {{ $summary['required_hours'] }} {{ __('ชม.') }}</span></span>
+                    <span class="font-medium text-slate-700 dark:text-slate-300">{{ __('ชั่วโมงสะสมรวม') }}</span>
+                    <span class="text-slate-400 dark:text-slate-400">{{ $summary['total_hours'] }} <span class="text-slate-300 dark:text-slate-500">/ {{ $summary['required_hours'] }} {{ __('ชม.') }}</span></span>
                 </div>
-                <div class="h-2.5 w-full overflow-hidden rounded-full bg-brand-purple-50">
+                <div class="h-2.5 w-full overflow-hidden rounded-full bg-brand-purple-50 dark:bg-brand-purple-500/10">
                     <div class="h-full rounded-full bg-gradient-to-r from-brand-purple-500 to-brand-green-400 glow-emerald" style="width: {{ $hoursPct }}%"></div>
                 </div>
             </div>
             <div>
                 <div class="mb-1.5 flex items-baseline justify-between text-sm">
-                    <span class="font-medium text-slate-700">{{ __('จำนวนกิจกรรมสะสม') }}</span>
-                    <span class="text-slate-400">{{ $summary['total_activities'] }} <span class="text-slate-300">/ {{ $summary['required_activities'] }} {{ __('งาน') }}</span></span>
+                    <span class="font-medium text-slate-700 dark:text-slate-300">{{ __('จำนวนกิจกรรมสะสม') }}</span>
+                    <span class="text-slate-400 dark:text-slate-400">{{ $summary['total_activities'] }} <span class="text-slate-300 dark:text-slate-500">/ {{ $summary['required_activities'] }} {{ __('งาน') }}</span></span>
                 </div>
-                <div class="h-2.5 w-full overflow-hidden rounded-full bg-brand-purple-50">
+                <div class="h-2.5 w-full overflow-hidden rounded-full bg-brand-purple-50 dark:bg-brand-purple-500/10">
                     <div class="h-full rounded-full bg-gradient-to-r from-brand-purple-500 to-brand-green-400 glow-emerald" style="width: {{ $activitiesPct }}%"></div>
                 </div>
             </div>
             @if ($summary['yearly_target_hours'])
-                <p class="text-xs text-slate-400">{{ __('เป้าหมายชั่วโมงกิจกรรมของชั้นปีที่ :year คือ :hours ชั่วโมง/ปี', [
+                <p class="text-xs text-slate-400 dark:text-slate-500">{{ __('เป้าหมายชั่วโมงกิจกรรมของชั้นปีที่ :year คือ :hours ชั่วโมง/ปี', [
                     'year' => $summary['current_year'],
                     'hours' => $summary['yearly_target_hours'],
                 ]) }}</p>
@@ -114,18 +114,18 @@
 
         <!-- Category breakdown (5 ด้าน) -->
         <div class="space-y-4 rounded-2xl glass-card p-5 shadow-soft">
-            <h2 class="text-sm font-semibold text-slate-900">{{ __('ชั่วโมงสะสมแยกตามหมวดหมู่ (5 ด้าน)') }}</h2>
+            <h2 class="text-sm font-semibold text-slate-900 dark:text-slate-100">{{ __('ชั่วโมงสะสมแยกตามหมวดหมู่ (5 ด้าน)') }}</h2>
             @foreach ($categoryMeta as $key => $meta)
                 @php $hours = $summary['category_hours'][$key] ?? 0; @endphp
                 <div>
                     <div class="mb-1 flex items-baseline justify-between text-xs">
-                        <span class="flex items-center gap-1.5 font-medium text-slate-600">
+                        <span class="flex items-center gap-1.5 font-medium text-slate-600 dark:text-slate-400">
                             <span class="h-2 w-2 rounded-full {{ $meta['dot'] }}"></span>
                             {{ $meta['label'] }}
                         </span>
-                        <span class="text-slate-400">{{ $hours }} {{ __('ชม.') }}</span>
+                        <span class="text-slate-400 dark:text-slate-500">{{ $hours }} {{ __('ชม.') }}</span>
                     </div>
-                    <div class="h-1.5 w-full overflow-hidden rounded-full bg-brand-purple-50">
+                    <div class="h-1.5 w-full overflow-hidden rounded-full bg-brand-purple-50 dark:bg-brand-purple-500/10">
                         @php $pct = min(100, $summary['required_hours'] > 0 ? round($hours / $summary['required_hours'] * 100) : 0); @endphp
                         <div class="h-full rounded-full bg-brand-green-500 glow-emerald" style="width: {{ $pct }}%"></div>
                     </div>

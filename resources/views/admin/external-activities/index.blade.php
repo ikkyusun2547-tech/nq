@@ -12,9 +12,9 @@
     $tabs = ['pending' => __('รอตรวจสอบ'), 'approved' => __('อนุมัติแล้ว'), 'rejected' => __('ปฏิเสธแล้ว'), 'all' => __('ทั้งหมด')];
     $statusDot = ['pending' => 'bg-amber-500', 'approved' => 'bg-brand-green-500', 'rejected' => 'bg-red-500'];
     $statusBadge = [
-        'pending' => 'bg-amber-50 text-amber-700',
-        'approved' => 'bg-brand-green-50 text-brand-green-700',
-        'rejected' => 'bg-red-50 text-red-700',
+        'pending' => 'bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400',
+        'approved' => 'bg-brand-green-50 text-brand-green-700 dark:bg-brand-green-500/10 dark:text-brand-green-400',
+        'rejected' => 'bg-red-50 text-red-700 dark:bg-red-500/10 dark:text-red-400',
     ];
 @endphp
 
@@ -47,7 +47,7 @@
                 @class([
                     'rounded-full px-3.5 py-1.5 font-medium transition-all duration-200',
                     'bg-brand-purple-600 text-white shadow-soft' => $status === $value,
-                    'bg-white text-slate-500 shadow-soft ring-1 ring-slate-200 hover:text-brand-purple-600' => $status !== $value,
+                    'bg-white text-slate-500 shadow-soft ring-1 ring-slate-200 hover:text-brand-purple-600 dark:bg-slate-900 dark:text-slate-400 dark:ring-slate-700 dark:hover:text-brand-purple-400' => $status !== $value,
                 ])>
                 {{ $label }}
             </a>
@@ -57,21 +57,21 @@
     <div class="overflow-x-auto rounded-2xl glass-card shadow-soft">
         <table class="min-w-full text-sm">
             <thead>
-                <tr class="border-b border-brand-purple-100">
-                    <th class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">{{ __('นักศึกษา') }}</th>
-                    <th class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">{{ __('ชื่อกิจกรรม') }}</th>
-                    <th class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">{{ __('หมวดหมู่') }}</th>
-                    <th class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">{{ __('ชั่วโมง') }}</th>
-                    <th class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">{{ __('สถานะ') }}</th>
+                <tr class="border-b border-brand-purple-100 dark:border-brand-purple-500/20">
+                    <th class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">{{ __('นักศึกษา') }}</th>
+                    <th class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">{{ __('ชื่อกิจกรรม') }}</th>
+                    <th class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">{{ __('หมวดหมู่') }}</th>
+                    <th class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">{{ __('ชั่วโมง') }}</th>
+                    <th class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">{{ __('สถานะ') }}</th>
                 </tr>
             </thead>
             <tbody>
                 @forelse ($requests as $req)
                     <tr
                         @class([
-                            'cursor-pointer border-b border-slate-100 transition-colors last:border-0 hover:bg-brand-purple-50/40',
-                            'bg-white' => $loop->even,
-                            'bg-slate-50/50' => $loop->odd,
+                            'cursor-pointer border-b border-slate-100 dark:border-slate-800 transition-colors last:border-0 hover:bg-brand-purple-50/40 dark:hover:bg-slate-800/60',
+                            'bg-white dark:bg-slate-900' => $loop->even,
+                            'bg-slate-50/50 dark:bg-slate-800/40' => $loop->odd,
                         ])
                         @click="open({{ \Illuminate\Support\Js::from([
                             'id' => $req->id,
@@ -88,12 +88,12 @@
                         ]) }})"
                     >
                         <td class="whitespace-nowrap px-4 py-3">
-                            <p class="font-medium text-slate-900">{{ $req->user->name_thai ?? $req->user->name }}</p>
-                            <p class="text-xs text-slate-400">{{ $req->user->student_id }}</p>
+                            <p class="font-medium text-slate-900 dark:text-slate-100">{{ $req->user->name_thai ?? $req->user->name }}</p>
+                            <p class="text-xs text-slate-400 dark:text-slate-500">{{ $req->user->student_id }}</p>
                         </td>
-                        <td class="whitespace-nowrap px-4 py-3 text-slate-700">{{ $req->title }}</td>
-                        <td class="whitespace-nowrap px-4 py-3 text-slate-500">{{ $categoryLabels[$req->activity_category] }}</td>
-                        <td class="whitespace-nowrap px-4 py-3 text-slate-500">{{ $req->hours_requested }}</td>
+                        <td class="whitespace-nowrap px-4 py-3 text-slate-700 dark:text-slate-300">{{ $req->title }}</td>
+                        <td class="whitespace-nowrap px-4 py-3 text-slate-500 dark:text-slate-400">{{ $categoryLabels[$req->activity_category] }}</td>
+                        <td class="whitespace-nowrap px-4 py-3 text-slate-500 dark:text-slate-400">{{ $req->hours_requested }}</td>
                         <td class="whitespace-nowrap px-4 py-3">
                             <span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium {{ $statusBadge[$req->status] }}">
                                 <span class="relative flex h-1.5 w-1.5">
@@ -106,7 +106,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="5" class="px-4 py-8 text-center text-slate-400">{{ __('ไม่มีคำร้องในหมวดนี้') }}</td>
+                        <td colspan="5" class="px-4 py-8 text-center text-slate-400 dark:text-slate-500">{{ __('ไม่มีคำร้องในหมวดนี้') }}</td>
                     </tr>
                 @endforelse
             </tbody>
@@ -117,28 +117,28 @@
 
     <!-- Detail modal -->
     <div x-show="showModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center bg-brand-purple-950/60 p-4 backdrop-blur-sm">
-        <div @click.outside="showModal = false" class="w-full max-w-lg rounded-3xl bg-white p-6 shadow-soft-lg" x-show="selected">
+        <div @click.outside="showModal = false" class="w-full max-w-lg rounded-3xl bg-white dark:bg-slate-900 p-6 shadow-soft-lg" x-show="selected">
             <template x-if="selected">
                 <div>
                     <div class="mb-4 flex items-start justify-between">
                         <div>
-                            <p class="font-semibold text-slate-900" x-text="selected.title"></p>
-                            <p class="text-xs text-slate-400" x-text="selected.student_name + ' (' + selected.student_id + ')'"></p>
+                            <p class="font-semibold text-slate-900 dark:text-slate-100" x-text="selected.title"></p>
+                            <p class="text-xs text-slate-400 dark:text-slate-500" x-text="selected.student_name + ' (' + selected.student_id + ')'"></p>
                         </div>
-                        <button @click="showModal = false" class="text-slate-400 hover:text-slate-600">&times;</button>
+                        <button @click="showModal = false" class="text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-400">&times;</button>
                     </div>
 
                     <dl class="mb-4 grid grid-cols-1 gap-3 text-sm sm:grid-cols-2">
-                        <div><dt class="text-xs text-slate-400">{{ __('หน่วยงานผู้จัด') }}</dt><dd x-text="selected.organization"></dd></div>
-                        <div><dt class="text-xs text-slate-400">{{ __('วันที่จัดกิจกรรม') }}</dt><dd x-text="selected.activity_date"></dd></div>
-                        <div><dt class="text-xs text-slate-400">{{ __('หมวดหมู่') }}</dt><dd x-text="selected.category"></dd></div>
-                        <div><dt class="text-xs text-slate-400">{{ __('ชั่วโมงที่ขอเทียบ') }}</dt><dd x-text="selected.hours_requested"></dd></div>
+                        <div><dt class="text-xs text-slate-400 dark:text-slate-500">{{ __('หน่วยงานผู้จัด') }}</dt><dd x-text="selected.organization"></dd></div>
+                        <div><dt class="text-xs text-slate-400 dark:text-slate-500">{{ __('วันที่จัดกิจกรรม') }}</dt><dd x-text="selected.activity_date"></dd></div>
+                        <div><dt class="text-xs text-slate-400 dark:text-slate-500">{{ __('หมวดหมู่') }}</dt><dd x-text="selected.category"></dd></div>
+                        <div><dt class="text-xs text-slate-400 dark:text-slate-500">{{ __('ชั่วโมงที่ขอเทียบ') }}</dt><dd x-text="selected.hours_requested"></dd></div>
                     </dl>
 
                     <img :src="selected.proof_image_url" class="mb-4 max-h-96 w-full rounded-2xl object-contain shadow-soft">
 
                     <template x-if="selected.status === 'rejected' && selected.reject_reason">
-                        <p class="mb-4 rounded-xl bg-red-50 px-3 py-2 text-xs text-red-600" x-text="'{{ __('เหตุผลที่ปฏิเสธ:') }} ' + selected.reject_reason"></p>
+                        <p class="mb-4 rounded-xl bg-red-50 px-3 py-2 text-xs text-red-600 dark:bg-red-500/10 dark:text-red-400" x-text="'{{ __('เหตุผลที่ปฏิเสธ:') }} ' + selected.reject_reason"></p>
                     </template>
 
                     <template x-if="selected.status === 'pending' && ! rejecting">
@@ -150,7 +150,7 @@
                                 </button>
                             </form>
                             <button @click="rejecting = true" type="button"
-                                class="flex-1 rounded-xl bg-red-50 px-4 py-2.5 text-sm font-semibold text-red-600 shadow-soft transition-all duration-300 hover:-translate-y-0.5 hover:bg-red-100 hover:shadow-lg">
+                                class="flex-1 rounded-xl bg-red-50 px-4 py-2.5 text-sm font-semibold text-red-600 shadow-soft transition-all duration-300 hover:-translate-y-0.5 hover:bg-red-100 hover:shadow-lg dark:bg-red-500/10 dark:text-red-400 dark:hover:bg-red-500/20">
                                 {{ __('ปฏิเสธ') }}
                             </button>
                         </div>
@@ -160,12 +160,12 @@
                         <form method="POST" :action="rejectUrlTemplate.replace('__ID__', selected.id)" class="space-y-3">
                             @csrf
                             <textarea name="reject_reason" x-model="rejectReason" required rows="3" placeholder="{{ __('ระบุเหตุผล เช่น รูปเกียรติบัตรไม่ชัดเจน') }}"
-                                class="w-full rounded-xl border border-slate-200 bg-slate-50/50 text-sm shadow-soft transition-all duration-200 focus:border-red-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-red-500/10"></textarea>
+                                class="w-full rounded-xl border border-slate-200 bg-slate-50/50 text-sm shadow-soft transition-all duration-200 focus:border-red-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-red-500/10 dark:border-slate-600 dark:bg-slate-800/40 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:bg-slate-900"></textarea>
                             <div class="flex gap-3">
                                 <button type="submit" class="flex-1 rounded-xl bg-red-600 px-4 py-2.5 text-sm font-semibold text-white shadow-soft transition-all duration-300 hover:-translate-y-0.5 hover:bg-red-700 hover:shadow-lg">
                                     {{ __('ยืนยันการปฏิเสธ') }}
                                 </button>
-                                <button @click="rejecting = false" type="button" class="flex-1 rounded-xl bg-slate-100 px-4 py-2.5 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-200">
+                                <button @click="rejecting = false" type="button" class="flex-1 rounded-xl bg-slate-100 px-4 py-2.5 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700">
                                     {{ __('ยกเลิก') }}
                                 </button>
                             </div>

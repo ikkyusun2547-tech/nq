@@ -56,7 +56,7 @@
 
     <!-- Bulk action bar -->
     <div class="mb-3 mt-4 flex flex-wrap items-center gap-3 rounded-2xl glass-card p-4 shadow-soft">
-        <span class="text-sm text-slate-500">{{ __('เลือกแล้ว') }} <span class="font-semibold text-brand-purple-700" x-text="selected.length"></span> {{ __('รายการ') }}</span>
+        <span class="text-sm text-slate-500 dark:text-slate-400">{{ __('เลือกแล้ว') }} <span class="font-semibold text-brand-purple-700 dark:text-brand-purple-400" x-text="selected.length"></span> {{ __('รายการ') }}</span>
         <button @click="approveAllValid()" type="button"
             class="rounded-xl bg-brand-green-500 px-4 py-2 text-sm font-semibold text-brand-purple-950 shadow-soft transition-all duration-300 hover:-translate-y-0.5 hover:bg-brand-green-400 hover:shadow-lg">
             {{ __('อนุมัติทั้งหมดที่ถูกต้อง') }}
@@ -65,7 +65,7 @@
             class="rounded-xl bg-red-500 px-4 py-2 text-sm font-semibold text-white shadow-soft transition-all duration-300 hover:-translate-y-0.5 hover:bg-red-600 hover:shadow-lg">
             {{ __('บังคับอนุมัติที่เลือก') }}
         </button>
-        <span class="text-xs text-slate-400">{{ __('ใช้ "Force Bypass" เมื่อพบปัญหาหน้างาน เช่น GPS คลาดเคลื่อนทั้งอาคาร') }}</span>
+        <span class="text-xs text-slate-400 dark:text-slate-500">{{ __('ใช้ "Force Bypass" เมื่อพบปัญหาหน้างาน เช่น GPS คลาดเคลื่อนทั้งอาคาร') }}</span>
     </div>
 
     <form method="POST" action="{{ route('admin.attendance.bulk-approve', $activity) }}" x-ref="bulkForm">
@@ -76,45 +76,45 @@
     <div class="overflow-x-auto rounded-2xl glass-card shadow-soft">
         <table class="min-w-full text-sm">
             <thead>
-                <tr class="border-b border-brand-purple-100">
-                    <th class="whitespace-nowrap px-3 py-3"><input type="checkbox" @change="toggleAll($event.target.checked)" class="rounded border-slate-300 text-brand-purple-600 focus:ring-brand-purple-500"></th>
-                    <th class="whitespace-nowrap px-3 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">{{ __('รหัสนักศึกษา') }}</th>
-                    <th class="whitespace-nowrap px-3 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">{{ __('ชื่อ-นามสกุล') }}</th>
-                    <th class="whitespace-nowrap px-3 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">{{ __('คณะ/สาขา') }}</th>
-                    <th class="whitespace-nowrap px-3 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">{{ __('ชั้นปี') }}</th>
-                    <th class="whitespace-nowrap px-3 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">{{ __('เวลาเช็กชื่อ') }}</th>
-                    <th class="whitespace-nowrap px-3 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">{{ __('ระยะห่าง') }}</th>
-                    <th class="whitespace-nowrap px-3 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">{{ __('สถานะ') }}</th>
-                    <th class="whitespace-nowrap px-3 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400"></th>
+                <tr class="border-b border-brand-purple-100 dark:border-brand-purple-500/20">
+                    <th class="whitespace-nowrap px-3 py-3"><input type="checkbox" @change="toggleAll($event.target.checked)" class="rounded border-slate-300 text-brand-purple-600 focus:ring-brand-purple-500 dark:border-slate-600"></th>
+                    <th class="whitespace-nowrap px-3 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">{{ __('รหัสนักศึกษา') }}</th>
+                    <th class="whitespace-nowrap px-3 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">{{ __('ชื่อ-นามสกุล') }}</th>
+                    <th class="whitespace-nowrap px-3 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">{{ __('คณะ/สาขา') }}</th>
+                    <th class="whitespace-nowrap px-3 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">{{ __('ชั้นปี') }}</th>
+                    <th class="whitespace-nowrap px-3 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">{{ __('เวลาเช็กชื่อ') }}</th>
+                    <th class="whitespace-nowrap px-3 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">{{ __('ระยะห่าง') }}</th>
+                    <th class="whitespace-nowrap px-3 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">{{ __('สถานะ') }}</th>
+                    <th class="whitespace-nowrap px-3 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500"></th>
                 </tr>
             </thead>
             <tbody>
                 @forelse ($attendances as $att)
                     <tr @class([
-                        'border-b border-slate-100 transition-colors last:border-0 hover:bg-brand-purple-50/40',
-                        'bg-red-50/60' => $att->status === 'flagged',
-                        'bg-white' => $att->status !== 'flagged' && $loop->even,
-                        'bg-slate-50/50' => $att->status !== 'flagged' && $loop->odd,
+                        'border-b border-slate-100 dark:border-slate-800 transition-colors last:border-0 hover:bg-brand-purple-50/40 dark:hover:bg-slate-800/60',
+                        'bg-red-50/60 dark:bg-red-500/10' => $att->status === 'flagged',
+                        'bg-white dark:bg-slate-900' => $att->status !== 'flagged' && $loop->even,
+                        'bg-slate-50/50 dark:bg-slate-800/40' => $att->status !== 'flagged' && $loop->odd,
                     ])>
                         <td class="whitespace-nowrap px-3 py-3">
-                            <input type="checkbox" class="row-checkbox rounded border-slate-300 text-brand-purple-600 focus:ring-brand-purple-500"
+                            <input type="checkbox" class="row-checkbox rounded border-slate-300 text-brand-purple-600 focus:ring-brand-purple-500 dark:border-slate-600"
                                 value="{{ $att->id }}" data-status="{{ $att->status }}"
                                 x-model="selected">
                         </td>
-                        <td class="whitespace-nowrap px-3 py-3 font-medium text-slate-900">{{ $att->user->student_id }}</td>
-                        <td class="whitespace-nowrap px-3 py-3 text-slate-700">{{ $att->user->name_thai ?? $att->user->name }}</td>
-                        <td class="whitespace-nowrap px-3 py-3 text-slate-500">{{ $att->user->faculty?->name_th }} / {{ $att->user->major?->name_th }}</td>
-                        <td class="whitespace-nowrap px-3 py-3 text-slate-500">{{ $att->user->current_year }}</td>
-                        <td class="whitespace-nowrap px-3 py-3 text-slate-500">{{ $att->checkin_time->format('H:i:s') }}</td>
-                        <td class="whitespace-nowrap px-3 py-3 @class(['font-semibold text-red-600' => $att->status === 'flagged', 'text-slate-500' => $att->status !== 'flagged'])">
+                        <td class="whitespace-nowrap px-3 py-3 font-medium text-slate-900 dark:text-slate-100">{{ $att->user->student_id }}</td>
+                        <td class="whitespace-nowrap px-3 py-3 text-slate-700 dark:text-slate-300">{{ $att->user->name_thai ?? $att->user->name }}</td>
+                        <td class="whitespace-nowrap px-3 py-3 text-slate-500 dark:text-slate-400">{{ $att->user->faculty?->name_th }} / {{ $att->user->major?->name_th }}</td>
+                        <td class="whitespace-nowrap px-3 py-3 text-slate-500 dark:text-slate-400">{{ $att->user->current_year }}</td>
+                        <td class="whitespace-nowrap px-3 py-3 text-slate-500 dark:text-slate-400">{{ $att->checkin_time->format('H:i:s') }}</td>
+                        <td class="whitespace-nowrap px-3 py-3 @class(['font-semibold text-red-600 dark:text-red-400' => $att->status === 'flagged', 'text-slate-500 dark:text-slate-400' => $att->status !== 'flagged'])">
                             {{ $att->distance_meters }} m
                         </td>
                         <td class="whitespace-nowrap px-3 py-3">
                             <span @class([
                                 'inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium',
-                                'bg-brand-green-50 text-brand-green-700' => $att->status === 'auto_approved',
-                                'bg-red-50 text-red-700' => $att->status === 'flagged',
-                                'bg-slate-100 text-slate-600' => $att->status === 'rejected',
+                                'bg-brand-green-50 text-brand-green-700 dark:bg-brand-green-500/10 dark:text-brand-green-400' => $att->status === 'auto_approved',
+                                'bg-red-50 text-red-700 dark:bg-red-500/10 dark:text-red-400' => $att->status === 'flagged',
+                                'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400' => $att->status === 'rejected',
                             ])>
                                 <span class="relative flex h-1.5 w-1.5">
                                     <span @class(['absolute inline-flex h-full w-full animate-ping rounded-full opacity-60', $badgeDot[$att->status]])></span>
@@ -123,18 +123,18 @@
                                 {{ $statusLabel[$att->status] }}
                             </span>
                             @if ($att->flag_reason)
-                                <p class="mt-1 whitespace-normal text-xs text-red-500">
+                                <p class="mt-1 whitespace-normal text-xs text-red-500 dark:text-red-400">
                                     {{ collect(explode(',', $att->flag_reason))->map(fn($r) => $reasonLabel[$r] ?? $r)->join(', ') }}
                                 </p>
                             @endif
                         </td>
                         <td class="whitespace-nowrap px-3 py-3">
-                            <button @click="lightboxUrl = '{{ asset('storage/'.$att->photo_path) }}'" type="button" class="font-medium text-brand-purple-600 transition-colors hover:text-brand-purple-800">{{ __('รูปเซลฟี') }}</button>
-                            <a href="https://www.google.com/maps?q={{ $att->student_lat }},{{ $att->student_lng }}" target="_blank" class="ml-2 font-medium text-brand-purple-600 transition-colors hover:text-brand-purple-800">{{ __('แผนที่') }}</a>
+                            <button @click="lightboxUrl = '{{ asset('storage/'.$att->photo_path) }}'" type="button" class="font-medium text-brand-purple-600 transition-colors hover:text-brand-purple-800 dark:text-brand-purple-400 dark:hover:text-brand-purple-300">{{ __('รูปเซลฟี') }}</button>
+                            <a href="https://www.google.com/maps?q={{ $att->student_lat }},{{ $att->student_lng }}" target="_blank" class="ml-2 font-medium text-brand-purple-600 transition-colors hover:text-brand-purple-800 dark:text-brand-purple-400 dark:hover:text-brand-purple-300">{{ __('แผนที่') }}</a>
                         </td>
                     </tr>
                 @empty
-                    <tr><td colspan="9" class="px-4 py-8 text-center text-slate-400">{{ __('ยังไม่มีผู้เช็กชื่อ') }}</td></tr>
+                    <tr><td colspan="9" class="px-4 py-8 text-center text-slate-400 dark:text-slate-500">{{ __('ยังไม่มีผู้เช็กชื่อ') }}</td></tr>
                 @endforelse
             </tbody>
         </table>

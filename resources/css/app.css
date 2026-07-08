@@ -6,6 +6,12 @@
 /* Class-based dark mode (toggled via .dark on <html>), not tied to OS preference. */
 @custom-variant dark (&:where(.dark, .dark *));
 
+/* Lets the browser auto-theme native widgets (checkboxes, date pickers,
+   scrollbars) that Tailwind utilities can't reach directly. */
+.dark {
+    color-scheme: dark;
+}
+
 /* SRRU premium palette — deep violet (structural) + emerald (accent/action).
    Matches Tailwind's stock violet/emerald scales so `brand-*` tokens stay
    swappable in one place without hardcoding hue names across every view. */
