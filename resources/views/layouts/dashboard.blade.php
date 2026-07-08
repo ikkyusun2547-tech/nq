@@ -52,6 +52,7 @@
                 </div>
 
                 <div class="hidden shrink-0 items-center gap-3 md:flex">
+                    @include('partials.theme-toggle')
                     @include('partials.locale-switch')
                     <span class="hidden whitespace-nowrap text-sm text-violet-200/70 lg:block">{{ auth()->user()->name_thai ?? auth()->user()->name }}</span>
                     <form method="POST" action="{{ route('logout') }}">
