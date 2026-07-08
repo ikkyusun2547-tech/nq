@@ -111,7 +111,11 @@ class ActivityController extends Controller
      */
     public function destroy(Activity $activity)
     {
-        abort_if($activity->attendances()->exists(), 422, 'ไม่สามารถลบกิจกรรมที่มีการเช็กชื่อแล้วได้');
+        if ($activity->attendances()->exists()) {
+            return redirect()
+                ->route('admin.activities.index')
+                ->with('error', 'ไม่สามารถลบกิจกรรม "'.$activity->title.'" ได้ เนื่องจากมีนักศึกษาเช็กชื่อเข้าร่วมแล้ว');
+        }
 
         if ($activity->banner_url) {
             Storage::disk('public')->delete($activity->banner_url);

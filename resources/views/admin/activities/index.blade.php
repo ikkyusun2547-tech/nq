@@ -51,6 +51,15 @@
                             <a href="{{ route('admin.attendance.qr-display', $activity) }}" class="text-brand-green-600 hover:underline">แสดง QR</a>
                             <a href="{{ route('admin.attendance.index', $activity) }}" class="text-brand-purple-600 hover:underline">หน้างาน</a>
                             <a href="{{ route('admin.activities.edit', $activity) }}" class="text-gray-500 hover:underline">แก้ไข</a>
+                            <form
+                                method="POST" action="{{ route('admin.activities.destroy', $activity) }}"
+                                class="inline"
+                                onsubmit="return confirm('ยืนยันลบกิจกรรม &quot;{{ addslashes($activity->title) }}&quot;? การลบไม่สามารถย้อนกลับได้')"
+                            >
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="text-red-500 hover:underline">ลบ</button>
+                            </form>
                         </td>
                     </tr>
                 @empty
