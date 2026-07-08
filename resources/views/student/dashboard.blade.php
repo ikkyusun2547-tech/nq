@@ -17,7 +17,7 @@
     <div class="overflow-hidden rounded-2xl brand-gradient p-6 text-white shadow-sm sm:p-8">
         <h1 class="text-xl font-semibold sm:text-2xl">สวัสดี, {{ auth()->user()->name_thai }}</h1>
         <p class="mt-1 text-sm text-white/80">
-            {{ auth()->user()->faculty->name_th }} · {{ auth()->user()->major->name_th }}
+            {{ auth()->user()->faculty?->name_th }} · {{ auth()->user()->major?->name_th }}
             @if ($summary['current_year']) · ชั้นปีที่ {{ $summary['current_year'] }} @endif
         </p>
     </div>
