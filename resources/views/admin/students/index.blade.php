@@ -96,7 +96,7 @@
         </div>
 
         <button type="submit"
-            class="w-full rounded-xl bg-brand-purple-600 px-5 py-2.5 text-sm font-semibold text-white shadow-soft transition-all duration-300 hover:-translate-y-0.5 hover:bg-brand-purple-700 hover:shadow-lg sm:w-auto">
+            class="w-full rounded-xl bg-brand-purple-600 px-5 py-2.5 text-sm font-semibold text-white shadow-soft transition-all duration-300 hover:-translate-y-0.5 hover:bg-brand-purple-700 hover:shadow-lg sm:ml-auto sm:block sm:w-auto">
             ค้นหา
         </button>
     </form>
