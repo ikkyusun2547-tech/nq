@@ -1,9 +1,13 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="flex min-h-screen flex-col items-center justify-center px-4">
-    <div class="w-full max-w-sm rounded-2xl bg-white p-8 shadow-sm ring-1 ring-gray-200">
+<div class="relative flex min-h-screen flex-col items-center justify-center overflow-hidden px-4 py-12 brand-gradient">
+    <div class="pointer-events-none absolute -left-24 -top-24 h-72 w-72 rounded-full bg-white/10 blur-3xl"></div>
+    <div class="pointer-events-none absolute -bottom-24 -right-24 h-72 w-72 rounded-full bg-white/10 blur-3xl"></div>
+
+    <div class="relative w-full max-w-sm rounded-3xl bg-white p-8 shadow-xl">
         <div class="mb-8 text-center">
+            <span class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl brand-gradient text-lg font-bold text-white shadow-sm">SR</span>
             <h1 class="text-lg font-semibold text-gray-900">ระบบเช็กชื่อกิจกรรมนักศึกษา</h1>
             <p class="mt-1 text-sm text-gray-500">มหาวิทยาลัยราชภัฏสุรินทร์</p>
         </div>
@@ -31,5 +35,9 @@
             ใช้ได้เฉพาะบัญชีอีเมล @ {{ config('services.srru.email_domain') }} เท่านั้น
         </p>
     </div>
+
+    <p class="relative mt-6 text-center text-xs text-white/70">
+        กองพัฒนานักศึกษา · มหาวิทยาลัยราชภัฏสุรินทร์
+    </p>
 </div>
 @endsection

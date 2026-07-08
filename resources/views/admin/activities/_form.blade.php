@@ -31,19 +31,19 @@
         <div class="md:col-span-2">
             <label class="mb-1 block text-sm font-medium text-gray-700">ชื่อกิจกรรม</label>
             <input type="text" name="title" value="{{ old('title', $activity->title ?? '') }}" required
-                class="w-full rounded-xl border-gray-300 text-sm focus:border-blue-500 focus:ring-blue-500">
+                class="w-full rounded-xl border-gray-300 text-sm focus:border-brand-green-500 focus:ring-brand-green-500">
         </div>
 
         <div class="md:col-span-2">
             <label class="mb-1 block text-sm font-medium text-gray-700">รายละเอียดกิจกรรม</label>
             <textarea name="description" rows="3"
-                class="w-full rounded-xl border-gray-300 text-sm focus:border-blue-500 focus:ring-blue-500">{{ old('description', $activity->description ?? '') }}</textarea>
+                class="w-full rounded-xl border-gray-300 text-sm focus:border-brand-green-500 focus:ring-brand-green-500">{{ old('description', $activity->description ?? '') }}</textarea>
         </div>
 
         <div class="md:col-span-2">
             <label class="mb-1 block text-sm font-medium text-gray-700">ภาพปกกิจกรรม (Banner)</label>
             <input type="file" name="banner" accept="image/*"
-                class="w-full text-sm text-gray-600 file:mr-3 file:rounded-lg file:border-0 file:bg-blue-50 file:px-3 file:py-2 file:text-sm file:font-medium file:text-blue-700 hover:file:bg-blue-100">
+                class="w-full text-sm text-gray-600 file:mr-3 file:rounded-lg file:border-0 file:bg-brand-green-50 file:px-3 file:py-2 file:text-sm file:font-medium file:text-brand-green-700 hover:file:bg-brand-green-100">
             @if (! empty($activity->banner_url))
                 <img src="{{ asset('storage/'.$activity->banner_url) }}" class="mt-2 h-24 rounded-lg object-cover">
             @endif
@@ -52,18 +52,18 @@
         <div>
             <label class="mb-1 block text-sm font-medium text-gray-700">หน่วยงานผู้จัด</label>
             <input type="text" name="organizer_name" value="{{ old('organizer_name', $activity->organizer_name ?? '') }}"
-                class="w-full rounded-xl border-gray-300 text-sm focus:border-blue-500 focus:ring-blue-500">
+                class="w-full rounded-xl border-gray-300 text-sm focus:border-brand-green-500 focus:ring-brand-green-500">
         </div>
 
         <div>
             <label class="mb-1 block text-sm font-medium text-gray-700">การแต่งกาย</label>
             <input type="text" name="dress_code" value="{{ old('dress_code', $activity->dress_code ?? '') }}"
-                class="w-full rounded-xl border-gray-300 text-sm focus:border-blue-500 focus:ring-blue-500">
+                class="w-full rounded-xl border-gray-300 text-sm focus:border-brand-green-500 focus:ring-brand-green-500">
         </div>
 
         <div>
             <label class="mb-1 block text-sm font-medium text-gray-700">ระดับกิจกรรม</label>
-            <select name="activity_level" class="w-full rounded-xl border-gray-300 text-sm focus:border-blue-500 focus:ring-blue-500">
+            <select name="activity_level" class="w-full rounded-xl border-gray-300 text-sm focus:border-brand-green-500 focus:ring-brand-green-500">
                 <option value="university" @selected(old('activity_level', $activity->activity_level ?? '') === 'university')>ระดับมหาวิทยาลัย</option>
                 <option value="faculty" @selected(old('activity_level', $activity->activity_level ?? '') === 'faculty')>ระดับคณะ</option>
             </select>
@@ -71,7 +71,7 @@
 
         <div>
             <label class="mb-1 block text-sm font-medium text-gray-700">หมวดหมู่กิจกรรม (5 ด้าน)</label>
-            <select name="activity_category" class="w-full rounded-xl border-gray-300 text-sm focus:border-blue-500 focus:ring-blue-500">
+            <select name="activity_category" class="w-full rounded-xl border-gray-300 text-sm focus:border-brand-green-500 focus:ring-brand-green-500">
                 @foreach ($categoryLabels as $value => $label)
                     <option value="{{ $value }}" @selected(old('activity_category', $activity->activity_category ?? '') === $value)>{{ $label }}</option>
                 @endforeach
@@ -81,12 +81,12 @@
         <div>
             <label class="mb-2 block text-sm font-medium text-gray-700">ลักษณะกิจกรรม</label>
             <div class="grid grid-cols-2 gap-3">
-                <label class="flex cursor-pointer items-center gap-2 rounded-xl border border-gray-300 px-3 py-2.5 text-sm has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50">
-                    <input type="radio" name="activity_type" value="core" x-model="activityType" @change="lockCredit()" class="text-blue-600 focus:ring-blue-500">
+                <label class="flex cursor-pointer items-center gap-2 rounded-xl border border-gray-300 px-3 py-2.5 text-sm has-[:checked]:border-brand-green-500 has-[:checked]:bg-brand-green-50">
+                    <input type="radio" name="activity_type" value="core" x-model="activityType" @change="lockCredit()" class="text-brand-green-600 focus:ring-brand-green-500">
                     บังคับแกน
                 </label>
-                <label class="flex cursor-pointer items-center gap-2 rounded-xl border border-gray-300 px-3 py-2.5 text-sm has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50">
-                    <input type="radio" name="activity_type" value="elective" x-model="activityType" @change="lockCredit()" class="text-blue-600 focus:ring-blue-500">
+                <label class="flex cursor-pointer items-center gap-2 rounded-xl border border-gray-300 px-3 py-2.5 text-sm has-[:checked]:border-brand-green-500 has-[:checked]:bg-brand-green-50">
+                    <input type="radio" name="activity_type" value="elective" x-model="activityType" @change="lockCredit()" class="text-brand-green-600 focus:ring-brand-green-500">
                     บังคับเลือก
                 </label>
             </div>
@@ -98,7 +98,7 @@
                 type="number" name="credit_hours" x-model.number="creditHours" :readonly="activityType === 'core'"
                 :class="activityType === 'core' ? 'bg-gray-100 text-gray-500' : ''"
                 min="1" max="100" required
-                class="w-full rounded-xl border-gray-300 text-sm focus:border-blue-500 focus:ring-blue-500"
+                class="w-full rounded-xl border-gray-300 text-sm focus:border-brand-green-500 focus:ring-brand-green-500"
             >
             <p class="mt-1 text-xs text-gray-400" x-show="activityType === 'core'">กิจกรรมบังคับแกนถูกกำหนดไว้ที่ 5 ชั่วโมงตามเกณฑ์สถาบัน</p>
         </div>
@@ -106,12 +106,12 @@
         <div>
             <label class="mb-1 block text-sm font-medium text-gray-700">จำนวนรับ (คน) — เว้นว่างหากไม่จำกัด</label>
             <input type="number" name="capacity" value="{{ old('capacity', $activity->capacity ?? '') }}" min="1"
-                class="w-full rounded-xl border-gray-300 text-sm focus:border-blue-500 focus:ring-blue-500">
+                class="w-full rounded-xl border-gray-300 text-sm focus:border-brand-green-500 focus:ring-brand-green-500">
         </div>
 
         <div>
             <label class="mb-1 block text-sm font-medium text-gray-700">สถานะ</label>
-            <select name="status" class="w-full rounded-xl border-gray-300 text-sm focus:border-blue-500 focus:ring-blue-500">
+            <select name="status" class="w-full rounded-xl border-gray-300 text-sm focus:border-brand-green-500 focus:ring-brand-green-500">
                 @foreach ($statusLabels as $value => $label)
                     <option value="{{ $value }}" @selected(old('status', $activity->status ?? 'draft') === $value)>{{ $label }}</option>
                 @endforeach
@@ -122,14 +122,14 @@
             <label class="mb-1 block text-sm font-medium text-gray-700">วันเวลาเริ่มกิจกรรม</label>
             <input type="datetime-local" name="start_at"
                 value="{{ old('start_at', isset($activity->start_at) ? $activity->start_at->format('Y-m-d\TH:i') : '') }}" required
-                class="w-full rounded-xl border-gray-300 text-sm focus:border-blue-500 focus:ring-blue-500">
+                class="w-full rounded-xl border-gray-300 text-sm focus:border-brand-green-500 focus:ring-brand-green-500">
         </div>
 
         <div>
             <label class="mb-1 block text-sm font-medium text-gray-700">วันเวลาสิ้นสุดกิจกรรม</label>
             <input type="datetime-local" name="end_at"
                 value="{{ old('end_at', isset($activity->end_at) ? $activity->end_at->format('Y-m-d\TH:i') : '') }}" required
-                class="w-full rounded-xl border-gray-300 text-sm focus:border-blue-500 focus:ring-blue-500">
+                class="w-full rounded-xl border-gray-300 text-sm focus:border-brand-green-500 focus:ring-brand-green-500">
         </div>
     </div>
 
@@ -153,7 +153,7 @@
                 <label class="mb-1 block text-xs text-gray-500">รัศมีปลอดภัย (เมตร)</label>
                 <input type="number" id="allowed_radius" name="allowed_radius" min="10" max="5000"
                     value="{{ old('allowed_radius', $activity->allowed_radius ?? 100) }}"
-                    class="w-full rounded-xl border-gray-300 text-sm focus:border-blue-500 focus:ring-blue-500">
+                    class="w-full rounded-xl border-gray-300 text-sm focus:border-brand-green-500 focus:ring-brand-green-500">
             </div>
         </div>
     </div>
@@ -168,7 +168,7 @@
                         <label class="flex items-center gap-2 text-sm">
                             <input type="checkbox" name="faculty_ids[]" value="{{ $faculty->id }}"
                                 @checked(in_array($faculty->id, $selectedFaculties))
-                                class="rounded text-blue-600 focus:ring-blue-500">
+                                class="rounded text-brand-green-600 focus:ring-brand-green-500">
                             {{ $faculty->name_th }}
                         </label>
                     @endforeach
@@ -182,7 +182,7 @@
                             <label class="flex items-center gap-2 text-sm">
                                 <input type="checkbox" name="major_ids[]" value="{{ $major->id }}"
                                     @checked(in_array($major->id, $selectedMajors))
-                                    class="rounded text-blue-600 focus:ring-blue-500">
+                                    class="rounded text-brand-green-600 focus:ring-brand-green-500">
                                 {{ $major->name_th }}
                             </label>
                         @endforeach
@@ -196,7 +196,7 @@
                         <label class="flex items-center gap-2 text-sm">
                             <input type="checkbox" name="target_years[]" value="{{ $year }}"
                                 @checked(in_array($year, $selectedYears))
-                                class="rounded text-blue-600 focus:ring-blue-500">
+                                class="rounded text-brand-green-600 focus:ring-brand-green-500">
                             ชั้นปีที่ {{ $year }}
                         </label>
                     @endforeach
@@ -226,8 +226,8 @@
         let marker = L.marker([initialLat, initialLng], { draggable: true }).addTo(map);
         let circle = L.circle([initialLat, initialLng], {
             radius: parseFloat(radiusInput.value) || 100,
-            color: '#2563eb',
-            fillOpacity: 0.1,
+            color: '#0a6e30',
+            fillOpacity: 0.12,
         }).addTo(map);
 
         function setPoint(lat, lng) {

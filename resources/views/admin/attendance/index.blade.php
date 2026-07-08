@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.dashboard')
 
 @section('content')
 @php
@@ -10,7 +10,7 @@
 @endphp
 
 <div
-    class="mx-auto max-w-6xl px-4 py-8"
+    class="mx-auto max-w-6xl"
     x-data="{
         selected: [],
         lightboxUrl: null,
@@ -47,15 +47,11 @@
         </div>
     </div>
 
-    @if (session('status'))
-        <div class="mb-4 rounded-lg bg-green-50 px-4 py-3 text-sm text-green-700">{{ session('status') }}</div>
-    @endif
-
     <!-- Bulk action bar -->
     <div class="mb-3 flex flex-wrap items-center gap-3 rounded-2xl bg-white p-3 shadow-sm ring-1 ring-gray-200">
         <span class="text-sm text-gray-500">เลือกแล้ว <span x-text="selected.length"></span> รายการ</span>
         <button @click="approveAllValid()" type="button"
-            class="rounded-xl bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-700">
+            class="rounded-xl bg-brand-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-green-700">
             Approve All Valid
         </button>
         <button @click="forceBypassSelected()" type="button"
@@ -74,51 +70,51 @@
         <table class="min-w-full divide-y divide-gray-200 text-sm">
             <thead class="bg-gray-50">
                 <tr>
-                    <th class="px-3 py-3"><input type="checkbox" @change="toggleAll($event.target.checked)" class="rounded text-blue-600"></th>
-                    <th class="px-3 py-3 text-left font-medium text-gray-500">รหัสนักศึกษา</th>
-                    <th class="px-3 py-3 text-left font-medium text-gray-500">ชื่อ-นามสกุล</th>
-                    <th class="px-3 py-3 text-left font-medium text-gray-500">คณะ/สาขา</th>
-                    <th class="px-3 py-3 text-left font-medium text-gray-500">ชั้นปี</th>
-                    <th class="px-3 py-3 text-left font-medium text-gray-500">เวลาเช็กชื่อ</th>
-                    <th class="px-3 py-3 text-left font-medium text-gray-500">ระยะห่าง</th>
-                    <th class="px-3 py-3 text-left font-medium text-gray-500">สถานะ</th>
-                    <th class="px-3 py-3 text-left font-medium text-gray-500"></th>
+                    <th class="whitespace-nowrap px-3 py-3"><input type="checkbox" @change="toggleAll($event.target.checked)" class="rounded text-brand-green-600"></th>
+                    <th class="whitespace-nowrap px-3 py-3 text-left font-medium text-gray-500">รหัสนักศึกษา</th>
+                    <th class="whitespace-nowrap px-3 py-3 text-left font-medium text-gray-500">ชื่อ-นามสกุล</th>
+                    <th class="whitespace-nowrap px-3 py-3 text-left font-medium text-gray-500">คณะ/สาขา</th>
+                    <th class="whitespace-nowrap px-3 py-3 text-left font-medium text-gray-500">ชั้นปี</th>
+                    <th class="whitespace-nowrap px-3 py-3 text-left font-medium text-gray-500">เวลาเช็กชื่อ</th>
+                    <th class="whitespace-nowrap px-3 py-3 text-left font-medium text-gray-500">ระยะห่าง</th>
+                    <th class="whitespace-nowrap px-3 py-3 text-left font-medium text-gray-500">สถานะ</th>
+                    <th class="whitespace-nowrap px-3 py-3 text-left font-medium text-gray-500"></th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-100">
                 @forelse ($attendances as $att)
                     <tr @class(['bg-red-50' => $att->status === 'flagged'])>
-                        <td class="px-3 py-3">
-                            <input type="checkbox" class="row-checkbox rounded text-blue-600"
+                        <td class="whitespace-nowrap px-3 py-3">
+                            <input type="checkbox" class="row-checkbox rounded text-brand-green-600"
                                 value="{{ $att->id }}" data-status="{{ $att->status }}"
                                 x-model="selected">
                         </td>
-                        <td class="px-3 py-3 font-medium text-gray-900">{{ $att->user->student_id }}</td>
-                        <td class="px-3 py-3 text-gray-700">{{ $att->user->name_thai ?? $att->user->name }}</td>
-                        <td class="px-3 py-3 text-gray-500">{{ $att->user->faculty?->name_th }} / {{ $att->user->major?->name_th }}</td>
-                        <td class="px-3 py-3 text-gray-500">{{ $att->user->current_year }}</td>
-                        <td class="px-3 py-3 text-gray-500">{{ $att->checkin_time->format('H:i:s') }}</td>
-                        <td class="px-3 py-3 @class(['font-semibold text-red-600' => $att->status === 'flagged', 'text-gray-500' => $att->status !== 'flagged'])">
+                        <td class="whitespace-nowrap px-3 py-3 font-medium text-gray-900">{{ $att->user->student_id }}</td>
+                        <td class="whitespace-nowrap px-3 py-3 text-gray-700">{{ $att->user->name_thai ?? $att->user->name }}</td>
+                        <td class="whitespace-nowrap px-3 py-3 text-gray-500">{{ $att->user->faculty?->name_th }} / {{ $att->user->major?->name_th }}</td>
+                        <td class="whitespace-nowrap px-3 py-3 text-gray-500">{{ $att->user->current_year }}</td>
+                        <td class="whitespace-nowrap px-3 py-3 text-gray-500">{{ $att->checkin_time->format('H:i:s') }}</td>
+                        <td class="whitespace-nowrap px-3 py-3 @class(['font-semibold text-red-600' => $att->status === 'flagged', 'text-gray-500' => $att->status !== 'flagged'])">
                             {{ $att->distance_meters }} m
                         </td>
-                        <td class="px-3 py-3">
+                        <td class="whitespace-nowrap px-3 py-3">
                             <span @class([
                                 'rounded-full px-2.5 py-1 text-xs font-medium',
-                                'bg-green-100 text-green-700' => $att->status === 'auto_approved',
+                                'bg-brand-green-100 text-brand-green-700' => $att->status === 'auto_approved',
                                 'bg-red-100 text-red-700' => $att->status === 'flagged',
                                 'bg-gray-100 text-gray-600' => $att->status === 'rejected',
                             ])>
                                 {{ $statusLabel[$att->status] }}
                             </span>
                             @if ($att->flag_reason)
-                                <p class="mt-1 text-xs text-red-500">
+                                <p class="mt-1 whitespace-normal text-xs text-red-500">
                                     {{ collect(explode(',', $att->flag_reason))->map(fn($r) => $reasonLabel[$r] ?? $r)->join(', ') }}
                                 </p>
                             @endif
                         </td>
                         <td class="px-3 py-3 whitespace-nowrap">
-                            <button @click="lightboxUrl = '{{ asset('storage/'.$att->photo_path) }}'" type="button" class="text-blue-600 hover:underline">รูปเซลฟี</button>
-                            <a href="https://www.google.com/maps?q={{ $att->student_lat }},{{ $att->student_lng }}" target="_blank" class="ml-2 text-blue-600 hover:underline">แผนที่</a>
+                            <button @click="lightboxUrl = '{{ asset('storage/'.$att->photo_path) }}'" type="button" class="text-brand-purple-600 hover:underline">รูปเซลฟี</button>
+                            <a href="https://www.google.com/maps?q={{ $att->student_lat }},{{ $att->student_lng }}" target="_blank" class="ml-2 text-brand-purple-600 hover:underline">แผนที่</a>
                         </td>
                     </tr>
                 @empty

@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.dashboard')
 
 @section('content')
 @php
@@ -11,24 +11,20 @@
     ];
     $statusBadge = [
         'pending' => 'bg-amber-100 text-amber-700',
-        'approved' => 'bg-green-100 text-green-700',
+        'approved' => 'bg-brand-green-100 text-brand-green-700',
         'rejected' => 'bg-red-100 text-red-700',
     ];
     $statusLabel = ['pending' => 'รอตรวจสอบ', 'approved' => 'อนุมัติแล้ว', 'rejected' => 'ถูกปฏิเสธ'];
 @endphp
 
-<div class="mx-auto max-w-md px-4 py-8" x-data="{ showForm: false }">
+<div class="mx-auto max-w-md" x-data="{ showForm: false }">
     <div class="mb-4 flex items-center justify-between">
         <h1 class="text-lg font-semibold text-gray-900">คำร้องกิจกรรมภายนอก</h1>
         <a href="{{ route('dashboard') }}" class="text-sm text-gray-400 hover:text-gray-600">&larr; กลับ</a>
     </div>
 
-    @if (session('status'))
-        <div class="mb-4 rounded-lg bg-green-50 px-4 py-3 text-sm text-green-700">{{ session('status') }}</div>
-    @endif
-
     <button @click="showForm = ! showForm"
-        class="mb-4 w-full rounded-2xl bg-blue-600 p-4 text-sm font-semibold text-white shadow-sm hover:bg-blue-700"
+        class="mb-4 w-full rounded-2xl bg-brand-green-600 p-4 text-sm font-semibold text-white shadow-sm hover:bg-brand-green-700"
         x-text="showForm ? 'ปิดฟอร์ม' : '+ ยื่นคำร้องกิจกรรมภายนอก'">
     </button>
 
@@ -48,21 +44,21 @@
             <div>
                 <label class="mb-1 block text-sm font-medium text-gray-700">ชื่อกิจกรรม</label>
                 <input type="text" name="title" value="{{ old('title') }}" required
-                    class="w-full rounded-xl border-gray-300 text-sm focus:border-blue-500 focus:ring-blue-500">
+                    class="w-full rounded-xl border-gray-300 text-sm focus:border-brand-green-500 focus:ring-brand-green-500">
             </div>
             <div>
                 <label class="mb-1 block text-sm font-medium text-gray-700">หน่วยงานผู้จัด</label>
                 <input type="text" name="organization" value="{{ old('organization') }}" required
-                    class="w-full rounded-xl border-gray-300 text-sm focus:border-blue-500 focus:ring-blue-500">
+                    class="w-full rounded-xl border-gray-300 text-sm focus:border-brand-green-500 focus:ring-brand-green-500">
             </div>
             <div>
                 <label class="mb-1 block text-sm font-medium text-gray-700">วันที่จัดกิจกรรม</label>
                 <input type="date" name="activity_date" value="{{ old('activity_date') }}" max="{{ date('Y-m-d') }}" required
-                    class="w-full rounded-xl border-gray-300 text-sm focus:border-blue-500 focus:ring-blue-500">
+                    class="w-full rounded-xl border-gray-300 text-sm focus:border-brand-green-500 focus:ring-brand-green-500">
             </div>
             <div>
                 <label class="mb-1 block text-sm font-medium text-gray-700">หมวดหมู่กิจกรรม</label>
-                <select name="activity_category" required class="w-full rounded-xl border-gray-300 text-sm focus:border-blue-500 focus:ring-blue-500">
+                <select name="activity_category" required class="w-full rounded-xl border-gray-300 text-sm focus:border-brand-green-500 focus:ring-brand-green-500">
                     <option value="">-- เลือกหมวดหมู่ --</option>
                     @foreach ($categoryLabels as $value => $label)
                         <option value="{{ $value }}" @selected(old('activity_category') === $value)>{{ $label }}</option>
@@ -72,14 +68,14 @@
             <div>
                 <label class="mb-1 block text-sm font-medium text-gray-700">จำนวนชั่วโมงที่ขอเทียบ</label>
                 <input type="number" name="hours_requested" value="{{ old('hours_requested') }}" min="1" max="200" required
-                    class="w-full rounded-xl border-gray-300 text-sm focus:border-blue-500 focus:ring-blue-500">
+                    class="w-full rounded-xl border-gray-300 text-sm focus:border-brand-green-500 focus:ring-brand-green-500">
             </div>
             <div>
                 <label class="mb-1 block text-sm font-medium text-gray-700">ภาพหลักฐาน (เกียรติบัตร/ภาพเข้าร่วม, ไม่เกิน 2MB)</label>
                 <input type="file" name="proof_image" accept="image/*" required
-                    class="w-full text-sm text-gray-600 file:mr-3 file:rounded-lg file:border-0 file:bg-blue-50 file:px-3 file:py-2 file:text-sm file:font-medium file:text-blue-700 hover:file:bg-blue-100">
+                    class="w-full text-sm text-gray-600 file:mr-3 file:rounded-lg file:border-0 file:bg-brand-green-50 file:px-3 file:py-2 file:text-sm file:font-medium file:text-brand-green-700 hover:file:bg-brand-green-100">
             </div>
-            <button type="submit" class="w-full rounded-xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white hover:bg-blue-700">
+            <button type="submit" class="w-full rounded-xl bg-brand-green-600 px-4 py-3 text-sm font-semibold text-white hover:bg-brand-green-700">
                 ส่งคำร้อง
             </button>
         </form>

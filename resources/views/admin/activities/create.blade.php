@@ -1,7 +1,7 @@
-@extends('layouts.app')
+@extends('layouts.dashboard')
 
 @section('content')
-<div class="mx-auto max-w-3xl px-4 py-8">
+<div class="mx-auto max-w-3xl">
     <div class="mb-6 flex items-center justify-between">
         <h1 class="text-lg font-semibold text-gray-900">สร้างกิจกรรมใหม่</h1>
         <a href="{{ route('admin.activities.index') }}" class="text-sm text-gray-400 hover:text-gray-600">&larr; กลับรายการกิจกรรม</a>
@@ -23,7 +23,7 @@
         @include('admin.activities._form')
 
         <div class="mt-6 flex justify-end">
-            <button type="submit" class="rounded-xl bg-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-blue-700">
+            <button type="submit" class="rounded-xl bg-brand-green-600 px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-brand-green-700">
                 บันทึกกิจกรรม
             </button>
         </div>

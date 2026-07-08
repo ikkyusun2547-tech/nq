@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.dashboard')
 
 @section('content')
 @php
@@ -13,7 +13,7 @@
 @endphp
 
 <div
-    class="mx-auto max-w-5xl px-4 py-8"
+    class="mx-auto max-w-5xl"
     x-data="{
         showModal: false,
         rejecting: false,
@@ -29,20 +29,16 @@
         <a href="{{ route('admin.dashboard') }}" class="text-sm text-gray-400 hover:text-gray-600">&larr; กลับแดชบอร์ด</a>
     </div>
 
-    @if (session('status'))
-        <div class="mb-4 rounded-lg bg-green-50 px-4 py-3 text-sm text-green-700">{{ session('status') }}</div>
-    @endif
-
-    <div class="mb-4 flex gap-2 text-sm">
+    <div class="mb-4 flex flex-wrap gap-2 text-sm">
         @foreach ($tabs as $value => $label)
             <a href="{{ route('admin.external-activities.index', ['status' => $value]) }}"
-                class="rounded-full px-3 py-1.5 {{ $status === $value ? 'bg-blue-600 text-white' : 'bg-white text-gray-500 ring-1 ring-gray-200' }}">
+                class="rounded-full px-3 py-1.5 {{ $status === $value ? 'bg-brand-green-600 text-white' : 'bg-white text-gray-500 ring-1 ring-gray-200' }}">
                 {{ $label }}
             </a>
         @endforeach
     </div>
 
-    <div class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
+    <div class="overflow-x-auto rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
         <table class="min-w-full divide-y divide-gray-200 text-sm">
             <thead class="bg-gray-50">
                 <tr>
@@ -71,18 +67,18 @@
                             'student_id' => $req->user->student_id,
                         ]) }})"
                     >
-                        <td class="px-4 py-3">
+                        <td class="whitespace-nowrap px-4 py-3">
                             <p class="font-medium text-gray-900">{{ $req->user->name_thai ?? $req->user->name }}</p>
                             <p class="text-xs text-gray-400">{{ $req->user->student_id }}</p>
                         </td>
-                        <td class="px-4 py-3 text-gray-700">{{ $req->title }}</td>
-                        <td class="px-4 py-3 text-gray-500">{{ $categoryLabels[$req->activity_category] }}</td>
-                        <td class="px-4 py-3 text-gray-500">{{ $req->hours_requested }}</td>
-                        <td class="px-4 py-3">
+                        <td class="whitespace-nowrap px-4 py-3 text-gray-700">{{ $req->title }}</td>
+                        <td class="whitespace-nowrap px-4 py-3 text-gray-500">{{ $categoryLabels[$req->activity_category] }}</td>
+                        <td class="whitespace-nowrap px-4 py-3 text-gray-500">{{ $req->hours_requested }}</td>
+                        <td class="whitespace-nowrap px-4 py-3">
                             <span @class([
                                 'rounded-full px-2.5 py-1 text-xs font-medium',
                                 'bg-amber-100 text-amber-700' => $req->status === 'pending',
-                                'bg-green-100 text-green-700' => $req->status === 'approved',
+                                'bg-brand-green-100 text-brand-green-700' => $req->status === 'approved',
                                 'bg-red-100 text-red-700' => $req->status === 'rejected',
                             ])>
                                 {{ ['pending' => 'รอตรวจสอบ', 'approved' => 'อนุมัติแล้ว', 'rejected' => 'ปฏิเสธแล้ว'][$req->status] }}
@@ -113,7 +109,7 @@
                         <button @click="showModal = false" class="text-gray-400 hover:text-gray-600">&times;</button>
                     </div>
 
-                    <dl class="mb-4 grid grid-cols-2 gap-3 text-sm">
+                    <dl class="mb-4 grid grid-cols-1 gap-3 text-sm sm:grid-cols-2">
                         <div><dt class="text-xs text-gray-400">หน่วยงานผู้จัด</dt><dd x-text="selected.organization"></dd></div>
                         <div><dt class="text-xs text-gray-400">วันที่จัดกิจกรรม</dt><dd x-text="selected.activity_date"></dd></div>
                         <div><dt class="text-xs text-gray-400">หมวดหมู่</dt><dd x-text="selected.category"></dd></div>
@@ -130,7 +126,7 @@
                         <div class="flex gap-3">
                             <form method="POST" :action="approveUrlTemplate.replace('__ID__', selected.id)" class="flex-1">
                                 @csrf
-                                <button type="submit" class="w-full rounded-xl bg-green-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-green-700">
+                                <button type="submit" class="w-full rounded-xl bg-brand-green-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-brand-green-700">
                                     อนุมัติ
                                 </button>
                             </form>

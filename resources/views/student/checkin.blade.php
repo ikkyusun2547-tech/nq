@@ -1,7 +1,7 @@
-@extends('layouts.app')
+@extends('layouts.dashboard')
 
 @section('content')
-<div class="mx-auto max-w-md px-4 py-6" x-data="checkinApp()" x-init="init()">
+<div class="mx-auto max-w-md" x-data="checkinApp()" x-init="init()">
     <div class="mb-4 flex items-center justify-between">
         <h1 class="text-lg font-semibold text-gray-900">เช็กชื่อเข้าร่วมกิจกรรม</h1>
         <a href="{{ route('dashboard') }}" class="text-sm text-gray-400 hover:text-gray-600">&larr; กลับ</a>
@@ -10,9 +10,9 @@
     <div class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
         <!-- Step indicator -->
         <div class="flex border-b border-gray-100 text-xs">
-            <div class="flex-1 py-2 text-center" :class="step === 'scan' ? 'font-semibold text-blue-600' : 'text-gray-400'">1. สแกน QR</div>
-            <div class="flex-1 py-2 text-center" :class="step === 'selfie' ? 'font-semibold text-blue-600' : 'text-gray-400'">2. ถ่ายเซลฟี</div>
-            <div class="flex-1 py-2 text-center" :class="['submitting','done','error'].includes(step) ? 'font-semibold text-blue-600' : 'text-gray-400'">3. ยืนยัน</div>
+            <div class="flex-1 py-2 text-center" :class="step === 'scan' ? 'font-semibold text-brand-green-700' : 'text-gray-400'">1. สแกน QR</div>
+            <div class="flex-1 py-2 text-center" :class="step === 'selfie' ? 'font-semibold text-brand-green-700' : 'text-gray-400'">2. ถ่ายเซลฟี</div>
+            <div class="flex-1 py-2 text-center" :class="['submitting','done','error'].includes(step) ? 'font-semibold text-brand-green-700' : 'text-gray-400'">3. ยืนยัน</div>
         </div>
 
         <div class="p-5">
@@ -34,7 +34,7 @@
                     </div>
                     <button
                         type="button" @click="capturePhoto()"
-                        class="mt-3 w-full rounded-xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white hover:bg-blue-700"
+                        class="mt-3 w-full rounded-xl bg-brand-green-600 px-4 py-3 text-sm font-semibold text-white hover:bg-brand-green-700"
                     >
                         ถ่ายภาพ
                     </button>
@@ -50,18 +50,18 @@
             <template x-if="step === 'done'">
                 <div class="py-6 text-center">
                     <div class="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full"
-                        :class="resultStatus === 'auto_approved' ? 'bg-green-100 text-green-600' : 'bg-amber-100 text-amber-600'">
+                        :class="resultStatus === 'auto_approved' ? 'bg-brand-green-100 text-brand-green-600' : 'bg-amber-100 text-amber-600'">
                         <span x-text="resultStatus === 'auto_approved' ? '✓' : '!'" class="text-2xl"></span>
                     </div>
                     <p class="text-sm font-medium text-gray-900" x-text="resultMessage"></p>
-                    <a href="{{ route('dashboard') }}" class="mt-4 inline-block text-sm text-blue-600 hover:underline">กลับหน้าแดชบอร์ด</a>
+                    <a href="{{ route('dashboard') }}" class="mt-4 inline-block text-sm text-brand-purple-600 hover:underline">กลับหน้าแดชบอร์ด</a>
                 </div>
             </template>
 
             <template x-if="step === 'error'">
                 <div class="py-6 text-center">
                     <p class="text-sm font-medium text-red-600" x-text="resultMessage"></p>
-                    <button @click="resetToScan()" class="mt-4 text-sm text-blue-600 hover:underline">สแกนใหม่อีกครั้ง</button>
+                    <button @click="resetToScan()" class="mt-4 text-sm text-brand-purple-600 hover:underline">สแกนใหม่อีกครั้ง</button>
                 </div>
             </template>
         </div>
