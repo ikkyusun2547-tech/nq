@@ -3,22 +3,28 @@
 @source "../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php";
 @source "../../resources/views";
 
-/* SRRU brand palette — deep green + royal violet.
-   Verify exact official hex values against SRRU brand guidelines. */
+/* SRRU premium palette — deep violet (structural) + emerald (accent/action).
+   Matches Tailwind's stock violet/emerald scales so `brand-*` tokens stay
+   swappable in one place without hardcoding hue names across every view. */
 @theme {
-    --color-brand-green-50: #ecfdf3;
-    --color-brand-green-100: #d1fae0;
-    --color-brand-green-500: #16a34a;
-    --color-brand-green-600: #0f8a3e;
-    --color-brand-green-700: #0a6e30;
-    --color-brand-green-800: #085427;
-
-    --color-brand-purple-50: #f5f0ff;
-    --color-brand-purple-100: #e9deff;
+    --color-brand-purple-50: #f5f3ff;
+    --color-brand-purple-100: #ede9fe;
+    --color-brand-purple-200: #ddd6fe;
+    --color-brand-purple-400: #a78bfa;
     --color-brand-purple-500: #8b5cf6;
     --color-brand-purple-600: #7c3aed;
-    --color-brand-purple-700: #6425c2;
-    --color-brand-purple-800: #4f1f98;
+    --color-brand-purple-700: #6d28d9;
+    --color-brand-purple-800: #5b21b6;
+    --color-brand-purple-900: #4c1d95;
+    --color-brand-purple-950: #2e1065;
+
+    --color-brand-green-50: #ecfdf5;
+    --color-brand-green-100: #d1fae5;
+    --color-brand-green-400: #34d399;
+    --color-brand-green-500: #10b981;
+    --color-brand-green-600: #059669;
+    --color-brand-green-700: #047857;
+    --color-brand-green-800: #065f46;
 }
 
 [x-cloak] {
@@ -26,12 +32,31 @@
 }
 
 .brand-gradient {
-    background-image: linear-gradient(135deg, var(--color-brand-green-700), var(--color-brand-purple-700));
+    background-image: linear-gradient(135deg, var(--color-brand-purple-950), var(--color-brand-purple-800) 55%, var(--color-brand-green-600));
 }
 
 .brand-gradient-text {
-    background-image: linear-gradient(135deg, var(--color-brand-green-600), var(--color-brand-purple-600));
+    background-image: linear-gradient(135deg, var(--color-brand-purple-600), var(--color-brand-green-500));
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
+}
+
+/* Soft, diffuse elevation instead of hard black borders/shadows. */
+.shadow-soft {
+    box-shadow: 0 8px 30px rgb(0 0 0 / 0.04);
+}
+
+.shadow-soft-lg {
+    box-shadow: 0 20px 50px rgb(46 16 101 / 0.10);
+}
+
+.glass-card {
+    background-color: rgb(255 255 255 / 0.7);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgb(139 92 246 / 0.10);
+}
+
+.glow-emerald {
+    box-shadow: 0 0 12px rgb(16 185 129 / 0.35);
 }

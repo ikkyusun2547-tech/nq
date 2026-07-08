@@ -7,7 +7,7 @@
     <title>{{ $title ?? 'ระบบเช็กชื่อกิจกรรมนักศึกษา SRRU' }}</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="min-h-screen bg-gray-50 text-gray-900 antialiased">
+<body class="min-h-screen bg-slate-50 text-slate-900 antialiased">
     @php
         $isAdmin = auth()->user()?->isAdmin();
         $navItems = $isAdmin
@@ -23,13 +23,12 @@
             ];
     @endphp
 
-    <nav class="sticky top-0 z-40 bg-white/95 shadow-sm backdrop-blur" x-data="{ mobileOpen: false }">
-        <div class="h-1 brand-gradient"></div>
+    <nav class="sticky top-0 z-40 bg-brand-purple-950 shadow-soft-lg" x-data="{ mobileOpen: false }">
         <div class="mx-auto max-w-6xl px-4 sm:px-6">
             <div class="flex h-16 items-center justify-between gap-4">
                 <a href="{{ $isAdmin ? route('admin.dashboard') : route('dashboard') }}" class="flex shrink-0 items-center gap-2.5">
-                    <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl brand-gradient text-sm font-bold text-white shadow-sm">SR</span>
-                    <span class="hidden whitespace-nowrap text-sm font-semibold leading-tight text-gray-900 sm:block">
+                    <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand-green-500 text-sm font-bold text-brand-purple-950 shadow-soft">SR</span>
+                    <span class="hidden whitespace-nowrap text-sm font-semibold leading-tight text-white sm:block">
                         <span class="xl:hidden">ระบบเช็กชื่อกิจกรรม SRRU</span>
                         <span class="hidden xl:inline">ระบบเช็กชื่อกิจกรรม<br> มหาวิทยาลัยราชภัฏสุรินทร์</span>
                     </span>
@@ -39,9 +38,9 @@
                     @foreach ($navItems as $item)
                         <a href="{{ route($item['route']) }}"
                             @class([
-                                'whitespace-nowrap rounded-lg px-2.5 py-2 text-sm font-medium transition lg:px-3.5',
-                                'bg-brand-green-50 text-brand-green-700' => request()->routeIs($item['route'].'*'),
-                                'text-gray-500 hover:bg-gray-50 hover:text-gray-900' => ! request()->routeIs($item['route'].'*'),
+                                'whitespace-nowrap rounded-lg px-2.5 py-2 text-sm font-medium transition-all duration-200 lg:px-3.5',
+                                'bg-brand-green-500/15 text-brand-green-400' => request()->routeIs($item['route'].'*'),
+                                'text-violet-200/70 hover:bg-white/5 hover:text-white' => ! request()->routeIs($item['route'].'*'),
                             ])>
                             {{ $item['label'] }}
                         </a>
@@ -49,39 +48,39 @@
                 </div>
 
                 <div class="hidden shrink-0 items-center gap-3 md:flex">
-                    <span class="hidden whitespace-nowrap text-sm text-gray-500 lg:block">{{ auth()->user()->name_thai ?? auth()->user()->name }}</span>
+                    <span class="hidden whitespace-nowrap text-sm text-violet-200/70 lg:block">{{ auth()->user()->name_thai ?? auth()->user()->name }}</span>
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
-                        <button class="whitespace-nowrap rounded-lg px-3 py-1.5 text-sm font-medium text-gray-400 hover:bg-gray-50 hover:text-gray-700">
+                        <button class="whitespace-nowrap rounded-lg px-3 py-1.5 text-sm font-medium text-violet-200/70 transition-colors hover:bg-white/5 hover:text-white">
                             ออกจากระบบ
                         </button>
                     </form>
                 </div>
 
-                <button @click="mobileOpen = ! mobileOpen" class="rounded-lg p-2 text-gray-500 hover:bg-gray-50 md:hidden" aria-label="เมนู">
+                <button @click="mobileOpen = ! mobileOpen" class="rounded-lg p-2 text-violet-200/70 hover:bg-white/5 hover:text-white md:hidden" aria-label="เมนู">
                     <svg x-show="! mobileOpen" class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
                     <svg x-show="mobileOpen" x-cloak class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
             </div>
         </div>
 
-        <div x-show="mobileOpen" x-cloak class="border-t border-gray-100 md:hidden">
+        <div x-show="mobileOpen" x-cloak class="border-t border-white/10 md:hidden">
             <div class="space-y-1 px-4 py-3">
                 @foreach ($navItems as $item)
                     <a href="{{ route($item['route']) }}"
                         @class([
                             'block rounded-lg px-3.5 py-2.5 text-sm font-medium',
-                            'bg-brand-green-50 text-brand-green-700' => request()->routeIs($item['route'].'*'),
-                            'text-gray-600 hover:bg-gray-50' => ! request()->routeIs($item['route'].'*'),
+                            'bg-brand-green-500/15 text-brand-green-400' => request()->routeIs($item['route'].'*'),
+                            'text-violet-200/70 hover:bg-white/5' => ! request()->routeIs($item['route'].'*'),
                         ])>
                         {{ $item['label'] }}
                     </a>
                 @endforeach
-                <div class="mt-2 flex items-center justify-between border-t border-gray-100 pt-3">
-                    <span class="text-sm text-gray-500">{{ auth()->user()->name_thai ?? auth()->user()->name }}</span>
+                <div class="mt-2 flex items-center justify-between border-t border-white/10 pt-3">
+                    <span class="text-sm text-violet-200/70">{{ auth()->user()->name_thai ?? auth()->user()->name }}</span>
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
-                        <button class="text-sm font-medium text-gray-400 hover:text-gray-700">ออกจากระบบ</button>
+                        <button class="text-sm font-medium text-violet-200/70 hover:text-white">ออกจากระบบ</button>
                     </form>
                 </div>
             </div>
