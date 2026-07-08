@@ -1,6 +1,13 @@
 @extends('layouts.app')
 
 @section('content')
+@php
+    $features = [
+        'เช็กชื่อกิจกรรมด้วย QR + GPS + เซลฟี ยืนยันตัวตน',
+        'ติดตามความคืบหน้าชั่วโมงกิจกรรมแบบเรียลไทม์',
+        'ยื่นคำร้องเทียบกิจกรรมภายนอกได้ในระบบเดียว',
+    ];
+@endphp
 <div
     class="grid min-h-screen grid-cols-1 lg:grid-cols-5"
     x-data="{
@@ -37,11 +44,7 @@
             </p>
 
             <ul class="mt-8 space-y-3.5">
-                @foreach ([
-                    'เช็กชื่อกิจกรรมด้วย QR + GPS + เซลฟี ยืนยันตัวตน',
-                    'ติดตามความคืบหน้าชั่วโมงกิจกรรมแบบเรียลไทม์',
-                    'ยื่นคำร้องเทียบกิจกรรมภายนอกได้ในระบบเดียว',
-                ] as $feature)
+                @foreach ($features as $feature)
                     <li class="flex items-start gap-3 text-sm text-violet-100/90">
                         <span class="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-brand-green-500/20 text-brand-green-400">
                             <svg class="h-3 w-3" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
@@ -58,12 +61,29 @@
     <!-- Right: form panel -->
     <div class="flex items-center justify-center bg-slate-50 px-4 py-10 lg:col-span-3 lg:px-16">
         <div class="w-full max-w-lg">
-            <div class="mb-6 flex items-center gap-3 lg:hidden">
-                <img src="{{ asset('images/logo.png') }}" alt="SRRU" class="h-11 w-11 object-contain">
-                <div>
-                    <p class="text-xs font-medium uppercase tracking-wider text-brand-purple-500">ขั้นตอนสุดท้ายก่อนใช้งาน</p>
-                    <h1 class="text-lg font-bold text-slate-900">กรอกข้อมูลโปรไฟล์นักศึกษา</h1>
+            <!-- Mobile/tablet branding banner -->
+            <div class="relative mb-6 overflow-hidden rounded-3xl brand-gradient p-6 shadow-soft-lg lg:hidden">
+                <div class="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-white/10 blur-2xl"></div>
+                <div class="pointer-events-none absolute -bottom-14 -left-6 h-40 w-40 rounded-full bg-brand-green-500/10 blur-2xl"></div>
+
+                <div class="relative flex items-center gap-3">
+                    <img src="{{ asset('images/logo.png') }}" alt="SRRU" class="h-14 w-14 object-contain drop-shadow-lg">
+                    <span class="text-xl font-extrabold tracking-wide text-white">SRRU Check</span>
                 </div>
+
+                <p class="relative mt-4 text-xs font-medium uppercase tracking-wider text-violet-200/70">ขั้นตอนสุดท้ายก่อนใช้งาน</p>
+                <h1 class="relative mt-1 text-lg font-bold text-white">กรอกข้อมูลโปรไฟล์นักศึกษา</h1>
+
+                <ul class="relative mt-4 space-y-2">
+                    @foreach ($features as $feature)
+                        <li class="flex items-start gap-2 text-xs text-violet-100/90">
+                            <span class="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-brand-green-500/20 text-brand-green-400">
+                                <svg class="h-2.5 w-2.5" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+                            </span>
+                            {{ $feature }}
+                        </li>
+                    @endforeach
+                </ul>
             </div>
             <h1 class="mb-6 hidden text-2xl font-bold text-slate-900 lg:block">กรอกข้อมูลโปรไฟล์นักศึกษา</h1>
 
