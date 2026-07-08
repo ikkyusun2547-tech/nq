@@ -9,27 +9,45 @@ class MajorSeeder extends Seeder
 {
     /**
      * Run the database seeds.
-     *
-     * Faculty/major names reflect SRRU's general Rajabhat-system structure.
-     * Verify exact current program names & codes against the SRRU registrar
-     * before using this in production — curricula are revised periodically.
      */
     public function run(): void
     {
         $faculties = [
             [
+                'code' => 'SCI',
+                'name_th' => 'คณะวิทยาศาสตร์และเทคโนโลยี',
+                'name_en' => 'Faculty of Science and Technology',
+                'majors' => [
+                    ['name_th' => 'วิทยาการคอมพิวเตอร์', 'degree_abbr' => 'วท.บ.'],
+                    ['name_th' => 'ชีววิทยาเชิงสร้างสรรค์', 'degree_abbr' => 'วท.บ.'],
+                    ['name_th' => 'เคมีประยุกต์', 'degree_abbr' => 'วท.บ.'],
+                    ['name_th' => 'คณิตศาสตร์ประยุกต์และสถิติ', 'degree_abbr' => 'วท.บ.'],
+                    ['name_th' => 'วิทยาศาสตร์สิ่งแวดล้อม', 'degree_abbr' => 'วท.บ.'],
+                    ['name_th' => 'คหกรรมศาสตร์ประยุกต์', 'degree_abbr' => 'วท.บ.'],
+                    ['name_th' => 'การส่งเสริมสุขภาพเด็กและผู้สูงอายุ', 'degree_abbr' => 'วท.บ.'],
+                    ['name_th' => 'สาธารณสุขศาสตร์', 'degree_abbr' => 'ส.บ.'],
+                    ['name_th' => 'การแพทย์แผนไทย', 'degree_abbr' => 'พท.บ.'],
+                    ['name_th' => 'คณิตศาสตร์', 'degree_abbr' => 'ค.บ.'],
+                    ['name_th' => 'เคมี', 'degree_abbr' => 'ค.บ.'],
+                    ['name_th' => 'ชีววิทยา', 'degree_abbr' => 'ค.บ.'],
+                    ['name_th' => 'ฟิสิกส์', 'degree_abbr' => 'ค.บ.'],
+                    ['name_th' => 'คอมพิวเตอร์ศึกษา', 'degree_abbr' => 'ค.บ.'],
+                    ['name_th' => 'วิทยาศาสตร์ทั่วไป', 'degree_abbr' => 'ค.บ.'],
+                    ['name_th' => 'ภาษาอังกฤษและเทคโนโลยีการศึกษา', 'degree_abbr' => 'ค.บ.'],
+                ],
+            ],
+            [
                 'code' => 'EDU',
                 'name_th' => 'คณะครุศาสตร์',
                 'name_en' => 'Faculty of Education',
                 'majors' => [
-                    ['code' => 'EDU-EARLY', 'name_th' => 'การศึกษาปฐมวัย', 'degree_abbr' => 'ค.บ.'],
-                    ['code' => 'EDU-THAI', 'name_th' => 'ภาษาไทย', 'degree_abbr' => 'ค.บ.'],
-                    ['code' => 'EDU-ENG', 'name_th' => 'ภาษาอังกฤษ', 'degree_abbr' => 'ค.บ.'],
-                    ['code' => 'EDU-MATH', 'name_th' => 'คณิตศาสตร์', 'degree_abbr' => 'ค.บ.'],
-                    ['code' => 'EDU-SCI', 'name_th' => 'วิทยาศาสตร์ทั่วไป', 'degree_abbr' => 'ค.บ.'],
-                    ['code' => 'EDU-PE', 'name_th' => 'พลศึกษา', 'degree_abbr' => 'ค.บ.'],
-                    ['code' => 'EDU-COMP', 'name_th' => 'คอมพิวเตอร์ศึกษา', 'degree_abbr' => 'ค.บ.'],
-                    ['code' => 'EDU-SOCIAL', 'name_th' => 'สังคมศึกษา', 'degree_abbr' => 'ค.บ.'],
+                    ['name_th' => 'การศึกษาปฐมวัย', 'degree_abbr' => 'ค.บ.'],
+                    ['name_th' => 'การประถมศึกษา', 'degree_abbr' => 'ค.บ.'],
+                    ['name_th' => 'พลศึกษา', 'degree_abbr' => 'ค.บ.'],
+                    ['name_th' => 'เทคโนโลยีดิจิทัลเพื่อการศึกษา', 'degree_abbr' => 'ค.บ.'],
+                    ['name_th' => 'การสอนภาษาจีน', 'degree_abbr' => 'ค.บ.'],
+                    ['name_th' => 'ภาษาอังกฤษ', 'degree_abbr' => 'ค.บ.'],
+                    ['name_th' => 'วิทยาศาสตร์การกีฬา', 'degree_abbr' => 'วท.บ.'],
                 ],
             ],
             [
@@ -37,40 +55,18 @@ class MajorSeeder extends Seeder
                 'name_th' => 'คณะมนุษยศาสตร์และสังคมศาสตร์',
                 'name_en' => 'Faculty of Humanities and Social Sciences',
                 'majors' => [
-                    ['code' => 'HUSO-THAI', 'name_th' => 'ภาษาไทย', 'degree_abbr' => 'ศศ.บ.'],
-                    ['code' => 'HUSO-ENG', 'name_th' => 'ภาษาอังกฤษ', 'degree_abbr' => 'ศศ.บ.'],
-                    ['code' => 'HUSO-BUSENG', 'name_th' => 'ภาษาอังกฤษธุรกิจ', 'degree_abbr' => 'ศศ.บ.'],
-                    ['code' => 'HUSO-SOCDEV', 'name_th' => 'การพัฒนาสังคม', 'degree_abbr' => 'ศศ.บ.'],
-                    ['code' => 'HUSO-TOURISM', 'name_th' => 'อุตสาหกรรมท่องเที่ยว', 'degree_abbr' => 'ศศ.บ.'],
-                    ['code' => 'HUSO-MUSIC', 'name_th' => 'ดนตรี', 'degree_abbr' => 'ศศ.บ.'],
-                ],
-            ],
-            [
-                'code' => 'SCI',
-                'name_th' => 'คณะวิทยาศาสตร์และเทคโนโลยี',
-                'name_en' => 'Faculty of Science and Technology',
-                'majors' => [
-                    ['code' => 'SCI-CHEM', 'name_th' => 'เคมี', 'degree_abbr' => 'วท.บ.'],
-                    ['code' => 'SCI-BIO', 'name_th' => 'ชีววิทยา', 'degree_abbr' => 'วท.บ.'],
-                    ['code' => 'SCI-PHYS', 'name_th' => 'ฟิสิกส์', 'degree_abbr' => 'วท.บ.'],
-                    ['code' => 'SCI-MATH', 'name_th' => 'คณิตศาสตร์', 'degree_abbr' => 'วท.บ.'],
-                    ['code' => 'SCI-CS', 'name_th' => 'วิทยาการคอมพิวเตอร์', 'degree_abbr' => 'วท.บ.'],
-                    ['code' => 'SCI-IT', 'name_th' => 'เทคโนโลยีสารสนเทศ', 'degree_abbr' => 'วท.บ.'],
-                    ['code' => 'SCI-PUBHEALTH', 'name_th' => 'สาธารณสุขศาสตร์', 'degree_abbr' => 'วท.บ.'],
-                    ['code' => 'SCI-AGRI', 'name_th' => 'เกษตรศาสตร์', 'degree_abbr' => 'วท.บ.'],
-                    ['code' => 'SCI-ENV', 'name_th' => 'วิทยาศาสตร์สิ่งแวดล้อม', 'degree_abbr' => 'วท.บ.'],
-                ],
-            ],
-            [
-                'code' => 'TECH',
-                'name_th' => 'คณะเทคโนโลยีอุตสาหกรรม',
-                'name_en' => 'Faculty of Industrial Technology',
-                'majors' => [
-                    ['code' => 'TECH-ELEC', 'name_th' => 'เทคโนโลยีวิศวกรรมไฟฟ้า', 'degree_abbr' => 'วท.บ.'],
-                    ['code' => 'TECH-CIVIL', 'name_th' => 'เทคโนโลยีวิศวกรรมโยธา', 'degree_abbr' => 'วท.บ.'],
-                    ['code' => 'TECH-INDMGT', 'name_th' => 'การจัดการงานอุตสาหกรรม', 'degree_abbr' => 'วท.บ.'],
-                    ['code' => 'TECH-DESIGN', 'name_th' => 'ออกแบบผลิตภัณฑ์อุตสาหกรรม', 'degree_abbr' => 'วท.บ.'],
-                    ['code' => 'TECH-AUTO', 'name_th' => 'เทคโนโลยีเครื่องกล', 'degree_abbr' => 'วท.บ.'],
+                    ['name_th' => 'นิติศาสตร์', 'degree_abbr' => 'น.บ.'],
+                    ['name_th' => 'รัฐศาสตร์', 'degree_abbr' => 'ร.บ.'],
+                    ['name_th' => 'รัฐประศาสนศาสตร์', 'degree_abbr' => 'รป.บ.'],
+                    ['name_th' => 'ภาษาอังกฤษเพื่อการสื่อสาร', 'degree_abbr' => 'ศศ.บ.'],
+                    ['name_th' => 'การพัฒนาสังคม', 'degree_abbr' => 'ศศ.บ.'],
+                    ['name_th' => 'บรรณารักษศาสตร์และสารสนเทศศาสตร์', 'degree_abbr' => 'ศศ.บ.'],
+                    ['name_th' => 'ทัศนศิลป์และการออกแบบ', 'degree_abbr' => 'ศป.บ.'],
+                    ['name_th' => 'ภาษาไทย', 'degree_abbr' => 'ค.บ.'],
+                    ['name_th' => 'ภาษาอังกฤษ', 'degree_abbr' => 'ค.บ.'],
+                    ['name_th' => 'สังคมศึกษา', 'degree_abbr' => 'ค.บ.'],
+                    ['name_th' => 'ดนตรีศึกษา', 'degree_abbr' => 'ค.บ.'],
+                    ['name_th' => 'นาฏศิลป์ศึกษา', 'degree_abbr' => 'ค.บ.'],
                 ],
             ],
             [
@@ -78,12 +74,24 @@ class MajorSeeder extends Seeder
                 'name_th' => 'คณะวิทยาการจัดการ',
                 'name_en' => 'Faculty of Management Science',
                 'majors' => [
-                    ['code' => 'MGT-MGMT', 'name_th' => 'การจัดการ', 'degree_abbr' => 'บธ.บ.'],
-                    ['code' => 'MGT-MKT', 'name_th' => 'การตลาด', 'degree_abbr' => 'บธ.บ.'],
-                    ['code' => 'MGT-FIN', 'name_th' => 'การเงินการธนาคาร', 'degree_abbr' => 'บธ.บ.'],
-                    ['code' => 'MGT-BIZCOMP', 'name_th' => 'คอมพิวเตอร์ธุรกิจ', 'degree_abbr' => 'บธ.บ.'],
-                    ['code' => 'MGT-HR', 'name_th' => 'การจัดการทรัพยากรมนุษย์', 'degree_abbr' => 'บธ.บ.'],
-                    ['code' => 'MGT-ACC', 'name_th' => 'การบัญชี', 'degree_abbr' => 'บช.บ.'],
+                    ['name_th' => 'บัญชี', 'degree_abbr' => 'บช.บ.'],
+                    ['name_th' => 'การตลาดสมัยใหม่', 'degree_abbr' => 'บธ.บ.'],
+                    ['name_th' => 'การจัดการโลจิสติกส์และซัพพลายเชน', 'degree_abbr' => 'บธ.บ.'],
+                    ['name_th' => 'บริหารธุรกิจ', 'degree_abbr' => 'บธ.บ.'],
+                    ['name_th' => 'การท่องเที่ยวและการโรงแรม', 'degree_abbr' => 'ศศ.บ.'],
+                    ['name_th' => 'นิเทศศาสตร์', 'degree_abbr' => 'ศศ.บ.'],
+                    ['name_th' => 'เศรษฐศาสตร์การพัฒนาชุมชน', 'degree_abbr' => 'ศ.บ.'],
+                ],
+            ],
+            [
+                'code' => 'TECH',
+                'name_th' => 'คณะเทคโนโลยีอุตสาหกรรม',
+                'name_en' => 'Faculty of Industrial Technology',
+                'majors' => [
+                    ['name_th' => 'เทคโนโลยีวิศวกรรมเครื่องกลและยานยนต์ไฟฟ้า', 'degree_abbr' => 'อส.บ.'],
+                    ['name_th' => 'เทคโนโลยีวิศวกรรมโยธาและสถาปัตยกรรม', 'degree_abbr' => 'อส.บ.'],
+                    ['name_th' => 'วิศวกรรมการจัดการและโลจิสติกส์', 'degree_abbr' => 'วศ.บ.'],
+                    ['name_th' => 'อุตสาหกรรมศิลป์', 'degree_abbr' => 'ค.บ.'],
                 ],
             ],
         ];
@@ -97,7 +105,9 @@ class MajorSeeder extends Seeder
                 $facultyData
             );
 
-            foreach ($majors as $majorData) {
+            foreach ($majors as $index => $majorData) {
+                $majorData['code'] = sprintf('%s-%02d', $facultyData['code'], $index + 1);
+
                 $faculty->majors()->updateOrCreate(
                     ['code' => $majorData['code']],
                     $majorData
