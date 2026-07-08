@@ -64,7 +64,7 @@ class AttendanceController extends Controller
                 'reviewed_at' => now(),
             ]);
 
-        return back()->with('status', "อัปเดตสถานะสำเร็จ {$count} รายการ");
+        return back()->with('status', __('อัปเดตสถานะสำเร็จ :count รายการ', ['count' => $count]));
     }
 
     public function exportExcel(Activity $activity)

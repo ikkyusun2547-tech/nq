@@ -31,6 +31,6 @@ class ExternalActivityController extends Controller
 
         return redirect()
             ->route('external-activities.index')
-            ->with('status', 'ส่งคำร้องสำเร็จ รอเจ้าหน้าที่ตรวจสอบ');
+            ->with('status', __('ส่งคำร้องสำเร็จ รอเจ้าหน้าที่ตรวจสอบ'));
     }
 }

@@ -61,7 +61,7 @@ class ActivityController extends Controller
 
         return redirect()
             ->route('admin.activities.index')
-            ->with('status', 'สร้างกิจกรรมสำเร็จ');
+            ->with('status', __('สร้างกิจกรรมสำเร็จ'));
     }
 
     /**
@@ -103,7 +103,7 @@ class ActivityController extends Controller
 
         return redirect()
             ->route('admin.activities.index')
-            ->with('status', 'บันทึกการแก้ไขกิจกรรมสำเร็จ');
+            ->with('status', __('บันทึกการแก้ไขกิจกรรมสำเร็จ'));
     }
 
     /**
@@ -114,7 +114,7 @@ class ActivityController extends Controller
         if ($activity->attendances()->exists()) {
             return redirect()
                 ->route('admin.activities.index')
-                ->with('error', 'ไม่สามารถลบกิจกรรม "'.$activity->title.'" ได้ เนื่องจากมีนักศึกษาเช็กชื่อเข้าร่วมแล้ว');
+                ->with('error', __('ไม่สามารถลบกิจกรรม ":title" ได้ เนื่องจากมีนักศึกษาเช็กชื่อเข้าร่วมแล้ว', ['title' => $activity->title]));
         }
 
         if ($activity->banner_url) {
@@ -125,7 +125,7 @@ class ActivityController extends Controller
 
         return redirect()
             ->route('admin.activities.index')
-            ->with('status', 'ลบกิจกรรมสำเร็จ');
+            ->with('status', __('ลบกิจกรรมสำเร็จ'));
     }
 
     /**

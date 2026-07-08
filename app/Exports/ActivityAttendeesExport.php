@@ -22,8 +22,8 @@ class ActivityAttendeesExport implements FromCollection, WithHeadings, WithMappi
     public function headings(): array
     {
         return [
-            'รหัสนักศึกษา', 'ชื่อ-นามสกุล', 'คณะ', 'สาขา', 'ชั้นปี',
-            'เวลาเช็กชื่อ', 'ระยะห่าง (เมตร)', 'สถานะ', 'หมายเหตุ',
+            __('รหัสนักศึกษา'), __('ชื่อ-นามสกุล'), __('คณะ'), __('สาขา'), __('ชั้นปี'),
+            __('เวลาเช็กชื่อ'), __('ระยะห่าง (เมตร)'), __('สถานะ'), __('หมายเหตุ'),
         ];
     }
 
@@ -37,7 +37,7 @@ class ActivityAttendeesExport implements FromCollection, WithHeadings, WithMappi
             $attendance->user->current_year,
             $attendance->checkin_time->format('d/m/Y H:i:s'),
             $attendance->distance_meters,
-            ['auto_approved' => 'ผ่านอัตโนมัติ', 'flagged' => 'ติดธงแดง', 'rejected' => 'ปฏิเสธ'][$attendance->status],
+            ['auto_approved' => __('ผ่านอัตโนมัติ'), 'flagged' => __('ติดธงแดง'), 'rejected' => __('ปฏิเสธ')][$attendance->status],
             $attendance->flag_reason,
         ];
     }

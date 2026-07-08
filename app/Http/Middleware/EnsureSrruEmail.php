@@ -26,7 +26,7 @@ class EnsureSrruEmail
             $request->session()->regenerateToken();
 
             return redirect()->route('login')->withErrors([
-                'email' => "อนุญาตเฉพาะบัญชีอีเมลของมหาวิทยาลัย (@{$domain}) เท่านั้น",
+                'email' => __('อนุญาตเฉพาะบัญชีอีเมลของมหาวิทยาลัย (@:domain) เท่านั้น', ['domain' => $domain]),
             ]);
         }
 

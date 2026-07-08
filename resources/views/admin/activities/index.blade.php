@@ -19,20 +19,20 @@
         'cancelled' => 'bg-red-50 text-red-700',
     ];
     $statusLabel = [
-        'draft' => 'ร่าง', 'open' => 'เปิดรับสมัคร', 'full' => 'เต็มแล้ว',
-        'ongoing' => 'กำลังดำเนินการ', 'closed' => 'ปิดกิจกรรม', 'cancelled' => 'ยกเลิก',
+        'draft' => __('ร่าง'), 'open' => __('เปิดรับสมัคร'), 'full' => __('เต็มแล้ว'),
+        'ongoing' => __('กำลังดำเนินการ'), 'closed' => __('ปิดกิจกรรม'), 'cancelled' => __('ถูกยกเลิก'),
     ];
 @endphp
 
 <div class="mx-auto max-w-5xl">
     <div class="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-3xl brand-gradient p-6 shadow-soft-lg sm:p-8">
         <div>
-            <p class="text-xs font-medium uppercase tracking-[0.2em] text-violet-200/70">กองพัฒนานักศึกษา</p>
-            <h1 class="mt-1 text-xl font-bold text-white sm:text-2xl">รายการกิจกรรมทั้งหมด</h1>
+            <p class="text-xs font-medium uppercase tracking-[0.2em] text-violet-200/70">{{ __('กองพัฒนานักศึกษา') }}</p>
+            <h1 class="mt-1 text-xl font-bold text-white sm:text-2xl">{{ __('รายการกิจกรรมทั้งหมด') }}</h1>
         </div>
         <a href="{{ route('admin.activities.create') }}"
             class="rounded-xl bg-brand-green-500 px-4 py-2.5 text-sm font-semibold text-brand-purple-950 shadow-soft transition-all duration-300 hover:-translate-y-0.5 hover:bg-brand-green-400 hover:shadow-lg">
-            + สร้างกิจกรรม
+            + {{ __('สร้างกิจกรรม') }}
         </a>
     </div>
 
@@ -40,10 +40,10 @@
         <table class="min-w-full text-sm">
             <thead>
                 <tr class="border-b border-brand-purple-100">
-                    <th class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">ชื่อกิจกรรม</th>
-                    <th class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">วันที่จัด</th>
-                    <th class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">ผู้เช็กชื่อแล้ว</th>
-                    <th class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">สถานะ</th>
+                    <th class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">{{ __('ชื่อกิจกรรม') }}</th>
+                    <th class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">{{ __('วันที่จัด') }}</th>
+                    <th class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">{{ __('ผู้เช็กชื่อแล้ว') }}</th>
+                    <th class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">{{ __('สถานะ') }}</th>
                     <th class="whitespace-nowrap px-4 py-3"></th>
                 </tr>
             </thead>
@@ -67,23 +67,23 @@
                             </span>
                         </td>
                         <td class="whitespace-nowrap px-4 py-3 text-right space-x-3">
-                            <a href="{{ route('admin.attendance.qr-display', $activity) }}" class="font-medium text-brand-green-600 transition-colors hover:text-brand-green-800">แสดง QR</a>
-                            <a href="{{ route('admin.attendance.index', $activity) }}" class="font-medium text-brand-purple-600 transition-colors hover:text-brand-purple-800">หน้างาน</a>
-                            <a href="{{ route('admin.activities.edit', $activity) }}" class="font-medium text-slate-500 transition-colors hover:text-slate-800">แก้ไข</a>
+                            <a href="{{ route('admin.attendance.qr-display', $activity) }}" class="font-medium text-brand-green-600 transition-colors hover:text-brand-green-800">{{ __('แสดง QR') }}</a>
+                            <a href="{{ route('admin.attendance.index', $activity) }}" class="font-medium text-brand-purple-600 transition-colors hover:text-brand-purple-800">{{ __('หน้างาน') }}</a>
+                            <a href="{{ route('admin.activities.edit', $activity) }}" class="font-medium text-slate-500 transition-colors hover:text-slate-800">{{ __('แก้ไข') }}</a>
                             <form
                                 method="POST" action="{{ route('admin.activities.destroy', $activity) }}"
                                 class="inline"
-                                onsubmit="return confirm('ยืนยันลบกิจกรรม &quot;{{ addslashes($activity->title) }}&quot;? การลบไม่สามารถย้อนกลับได้')"
+                                onsubmit="return confirm('{{ __('ยืนยันลบกิจกรรม \":title\"? การลบไม่สามารถย้อนกลับได้', ['title' => addslashes($activity->title)]) }}')"
                             >
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="font-medium text-red-500 transition-colors hover:text-red-700">ลบ</button>
+                                <button type="submit" class="font-medium text-red-500 transition-colors hover:text-red-700">{{ __('ลบ') }}</button>
                             </form>
                         </td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="5" class="px-4 py-8 text-center text-slate-400">ยังไม่มีกิจกรรม</td>
+                        <td colspan="5" class="px-4 py-8 text-center text-slate-400">{{ __('ยังไม่มีกิจกรรม') }}</td>
                     </tr>
                 @endforelse
             </tbody>

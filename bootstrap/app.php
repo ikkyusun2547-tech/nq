@@ -16,6 +16,10 @@ return Application::configure(basePath: dirname(__DIR__))
             'profile.completed' => \App\Http\Middleware\EnsureProfileCompleted::class,
             'admin' => \App\Http\Middleware\EnsureIsAdmin::class,
         ]);
+
+        $middleware->web(append: [
+            \App\Http\Middleware\SetLocale::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

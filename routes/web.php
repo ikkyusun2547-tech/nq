@@ -17,6 +17,14 @@ Route::get('/', function () {
     return redirect()->route('login');
 });
 
+Route::get('/locale/{locale}', function (string $locale) {
+    if (in_array($locale, ['th', 'en'], true)) {
+        session(['locale' => $locale]);
+    }
+
+    return redirect()->back();
+})->name('locale.switch');
+
 Route::middleware('guest')->group(function () {
     Route::get('/login', function () {
         return view('auth.login');

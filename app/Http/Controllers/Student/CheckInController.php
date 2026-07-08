@@ -36,8 +36,8 @@ class CheckInController extends Controller
             'status' => $attendance->status,
             'distance_meters' => $attendance->distance_meters,
             'message' => $attendance->status === 'auto_approved'
-                ? 'เช็กชื่อสำเร็จ! บันทึกชั่วโมงกิจกรรมเรียบร้อยแล้ว'
-                : 'เช็กชื่อสำเร็จ แต่ระบบตรวจพบความผิดปกติ กรุณารอเจ้าหน้าที่ตรวจสอบ',
+                ? __('เช็กชื่อสำเร็จ! บันทึกชั่วโมงกิจกรรมเรียบร้อยแล้ว')
+                : __('เช็กชื่อสำเร็จ แต่ระบบตรวจพบความผิดปกติ กรุณารอเจ้าหน้าที่ตรวจสอบ'),
         ]);
     }
 }

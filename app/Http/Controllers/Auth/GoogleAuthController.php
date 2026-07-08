@@ -22,7 +22,7 @@ class GoogleAuthController extends Controller
 
         if (! Str::endsWith($googleUser->getEmail(), '@'.$domain)) {
             return redirect()->route('login')->withErrors([
-                'email' => "อนุญาตเฉพาะบัญชีอีเมลของมหาวิทยาลัย (@{$domain}) เท่านั้น",
+                'email' => __('อนุญาตเฉพาะบัญชีอีเมลของมหาวิทยาลัย (@:domain) เท่านั้น', ['domain' => $domain]),
             ]);
         }
 
@@ -38,7 +38,7 @@ class GoogleAuthController extends Controller
 
         if ($user->account_status === 'banned') {
             return redirect()->route('login')->withErrors([
-                'email' => 'บัญชีนี้ถูกระงับการใช้งาน กรุณาติดต่อกองพัฒนานักศึกษา',
+                'email' => __('บัญชีนี้ถูกระงับการใช้งาน กรุณาติดต่อกองพัฒนานักศึกษา'),
             ]);
         }
 

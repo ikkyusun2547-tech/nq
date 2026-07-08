@@ -3,13 +3,13 @@
 @section('content')
 @php
     $categoryLabels = [
-        'culture' => 'ทำนุบำรุงศิลปวัฒนธรรม',
-        'academic' => 'วิชาการ',
-        'sports' => 'กีฬาและส่งเสริมสุขภาพ',
-        'volunteer' => 'จิตอาสา/บำเพ็ญประโยชน์',
-        'ethics' => 'คุณธรรมจริยธรรม',
+        'culture' => __('ทำนุบำรุงศิลปวัฒนธรรม'),
+        'academic' => __('วิชาการ'),
+        'sports' => __('กีฬาและส่งเสริมสุขภาพ'),
+        'volunteer' => __('จิตอาสา/บำเพ็ญประโยชน์'),
+        'ethics' => __('คุณธรรมจริยธรรม'),
     ];
-    $tabs = ['pending' => 'รอตรวจสอบ', 'approved' => 'อนุมัติแล้ว', 'rejected' => 'ปฏิเสธแล้ว', 'all' => 'ทั้งหมด'];
+    $tabs = ['pending' => __('รอตรวจสอบ'), 'approved' => __('อนุมัติแล้ว'), 'rejected' => __('ปฏิเสธแล้ว'), 'all' => __('ทั้งหมด')];
     $statusDot = ['pending' => 'bg-amber-500', 'approved' => 'bg-brand-green-500', 'rejected' => 'bg-red-500'];
     $statusBadge = [
         'pending' => 'bg-amber-50 text-amber-700',
@@ -32,12 +32,12 @@
 >
     <div class="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-3xl brand-gradient p-6 shadow-soft-lg sm:p-8">
         <div>
-            <p class="text-xs font-medium uppercase tracking-[0.2em] text-violet-200/70">กองพัฒนานักศึกษา</p>
-            <h1 class="mt-1 text-xl font-bold text-white sm:text-2xl">คำร้องกิจกรรมภายนอก</h1>
+            <p class="text-xs font-medium uppercase tracking-[0.2em] text-violet-200/70">{{ __('กองพัฒนานักศึกษา') }}</p>
+            <h1 class="mt-1 text-xl font-bold text-white sm:text-2xl">{{ __('คำร้องกิจกรรมภายนอก') }}</h1>
         </div>
         <a href="{{ route('admin.dashboard') }}"
             class="rounded-xl bg-white/10 px-4 py-2 text-sm font-medium text-white shadow-soft ring-1 ring-white/15 backdrop-blur transition-all duration-300 hover:-translate-y-0.5 hover:bg-white/15">
-            &larr; กลับแดชบอร์ด
+            &larr; {{ __('กลับแดชบอร์ด') }}
         </a>
     </div>
 
@@ -58,11 +58,11 @@
         <table class="min-w-full text-sm">
             <thead>
                 <tr class="border-b border-brand-purple-100">
-                    <th class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">นักศึกษา</th>
-                    <th class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">ชื่อกิจกรรม</th>
-                    <th class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">หมวดหมู่</th>
-                    <th class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">ชั่วโมง</th>
-                    <th class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">สถานะ</th>
+                    <th class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">{{ __('นักศึกษา') }}</th>
+                    <th class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">{{ __('ชื่อกิจกรรม') }}</th>
+                    <th class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">{{ __('หมวดหมู่') }}</th>
+                    <th class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">{{ __('ชั่วโมง') }}</th>
+                    <th class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">{{ __('สถานะ') }}</th>
                 </tr>
             </thead>
             <tbody>
@@ -100,13 +100,13 @@
                                     <span @class(['absolute inline-flex h-full w-full animate-ping rounded-full opacity-60', $statusDot[$req->status]])></span>
                                     <span @class(['relative inline-flex h-1.5 w-1.5 rounded-full', $statusDot[$req->status]])></span>
                                 </span>
-                                {{ ['pending' => 'รอตรวจสอบ', 'approved' => 'อนุมัติแล้ว', 'rejected' => 'ปฏิเสธแล้ว'][$req->status] }}
+                                {{ ['pending' => __('รอตรวจสอบ'), 'approved' => __('อนุมัติแล้ว'), 'rejected' => __('ปฏิเสธแล้ว')][$req->status] }}
                             </span>
                         </td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="5" class="px-4 py-8 text-center text-slate-400">ไม่มีคำร้องในหมวดนี้</td>
+                        <td colspan="5" class="px-4 py-8 text-center text-slate-400">{{ __('ไม่มีคำร้องในหมวดนี้') }}</td>
                     </tr>
                 @endforelse
             </tbody>
@@ -129,16 +129,16 @@
                     </div>
 
                     <dl class="mb-4 grid grid-cols-1 gap-3 text-sm sm:grid-cols-2">
-                        <div><dt class="text-xs text-slate-400">หน่วยงานผู้จัด</dt><dd x-text="selected.organization"></dd></div>
-                        <div><dt class="text-xs text-slate-400">วันที่จัดกิจกรรม</dt><dd x-text="selected.activity_date"></dd></div>
-                        <div><dt class="text-xs text-slate-400">หมวดหมู่</dt><dd x-text="selected.category"></dd></div>
-                        <div><dt class="text-xs text-slate-400">ชั่วโมงที่ขอเทียบ</dt><dd x-text="selected.hours_requested"></dd></div>
+                        <div><dt class="text-xs text-slate-400">{{ __('หน่วยงานผู้จัด') }}</dt><dd x-text="selected.organization"></dd></div>
+                        <div><dt class="text-xs text-slate-400">{{ __('วันที่จัดกิจกรรม') }}</dt><dd x-text="selected.activity_date"></dd></div>
+                        <div><dt class="text-xs text-slate-400">{{ __('หมวดหมู่') }}</dt><dd x-text="selected.category"></dd></div>
+                        <div><dt class="text-xs text-slate-400">{{ __('ชั่วโมงที่ขอเทียบ') }}</dt><dd x-text="selected.hours_requested"></dd></div>
                     </dl>
 
                     <img :src="selected.proof_image_url" class="mb-4 max-h-96 w-full rounded-2xl object-contain shadow-soft">
 
                     <template x-if="selected.status === 'rejected' && selected.reject_reason">
-                        <p class="mb-4 rounded-xl bg-red-50 px-3 py-2 text-xs text-red-600" x-text="'เหตุผลที่ปฏิเสธ: ' + selected.reject_reason"></p>
+                        <p class="mb-4 rounded-xl bg-red-50 px-3 py-2 text-xs text-red-600" x-text="'{{ __('เหตุผลที่ปฏิเสธ:') }} ' + selected.reject_reason"></p>
                     </template>
 
                     <template x-if="selected.status === 'pending' && ! rejecting">
@@ -146,12 +146,12 @@
                             <form method="POST" :action="approveUrlTemplate.replace('__ID__', selected.id)" class="flex-1">
                                 @csrf
                                 <button type="submit" class="w-full rounded-xl bg-brand-green-500 px-4 py-2.5 text-sm font-semibold text-brand-purple-950 shadow-soft transition-all duration-300 hover:-translate-y-0.5 hover:bg-brand-green-400 hover:shadow-lg">
-                                    อนุมัติ
+                                    {{ __('อนุมัติ') }}
                                 </button>
                             </form>
                             <button @click="rejecting = true" type="button"
                                 class="flex-1 rounded-xl bg-red-50 px-4 py-2.5 text-sm font-semibold text-red-600 shadow-soft transition-all duration-300 hover:-translate-y-0.5 hover:bg-red-100 hover:shadow-lg">
-                                ปฏิเสธ
+                                {{ __('ปฏิเสธ') }}
                             </button>
                         </div>
                     </template>
@@ -159,14 +159,14 @@
                     <template x-if="selected.status === 'pending' && rejecting">
                         <form method="POST" :action="rejectUrlTemplate.replace('__ID__', selected.id)" class="space-y-3">
                             @csrf
-                            <textarea name="reject_reason" x-model="rejectReason" required rows="3" placeholder="ระบุเหตุผล เช่น รูปเกียรติบัตรไม่ชัดเจน"
+                            <textarea name="reject_reason" x-model="rejectReason" required rows="3" placeholder="{{ __('ระบุเหตุผล เช่น รูปเกียรติบัตรไม่ชัดเจน') }}"
                                 class="w-full rounded-xl border border-slate-200 bg-slate-50/50 text-sm shadow-soft transition-all duration-200 focus:border-red-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-red-500/10"></textarea>
                             <div class="flex gap-3">
                                 <button type="submit" class="flex-1 rounded-xl bg-red-600 px-4 py-2.5 text-sm font-semibold text-white shadow-soft transition-all duration-300 hover:-translate-y-0.5 hover:bg-red-700 hover:shadow-lg">
-                                    ยืนยันการปฏิเสธ
+                                    {{ __('ยืนยันการปฏิเสธ') }}
                                 </button>
                                 <button @click="rejecting = false" type="button" class="flex-1 rounded-xl bg-slate-100 px-4 py-2.5 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-200">
-                                    ยกเลิก
+                                    {{ __('ยกเลิก') }}
                                 </button>
                             </div>
                         </form>

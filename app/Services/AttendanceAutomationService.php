@@ -33,13 +33,13 @@ class AttendanceAutomationService
 
         if (! in_array($activity->status, ['open', 'ongoing'], true)) {
             throw ValidationException::withMessages([
-                'qr_token' => 'กิจกรรมนี้ไม่ได้เปิดรับเช็กชื่อในขณะนี้',
+                'qr_token' => __('กิจกรรมนี้ไม่ได้เปิดรับเช็กชื่อในขณะนี้'),
             ]);
         }
 
         if (! $activity->isEligibleFor($user)) {
             throw ValidationException::withMessages([
-                'qr_token' => 'คุณไม่มีสิทธิ์เข้าร่วมกิจกรรมนี้',
+                'qr_token' => __('คุณไม่มีสิทธิ์เข้าร่วมกิจกรรมนี้'),
             ]);
         }
 

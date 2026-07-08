@@ -9,7 +9,7 @@
         <div class="mb-8 text-center">
             <img src="{{ asset('images/logo.png') }}" alt="SRRU" class="mx-auto mb-4 h-20 w-20 object-contain drop-shadow">
             <h1 class="text-lg font-semibold text-slate-900">SRRU Check</h1>
-            <p class="mt-1 text-sm text-slate-500">มหาวิทยาลัยราชภัฏสุรินทร์</p>
+            <p class="mt-1 text-sm text-slate-500">{{ __('มหาวิทยาลัยราชภัฏสุรินทร์') }}</p>
         </div>
 
         @if ($errors->any())
@@ -28,16 +28,16 @@
                 <path fill="#FBBC05" d="M5.31 14.33a7.2 7.2 0 0 1 0-4.66V6.58H1.3a12 12 0 0 0 0 10.84l4.01-3.09z"/>
                 <path fill="#EA4335" d="M12 4.77c1.77 0 3.35.61 4.6 1.8l3.44-3.44A11.6 11.6 0 0 0 12 0 12 12 0 0 0 1.3 6.58l4.01 3.09C6.25 6.86 8.89 4.77 12 4.77z"/>
             </svg>
-            เข้าสู่ระบบด้วยบัญชี Google มหาวิทยาลัย
+            {{ __('เข้าสู่ระบบด้วยบัญชี Google มหาวิทยาลัย') }}
         </a>
 
         <p class="mt-6 text-center text-xs text-slate-400">
-            ใช้ได้เฉพาะบัญชีอีเมล @ {{ config('services.srru.email_domain') }} เท่านั้น
+            {{ __('ใช้ได้เฉพาะบัญชีอีเมล @ :domain เท่านั้น', ['domain' => config('services.srru.email_domain')]) }}
         </p>
     </div>
 
     <p class="relative mt-6 text-center text-xs text-violet-200/70">
-        กองพัฒนานักศึกษา · มหาวิทยาลัยราชภัฏสุรินทร์
+        {{ __('กองพัฒนานักศึกษา · มหาวิทยาลัยราชภัฏสุรินทร์') }}
     </p>
 </div>
 @endsection

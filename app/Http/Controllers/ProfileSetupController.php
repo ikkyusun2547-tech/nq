@@ -43,6 +43,6 @@ class ProfileSetupController extends Controller
             'name_thai' => $validated['title_prefix'].$validated['first_name'].' '.$validated['last_name'],
         ]);
 
-        return redirect()->route('dashboard')->with('status', 'บันทึกข้อมูลโปรไฟล์สำเร็จ');
+        return redirect()->route('dashboard')->with('status', __('บันทึกข้อมูลโปรไฟล์สำเร็จ'));
     }
 }

@@ -46,7 +46,7 @@ class DynamicQrTokenGenerator
         $parts = explode('.', $token);
 
         if (count($parts) !== 3 || ! ctype_digit($parts[0]) || ! ctype_digit(ltrim($parts[1], '-'))) {
-            throw new QrTokenException('รูปแบบ QR Code ไม่ถูกต้อง');
+            throw new QrTokenException(__('รูปแบบ QR Code ไม่ถูกต้อง'));
         }
 
         [$activityId, $window, $signature] = $parts;
@@ -54,11 +54,11 @@ class DynamicQrTokenGenerator
         $activity = Activity::find((int) $activityId);
 
         if (! $activity) {
-            throw new QrTokenException('ไม่พบกิจกรรมที่ตรงกับ QR Code นี้');
+            throw new QrTokenException(__('ไม่พบกิจกรรมที่ตรงกับ QR Code นี้'));
         }
 
         if (! $this->verify($activity, (int) $window, $signature)) {
-            throw new QrTokenException('QR Code หมดอายุแล้ว กรุณาสแกนใหม่อีกครั้ง');
+            throw new QrTokenException(__('QR Code หมดอายุแล้ว กรุณาสแกนใหม่อีกครั้ง'));
         }
 
         return $activity;

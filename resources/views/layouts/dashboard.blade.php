@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="th">
+<html lang="{{ app()->getLocale() }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ $title ?? 'ระบบเช็กชื่อกิจกรรมนักศึกษา SRRU' }}</title>
+    <title>{{ $title ?? __('ระบบเช็กชื่อกิจกรรมนักศึกษา SRRU') }}</title>
     <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
@@ -13,15 +13,15 @@
         $isAdmin = auth()->user()?->isAdmin();
         $navItems = $isAdmin
             ? [
-                ['route' => 'admin.dashboard', 'label' => 'แดชบอร์ด'],
-                ['route' => 'admin.activities.index', 'label' => 'กิจกรรม'],
-                ['route' => 'admin.external-activities.index', 'label' => 'คำร้องภายนอก'],
-                ['route' => 'admin.students.index', 'label' => 'นักศึกษา'],
+                ['route' => 'admin.dashboard', 'label' => __('แดชบอร์ด')],
+                ['route' => 'admin.activities.index', 'label' => __('กิจกรรม')],
+                ['route' => 'admin.external-activities.index', 'label' => __('คำร้องภายนอก')],
+                ['route' => 'admin.students.index', 'label' => __('นักศึกษา')],
             ]
             : [
-                ['route' => 'dashboard', 'label' => 'แดชบอร์ด'],
-                ['route' => 'checkin.show', 'label' => 'เช็กชื่อ'],
-                ['route' => 'external-activities.index', 'label' => 'คำร้องภายนอก'],
+                ['route' => 'dashboard', 'label' => __('แดชบอร์ด')],
+                ['route' => 'checkin.show', 'label' => __('เช็กชื่อ')],
+                ['route' => 'external-activities.index', 'label' => __('คำร้องภายนอก')],
             ];
     @endphp
 
@@ -47,16 +47,17 @@
                 </div>
 
                 <div class="hidden shrink-0 items-center gap-3 md:flex">
+                    @include('partials.locale-switch')
                     <span class="hidden whitespace-nowrap text-sm text-violet-200/70 lg:block">{{ auth()->user()->name_thai ?? auth()->user()->name }}</span>
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
                         <button class="whitespace-nowrap rounded-lg px-3 py-1.5 text-sm font-medium text-violet-200/70 transition-colors hover:bg-white/5 hover:text-white">
-                            ออกจากระบบ
+                            {{ __('ออกจากระบบ') }}
                         </button>
                     </form>
                 </div>
 
-                <button @click="mobileOpen = ! mobileOpen" class="rounded-lg p-2 text-violet-200/70 hover:bg-white/5 hover:text-white md:hidden" aria-label="เมนู">
+                <button @click="mobileOpen = ! mobileOpen" class="rounded-lg p-2 text-violet-200/70 hover:bg-white/5 hover:text-white md:hidden" aria-label="{{ __('เมนู') }}">
                     <svg x-show="! mobileOpen" class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
                     <svg x-show="mobileOpen" x-cloak class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
@@ -77,10 +78,13 @@
                 @endforeach
                 <div class="mt-2 flex items-center justify-between border-t border-white/10 pt-3">
                     <span class="text-sm text-violet-200/70">{{ auth()->user()->name_thai ?? auth()->user()->name }}</span>
-                    <form method="POST" action="{{ route('logout') }}">
-                        @csrf
-                        <button class="text-sm font-medium text-violet-200/70 hover:text-white">ออกจากระบบ</button>
-                    </form>
+                    <div class="flex items-center gap-3">
+                        @include('partials.locale-switch')
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+                            <button class="text-sm font-medium text-violet-200/70 hover:text-white">{{ __('ออกจากระบบ') }}</button>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>

@@ -24,7 +24,7 @@ class ExternalApprovalController extends Controller
 
     public function approve(Request $request, ExternalActivityRequest $externalActivityRequest)
     {
-        abort_if($externalActivityRequest->status !== 'pending', 422, 'คำร้องนี้ถูกดำเนินการไปแล้ว');
+        abort_if($externalActivityRequest->status !== 'pending', 422, __('คำร้องนี้ถูกดำเนินการไปแล้ว'));
 
         $externalActivityRequest->update([
             'status' => 'approved',
@@ -32,12 +32,12 @@ class ExternalApprovalController extends Controller
             'reviewed_at' => now(),
         ]);
 
-        return back()->with('status', 'อนุมัติคำร้องสำเร็จ');
+        return back()->with('status', __('อนุมัติคำร้องสำเร็จ'));
     }
 
     public function reject(Request $request, ExternalActivityRequest $externalActivityRequest)
     {
-        abort_if($externalActivityRequest->status !== 'pending', 422, 'คำร้องนี้ถูกดำเนินการไปแล้ว');
+        abort_if($externalActivityRequest->status !== 'pending', 422, __('คำร้องนี้ถูกดำเนินการไปแล้ว'));
 
         $validated = $request->validate([
             'reject_reason' => ['required', 'string', 'max:500'],
@@ -50,6 +50,6 @@ class ExternalApprovalController extends Controller
             'reviewed_at' => now(),
         ]);
 
-        return back()->with('status', 'ปฏิเสธคำร้องสำเร็จ');
+        return back()->with('status', __('ปฏิเสธคำร้องสำเร็จ'));
     }
 }
