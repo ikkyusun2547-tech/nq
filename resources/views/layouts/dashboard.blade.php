@@ -16,6 +16,7 @@
                 ['route' => 'admin.dashboard', 'label' => 'แดชบอร์ด'],
                 ['route' => 'admin.activities.index', 'label' => 'กิจกรรม'],
                 ['route' => 'admin.external-activities.index', 'label' => 'คำร้องภายนอก'],
+                ['route' => 'admin.students.index', 'label' => 'นักศึกษา'],
             ]
             : [
                 ['route' => 'dashboard', 'label' => 'แดชบอร์ด'],

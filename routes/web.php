@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\ActivityController;
 use App\Http\Controllers\Admin\AttendanceController;
 use App\Http\Controllers\Admin\ClearanceReportController;
 use App\Http\Controllers\Admin\ExternalApprovalController;
+use App\Http\Controllers\Admin\StudentController;
 use App\Http\Controllers\Auth\GoogleAuthController;
 use App\Http\Controllers\ProfileSetupController;
 use App\Http\Controllers\Student\CheckInController;
@@ -57,6 +58,9 @@ Route::middleware(['auth', 'srru.email'])->group(function () {
         Route::get('/dashboard', function () {
             return view('admin.dashboard');
         })->name('dashboard');
+
+        Route::get('/students', [StudentController::class, 'index'])->name('students.index');
+        Route::get('/students/{student}', [StudentController::class, 'show'])->name('students.show');
 
         Route::resource('activities', ActivityController::class)->except(['show']);
 
