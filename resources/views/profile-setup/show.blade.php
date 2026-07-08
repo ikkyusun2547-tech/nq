@@ -90,15 +90,20 @@
                     <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
                         <div>
                             <label class="mb-2 block text-sm font-medium text-slate-600">คำนำหน้าชื่อ</label>
-                            <select
-                                name="title_prefix" required
-                                class="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-700 shadow-soft transition-all duration-200 focus:border-brand-purple-500 focus:outline-none focus:ring-4 focus:ring-brand-purple-500/10"
-                            >
-                                <option value="">-- เลือก --</option>
-                                @foreach (['นาย', 'นาง', 'นางสาว'] as $prefix)
-                                    <option value="{{ $prefix }}" @selected(old('title_prefix') === $prefix)>{{ $prefix }}</option>
-                                @endforeach
-                            </select>
+                            <div class="relative">
+                                <select
+                                    name="title_prefix" required
+                                    class="w-full appearance-none rounded-xl border border-slate-200 bg-white py-2.5 pl-3.5 pr-9 text-sm text-slate-700 shadow-soft transition-all duration-200 focus:border-brand-purple-500 focus:outline-none focus:ring-4 focus:ring-brand-purple-500/10"
+                                >
+                                    <option value="">-- เลือก --</option>
+                                    @foreach (['นาย', 'นาง', 'นางสาว'] as $prefix)
+                                        <option value="{{ $prefix }}" @selected(old('title_prefix') === $prefix)>{{ $prefix }}</option>
+                                    @endforeach
+                                </select>
+                                <span class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3.5 text-slate-400">
+                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
+                                </span>
+                            </div>
                         </div>
                         <div class="sm:col-span-2">
                             <label class="mb-2 block text-sm font-medium text-slate-600">ชื่อ</label>
@@ -186,13 +191,16 @@
                             </span>
                             <select
                                 name="faculty_id" x-model="facultyId" @change="loadMajors()" required
-                                class="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-3.5 text-sm text-slate-700 shadow-soft transition-all duration-200 focus:border-brand-purple-500 focus:outline-none focus:ring-4 focus:ring-brand-purple-500/10"
+                                class="w-full appearance-none rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-9 text-sm text-slate-700 shadow-soft transition-all duration-200 focus:border-brand-purple-500 focus:outline-none focus:ring-4 focus:ring-brand-purple-500/10"
                             >
                                 <option value="">-- เลือกคณะ --</option>
                                 @foreach ($faculties as $faculty)
                                     <option value="{{ $faculty->id }}">{{ $faculty->name_th }}</option>
                                 @endforeach
                             </select>
+                            <span class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3.5 text-slate-400">
+                                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
+                            </span>
                         </div>
                     </div>
 
@@ -204,13 +212,16 @@
                             </span>
                             <select
                                 name="major_id" required :disabled="! facultyId || loadingMajors"
-                                class="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-3.5 text-sm text-slate-700 shadow-soft transition-all duration-200 focus:border-brand-purple-500 focus:outline-none focus:ring-4 focus:ring-brand-purple-500/10 disabled:bg-slate-50 disabled:text-slate-400"
+                                class="w-full appearance-none rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-9 text-sm text-slate-700 shadow-soft transition-all duration-200 focus:border-brand-purple-500 focus:outline-none focus:ring-4 focus:ring-brand-purple-500/10 disabled:bg-slate-50 disabled:text-slate-400"
                             >
                                 <option value="">-- <span x-text="loadingMajors ? 'กำลังโหลด...' : 'เลือกสาขาวิชา'"></span> --</option>
                                 <template x-for="major in majors" :key="major.id">
                                     <option :value="major.id" x-text="`${major.name_th} (${major.degree_abbr ?? '-'})`"></option>
                                 </template>
                             </select>
+                            <span class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3.5 text-slate-400">
+                                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
+                            </span>
                         </div>
                     </div>
                 </div>
