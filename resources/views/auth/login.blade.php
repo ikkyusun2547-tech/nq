@@ -7,7 +7,7 @@
 
     <div class="relative w-full max-w-sm rounded-3xl bg-white p-8 shadow-xl">
         <div class="mb-8 text-center">
-            <span class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl brand-gradient text-lg font-bold text-white shadow-sm">SR</span>
+            <img src="{{ asset('images/logo.png') }}" alt="SRRU" class="mx-auto mb-4 h-20 w-20 object-contain">
             <h1 class="text-lg font-semibold text-gray-900">ระบบเช็กชื่อกิจกรรมนักศึกษา</h1>
             <p class="mt-1 text-sm text-gray-500">มหาวิทยาลัยราชภัฏสุรินทร์</p>
         </div>

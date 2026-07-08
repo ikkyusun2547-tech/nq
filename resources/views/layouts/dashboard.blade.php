@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $title ?? 'ระบบเช็กชื่อกิจกรรมนักศึกษา SRRU' }}</title>
+    <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="min-h-screen bg-slate-50 text-slate-900 antialiased">
@@ -27,7 +28,7 @@
         <div class="mx-auto max-w-6xl px-4 sm:px-6">
             <div class="flex h-16 items-center justify-between gap-4">
                 <a href="{{ $isAdmin ? route('admin.dashboard') : route('dashboard') }}" class="flex shrink-0 items-center gap-2.5">
-                    <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand-green-500 text-sm font-bold text-brand-purple-950 shadow-soft">SR</span>
+                    <img src="{{ asset('images/logo.png') }}" alt="SRRU" class="h-11 w-11 shrink-0 object-contain drop-shadow">
                     <span class="hidden whitespace-nowrap text-sm font-semibold leading-tight text-white sm:block">
                         <span class="xl:hidden">ระบบเช็กชื่อกิจกรรม SRRU</span>
                         <span class="hidden xl:inline">ระบบเช็กชื่อกิจกรรม<br> มหาวิทยาลัยราชภัฏสุรินทร์</span>
