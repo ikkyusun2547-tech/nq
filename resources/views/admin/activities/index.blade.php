@@ -22,6 +22,7 @@
         'draft' => __('ร่าง'), 'open' => __('เปิดรับสมัคร'), 'full' => __('เต็มแล้ว'),
         'ongoing' => __('กำลังดำเนินการ'), 'closed' => __('ปิดกิจกรรม'), 'cancelled' => __('ถูกยกเลิก'),
     ];
+    $semesterShort = ['1' => __('เทอม 1'), '2' => __('เทอม 2'), '3' => __('ฤดูร้อน')];
 @endphp
 
 <div class="mx-auto max-w-5xl">
@@ -42,6 +43,7 @@
                 <tr class="border-b border-brand-purple-100 dark:border-brand-purple-500/20">
                     <th class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">{{ __('ชื่อกิจกรรม') }}</th>
                     <th class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">{{ __('วันที่จัด') }}</th>
+                    <th class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">{{ __('ปีการศึกษา') }}</th>
                     <th class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">{{ __('ผู้เช็กชื่อแล้ว') }}</th>
                     <th class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">{{ __('สถานะ') }}</th>
                     <th class="whitespace-nowrap px-4 py-3"></th>
@@ -56,6 +58,13 @@
                     ])>
                         <td class="whitespace-nowrap px-4 py-3 font-medium text-slate-900 dark:text-slate-100">{{ $activity->title }}</td>
                         <td class="whitespace-nowrap px-4 py-3 text-slate-500 dark:text-slate-400">{{ $activity->start_at->format('d/m/Y H:i') }}</td>
+                        <td class="whitespace-nowrap px-4 py-3 text-slate-500 dark:text-slate-400">
+                            @if ($activity->academic_year)
+                                {{ $activity->academic_year }} · {{ $semesterShort[$activity->semester] ?? '-' }}
+                            @else
+                                -
+                            @endif
+                        </td>
                         <td class="whitespace-nowrap px-4 py-3 text-slate-500 dark:text-slate-400">{{ $activity->attendances_count }}</td>
                         <td class="whitespace-nowrap px-4 py-3">
                             <span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium {{ $statusBadge[$activity->status] }}">
@@ -83,7 +92,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="5" class="px-4 py-8 text-center text-slate-400 dark:text-slate-500">{{ __('ยังไม่มีกิจกรรม') }}</td>
+                        <td colspan="6" class="px-4 py-8 text-center text-slate-400 dark:text-slate-500">{{ __('ยังไม่มีกิจกรรม') }}</td>
                     </tr>
                 @endforelse
             </tbody>

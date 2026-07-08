@@ -79,6 +79,26 @@
         </div>
 
         <div>
+            <label class="mb-1 block text-sm font-medium text-slate-600 dark:text-slate-400">{{ __('ปีการศึกษา') }}</label>
+            @php
+                $now = now();
+                $currentAcademicYear = $now->year + 543 - ($now->month >= 6 ? 0 : 1);
+            @endphp
+            <input type="number" name="academic_year" value="{{ old('academic_year', $activity->academic_year ?? $currentAcademicYear) }}" required
+                min="2540" max="{{ date('Y') + 544 }}"
+                class="w-full rounded-2xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-700 placeholder:text-slate-400 shadow-soft transition-all duration-200 focus:border-brand-purple-500 focus:outline-none focus:ring-4 focus:ring-brand-purple-500/10 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500">
+        </div>
+
+        <div>
+            <label class="mb-1 block text-sm font-medium text-slate-600 dark:text-slate-400">{{ __('ภาคเรียน') }}</label>
+            <select name="semester" required class="w-full rounded-2xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-700 placeholder:text-slate-400 shadow-soft transition-all duration-200 focus:border-brand-purple-500 focus:outline-none focus:ring-4 focus:ring-brand-purple-500/10 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500">
+                <option value="1" @selected(old('semester', $activity->semester ?? '1') === '1')>{{ __('ภาคเรียนที่ 1') }}</option>
+                <option value="2" @selected(old('semester', $activity->semester ?? '1') === '2')>{{ __('ภาคเรียนที่ 2') }}</option>
+                <option value="3" @selected(old('semester', $activity->semester ?? '1') === '3')>{{ __('ภาคฤดูร้อน') }}</option>
+            </select>
+        </div>
+
+        <div>
             <label class="mb-2 block text-sm font-medium text-slate-600 dark:text-slate-400">{{ __('ลักษณะกิจกรรม') }}</label>
             <div class="grid grid-cols-2 gap-3">
                 <label class="flex cursor-pointer items-center gap-2 rounded-xl border border-slate-200 bg-slate-50/50 px-3 py-2.5 text-sm shadow-soft transition-all duration-200 has-[:checked]:border-brand-purple-500 has-[:checked]:bg-brand-purple-50 has-[:checked]:text-brand-purple-700 dark:border-slate-700 dark:bg-slate-800/40 dark:has-[:checked]:bg-brand-purple-500/10 dark:has-[:checked]:text-brand-purple-400">

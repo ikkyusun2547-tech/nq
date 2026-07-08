@@ -19,6 +19,8 @@ class Activity extends Model
         'activity_level',
         'activity_category',
         'activity_type',
+        'academic_year',
+        'semester',
         'credit_hours',
         'capacity',
         'start_at',
@@ -39,6 +41,7 @@ class Activity extends Model
         return [
             'start_at' => 'datetime',
             'end_at' => 'datetime',
+            'academic_year' => 'integer',
             'location_lat' => 'decimal:8',
             'location_lng' => 'decimal:8',
         ];

@@ -31,6 +31,8 @@ class StoreActivityRequest extends FormRequest
             'activity_level' => ['required', Rule::in(['university', 'faculty'])],
             'activity_category' => ['required', Rule::in(['culture', 'academic', 'sports', 'volunteer', 'ethics'])],
             'activity_type' => ['required', Rule::in(['core', 'elective'])],
+            'academic_year' => ['required', 'integer', 'min:2540', 'max:'.((int) date('Y') + 544)],
+            'semester' => ['required', Rule::in(['1', '2', '3'])],
             'credit_hours' => ['required', 'integer', 'min:1', 'max:100'],
             'capacity' => ['nullable', 'integer', 'min:1'],
             'start_at' => ['required', 'date'],
