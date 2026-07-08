@@ -8,7 +8,7 @@
     <div class="relative w-full max-w-sm rounded-3xl glass-card p-8 shadow-soft-lg">
         <div class="mb-8 text-center">
             <img src="{{ asset('images/logo.png') }}" alt="SRRU" class="mx-auto mb-4 h-20 w-20 object-contain drop-shadow">
-            <h1 class="text-lg font-semibold text-slate-900">ระบบเช็กชื่อกิจกรรมนักศึกษา</h1>
+            <h1 class="text-lg font-semibold text-slate-900">SRRU Check</h1>
             <p class="mt-1 text-sm text-slate-500">มหาวิทยาลัยราชภัฏสุรินทร์</p>
         </div>
 
