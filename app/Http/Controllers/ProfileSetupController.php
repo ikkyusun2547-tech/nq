@@ -21,7 +21,8 @@ class ProfileSetupController extends Controller
         $user = Auth::user();
 
         $validated = $request->validate([
-            'name_thai' => ['required', 'string', 'max:150'],
+            'title_prefix' => ['required', Rule::in(['นาย', 'นาง', 'นางสาว'])],
+            'full_name' => ['required', 'string', 'max:150'],
             'student_id' => [
                 'required', 'digits:8',
                 Rule::unique('users', 'student_id')->ignore($user->id),
@@ -35,7 +36,10 @@ class ProfileSetupController extends Controller
             ],
         ]);
 
-        $user->update($validated);
+        $user->update([
+            ...collect($validated)->except(['title_prefix', 'full_name'])->all(),
+            'name_thai' => $validated['title_prefix'].$validated['full_name'],
+        ]);
 
         return redirect()->route('dashboard')->with('status', 'บันทึกข้อมูลโปรไฟล์สำเร็จ');
     }

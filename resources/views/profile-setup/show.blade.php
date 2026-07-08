@@ -38,13 +38,27 @@
     <form method="POST" action="{{ route('profile-setup.store') }}" class="space-y-5 rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-200">
         @csrf
 
-        <div>
-            <label class="mb-1 block text-sm font-medium text-gray-700">ชื่อ-นามสกุล (ภาษาไทย)</label>
-            <input
-                type="text" name="name_thai" value="{{ old('name_thai') }}" required
-                class="w-full rounded-xl border-gray-300 text-sm focus:border-brand-green-500 focus:ring-brand-green-500"
-                placeholder="เช่น นายสมชาย ใจดี"
-            >
+        <div class="grid grid-cols-3 gap-3">
+            <div>
+                <label class="mb-1 block text-sm font-medium text-gray-700">คำนำหน้าชื่อ</label>
+                <select
+                    name="title_prefix" required
+                    class="w-full rounded-xl border-gray-300 text-sm focus:border-brand-green-500 focus:ring-brand-green-500"
+                >
+                    <option value="">-- เลือก --</option>
+                    @foreach (['นาย', 'นาง', 'นางสาว'] as $prefix)
+                        <option value="{{ $prefix }}" @selected(old('title_prefix') === $prefix)>{{ $prefix }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="col-span-2">
+                <label class="mb-1 block text-sm font-medium text-gray-700">ชื่อ-นามสกุล (ภาษาไทย)</label>
+                <input
+                    type="text" name="full_name" value="{{ old('full_name') }}" required
+                    class="w-full rounded-xl border-gray-300 text-sm focus:border-brand-green-500 focus:ring-brand-green-500"
+                    placeholder="เช่น สมชาย ใจดี"
+                >
+            </div>
         </div>
 
         <div>
