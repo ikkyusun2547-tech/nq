@@ -38,7 +38,7 @@
     <form method="POST" action="{{ route('profile-setup.store') }}" class="space-y-5 rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-200">
         @csrf
 
-        <div class="grid grid-cols-3 gap-3">
+        <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
             <div>
                 <label class="mb-1 block text-sm font-medium text-gray-700">คำนำหน้าชื่อ</label>
                 <select
@@ -51,12 +51,20 @@
                     @endforeach
                 </select>
             </div>
-            <div class="col-span-2">
-                <label class="mb-1 block text-sm font-medium text-gray-700">ชื่อ-นามสกุล (ภาษาไทย)</label>
+            <div>
+                <label class="mb-1 block text-sm font-medium text-gray-700">ชื่อ</label>
                 <input
-                    type="text" name="full_name" value="{{ old('full_name') }}" required
+                    type="text" name="first_name" value="{{ old('first_name') }}" required
                     class="w-full rounded-xl border-gray-300 text-sm focus:border-brand-green-500 focus:ring-brand-green-500"
-                    placeholder="เช่น สมชาย ใจดี"
+                    placeholder="เช่น สมชาย"
+                >
+            </div>
+            <div>
+                <label class="mb-1 block text-sm font-medium text-gray-700">นามสกุล</label>
+                <input
+                    type="text" name="last_name" value="{{ old('last_name') }}" required
+                    class="w-full rounded-xl border-gray-300 text-sm focus:border-brand-green-500 focus:ring-brand-green-500"
+                    placeholder="เช่น ใจดี"
                 >
             </div>
         </div>
