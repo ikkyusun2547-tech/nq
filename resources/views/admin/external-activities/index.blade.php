@@ -10,6 +10,12 @@
         'ethics' => 'คุณธรรมจริยธรรม',
     ];
     $tabs = ['pending' => 'รอตรวจสอบ', 'approved' => 'อนุมัติแล้ว', 'rejected' => 'ปฏิเสธแล้ว', 'all' => 'ทั้งหมด'];
+    $statusDot = ['pending' => 'bg-amber-500', 'approved' => 'bg-brand-green-500', 'rejected' => 'bg-red-500'];
+    $statusBadge = [
+        'pending' => 'bg-amber-50 text-amber-700',
+        'approved' => 'bg-brand-green-50 text-brand-green-700',
+        'rejected' => 'bg-red-50 text-red-700',
+    ];
 @endphp
 
 <div
@@ -24,35 +30,49 @@
         open(item) { this.selected = item; this.showModal = true; this.rejecting = false; this.rejectReason = ''; },
     }"
 >
-    <div class="mb-6 flex items-center justify-between">
-        <h1 class="text-lg font-semibold text-gray-900">คำร้องกิจกรรมภายนอก</h1>
-        <a href="{{ route('admin.dashboard') }}" class="text-sm text-gray-400 hover:text-gray-600">&larr; กลับแดชบอร์ด</a>
+    <div class="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-3xl brand-gradient p-6 shadow-soft-lg sm:p-8">
+        <div>
+            <p class="text-xs font-medium uppercase tracking-[0.2em] text-violet-200/70">กองพัฒนานักศึกษา</p>
+            <h1 class="mt-1 text-xl font-bold text-white sm:text-2xl">คำร้องกิจกรรมภายนอก</h1>
+        </div>
+        <a href="{{ route('admin.dashboard') }}"
+            class="rounded-xl bg-white/10 px-4 py-2 text-sm font-medium text-white shadow-soft ring-1 ring-white/15 backdrop-blur transition-all duration-300 hover:-translate-y-0.5 hover:bg-white/15">
+            &larr; กลับแดชบอร์ด
+        </a>
     </div>
 
-    <div class="mb-4 flex flex-wrap gap-2 text-sm">
+    <div class="mb-4 mt-4 flex flex-wrap gap-2 text-sm">
         @foreach ($tabs as $value => $label)
             <a href="{{ route('admin.external-activities.index', ['status' => $value]) }}"
-                class="rounded-full px-3 py-1.5 {{ $status === $value ? 'bg-brand-green-600 text-white' : 'bg-white text-gray-500 ring-1 ring-gray-200' }}">
+                @class([
+                    'rounded-full px-3.5 py-1.5 font-medium transition-all duration-200',
+                    'bg-brand-purple-600 text-white shadow-soft' => $status === $value,
+                    'bg-white text-slate-500 shadow-soft ring-1 ring-slate-200 hover:text-brand-purple-600' => $status !== $value,
+                ])>
                 {{ $label }}
             </a>
         @endforeach
     </div>
 
-    <div class="overflow-x-auto rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
-        <table class="min-w-full divide-y divide-gray-200 text-sm">
-            <thead class="bg-gray-50">
-                <tr>
-                    <th class="px-4 py-3 text-left font-medium text-gray-500">นักศึกษา</th>
-                    <th class="px-4 py-3 text-left font-medium text-gray-500">ชื่อกิจกรรม</th>
-                    <th class="px-4 py-3 text-left font-medium text-gray-500">หมวดหมู่</th>
-                    <th class="px-4 py-3 text-left font-medium text-gray-500">ชั่วโมง</th>
-                    <th class="px-4 py-3 text-left font-medium text-gray-500">สถานะ</th>
+    <div class="overflow-x-auto rounded-2xl glass-card shadow-soft">
+        <table class="min-w-full text-sm">
+            <thead>
+                <tr class="border-b border-brand-purple-100">
+                    <th class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">นักศึกษา</th>
+                    <th class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">ชื่อกิจกรรม</th>
+                    <th class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">หมวดหมู่</th>
+                    <th class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">ชั่วโมง</th>
+                    <th class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">สถานะ</th>
                 </tr>
             </thead>
-            <tbody class="divide-y divide-gray-100">
+            <tbody>
                 @forelse ($requests as $req)
                     <tr
-                        class="cursor-pointer hover:bg-gray-50"
+                        @class([
+                            'cursor-pointer border-b border-slate-100 transition-colors last:border-0 hover:bg-brand-purple-50/40',
+                            'bg-white' => $loop->even,
+                            'bg-slate-50/50' => $loop->odd,
+                        ])
                         @click="open({{ \Illuminate\Support\Js::from([
                             'id' => $req->id,
                             'title' => $req->title,
@@ -68,26 +88,25 @@
                         ]) }})"
                     >
                         <td class="whitespace-nowrap px-4 py-3">
-                            <p class="font-medium text-gray-900">{{ $req->user->name_thai ?? $req->user->name }}</p>
-                            <p class="text-xs text-gray-400">{{ $req->user->student_id }}</p>
+                            <p class="font-medium text-slate-900">{{ $req->user->name_thai ?? $req->user->name }}</p>
+                            <p class="text-xs text-slate-400">{{ $req->user->student_id }}</p>
                         </td>
-                        <td class="whitespace-nowrap px-4 py-3 text-gray-700">{{ $req->title }}</td>
-                        <td class="whitespace-nowrap px-4 py-3 text-gray-500">{{ $categoryLabels[$req->activity_category] }}</td>
-                        <td class="whitespace-nowrap px-4 py-3 text-gray-500">{{ $req->hours_requested }}</td>
+                        <td class="whitespace-nowrap px-4 py-3 text-slate-700">{{ $req->title }}</td>
+                        <td class="whitespace-nowrap px-4 py-3 text-slate-500">{{ $categoryLabels[$req->activity_category] }}</td>
+                        <td class="whitespace-nowrap px-4 py-3 text-slate-500">{{ $req->hours_requested }}</td>
                         <td class="whitespace-nowrap px-4 py-3">
-                            <span @class([
-                                'rounded-full px-2.5 py-1 text-xs font-medium',
-                                'bg-amber-100 text-amber-700' => $req->status === 'pending',
-                                'bg-brand-green-100 text-brand-green-700' => $req->status === 'approved',
-                                'bg-red-100 text-red-700' => $req->status === 'rejected',
-                            ])>
+                            <span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium {{ $statusBadge[$req->status] }}">
+                                <span class="relative flex h-1.5 w-1.5">
+                                    <span @class(['absolute inline-flex h-full w-full animate-ping rounded-full opacity-60', $statusDot[$req->status]])></span>
+                                    <span @class(['relative inline-flex h-1.5 w-1.5 rounded-full', $statusDot[$req->status]])></span>
+                                </span>
                                 {{ ['pending' => 'รอตรวจสอบ', 'approved' => 'อนุมัติแล้ว', 'rejected' => 'ปฏิเสธแล้ว'][$req->status] }}
                             </span>
                         </td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="5" class="px-4 py-8 text-center text-gray-400">ไม่มีคำร้องในหมวดนี้</td>
+                        <td colspan="5" class="px-4 py-8 text-center text-slate-400">ไม่มีคำร้องในหมวดนี้</td>
                     </tr>
                 @endforelse
             </tbody>
@@ -97,41 +116,41 @@
     <div class="mt-4">{{ $requests->links() }}</div>
 
     <!-- Detail modal -->
-    <div x-show="showModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-        <div @click.outside="showModal = false" class="w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl" x-show="selected">
+    <div x-show="showModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center bg-brand-purple-950/60 p-4 backdrop-blur-sm">
+        <div @click.outside="showModal = false" class="w-full max-w-lg rounded-3xl bg-white p-6 shadow-soft-lg" x-show="selected">
             <template x-if="selected">
                 <div>
                     <div class="mb-4 flex items-start justify-between">
                         <div>
-                            <p class="font-semibold text-gray-900" x-text="selected.title"></p>
-                            <p class="text-xs text-gray-400" x-text="selected.student_name + ' (' + selected.student_id + ')'"></p>
+                            <p class="font-semibold text-slate-900" x-text="selected.title"></p>
+                            <p class="text-xs text-slate-400" x-text="selected.student_name + ' (' + selected.student_id + ')'"></p>
                         </div>
-                        <button @click="showModal = false" class="text-gray-400 hover:text-gray-600">&times;</button>
+                        <button @click="showModal = false" class="text-slate-400 hover:text-slate-600">&times;</button>
                     </div>
 
                     <dl class="mb-4 grid grid-cols-1 gap-3 text-sm sm:grid-cols-2">
-                        <div><dt class="text-xs text-gray-400">หน่วยงานผู้จัด</dt><dd x-text="selected.organization"></dd></div>
-                        <div><dt class="text-xs text-gray-400">วันที่จัดกิจกรรม</dt><dd x-text="selected.activity_date"></dd></div>
-                        <div><dt class="text-xs text-gray-400">หมวดหมู่</dt><dd x-text="selected.category"></dd></div>
-                        <div><dt class="text-xs text-gray-400">ชั่วโมงที่ขอเทียบ</dt><dd x-text="selected.hours_requested"></dd></div>
+                        <div><dt class="text-xs text-slate-400">หน่วยงานผู้จัด</dt><dd x-text="selected.organization"></dd></div>
+                        <div><dt class="text-xs text-slate-400">วันที่จัดกิจกรรม</dt><dd x-text="selected.activity_date"></dd></div>
+                        <div><dt class="text-xs text-slate-400">หมวดหมู่</dt><dd x-text="selected.category"></dd></div>
+                        <div><dt class="text-xs text-slate-400">ชั่วโมงที่ขอเทียบ</dt><dd x-text="selected.hours_requested"></dd></div>
                     </dl>
 
-                    <img :src="selected.proof_image_url" class="mb-4 max-h-96 w-full rounded-xl object-contain ring-1 ring-gray-200">
+                    <img :src="selected.proof_image_url" class="mb-4 max-h-96 w-full rounded-2xl object-contain shadow-soft">
 
                     <template x-if="selected.status === 'rejected' && selected.reject_reason">
-                        <p class="mb-4 rounded-lg bg-red-50 px-3 py-2 text-xs text-red-600" x-text="'เหตุผลที่ปฏิเสธ: ' + selected.reject_reason"></p>
+                        <p class="mb-4 rounded-xl bg-red-50 px-3 py-2 text-xs text-red-600" x-text="'เหตุผลที่ปฏิเสธ: ' + selected.reject_reason"></p>
                     </template>
 
                     <template x-if="selected.status === 'pending' && ! rejecting">
                         <div class="flex gap-3">
                             <form method="POST" :action="approveUrlTemplate.replace('__ID__', selected.id)" class="flex-1">
                                 @csrf
-                                <button type="submit" class="w-full rounded-xl bg-brand-green-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-brand-green-700">
+                                <button type="submit" class="w-full rounded-xl bg-brand-green-500 px-4 py-2.5 text-sm font-semibold text-brand-purple-950 shadow-soft transition-all duration-300 hover:-translate-y-0.5 hover:bg-brand-green-400 hover:shadow-lg">
                                     อนุมัติ
                                 </button>
                             </form>
                             <button @click="rejecting = true" type="button"
-                                class="flex-1 rounded-xl bg-red-50 px-4 py-2.5 text-sm font-semibold text-red-600 hover:bg-red-100">
+                                class="flex-1 rounded-xl bg-red-50 px-4 py-2.5 text-sm font-semibold text-red-600 shadow-soft transition-all duration-300 hover:-translate-y-0.5 hover:bg-red-100 hover:shadow-lg">
                                 ปฏิเสธ
                             </button>
                         </div>
@@ -141,12 +160,12 @@
                         <form method="POST" :action="rejectUrlTemplate.replace('__ID__', selected.id)" class="space-y-3">
                             @csrf
                             <textarea name="reject_reason" x-model="rejectReason" required rows="3" placeholder="ระบุเหตุผล เช่น รูปเกียรติบัตรไม่ชัดเจน"
-                                class="w-full rounded-xl border-gray-300 text-sm focus:border-red-500 focus:ring-red-500"></textarea>
+                                class="w-full rounded-xl border border-slate-200 bg-slate-50/50 text-sm shadow-soft transition-all duration-200 focus:border-red-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-red-500/10"></textarea>
                             <div class="flex gap-3">
-                                <button type="submit" class="flex-1 rounded-xl bg-red-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-red-700">
+                                <button type="submit" class="flex-1 rounded-xl bg-red-600 px-4 py-2.5 text-sm font-semibold text-white shadow-soft transition-all duration-300 hover:-translate-y-0.5 hover:bg-red-700 hover:shadow-lg">
                                     ยืนยันการปฏิเสธ
                                 </button>
-                                <button @click="rejecting = false" type="button" class="flex-1 rounded-xl bg-gray-100 px-4 py-2.5 text-sm font-semibold text-gray-600">
+                                <button @click="rejecting = false" type="button" class="flex-1 rounded-xl bg-slate-100 px-4 py-2.5 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-200">
                                     ยกเลิก
                                 </button>
                             </div>
