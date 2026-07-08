@@ -56,7 +56,7 @@
                 <input
                     type="text" name="first_name" value="{{ old('first_name') }}" required
                     class="w-full rounded-xl border-gray-300 text-sm focus:border-brand-green-500 focus:ring-brand-green-500"
-                    placeholder="เช่น สมชาย"
+                    placeholder="กรอกชื่อ"
                 >
             </div>
             <div>
@@ -64,7 +64,7 @@
                 <input
                     type="text" name="last_name" value="{{ old('last_name') }}" required
                     class="w-full rounded-xl border-gray-300 text-sm focus:border-brand-green-500 focus:ring-brand-green-500"
-                    placeholder="เช่น ใจดี"
+                    placeholder="กรอกนามสกุล"
                 >
             </div>
         </div>
