@@ -39,7 +39,7 @@
                     <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 21V9.75l8.25-4.5 8.25 4.5V21M8.25 21v-6h7.5v6M3 21h18"/></svg>
                 </span>
                 <select
-                    name="faculty_id" onchange="this.form.submit()"
+                    name="faculty_id" onchange="this.form.querySelector('[name=major_id]').value = ''; this.form.submit()"
                     class="w-full appearance-none rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-9 text-sm text-slate-700 shadow-soft transition-all duration-200 focus:border-brand-purple-500 focus:outline-none focus:ring-4 focus:ring-brand-purple-500/10 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
                 >
                     <option value="">{{ __('-- ทุกคณะ --') }}</option>
@@ -61,15 +61,22 @@
                     class="w-full appearance-none rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-9 text-sm text-slate-700 shadow-soft transition-all duration-200 focus:border-brand-purple-500 focus:outline-none focus:ring-4 focus:ring-brand-purple-500/10 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
                 >
                     <option value="">{{ __('-- ทุกสาขา --') }}</option>
-                    @foreach ($faculties as $faculty)
-                        @if ($faculty->majors->isNotEmpty())
-                            <optgroup label="{{ $faculty->name_th }}">
-                                @foreach ($faculty->majors as $major)
-                                    <option value="{{ $major->id }}" @selected(request('major_id') == $major->id)>{{ $major->name_th }}</option>
-                                @endforeach
-                            </optgroup>
-                        @endif
-                    @endforeach
+                    @if (request('faculty_id'))
+                        @php $selectedFaculty = $faculties->firstWhere('id', (int) request('faculty_id')); @endphp
+                        @foreach ($selectedFaculty?->majors ?? [] as $major)
+                            <option value="{{ $major->id }}" @selected(request('major_id') == $major->id)>{{ $major->name_th }}</option>
+                        @endforeach
+                    @else
+                        @foreach ($faculties as $faculty)
+                            @if ($faculty->majors->isNotEmpty())
+                                <optgroup label="{{ $faculty->name_th }}">
+                                    @foreach ($faculty->majors as $major)
+                                        <option value="{{ $major->id }}" @selected(request('major_id') == $major->id)>{{ $major->name_th }}</option>
+                                    @endforeach
+                                </optgroup>
+                            @endif
+                        @endforeach
+                    @endif
                 </select>
                 <span class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3.5 text-slate-400 dark:text-slate-500">
                     <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
