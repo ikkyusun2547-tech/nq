@@ -1,4 +1,12 @@
 {
+    "กรุณาถ่ายภาพเซลฟีก่อนส่ง": "Please take a selfie before submitting",
+    "ไฟล์ที่ส่งมาไม่ใช่รูปภาพ กรุณาถ่ายเซลฟีใหม่อีกครั้ง": "The file you sent isn't an image. Please retake your selfie",
+    "ไฟล์รูปภาพมีขนาดใหญ่เกินไป กรุณาลองถ่ายใหม่อีกครั้ง": "The photo file is too large. Please try taking it again",
+    "มีรายการรอตรวจสอบ": "Has check-ins pending review",
+    "ปิด": "Close",
+    "ลบการแจ้งเตือน": "Delete notification",
+    "ลบการแจ้งเตือนนี้?": "Delete this notification?",
+    "ลบการแจ้งเตือนแล้ว": "Notification deleted",
     "ไม่มีสิทธิ์เข้าถึงหน้านี้": "You don't have access to this page",
     "คุณกำลังเข้าสู่ระบบด้วยบัญชี :name (:email) ซึ่งไม่มีสิทธิ์เข้าถึงหน้านี้": "You're signed in as :name (:email), which doesn't have access to this page",
     "กลับไปหน้าของฉัน": "Back to my dashboard",

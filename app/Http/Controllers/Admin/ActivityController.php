@@ -18,7 +18,10 @@ class ActivityController extends Controller
      */
     public function index(Request $request)
     {
-        $activities = Activity::withCount('attendances')
+        $activities = Activity::withCount([
+            'attendances',
+            'attendances as flagged_count' => fn ($query) => $query->where('status', 'flagged'),
+        ])
             ->when($request->filled('search'), function ($query) use ($request) {
                 $query->where('title', 'like', '%'.$request->string('search').'%');
             })

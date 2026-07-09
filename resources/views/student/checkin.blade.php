@@ -125,12 +125,45 @@
                 this.step = 'selfie';
             },
 
-            handleFileCapture(event) {
+            async handleFileCapture(event) {
                 const file = event.target.files[0];
                 if (! file) return;
 
-                this.photoBlob = file;
+                // Native camera capture can produce very high-resolution
+                // photos (12MP+ phones easily exceed the server's upload
+                // limit) — downscale and re-compress client-side so any
+                // phone's selfie comfortably fits, regardless of the
+                // camera's native resolution.
+                this.photoBlob = await this.compressImage(file);
                 this.submitCheckIn();
+            },
+
+            compressImage(file, maxDimension = 1280, quality = 0.8) {
+                return new Promise((resolve) => {
+                    const img = new Image();
+                    const url = URL.createObjectURL(file);
+
+                    img.onload = () => {
+                        URL.revokeObjectURL(url);
+                        let { width, height } = img;
+
+                        if (width > height && width > maxDimension) {
+                            height = Math.round(height * (maxDimension / width));
+                            width = maxDimension;
+                        } else if (height > maxDimension) {
+                            width = Math.round(width * (maxDimension / height));
+                            height = maxDimension;
+                        }
+
+                        const canvas = document.createElement('canvas');
+                        canvas.width = width;
+                        canvas.height = height;
+                        canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+                        canvas.toBlob((blob) => resolve(blob ?? file), 'image/jpeg', quality);
+                    };
+                    img.onerror = () => { URL.revokeObjectURL(url); resolve(file); };
+                    img.src = url;
+                });
             },
 
             submitCheckIn() {

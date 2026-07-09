@@ -26,7 +26,18 @@ class CheckInRequest extends FormRequest
             'location_lat' => ['required', 'numeric', 'between:-90,90'],
             'location_lng' => ['required', 'numeric', 'between:-180,180'],
             'device_uuid' => ['required', 'string', 'max:100'],
-            'photo' => ['required', 'image', 'max:5120'],
+            // The client compresses the selfie before upload, so this is a
+            // generous backstop rather than the expected size.
+            'photo' => ['required', 'image', 'max:8192'],
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'photo.required' => __('กรุณาถ่ายภาพเซลฟีก่อนส่ง'),
+            'photo.image' => __('ไฟล์ที่ส่งมาไม่ใช่รูปภาพ กรุณาถ่ายเซลฟีใหม่อีกครั้ง'),
+            'photo.max' => __('ไฟล์รูปภาพมีขนาดใหญ่เกินไป กรุณาลองถ่ายใหม่อีกครั้ง'),
         ];
     }
 }

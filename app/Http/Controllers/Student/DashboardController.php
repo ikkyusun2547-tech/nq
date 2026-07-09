@@ -11,6 +11,11 @@ class DashboardController extends Controller
     public function show(Request $request, ActivityEvaluationService $evaluator)
     {
         $user = $request->user();
+
+        if ($user->isAdmin()) {
+            return redirect()->route('admin.dashboard');
+        }
+
         $summary = $evaluator->summarize($user);
 
         $checkins = $user->attendances()

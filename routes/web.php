@@ -109,6 +109,7 @@ Route::middleware(['auth', 'srru.email'])->group(function () {
         Route::get('/notifications/poll', [NotificationController::class, 'poll'])->name('notifications.poll');
         Route::post('/notifications/{notification}/read', [NotificationController::class, 'read'])->name('notifications.read');
         Route::post('/notifications/read-all', [NotificationController::class, 'readAll'])->name('notifications.read-all');
+        Route::delete('/notifications/{notification}', [NotificationController::class, 'destroy'])->name('notifications.destroy');
     });
 
     Route::middleware('admin')->prefix('admin')->name('admin.')->group(function () {

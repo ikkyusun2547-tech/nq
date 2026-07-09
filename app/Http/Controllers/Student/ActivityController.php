@@ -39,8 +39,7 @@ class ActivityController extends Controller
 
         $faculties = Faculty::orderBy('name_th')->get();
 
-        $activities = Activity::query()
-            ->whereIn('status', self::STATUS_GROUPS[$statusGroup])
+        $baseQuery = fn () => Activity::query()
             ->when($request->filled('activity_level'), fn ($query) => $query->where('activity_level', $request->input('activity_level')))
             ->when($request->filled('academic_year'), fn ($query) => $query->where('academic_year', $request->input('academic_year')))
             ->when($request->filled('faculty_id'), function ($query) use ($request) {
@@ -51,11 +50,30 @@ class ActivityController extends Controller
                         ->orWhereHas('restrictions', fn ($r) => $r->where('faculty_id', $facultyId));
                 });
             })
-            ->withCount('attendances')
-            ->orderBy('start_at', $statusGroup === 'ended' ? 'desc' : 'asc')
-            ->get()
-            ->filter(fn (Activity $activity) => $activity->isEligibleFor($user))
-            ->values();
+            ->withCount('attendances');
+
+        if ($statusGroup === 'open') {
+            // The main feed: every non-cancelled activity, but ranked open
+            // first (soonest first), then upcoming drafts (soonest first),
+            // then ended ones (most recently ended first) — rather than the
+            // hard status filter the other two tabs use.
+            $activities = collect(['open', 'upcoming', 'ended'])
+                ->flatMap(function (string $group) use ($baseQuery) {
+                    return $baseQuery()
+                        ->whereIn('status', self::STATUS_GROUPS[$group])
+                        ->orderBy('start_at', $group === 'ended' ? 'desc' : 'asc')
+                        ->get();
+                })
+                ->filter(fn (Activity $activity) => $activity->isEligibleFor($user))
+                ->values();
+        } else {
+            $activities = $baseQuery()
+                ->whereIn('status', self::STATUS_GROUPS[$statusGroup])
+                ->orderBy('start_at', $statusGroup === 'ended' ? 'desc' : 'asc')
+                ->get()
+                ->filter(fn (Activity $activity) => $activity->isEligibleFor($user))
+                ->values();
+        }
 
         $checkedInActivityIds = $user->attendances()
             ->whereIn('activity_id', $activities->pluck('id'))

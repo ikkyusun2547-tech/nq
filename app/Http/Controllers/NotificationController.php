@@ -45,4 +45,16 @@ class NotificationController extends Controller
 
         return back();
     }
+
+    public function destroy(Request $request, string $notification)
+    {
+        $notif = $request->user()->notifications()->findOrFail($notification);
+        $notif->delete();
+
+        if ($request->wantsJson()) {
+            return response()->json(['deleted' => true]);
+        }
+
+        return back()->with('status', __('ลบการแจ้งเตือนแล้ว'));
+    }
 }

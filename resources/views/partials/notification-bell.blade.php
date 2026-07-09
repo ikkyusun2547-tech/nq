@@ -20,6 +20,16 @@
                 this.items = data.notifications;
             } catch (e) {}
         },
+        async remove(item) {
+            this.items = this.items.filter(i => i.id !== item.id);
+            if (! item.read) this.unread = Math.max(0, this.unread - 1);
+            try {
+                await fetch('/notifications/' + item.id, {
+                    method: 'DELETE',
+                    headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content },
+                });
+            } catch (e) {}
+        },
         init() {
             this.poll();
             setInterval(() => this.poll(), 20000);
@@ -38,14 +48,22 @@
     </button>
 
     <div x-show="open" x-cloak x-transition:enter="transition ease-out duration-150" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"
-        class="absolute right-0 z-50 mt-2 w-80 origin-top-right overflow-hidden rounded-2xl bg-white shadow-soft-lg ring-1 ring-black/5 dark:bg-slate-900 dark:ring-white/10 sm:w-96"
+        class="fixed inset-x-4 top-16 z-50 origin-top overflow-hidden rounded-2xl bg-white shadow-soft-lg ring-1 ring-black/5 dark:bg-slate-900 dark:ring-white/10 sm:absolute sm:inset-x-auto sm:right-0 sm:top-auto sm:mt-2 sm:w-96 sm:origin-top-right"
     >
         <div class="flex items-center justify-between border-b border-slate-100 px-4 py-3 dark:border-slate-800">
             <p class="text-sm font-semibold text-slate-800 dark:text-slate-100">{{ __('การแจ้งเตือน') }}</p>
-            <form method="POST" action="{{ route('notifications.read-all') }}" x-show="unread > 0">
-                @csrf
-                <button type="submit" class="text-xs font-medium text-brand-purple-600 hover:underline dark:text-brand-purple-400">{{ __('อ่านทั้งหมด') }}</button>
-            </form>
+            <div class="flex items-center gap-3">
+                <form method="POST" action="{{ route('notifications.read-all') }}" x-show="unread > 0">
+                    @csrf
+                    <button type="submit" class="text-xs font-medium text-brand-purple-600 hover:underline dark:text-brand-purple-400">{{ __('อ่านทั้งหมด') }}</button>
+                </form>
+                <button type="button" @click="open = false"
+                    class="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 dark:text-slate-500 dark:hover:bg-slate-800 dark:hover:text-slate-300"
+                    aria-label="{{ __('ปิด') }}"
+                >
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
         </div>
 
         <div class="max-h-96 overflow-y-auto">
@@ -53,12 +71,8 @@
                 <p class="px-4 py-8 text-center text-xs text-slate-400 dark:text-slate-500">{{ __('ไม่มีการแจ้งเตือน') }}</p>
             </template>
             <template x-for="item in items" :key="item.id">
-                <form method="POST" :action="'/notifications/' + item.id + '/read'">
-                    @csrf
-                    <button type="submit"
-                        class="flex w-full items-start gap-3 px-4 py-3 text-left transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/60"
-                        :class="! item.read ? 'bg-brand-purple-50/60 dark:bg-brand-purple-500/[0.06]' : ''"
-                    >
+                <div class="group flex items-start transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/60" :class="! item.read ? 'bg-brand-purple-50/60 dark:bg-brand-purple-500/[0.06]' : ''">
+                    <div class="flex min-w-0 flex-1 items-start gap-3 py-3 pl-4 pr-1">
                         <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full" :class="(icons[item.icon] || icons.check).tint">
                             <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" :d="(icons[item.icon] || icons.check).path"/></svg>
                         </span>
@@ -68,8 +82,14 @@
                             <span class="mt-1 block text-[0.65rem] text-slate-400 dark:text-slate-500" x-text="item.created_at"></span>
                         </span>
                         <span x-show="! item.read" class="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-brand-purple-500"></span>
+                    </div>
+                    <button type="button" @click="remove(item)"
+                        class="mr-2 mt-3 shrink-0 rounded-lg p-1.5 text-slate-300 opacity-0 transition-all hover:bg-red-50 hover:text-red-500 group-hover:opacity-100 dark:text-slate-600 dark:hover:bg-red-500/10 dark:hover:text-red-400"
+                        aria-label="{{ __('ลบการแจ้งเตือน') }}"
+                    >
+                        <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
                     </button>
-                </form>
+                </div>
             </template>
         </div>
 
