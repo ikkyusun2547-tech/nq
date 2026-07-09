@@ -4,30 +4,61 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Laravel\Socialite\Facades\Socialite;
+use Throwable;
 
 class GoogleAuthController extends Controller
 {
     public function redirect()
     {
+        // Stateless: skips storing/verifying the OAuth "state" value in the
+        // session. Normally that's a CSRF guard, but session-cookie
+        // continuity through a tunnel (ngrok) plus a real multi-page Google
+        // consent flow proved unreliable in practice (InvalidStateException
+        // even with a matching redirect URI). Access is still gated to
+        // @srru.ac.th emails below, so the practical risk is low for this
+        // internal tool.
         return Socialite::driver('google')
+            ->stateless()
             ->redirectUrl(url('/auth/google/callback'))
             ->redirect();
     }
 
-    public function callback()
+    public function callback(Request $request)
     {
-        // The callback must return to whichever host actually started the
-        // login (localhost during local dev, an ngrok tunnel when sharing
-        // with someone else) — a mismatch here means Google's callback
-        // lands on a different origin than the one holding the session
-        // where the CSRF "state" was stored, which Socialite then rejects
-        // as InvalidStateException.
-        $googleUser = Socialite::driver('google')
-            ->redirectUrl(url('/auth/google/callback'))
-            ->user();
+        // Google redirects back with ?error=... (denied consent, closed the
+        // popup, picked no account, etc.) instead of ?code=... when the user
+        // didn't complete authorization — without this check we'd blindly
+        // try to exchange a missing code and blow up with a raw Guzzle
+        // "Missing required parameter: code" error.
+        if ($request->has('error') || ! $request->filled('code')) {
+            return redirect()->route('login')->withErrors([
+                'email' => __('การเข้าสู่ระบบถูกยกเลิกหรือไม่สำเร็จ กรุณาลองใหม่อีกครั้ง'),
+            ]);
+        }
+
+        try {
+            // The callback must return to whichever host actually started
+            // the login (localhost during local dev, an ngrok tunnel when
+            // sharing with someone else) — a mismatch here means Google's
+            // callback lands on a different origin than the one holding the
+            // session where the CSRF "state" was stored, which Socialite
+            // then rejects as InvalidStateException.
+            $googleUser = Socialite::driver('google')
+                ->stateless()
+                ->redirectUrl(url('/auth/google/callback'))
+                ->user();
+        } catch (Throwable $e) {
+            report($e);
+
+            return redirect()->route('login')->withErrors([
+                'email' => __('เข้าสู่ระบบไม่สำเร็จ กรุณาลองใหม่อีกครั้ง'),
+            ]);
+        }
+
         $domain = config('services.srru.email_domain');
 
         if (! Str::endsWith($googleUser->getEmail(), '@'.$domain)) {

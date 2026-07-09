@@ -1,4 +1,6 @@
 {
+    "การเข้าสู่ระบบถูกยกเลิกหรือไม่สำเร็จ กรุณาลองใหม่อีกครั้ง": "Sign-in was cancelled or unsuccessful. Please try again",
+    "เข้าสู่ระบบไม่สำเร็จ กรุณาลองใหม่อีกครั้ง": "Sign-in failed. Please try again",
     "กรุณาถ่ายภาพเซลฟีก่อนส่ง": "Please take a selfie before submitting",
     "ไฟล์ที่ส่งมาไม่ใช่รูปภาพ กรุณาถ่ายเซลฟีใหม่อีกครั้ง": "The file you sent isn't an image. Please retake your selfie",
     "ไฟล์รูปภาพมีขนาดใหญ่เกินไป กรุณาลองถ่ายใหม่อีกครั้ง": "The photo file is too large. Please try taking it again",
