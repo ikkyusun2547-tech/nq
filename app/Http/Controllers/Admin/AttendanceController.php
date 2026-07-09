@@ -7,8 +7,10 @@ use App\Exports\ActivityMissingStudentsExport;
 use App\Http\Controllers\Controller;
 use App\Models\Activity;
 use App\Models\Faculty;
+use App\Notifications\AttendanceApproved;
 use App\Services\DynamicQrTokenGenerator;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Notification;
 use Maatwebsite\Excel\Facades\Excel;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
@@ -97,6 +99,15 @@ class AttendanceController extends Controller
             'attendance_ids.*' => ['integer'],
         ]);
 
+        // Only rows that were actually flagged represent a meaningful status
+        // change worth notifying the student about — re-stamping already
+        // auto_approved rows (the "Approve All Valid" button) is a no-op.
+        $newlyApproved = $activity->attendances()
+            ->whereIn('id', $validated['attendance_ids'])
+            ->where('status', 'flagged')
+            ->with(['user', 'activity'])
+            ->get();
+
         $count = $activity->attendances()
             ->whereIn('id', $validated['attendance_ids'])
             ->update([
@@ -104,6 +115,10 @@ class AttendanceController extends Controller
                 'reviewed_by' => $request->user()->id,
                 'reviewed_at' => now(),
             ]);
+
+        foreach ($newlyApproved as $attendance) {
+            $attendance->user->notify(new AttendanceApproved($attendance));
+        }
 
         return back()->with('status', __('อัปเดตสถานะสำเร็จ :count รายการ', ['count' => $count]));
     }

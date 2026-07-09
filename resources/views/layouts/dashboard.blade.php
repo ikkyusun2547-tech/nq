@@ -53,6 +53,7 @@
                 </div>
 
                 <div class="hidden shrink-0 items-center gap-3 md:flex">
+                    @include('partials.notification-bell')
                     @include('partials.theme-toggle')
                     @include('partials.locale-switch')
                     <span class="hidden whitespace-nowrap text-sm text-violet-200/70 lg:block">{{ auth()->user()->name_thai ?? auth()->user()->name }}</span>
@@ -62,6 +63,10 @@
                             {{ __('ออกจากระบบ') }}
                         </button>
                     </form>
+                </div>
+
+                <div class="flex items-center gap-1 md:hidden">
+                    @include('partials.notification-bell')
                 </div>
 
                 <button @click="mobileOpen = ! mobileOpen" class="rounded-lg p-2 text-violet-200/70 hover:bg-white/5 hover:text-white md:hidden" aria-label="{{ __('เมนู') }}">

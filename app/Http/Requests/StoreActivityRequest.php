@@ -37,6 +37,7 @@ class StoreActivityRequest extends FormRequest
             'capacity' => ['nullable', 'integer', 'min:1'],
             'start_at' => ['required', 'date'],
             'end_at' => ['required', 'date', 'after:start_at'],
+            'location_name' => ['required', 'string', 'max:255'],
             // Thailand's bounding box, roughly: lat 5.6-20.5N, lng 97.3-105.7E
             'location_lat' => ['required', 'numeric', 'between:5.6,20.5'],
             'location_lng' => ['required', 'numeric', 'between:97.3,105.7'],

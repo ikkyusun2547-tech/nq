@@ -5,7 +5,10 @@ namespace App\Http\Controllers\Student;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ExternalActivityStoreRequest;
 use App\Models\ExternalActivityRequest;
+use App\Models\User;
+use App\Notifications\ExternalActivityRequestSubmitted;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Notification;
 
 class ExternalActivityController extends Controller
 {
@@ -22,12 +25,15 @@ class ExternalActivityController extends Controller
     {
         $validated = $request->validated();
 
-        ExternalActivityRequest::create([
+        $externalActivityRequest = ExternalActivityRequest::create([
             ...collect($validated)->except('proof_image')->all(),
             'user_id' => $request->user()->id,
             'proof_image_path' => $request->file('proof_image')->store('external-activity-proofs', 'public'),
             'status' => 'pending',
         ]);
+
+        $admins = User::whereIn('role', ['admin', 'super_admin'])->get();
+        Notification::send($admins, new ExternalActivityRequestSubmitted($externalActivityRequest->load('user')));
 
         return redirect()
             ->route('external-activities.index')

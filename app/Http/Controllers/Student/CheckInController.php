@@ -5,7 +5,10 @@ namespace App\Http\Controllers\Student;
 use App\Exceptions\QrTokenException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CheckInRequest;
+use App\Models\User;
+use App\Notifications\AttendanceFlagged;
 use App\Services\AttendanceAutomationService;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Validation\ValidationException;
 
 class CheckInController extends Controller
@@ -30,6 +33,11 @@ class CheckInController extends Controller
             return response()->json(['message' => $e->getMessage()], 422);
         } catch (ValidationException $e) {
             return response()->json(['message' => collect($e->errors())->flatten()->first()], 422);
+        }
+
+        if ($attendance->status === 'flagged') {
+            $admins = User::whereIn('role', ['admin', 'super_admin'])->get();
+            Notification::send($admins, new AttendanceFlagged($attendance->load(['user', 'activity'])));
         }
 
         return response()->json([

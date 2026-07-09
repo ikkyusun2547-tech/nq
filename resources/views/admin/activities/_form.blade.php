@@ -153,6 +153,10 @@
     </div>
 
     <div class="mt-6 rounded-2xl glass-card p-5 shadow-soft">
+        <label class="mb-1 block text-sm font-medium text-slate-600 dark:text-slate-400">{{ __('สถานที่จัดกิจกรรม') }}</label>
+        <input type="text" name="location_name" value="{{ old('location_name', $activity->location_name ?? '') }}" required
+            class="mb-4 w-full rounded-2xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-700 placeholder:text-slate-400 shadow-soft transition-all duration-200 focus:border-brand-purple-500 focus:outline-none focus:ring-4 focus:ring-brand-purple-500/10 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500">
+
         <label class="mb-2 block text-sm font-medium text-slate-600 dark:text-slate-400">{{ __('ปักหมุดสถานที่จัดกิจกรรม (คลิกบนแผนที่)') }}</label>
         <div id="activity-map" class="h-72 w-full overflow-hidden rounded-2xl ring-1 ring-brand-purple-100 dark:ring-brand-purple-500/20"></div>
         <div class="mt-3 grid grid-cols-3 gap-3">

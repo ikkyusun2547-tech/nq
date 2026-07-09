@@ -35,6 +35,12 @@
         @endif
 
         <h1 class="mb-1.5 max-w-lg text-2xl font-bold leading-tight text-white sm:text-[1.75rem]" style="text-wrap: balance; letter-spacing: -0.01em;">{{ $activity->title }}</h1>
+        @if ($activity->location_name)
+            <p class="mb-2 flex items-center gap-1.5 text-sm text-white/60">
+                <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"/></svg>
+                {{ $activity->location_name }}
+            </p>
+        @endif
         <p class="mb-9 text-sm font-light tracking-wide text-white/50">{{ __('สแกน QR นี้เพื่อเช็กชื่อเข้าร่วมกิจกรรม') }}</p>
 
         <div class="qr-frame relative rounded-[2.25rem] p-[1px]">

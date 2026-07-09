@@ -3,9 +3,11 @@
 use App\Http\Controllers\Admin\ActivityController;
 use App\Http\Controllers\Admin\AttendanceController;
 use App\Http\Controllers\Admin\ClearanceReportController;
+use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\ExternalApprovalController;
 use App\Http\Controllers\Admin\StudentController;
 use App\Http\Controllers\Auth\GoogleAuthController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileSetupController;
 use App\Http\Controllers\Student\ActivityController as StudentActivityController;
 use App\Http\Controllers\Student\CheckInController;
@@ -102,12 +104,15 @@ Route::middleware(['auth', 'srru.email'])->group(function () {
 
         Route::get('/external-activities', [ExternalActivityController::class, 'index'])->name('external-activities.index');
         Route::post('/external-activities', [ExternalActivityController::class, 'store'])->name('external-activities.store');
+
+        Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+        Route::get('/notifications/poll', [NotificationController::class, 'poll'])->name('notifications.poll');
+        Route::post('/notifications/{notification}/read', [NotificationController::class, 'read'])->name('notifications.read');
+        Route::post('/notifications/read-all', [NotificationController::class, 'readAll'])->name('notifications.read-all');
     });
 
     Route::middleware('admin')->prefix('admin')->name('admin.')->group(function () {
-        Route::get('/dashboard', function () {
-            return view('admin.dashboard');
-        })->name('dashboard');
+        Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
 
         Route::get('/students', [StudentController::class, 'index'])->name('students.index');
         Route::get('/students/{student}', [StudentController::class, 'show'])->name('students.show');

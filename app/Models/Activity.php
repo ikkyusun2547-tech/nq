@@ -26,6 +26,7 @@ class Activity extends Model
         'capacity',
         'start_at',
         'end_at',
+        'location_name',
         'location_lat',
         'location_lng',
         'allowed_radius',
