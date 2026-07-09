@@ -133,5 +133,55 @@
             @endforeach
         </div>
     </div>
+
+    <div class="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <!-- Approved check-ins -->
+        <div class="space-y-3 rounded-2xl glass-card p-5 shadow-soft">
+            <h2 class="flex items-center gap-1.5 text-sm font-semibold text-slate-900 dark:text-slate-100">
+                <span class="h-2 w-2 rounded-full bg-brand-green-500"></span>
+                {{ __('กิจกรรมที่อนุมัติแล้ว') }}
+            </h2>
+            @forelse ($approvedActivities as $item)
+                <div class="flex items-center justify-between gap-3 rounded-xl bg-brand-green-50/50 px-3.5 py-2.5 dark:bg-brand-green-500/5">
+                    <div class="min-w-0">
+                        <p class="truncate text-sm font-medium text-slate-800 dark:text-slate-200">{{ $item->title }}</p>
+                        <p class="text-xs text-slate-400 dark:text-slate-500">
+                            {{ $item->date->translatedFormat('d M Y') }}
+                            @if ($item->type === 'external')
+                                · <span class="text-brand-purple-500 dark:text-brand-purple-400">{{ __('กิจกรรมเทียบชั่วโมง') }}</span>
+                            @endif
+                        </p>
+                    </div>
+                    <span class="shrink-0 text-xs font-medium text-brand-green-700 dark:text-brand-green-400">{{ __(':hours ชม.', ['hours' => $item->hours]) }}</span>
+                </div>
+            @empty
+                <p class="py-4 text-center text-xs text-slate-400 dark:text-slate-500">{{ __('ยังไม่มีกิจกรรมที่ได้รับการอนุมัติ') }}</p>
+            @endforelse
+        </div>
+
+        <!-- Pending review -->
+        <div class="space-y-3 rounded-2xl glass-card p-5 shadow-soft">
+            <h2 class="flex items-center gap-1.5 text-sm font-semibold text-slate-900 dark:text-slate-100">
+                <span class="h-2 w-2 rounded-full bg-amber-500"></span>
+                {{ __('กิจกรรมที่ลงแล้วรออนุมัติ') }}
+            </h2>
+            @forelse ($pendingActivities as $item)
+                <div class="flex items-center justify-between gap-3 rounded-xl bg-amber-50/50 px-3.5 py-2.5 dark:bg-amber-500/5">
+                    <div class="min-w-0">
+                        <p class="truncate text-sm font-medium text-slate-800 dark:text-slate-200">{{ $item->title }}</p>
+                        <p class="text-xs text-slate-400 dark:text-slate-500">
+                            {{ $item->date->translatedFormat('d M Y') }} · {{ __('รอเจ้าหน้าที่ตรวจสอบ') }}
+                            @if ($item->type === 'external')
+                                · <span class="text-brand-purple-500 dark:text-brand-purple-400">{{ __('กิจกรรมเทียบชั่วโมง') }}</span>
+                            @endif
+                        </p>
+                    </div>
+                    <span class="shrink-0 text-xs font-medium text-amber-600 dark:text-amber-400">{{ __(':hours ชม.', ['hours' => $item->hours]) }}</span>
+                </div>
+            @empty
+                <p class="py-4 text-center text-xs text-slate-400 dark:text-slate-500">{{ __('ไม่มีกิจกรรมที่รอตรวจสอบ') }}</p>
+            @endforelse
+        </div>
+    </div>
 </div>
 @endsection

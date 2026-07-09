@@ -25,7 +25,7 @@
     $semesterShort = ['1' => __('เทอม 1'), '2' => __('เทอม 2'), '3' => __('ฤดูร้อน')];
 @endphp
 
-<div class="mx-auto max-w-5xl">
+<div class="mx-auto max-w-7xl">
     <div class="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-3xl brand-gradient p-6 shadow-soft-lg sm:p-8">
         <div>
             <p class="text-xs font-medium uppercase tracking-[0.2em] text-violet-200/70">{{ __('กองพัฒนานักศึกษา') }}</p>
@@ -36,6 +36,47 @@
             + {{ __('สร้างกิจกรรม') }}
         </a>
     </div>
+
+    <form method="GET" action="{{ route('admin.activities.index') }}" class="mt-4 space-y-3">
+        <div class="flex flex-col gap-3 sm:flex-row">
+            <div class="relative flex-1">
+                <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400 dark:text-slate-500">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
+                </span>
+                <input
+                    type="text" name="search" value="{{ request('search') }}" placeholder="{{ __('ค้นหาชื่อกิจกรรม') }}"
+                    class="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-3.5 text-sm text-slate-700 placeholder:text-slate-400 shadow-soft transition-all duration-200 focus:border-brand-purple-500 focus:outline-none focus:ring-4 focus:ring-brand-purple-500/10 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500"
+                >
+            </div>
+
+            <button type="submit"
+                class="flex shrink-0 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-brand-purple-600 to-brand-purple-500 px-6 py-2.5 text-sm font-semibold text-white shadow-soft transition-all duration-300 hover:-translate-y-0.5 hover:from-brand-purple-500 hover:to-brand-purple-400 hover:shadow-lg active:scale-[0.99]">
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
+                {{ __('ค้นหา') }}
+            </button>
+        </div>
+
+        @php
+            $academicYearOptions = $academicYears->mapWithKeys(fn ($y) => [$y => $y])->all();
+        @endphp
+
+        <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
+            <x-premium-select
+                name="status" :options="$statusLabel" :selected="request('status')"
+                placeholder="{{ __('-- ทุกสถานะ --') }}" autosubmit
+            />
+
+            <x-premium-select
+                name="academic_year" :options="$academicYearOptions" :selected="request('academic_year')"
+                placeholder="{{ __('-- ทุกปีการศึกษา --') }}" autosubmit
+            />
+
+            <x-premium-select
+                name="semester" :options="$semesterShort" :selected="request('semester')"
+                placeholder="{{ __('-- ทุกภาคเรียน --') }}" autosubmit
+            />
+        </div>
+    </form>
 
     <div class="mt-4 overflow-x-auto rounded-2xl glass-card shadow-soft">
         <table class="min-w-full text-sm">

@@ -161,7 +161,14 @@
                     <div class="flex items-start justify-between gap-2 rounded-xl bg-white/60 p-3 text-sm shadow-soft dark:bg-slate-800/60">
                         <div>
                             <p class="font-medium text-slate-800 dark:text-slate-200">{{ $req->title }}</p>
-                            <p class="text-xs text-slate-400 dark:text-slate-500">{{ $req->activity_date->format('d/m/Y') }} · {{ $req->hours_requested }} {{ __('ชม.') }}</p>
+                            <p class="text-xs text-slate-400 dark:text-slate-500">
+                                {{ $req->activity_date->format('d/m/Y') }} ·
+                                @if ($req->status === 'approved' && $req->hours_approved !== null && $req->hours_approved != $req->hours_requested)
+                                    <span class="text-slate-400 line-through">{{ $req->hours_requested }}</span> {{ $req->hours_credited }} {{ __('ชม.') }}
+                                @else
+                                    {{ $req->hours_requested }} {{ __('ชม.') }}
+                                @endif
+                            </p>
                         </div>
                         <span class="shrink-0 rounded-full px-2.5 py-1 text-xs font-medium {{ $externalBadge[$req->status] ?? 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400' }}">
                             {{ $externalLabel[$req->status] ?? $req->status }}

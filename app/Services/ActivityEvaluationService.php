@@ -53,7 +53,8 @@ class ActivityEvaluationService
 
         $externalHours = (int) ExternalActivityRequest::where('user_id', $user->id)
             ->where('status', 'approved')
-            ->sum('hours_requested');
+            ->selectRaw('COALESCE(SUM(COALESCE(hours_approved, hours_requested)), 0) as total')
+            ->value('total');
 
         $totalHours = $creditedHoursFromActivities + $externalHours;
 
@@ -109,7 +110,7 @@ class ActivityEvaluationService
 
         $externalHours = ExternalActivityRequest::whereIn('user_id', $studentIds)
             ->where('status', 'approved')
-            ->selectRaw('user_id, sum(hours_requested) as hours')
+            ->selectRaw('user_id, sum(COALESCE(hours_approved, hours_requested)) as hours')
             ->groupBy('user_id')
             ->pluck('hours', 'user_id');
 
@@ -153,7 +154,7 @@ class ActivityEvaluationService
 
         ExternalActivityRequest::where('user_id', $user->id)
             ->where('status', 'approved')
-            ->selectRaw('activity_category as category, sum(hours_requested) as hours')
+            ->selectRaw('activity_category as category, sum(COALESCE(hours_approved, hours_requested)) as hours')
             ->groupBy('activity_category')
             ->pluck('hours', 'category')
             ->each(function ($hours, $category) use (&$breakdown) {

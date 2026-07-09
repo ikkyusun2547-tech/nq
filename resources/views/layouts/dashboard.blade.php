@@ -25,13 +25,14 @@
             ]
             : [
                 ['route' => 'dashboard', 'label' => __('แดชบอร์ด')],
+                ['route' => 'activities.index', 'label' => __('กิจกรรม')],
                 ['route' => 'checkin.show', 'label' => __('เช็กชื่อ')],
                 ['route' => 'external-activities.index', 'label' => __('คำร้องภายนอก')],
             ];
     @endphp
 
     <nav class="sticky top-0 z-40 bg-brand-purple-950 shadow-soft-lg" x-data="{ mobileOpen: false }">
-        <div class="mx-auto max-w-6xl px-4 sm:px-6">
+        <div class="mx-auto max-w-[90rem] px-4 sm:px-6">
             <div class="flex h-16 items-center justify-between gap-4">
                 <a href="{{ $isAdmin ? route('admin.dashboard') : route('dashboard') }}" class="flex shrink-0 items-center gap-2.5">
                     <img src="{{ asset('images/logo.png') }}" alt="SRRU" class="h-11 w-11 shrink-0 object-contain drop-shadow">
@@ -97,7 +98,7 @@
         </div>
     </nav>
 
-    <main class="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
+    <main class="mx-auto max-w-[90rem] px-4 py-6 sm:px-6 sm:py-8">
         @if (session('status'))
             <div class="mb-4 rounded-xl bg-brand-green-50 px-4 py-3 text-sm text-brand-green-700 ring-1 ring-brand-green-100 dark:bg-brand-green-500/10 dark:text-brand-green-400 dark:ring-brand-green-500/20">
                 {{ session('status') }}

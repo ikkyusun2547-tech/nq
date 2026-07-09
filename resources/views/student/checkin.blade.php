@@ -25,19 +25,24 @@
                 </div>
             </template>
 
-            <!-- Step 2: Front-camera selfie only, no gallery upload -->
+            <!-- Step 2: Front-camera selfie only, no gallery upload. Capture is
+                 handed off to the OS's own camera app via a file input rather
+                 than an in-page getUserMedia stream — the latter is unreliable
+                 on devices that refuse to hand the camera to a live preview
+                 (NotReadableError) even when the hardware itself is free. -->
             <template x-if="step === 'selfie'">
                 <div>
                     <p class="mb-3 text-sm text-gray-500 dark:text-slate-400">{{ __('ถ่ายภาพเซลฟีเพื่อยืนยันตัวตน (ใช้กล้องหน้าเท่านั้น)') }}</p>
-                    <div class="relative overflow-hidden rounded-xl bg-black">
-                        <video x-ref="video" autoplay playsinline muted class="w-full -scale-x-100"></video>
-                    </div>
                     <button
-                        type="button" @click="capturePhoto()"
-                        class="mt-3 w-full rounded-xl bg-brand-green-600 px-4 py-3 text-sm font-semibold text-white hover:bg-brand-green-700"
+                        type="button" @click="$refs.fileInput.click()"
+                        class="w-full rounded-xl bg-brand-green-600 px-4 py-3 text-sm font-semibold text-white hover:bg-brand-green-700"
                     >
-                        {{ __('ถ่ายภาพ') }}
+                        {{ __('เปิดกล้องเพื่อถ่ายเซลฟี') }}
                     </button>
+                    <input
+                        type="file" x-ref="fileInput" accept="image/*" capture="user" class="hidden"
+                        @change="handleFileCapture($event)"
+                    >
                     <p class="mt-2 text-xs text-red-500" x-show="cameraError" x-text="cameraError"></p>
                 </div>
             </template>
@@ -82,7 +87,6 @@
             qrToken: null,
             photoBlob: null,
             scanner: null,
-            stream: null,
 
             init() {
                 this.$nextTick(() => this.startScanner());
@@ -115,49 +119,18 @@
 
                 try {
                     await this.scanner.stop();
+                    await this.scanner.clear();
                 } catch (e) { /* already stopped */ }
 
                 this.step = 'selfie';
-                await this.startFrontCamera();
             },
 
-            async startFrontCamera() {
-                try {
-                    this.stream = await navigator.mediaDevices.getUserMedia({
-                        video: { facingMode: 'user' },
-                        audio: false,
-                    });
-                    this.$refs.video.srcObject = this.stream;
-                } catch (err) {
-                    this.cameraError = '{{ __('ไม่สามารถเปิดกล้องหน้าได้: กรุณาอนุญาตการใช้กล้อง') }}';
-                }
-            },
+            handleFileCapture(event) {
+                const file = event.target.files[0];
+                if (! file) return;
 
-            capturePhoto() {
-                const video = this.$refs.video;
-                const canvas = document.createElement('canvas');
-
-                // Resize to a max width of 480px before upload to cut server load.
-                const maxWidth = 480;
-                const scale = Math.min(1, maxWidth / video.videoWidth);
-                canvas.width = video.videoWidth * scale;
-                canvas.height = video.videoHeight * scale;
-
-                const ctx = canvas.getContext('2d');
-                // Mirror horizontally so the saved photo matches what the student saw.
-                ctx.translate(canvas.width, 0);
-                ctx.scale(-1, 1);
-                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-                canvas.toBlob((blob) => {
-                    this.photoBlob = blob;
-                    this.stopCamera();
-                    this.submitCheckIn();
-                }, 'image/jpeg', 0.7);
-            },
-
-            stopCamera() {
-                this.stream?.getTracks().forEach((track) => track.stop());
+                this.photoBlob = file;
+                this.submitCheckIn();
             },
 
             submitCheckIn() {

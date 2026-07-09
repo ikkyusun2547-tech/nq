@@ -31,7 +31,7 @@ class AttendanceAutomationService
     ): Attendance {
         $activity = $this->qrTokens->resolveActivity($qrToken);
 
-        if (! in_array($activity->status, ['open', 'ongoing'], true)) {
+        if (! $activity->acceptsCheckIn()) {
             throw ValidationException::withMessages([
                 'qr_token' => __('กิจกรรมนี้ไม่ได้เปิดรับเช็กชื่อในขณะนี้'),
             ]);

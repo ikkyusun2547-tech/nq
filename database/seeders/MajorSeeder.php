@@ -94,6 +94,15 @@ class MajorSeeder extends Seeder
                     ['name_th' => 'อุตสาหกรรมศิลป์', 'degree_abbr' => 'ค.บ.'],
                 ],
             ],
+            [
+                'code' => 'AGRI',
+                'name_th' => 'คณะเกษตรและอุตสาหกรรมเกษตร',
+                'name_en' => 'Faculty of Agriculture and Agro-Industry',
+                'majors' => [
+                    ['name_th' => 'เกษตรศาสตร์', 'degree_abbr' => 'วท.บ.'],
+                    ['name_th' => 'สัตวศาสตร์', 'degree_abbr' => 'วท.บ.'],
+                ],
+            ],
         ];
 
         foreach ($faculties as $facultyData) {

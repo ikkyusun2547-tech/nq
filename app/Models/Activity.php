@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\DB;
 
 class Activity extends Model
 {
@@ -81,6 +82,11 @@ class Activity extends Model
         return $this->restrictions()->doesntExist();
     }
 
+    public function acceptsCheckIn(): bool
+    {
+        return in_array($this->status, ['open', 'ongoing'], true);
+    }
+
     public function isEligibleFor(User $user): bool
     {
         if ($this->isOpenToEveryone()) {
@@ -98,5 +104,56 @@ class Activity extends Model
                 $query->whereNull('target_year')->orWhere('target_year', $user->current_year);
             })
             ->exists();
+    }
+
+    /**
+     * Enrolled students eligible to attend, per the same faculty/major/year
+     * targeting rules as isEligibleFor() — a single query rather than
+     * looping every student through that method. Shared base for the
+     * headline count and the "who hasn't checked in" list/export.
+     *
+     * @return \Illuminate\Database\Eloquent\Builder<User>
+     */
+    public function eligibleStudentsQuery()
+    {
+        $query = User::where('role', 'student');
+
+        if ($this->isOpenToEveryone()) {
+            return $query;
+        }
+
+        return $query->whereExists(function ($q) {
+            $q->select(DB::raw(1))
+                ->from('activity_restrictions')
+                ->where('activity_restrictions.activity_id', $this->id)
+                ->where(function ($qq) {
+                    $qq->whereNull('activity_restrictions.faculty_id')
+                        ->orWhereColumn('activity_restrictions.faculty_id', 'users.faculty_id');
+                })
+                ->where(function ($qq) {
+                    $qq->whereNull('activity_restrictions.major_id')
+                        ->orWhereColumn('activity_restrictions.major_id', 'users.major_id');
+                })
+                ->where(function ($qq) {
+                    $qq->whereNull('activity_restrictions.target_year')
+                        ->orWhereColumn('activity_restrictions.target_year', 'users.year_level');
+                });
+        });
+    }
+
+    public function eligibleStudentsCount(): int
+    {
+        return $this->eligibleStudentsQuery()->count();
+    }
+
+    /**
+     * Eligible students who have not (yet) checked in to this activity.
+     *
+     * @return \Illuminate\Database\Eloquent\Builder<User>
+     */
+    public function missingStudentsQuery()
+    {
+        return $this->eligibleStudentsQuery()
+            ->whereNotIn('users.id', $this->attendances()->pluck('user_id'));
     }
 }

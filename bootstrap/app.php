@@ -11,6 +11,8 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
+        $middleware->trustProxies(at: '*');
+
         $middleware->alias([
             'srru.email' => \App\Http\Middleware\EnsureSrruEmail::class,
             'profile.completed' => \App\Http\Middleware\EnsureProfileCompleted::class,

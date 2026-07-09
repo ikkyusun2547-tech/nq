@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\ExternalApprovalController;
 use App\Http\Controllers\Admin\StudentController;
 use App\Http\Controllers\Auth\GoogleAuthController;
 use App\Http\Controllers\ProfileSetupController;
+use App\Http\Controllers\Student\ActivityController as StudentActivityController;
 use App\Http\Controllers\Student\CheckInController;
 use App\Http\Controllers\Student\DashboardController;
 use App\Http\Controllers\Student\ExternalActivityController;
@@ -42,6 +43,45 @@ if (app()->environment('local')) {
 
         return redirect($user->isAdmin() ? '/admin/dashboard' : '/dashboard');
     });
+
+    Route::get('/_camera-test', function () {
+        return response(<<<'HTML'
+            <!doctype html>
+            <html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+            <title>Camera test</title>
+            <style>body{font-family:sans-serif;padding:1.5rem;max-width:480px;margin:0 auto}
+            button{display:block;width:100%;padding:0.9rem;margin:0.5rem 0;font-size:1rem;border-radius:10px;border:1px solid #ccc}
+            video{width:100%;border-radius:10px;background:#000}
+            pre{white-space:pre-wrap;background:#f4f4f4;padding:0.75rem;border-radius:8px;font-size:0.85rem}</style>
+            </head><body>
+            <h2>ทดสอบกล้อง (ไม่ผ่าน QR scan)</h2>
+            <button onclick="test('user')">เปิดกล้องหน้า (facingMode: user)</button>
+            <button onclick="test('environment')">เปิดกล้องหลัง (facingMode: environment)</button>
+            <button onclick="test(null)">เปิดกล้องแบบไม่ระบุ (video: true)</button>
+            <video id="v" autoplay playsinline muted></video>
+            <pre id="log">ผลลัพธ์จะขึ้นตรงนี้...</pre>
+            <script>
+            const log = document.getElementById('log');
+            const video = document.getElementById('v');
+            let stream = null;
+            async function test(facing) {
+                if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
+                log.textContent = 'กำลังขอสิทธิ์กล้อง (' + (facing ?? 'any') + ')...';
+                const constraints = facing ? { video: { facingMode: facing }, audio: false } : { video: true, audio: false };
+                try {
+                    stream = await navigator.mediaDevices.getUserMedia(constraints);
+                    video.srcObject = stream;
+                    const track = stream.getVideoTracks()[0];
+                    log.textContent = 'สำเร็จ!\nlabel: ' + track.label + '\nsettings: ' + JSON.stringify(track.getSettings(), null, 2);
+                } catch (err) {
+                    log.textContent = 'ล้มเหลว\nname: ' + err.name + '\nmessage: ' + err.message;
+                }
+            }
+            log.textContent += '\n\nuserAgent: ' + navigator.userAgent;
+            </script>
+            </body></html>
+            HTML, 200, ['Content-Type' => 'text/html']);
+    });
 }
 
 Route::middleware(['auth', 'srru.email'])->group(function () {
@@ -54,6 +94,8 @@ Route::middleware(['auth', 'srru.email'])->group(function () {
 
     Route::middleware('profile.completed')->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'show'])->name('dashboard');
+
+        Route::get('/activities', [StudentActivityController::class, 'index'])->name('activities.index');
 
         Route::get('/checkin', [CheckInController::class, 'show'])->name('checkin.show');
         Route::post('/checkin', [CheckInController::class, 'store'])->name('checkin.store');
@@ -77,6 +119,7 @@ Route::middleware(['auth', 'srru.email'])->group(function () {
         Route::get('/activities/{activity}/attendance', [AttendanceController::class, 'index'])->name('attendance.index');
         Route::post('/activities/{activity}/attendance/bulk-approve', [AttendanceController::class, 'bulkApprove'])->name('attendance.bulk-approve');
         Route::get('/activities/{activity}/attendance/export', [AttendanceController::class, 'exportExcel'])->name('attendance.export');
+        Route::get('/activities/{activity}/attendance/missing-export', [AttendanceController::class, 'exportMissingExcel'])->name('attendance.missing-export');
 
         Route::get('/external-activities', [ExternalApprovalController::class, 'index'])->name('external-activities.index');
         Route::post('/external-activities/{externalActivityRequest}/approve', [ExternalApprovalController::class, 'approve'])->name('external-activities.approve');

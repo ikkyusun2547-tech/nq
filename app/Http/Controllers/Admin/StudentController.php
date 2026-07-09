@@ -27,7 +27,7 @@ class StudentController extends Controller
             ->when($request->filled('faculty_id'), fn ($query) => $query->where('faculty_id', $request->input('faculty_id')))
             ->when($request->filled('major_id'), fn ($query) => $query->where('major_id', $request->input('major_id')))
             ->when($request->filled('year_level'), fn ($query) => $query->where('year_level', $request->input('year_level')))
-            ->orderBy('name_thai')
+            ->orderBy('student_id')
             ->paginate(20)
             ->withQueryString();
 

@@ -14,9 +14,11 @@ class ExternalActivityRequest extends Model
         'activity_date',
         'activity_category',
         'hours_requested',
+        'hours_approved',
         'proof_image_path',
         'status',
         'reject_reason',
+        'admin_comment',
         'reviewed_by',
         'reviewed_at',
     ];
@@ -42,5 +44,14 @@ class ExternalActivityRequest extends Model
     public function scopePending($query)
     {
         return $query->where('status', 'pending');
+    }
+
+    /**
+     * The hours actually credited: what an admin overrode to, or the
+     * student's original request if never adjusted.
+     */
+    public function getHoursCreditedAttribute(): int
+    {
+        return $this->hours_approved ?? $this->hours_requested;
     }
 }

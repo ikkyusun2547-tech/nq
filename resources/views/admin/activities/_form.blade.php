@@ -63,19 +63,19 @@
 
         <div>
             <label class="mb-1 block text-sm font-medium text-slate-600 dark:text-slate-400">{{ __('ระดับกิจกรรม') }}</label>
-            <select name="activity_level" class="w-full rounded-2xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-700 placeholder:text-slate-400 shadow-soft transition-all duration-200 focus:border-brand-purple-500 focus:outline-none focus:ring-4 focus:ring-brand-purple-500/10 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500">
-                <option value="university" @selected(old('activity_level', $activity->activity_level ?? '') === 'university')>{{ __('ระดับมหาวิทยาลัย') }}</option>
-                <option value="faculty" @selected(old('activity_level', $activity->activity_level ?? '') === 'faculty')>{{ __('ระดับคณะ') }}</option>
-            </select>
+            <x-premium-select
+                name="activity_level" :nullable="false"
+                :options="['university' => __('ระดับมหาวิทยาลัย'), 'faculty' => __('ระดับคณะ')]"
+                :selected="old('activity_level', $activity->activity_level ?? 'university')"
+            />
         </div>
 
         <div>
             <label class="mb-1 block text-sm font-medium text-slate-600 dark:text-slate-400">{{ __('หมวดหมู่กิจกรรม') }} (5 {{ __('ด้าน') }})</label>
-            <select name="activity_category" class="w-full rounded-2xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-700 placeholder:text-slate-400 shadow-soft transition-all duration-200 focus:border-brand-purple-500 focus:outline-none focus:ring-4 focus:ring-brand-purple-500/10 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500">
-                @foreach ($categoryLabels as $value => $label)
-                    <option value="{{ $value }}" @selected(old('activity_category', $activity->activity_category ?? '') === $value)>{{ $label }}</option>
-                @endforeach
-            </select>
+            <x-premium-select
+                name="activity_category" :options="$categoryLabels" :nullable="false"
+                :selected="old('activity_category', $activity->activity_category ?? '')"
+            />
         </div>
 
         <div>
@@ -91,11 +91,11 @@
 
         <div>
             <label class="mb-1 block text-sm font-medium text-slate-600 dark:text-slate-400">{{ __('ภาคเรียน') }}</label>
-            <select name="semester" required class="w-full rounded-2xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-700 placeholder:text-slate-400 shadow-soft transition-all duration-200 focus:border-brand-purple-500 focus:outline-none focus:ring-4 focus:ring-brand-purple-500/10 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500">
-                <option value="1" @selected(old('semester', $activity->semester ?? '1') === '1')>{{ __('ภาคเรียนที่ 1') }}</option>
-                <option value="2" @selected(old('semester', $activity->semester ?? '1') === '2')>{{ __('ภาคเรียนที่ 2') }}</option>
-                <option value="3" @selected(old('semester', $activity->semester ?? '1') === '3')>{{ __('ภาคฤดูร้อน') }}</option>
-            </select>
+            <x-premium-select
+                name="semester" :nullable="false"
+                :options="['1' => __('ภาคเรียนที่ 1'), '2' => __('ภาคเรียนที่ 2'), '3' => __('ภาคฤดูร้อน')]"
+                :selected="old('semester', $activity->semester ?? '1')"
+            />
         </div>
 
         <div>
@@ -131,11 +131,10 @@
 
         <div>
             <label class="mb-1 block text-sm font-medium text-slate-600 dark:text-slate-400">{{ __('สถานะ') }}</label>
-            <select name="status" class="w-full rounded-2xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-700 placeholder:text-slate-400 shadow-soft transition-all duration-200 focus:border-brand-purple-500 focus:outline-none focus:ring-4 focus:ring-brand-purple-500/10 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500">
-                @foreach ($statusLabels as $value => $label)
-                    <option value="{{ $value }}" @selected(old('status', $activity->status ?? 'draft') === $value)>{{ $label }}</option>
-                @endforeach
-            </select>
+            <x-premium-select
+                name="status" :options="$statusLabels" :nullable="false"
+                :selected="old('status', $activity->status ?? 'draft')"
+            />
         </div>
 
         <div>

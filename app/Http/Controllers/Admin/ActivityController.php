@@ -7,6 +7,7 @@ use App\Http\Requests\StoreActivityRequest;
 use App\Models\Activity;
 use App\Models\ActivityRestriction;
 use App\Models\Faculty;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -15,13 +16,26 @@ class ActivityController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         $activities = Activity::withCount('attendances')
+            ->when($request->filled('search'), function ($query) use ($request) {
+                $query->where('title', 'like', '%'.$request->string('search').'%');
+            })
+            ->when($request->filled('status'), fn ($query) => $query->where('status', $request->input('status')))
+            ->when($request->filled('academic_year'), fn ($query) => $query->where('academic_year', $request->input('academic_year')))
+            ->when($request->filled('semester'), fn ($query) => $query->where('semester', $request->input('semester')))
             ->latest('start_at')
-            ->paginate(20);
+            ->paginate(20)
+            ->withQueryString();
 
-        return view('admin.activities.index', compact('activities'));
+        $academicYears = Activity::query()
+            ->whereNotNull('academic_year')
+            ->distinct()
+            ->orderByDesc('academic_year')
+            ->pluck('academic_year');
+
+        return view('admin.activities.index', compact('activities', 'academicYears'));
     }
 
     /**

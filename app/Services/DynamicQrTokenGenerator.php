@@ -14,9 +14,11 @@ class DynamicQrTokenGenerator
 
     /**
      * How many past windows (in addition to the current one) are still
-     * accepted, to absorb clock skew and scan/upload latency.
+     * accepted, to absorb clock skew and scan/upload latency. Selfie capture
+     * hands off to the OS camera app rather than an in-page preview, so this
+     * covers roughly 2 minutes end-to-end (app switch + shot + GPS + upload).
      */
-    private const GRACE_WINDOWS = 1;
+    private const GRACE_WINDOWS = 7;
 
     public function currentWindow(): int
     {
@@ -33,6 +35,15 @@ class DynamicQrTokenGenerator
     public function secondsUntilNextRotation(): int
     {
         return self::WINDOW_SECONDS - (time() % self::WINDOW_SECONDS);
+    }
+
+    /**
+     * Total time a scanned token stays valid, from the moment its window
+     * started until the grace period runs out.
+     */
+    public function scanValiditySeconds(): int
+    {
+        return self::WINDOW_SECONDS * (self::GRACE_WINDOWS + 1);
     }
 
     /**
