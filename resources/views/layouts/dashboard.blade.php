@@ -6,6 +6,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $title ?? __('ระบบเช็กชื่อกิจกรรมนักศึกษา SRRU') }}</title>
     <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}">
+    @include('partials.pwa-head')
     <script>
         if (localStorage.theme === 'dark' || (! ('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
             document.documentElement.classList.add('dark');
@@ -122,6 +123,7 @@
         @yield('content')
     </main>
 
+    @include('partials.pwa-install-banner')
     @stack('scripts')
 </body>
 </html>

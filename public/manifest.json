@@ -1,0 +1,32 @@
+{
+    "name": "ระบบเช็กชื่อกิจกรรมนักศึกษา SRRU",
+    "short_name": "SRRU Check",
+    "description": "เช็กชื่อกิจกรรมนักศึกษาผ่าน QR Code, GPS และเซลฟียืนยันตัวตน มหาวิทยาลัยราชภัฏสุรินทร์",
+    "lang": "th",
+    "start_url": "/",
+    "scope": "/",
+    "display": "standalone",
+    "orientation": "portrait-primary",
+    "background_color": "#2e1065",
+    "theme_color": "#2e1065",
+    "icons": [
+        {
+            "src": "/images/icons/icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "/images/icons/icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "/images/icons/icon-512-maskable.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "maskable"
+        }
+    ]
+}

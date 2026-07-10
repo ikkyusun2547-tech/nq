@@ -421,5 +421,12 @@
     "คลิกเพื่อเลือกไฟล์ Excel (.xlsx) หรือ CSV": "Click to select an Excel (.xlsx) or CSV file",
     "นำเข้ารายชื่อ": "Import Roster",
     "ไม่พบสาขา \":major\" ในคณะ \":faculty\"": "Major \":major\" not found under faculty \":faculty\"",
-    "รหัสนักศึกษาและอีเมลตรงกับคนละบัญชีที่มีอยู่แล้วในระบบ": "The student ID and email match two different existing accounts"
+    "รหัสนักศึกษาและอีเมลตรงกับคนละบัญชีที่มีอยู่แล้วในระบบ": "The student ID and email match two different existing accounts",
+
+    "ติดตั้งแอป SRRU Check": "Install SRRU Check App",
+    "แตะปุ่มแชร์ด้านล่างเบราว์เซอร์ แล้วเลือก \"เพิ่มไปยังหน้าจอโฮม\"": "Tap the Share button in your browser, then choose \"Add to Home Screen\"",
+    "เข้าใช้งานได้เร็วขึ้นจากหน้าจอหลัก เหมือนแอปทั่วไป": "Get faster access from your home screen, just like a regular app",
+    "เปิดเมนูของเบราว์เซอร์ (⋮ หรือ ≡) แล้วมองหา \"ติดตั้งแอป\" หรือ \"เพิ่มไปยังหน้าจอหลัก\"": "Open your browser's menu (⋮ or ≡) and look for \"Install app\" or \"Add to Home Screen\"",
+    "ติดตั้ง": "Install",
+    "ไม่ใช่ตอนนี้": "Not now"
 }
