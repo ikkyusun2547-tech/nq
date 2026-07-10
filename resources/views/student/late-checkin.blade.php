@@ -13,7 +13,10 @@
 <div class="mx-auto max-w-md">
     <div class="mb-4 flex items-center justify-between">
         <h1 class="text-lg font-semibold text-gray-900 dark:text-slate-100">{{ __('ขอเช็กชื่อย้อนหลัง') }}</h1>
-        <a href="{{ route('activities.index', ['status_group' => 'ended']) }}" class="text-sm text-gray-400 hover:text-gray-600 dark:text-slate-500 dark:hover:text-slate-300">&larr; {{ __('กลับ') }}</a>
+        <a href="{{ route('activities.index', ['status_group' => 'ended']) }}" class="inline-flex items-center gap-1 text-sm text-gray-400 hover:text-gray-600 dark:text-slate-500 dark:hover:text-slate-300">
+            <svg class="h-3.5 w-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/></svg>
+            {{ __('กลับ') }}
+        </a>
     </div>
 
     <div class="rounded-3xl glass-card p-5 shadow-soft-lg sm:p-6">

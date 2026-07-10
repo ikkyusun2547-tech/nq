@@ -30,8 +30,9 @@
         <div class="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-white/5 blur-2xl"></div>
         <div class="pointer-events-none absolute -bottom-20 -left-10 h-56 w-56 rounded-full bg-brand-green-500/10 blur-2xl"></div>
 
-        <a href="{{ route('admin.students.index') }}" class="relative mb-4 inline-block text-xs font-medium text-violet-200/70 transition-colors hover:text-white">
-            &larr; {{ __('กลับรายชื่อนักศึกษา') }}
+        <a href="{{ route('admin.students.index') }}" class="relative mb-4 inline-flex items-center gap-1 text-xs font-medium text-violet-200/70 transition-colors hover:text-white">
+            <svg class="h-3.5 w-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/></svg>
+            {{ __('กลับรายชื่อนักศึกษา') }}
         </a>
 
         <div class="relative flex items-start justify-between gap-4">
