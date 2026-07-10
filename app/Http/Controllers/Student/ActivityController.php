@@ -8,6 +8,7 @@ use App\Models\Faculty;
 use App\Models\LateCheckInRequest;
 use App\Services\AcademicYearCalculator;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class ActivityController extends Controller
 {
@@ -21,6 +22,9 @@ class ActivityController extends Controller
         'upcoming' => ['draft'],
         'ended' => ['closed'],
     ];
+
+    /** Matches the 3-column card grid — 9 is exactly 3 full rows. */
+    private const PER_PAGE = 9;
 
     /**
      * Browsable feed of activities the student is eligible for, so the
@@ -84,6 +88,19 @@ class ActivityController extends Controller
                 ->filter(fn (Activity $activity) => $activity->isEligibleFor($user))
                 ->values();
         }
+
+        // Eligibility is filtered in PHP above (isEligibleFor() isn't a SQL
+        // condition), so this can't be a normal ->paginate() — the query
+        // would slice before filtering. Paginating the already-filtered
+        // Collection instead keeps the eligibility logic untouched.
+        $page = LengthAwarePaginator::resolveCurrentPage();
+        $activities = new LengthAwarePaginator(
+            $activities->forPage($page, self::PER_PAGE)->values(),
+            $activities->count(),
+            self::PER_PAGE,
+            $page,
+            ['path' => LengthAwarePaginator::resolveCurrentPath(), 'query' => $request->query()]
+        );
 
         $checkedInActivityIds = $user->attendances()
             ->whereIn('activity_id', $activities->pluck('id'))

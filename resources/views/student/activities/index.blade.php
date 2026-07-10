@@ -45,7 +45,7 @@
             <h1 class="mt-1 text-xl font-bold text-white sm:text-2xl">{{ $pageTitle }}</h1>
         </div>
         <span class="rounded-xl bg-white/10 px-4 py-2 text-sm font-medium text-white shadow-soft ring-1 ring-white/15 backdrop-blur">
-            {{ __(':count กิจกรรม', ['count' => $activities->count()]) }}
+            {{ __(':count กิจกรรม', ['count' => $activities->total()]) }}
         </span>
     </div>
 
@@ -197,6 +197,8 @@
                 </div>
             @endforeach
         </div>
+
+        <div class="mt-6">{{ $activities->links() }}</div>
     @endif
 </div>
 @endsection
