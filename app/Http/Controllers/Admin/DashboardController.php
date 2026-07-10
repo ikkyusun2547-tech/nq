@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Activity;
 use App\Models\Attendance;
+use App\Models\CreditTransferRequest;
 use App\Models\ExternalActivityRequest;
 use App\Models\Faculty;
 use App\Models\User;
@@ -46,6 +47,7 @@ class DashboardController extends Controller
                 ->count(),
             'checkins_this_month' => Attendance::whereBetween('checkin_time', [now()->startOfMonth(), now()->endOfMonth()])->count(),
             'pending_external_requests' => ExternalActivityRequest::where('status', 'pending')->count(),
+            'pending_credit_transfers' => CreditTransferRequest::where('status', 'pending')->count(),
             'flagged_attendances' => Attendance::where('status', 'flagged')->count(),
             'graduating_cleared' => $this->evaluations->clearedGraduatingStudents(4)->count(),
         ];
@@ -117,6 +119,15 @@ class DashboardController extends Controller
                 [$start, $end] = AcademicYearCalculator::rangeFor((int) $academicYear);
                 $query->whereBetween('activity_date', [$start, $end]);
             })
+            ->selectRaw('activity_category as category, sum(COALESCE(hours_approved, hours_requested)) as hours')
+            ->groupBy('activity_category')
+            ->pluck('hours', 'category')
+            ->each(function ($hours, $category) use (&$breakdown) {
+                $breakdown[$category] += (int) $hours;
+            });
+
+        CreditTransferRequest::where('status', 'approved')
+            ->when($academicYear !== '', fn ($query) => $query->where('academic_year', $academicYear))
             ->selectRaw('activity_category as category, sum(COALESCE(hours_approved, hours_requested)) as hours')
             ->groupBy('activity_category')
             ->pluck('hours', 'category')

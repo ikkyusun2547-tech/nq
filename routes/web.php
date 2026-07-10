@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\AttendanceController;
 use App\Http\Controllers\Admin\ClearanceReportController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\ExternalApprovalController;
+use App\Http\Controllers\Admin\CreditTransferApprovalController;
 use App\Http\Controllers\Admin\LateCheckInApprovalController;
 use App\Http\Controllers\Admin\StudentController;
 use App\Http\Controllers\Auth\GoogleAuthController;
@@ -12,6 +13,7 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileSetupController;
 use App\Http\Controllers\Student\ActivityController as StudentActivityController;
 use App\Http\Controllers\Student\CheckInController;
+use App\Http\Controllers\Student\CreditTransferController;
 use App\Http\Controllers\Student\DashboardController;
 use App\Http\Controllers\Student\ExternalActivityController;
 use App\Http\Controllers\Student\LateCheckInController;
@@ -114,6 +116,9 @@ Route::middleware(['auth', 'srru.email'])->group(function () {
         Route::get('/external-activities', [ExternalActivityController::class, 'index'])->name('external-activities.index');
         Route::post('/external-activities', [ExternalActivityController::class, 'store'])->name('external-activities.store');
 
+        Route::get('/credit-transfers', [CreditTransferController::class, 'index'])->name('credit-transfers.index');
+        Route::post('/credit-transfers', [CreditTransferController::class, 'store'])->name('credit-transfers.store');
+
         Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
         Route::get('/notifications/poll', [NotificationController::class, 'poll'])->name('notifications.poll');
         Route::post('/notifications/{notification}/read', [NotificationController::class, 'read'])->name('notifications.read');
@@ -140,6 +145,10 @@ Route::middleware(['auth', 'srru.email'])->group(function () {
         Route::get('/external-activities', [ExternalApprovalController::class, 'index'])->name('external-activities.index');
         Route::post('/external-activities/{externalActivityRequest}/approve', [ExternalApprovalController::class, 'approve'])->name('external-activities.approve');
         Route::post('/external-activities/{externalActivityRequest}/reject', [ExternalApprovalController::class, 'reject'])->name('external-activities.reject');
+
+        Route::get('/credit-transfers', [CreditTransferApprovalController::class, 'index'])->name('credit-transfers.index');
+        Route::post('/credit-transfers/{creditTransferRequest}/approve', [CreditTransferApprovalController::class, 'approve'])->name('credit-transfers.approve');
+        Route::post('/credit-transfers/{creditTransferRequest}/reject', [CreditTransferApprovalController::class, 'reject'])->name('credit-transfers.reject');
 
         Route::get('/late-checkins', [LateCheckInApprovalController::class, 'index'])->name('late-checkins.index');
         Route::post('/late-checkins/{lateCheckInRequest}/approve', [LateCheckInApprovalController::class, 'approve'])->name('late-checkins.approve');

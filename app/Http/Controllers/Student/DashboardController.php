@@ -3,12 +3,27 @@
 namespace App\Http\Controllers\Student;
 
 use App\Http\Controllers\Controller;
+use App\Models\CreditTransferRequest;
 use App\Models\LateCheckInRequest;
 use App\Services\ActivityEvaluationService;
 use Illuminate\Http\Request;
 
 class DashboardController extends Controller
 {
+    /**
+     * Thai labels for CreditTransferRequest::POSITION_HOURS keys, used to
+     * give each request a human-readable title in the dashboard feed.
+     */
+    private const POSITION_LABELS = [
+        'student_council_president' => 'นายกองค์การบริหารนักศึกษา',
+        'student_club_president' => 'นายกสโมสรนักศึกษา',
+        'student_parliament_president' => 'ประธานสภานักศึกษา',
+        'club_president' => 'ประธานชมรม',
+        'dormitory_president' => 'ประธานหอพักมหาวิทยาลัย',
+        'class_leader' => 'หัวหน้าหมู่เรียน',
+        'class_representative' => 'ตัวแทนหมู่เรียน',
+    ];
+
     public function show(Request $request, ActivityEvaluationService $evaluator)
     {
         $user = $request->user();
@@ -46,7 +61,18 @@ class DashboardController extends Controller
                 'is_approved' => $ext->status === 'approved',
             ]);
 
-        $items = $checkins->concat($externalRequests)->sortByDesc('date')->values();
+        $creditTransfers = $user->creditTransferRequests()
+            ->whereIn('status', ['approved', 'pending'])
+            ->get()
+            ->map(fn ($credit) => (object) [
+                'title' => __(self::POSITION_LABELS[$credit->position]),
+                'date' => $credit->created_at,
+                'hours' => $credit->hours_credited,
+                'type' => 'credit_transfer',
+                'is_approved' => $credit->status === 'approved',
+            ]);
+
+        $items = $checkins->concat($externalRequests)->concat($creditTransfers)->sortByDesc('date')->values();
 
         $approvedActivities = $items->where('is_approved', true)->take(5);
         $pendingActivities = $items->where('is_approved', false)->take(5);
@@ -96,7 +122,23 @@ class DashboardController extends Controller
                 'reject_reason' => $req->reject_reason,
             ]);
 
-        $rejectedActivities = $rejectedExternal->concat($rejectedLateCheckins)->sortByDesc('date')->take(5)->values();
+        $rejectedCreditTransfers = $user->creditTransferRequests()
+            ->where('status', 'rejected')
+            ->get()
+            ->reject(function ($credit) use ($user) {
+                return $user->creditTransferRequests()
+                    ->where('academic_year', $credit->academic_year)
+                    ->whereIn('status', ['pending', 'approved'])
+                    ->exists();
+            })
+            ->map(fn ($credit) => (object) [
+                'title' => __(self::POSITION_LABELS[$credit->position]),
+                'date' => $credit->created_at,
+                'type' => 'credit_transfer',
+                'reject_reason' => $credit->reject_reason,
+            ]);
+
+        $rejectedActivities = $rejectedExternal->concat($rejectedLateCheckins)->concat($rejectedCreditTransfers)->sortByDesc('date')->take(5)->values();
 
         return view('student.dashboard', compact('summary', 'approvedActivities', 'pendingActivities', 'rejectedActivities'));
     }

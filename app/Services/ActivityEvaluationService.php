@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Attendance;
+use App\Models\CreditTransferRequest;
 use App\Models\ExternalActivityRequest;
 use App\Models\User;
 
@@ -63,7 +64,12 @@ class ActivityEvaluationService
             ->selectRaw('COALESCE(SUM(COALESCE(hours_approved, hours_requested)), 0) as total')
             ->value('total');
 
-        $totalHours = $creditedHoursFromActivities + $externalHours;
+        $creditTransferHours = (int) CreditTransferRequest::where('user_id', $user->id)
+            ->where('status', 'approved')
+            ->selectRaw('COALESCE(SUM(COALESCE(hours_approved, hours_requested)), 0) as total')
+            ->value('total');
+
+        $totalHours = $creditedHoursFromActivities + $externalHours + $creditTransferHours;
 
         $categoryHours = $this->categoryBreakdown($user);
 
@@ -121,13 +127,21 @@ class ActivityEvaluationService
             ->groupBy('user_id')
             ->pluck('hours', 'user_id');
 
+        $creditTransferHours = CreditTransferRequest::whereIn('user_id', $studentIds)
+            ->where('status', 'approved')
+            ->selectRaw('user_id, sum(COALESCE(hours_approved, hours_requested)) as hours')
+            ->groupBy('user_id')
+            ->pluck('hours', 'user_id');
+
         return $students
-            ->map(function (User $user) use ($activityStats, $externalHours) {
+            ->map(function (User $user) use ($activityStats, $externalHours, $creditTransferHours) {
                 $criteria = self::CRITERIA[$user->program_type] ?? self::CRITERIA['normal'];
                 $stat = $activityStats->get($user->id);
 
                 $totalActivities = (int) ($stat->activity_count ?? 0);
-                $totalHours = (int) ($stat->activity_hours ?? 0) + (int) ($externalHours[$user->id] ?? 0);
+                $totalHours = (int) ($stat->activity_hours ?? 0)
+                    + (int) ($externalHours[$user->id] ?? 0)
+                    + (int) ($creditTransferHours[$user->id] ?? 0);
 
                 return [
                     'user' => $user,
@@ -160,6 +174,15 @@ class ActivityEvaluationService
             });
 
         ExternalActivityRequest::where('user_id', $user->id)
+            ->where('status', 'approved')
+            ->selectRaw('activity_category as category, sum(COALESCE(hours_approved, hours_requested)) as hours')
+            ->groupBy('activity_category')
+            ->pluck('hours', 'category')
+            ->each(function ($hours, $category) use (&$breakdown) {
+                $breakdown[$category] += (int) $hours;
+            });
+
+        CreditTransferRequest::where('user_id', $user->id)
             ->where('status', 'approved')
             ->selectRaw('activity_category as category, sum(COALESCE(hours_approved, hours_requested)) as hours')
             ->groupBy('activity_category')

@@ -41,7 +41,7 @@
         </div>
     </div>
 
-    <div class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+    <div class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
         <a href="{{ route('checkin.show') }}"
             class="flex items-center justify-center gap-2 rounded-2xl bg-brand-green-500 p-4 text-center text-sm font-semibold text-brand-purple-950 shadow-soft transition-all duration-300 hover:-translate-y-0.5 hover:bg-brand-green-400 hover:shadow-lg">
             {{ __('สแกน QR เช็กชื่อ') }}
@@ -49,6 +49,10 @@
         <a href="{{ route('external-activities.index') }}"
             class="flex items-center justify-center gap-2 rounded-2xl bg-white p-4 text-center text-sm font-semibold text-brand-purple-700 shadow-soft ring-1 ring-brand-purple-100 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg dark:bg-slate-900 dark:text-brand-purple-400 dark:ring-brand-purple-500/20">
             {{ __('ยื่นคำร้องกิจกรรมภายนอก') }}
+        </a>
+        <a href="{{ route('credit-transfers.index') }}"
+            class="flex items-center justify-center gap-2 rounded-2xl bg-white p-4 text-center text-sm font-semibold text-brand-purple-700 shadow-soft ring-1 ring-brand-purple-100 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg dark:bg-slate-900 dark:text-brand-purple-400 dark:ring-brand-purple-500/20">
+            {{ __('เทียบโอนชั่วโมงจากตำแหน่ง') }}
         </a>
     </div>
 
@@ -147,6 +151,8 @@
                 @endphp
                 @if ($item->type === 'external')
                     <a href="{{ route('external-activities.index') }}" class="{{ $rowClass }}">
+                @elseif ($item->type === 'credit_transfer')
+                    <a href="{{ route('credit-transfers.index') }}" class="{{ $rowClass }}">
                 @elseif ($item->checkin_method === 'late_request')
                     <a href="{{ route('late-checkin.show', $item->activity_id) }}" class="{{ $rowClass }}">
                 @else
@@ -164,13 +170,15 @@
                             {{ $item->date->translatedFormat('d M Y') }}
                             @if ($item->type === 'external')
                                 · <span class="text-brand-purple-500 dark:text-brand-purple-400">{{ __('กิจกรรมเทียบชั่วโมง') }}</span>
+                            @elseif ($item->type === 'credit_transfer')
+                                · <span class="text-brand-purple-500 dark:text-brand-purple-400">{{ __('เทียบโอนตำแหน่ง') }}</span>
                             @elseif ($item->checkin_method === 'late_request')
                                 · <span class="text-brand-purple-500 dark:text-brand-purple-400">{{ __('เช็กชื่อย้อนหลัง') }}</span>
                             @endif
                         </p>
                     </div>
                     <span class="shrink-0 text-xs font-medium text-brand-green-700 dark:text-brand-green-400">{{ __(':hours ชม.', ['hours' => $item->hours]) }}</span>
-                @if ($item->type === 'external' || $item->checkin_method === 'late_request')
+                @if ($item->type === 'external' || $item->type === 'credit_transfer' || $item->checkin_method === 'late_request')
                     </a>
                 @else
                     </button>
@@ -194,6 +202,8 @@
                             {{ $item->date->translatedFormat('d M Y') }} · {{ __('รอเจ้าหน้าที่ตรวจสอบ') }}
                             @if ($item->type === 'external')
                                 · <span class="text-brand-purple-500 dark:text-brand-purple-400">{{ __('กิจกรรมเทียบชั่วโมง') }}</span>
+                            @elseif ($item->type === 'credit_transfer')
+                                · <span class="text-brand-purple-500 dark:text-brand-purple-400">{{ __('เทียบโอนตำแหน่ง') }}</span>
                             @endif
                         </p>
                     </div>
@@ -214,12 +224,21 @@
                 @php
                     $rejectedRowClass = 'block w-full rounded-xl bg-red-50/50 px-3.5 py-2.5 text-left transition-colors hover:bg-red-100/60 dark:bg-red-500/5 dark:hover:bg-red-500/10';
                 @endphp
-                <a href="{{ $item->type === 'external' ? route('external-activities.index') : route('late-checkin.show', $item->activity_id) }}" class="{{ $rejectedRowClass }}">
+                @php
+                    $rejectedHref = match ($item->type) {
+                        'external' => route('external-activities.index'),
+                        'credit_transfer' => route('credit-transfers.index'),
+                        default => route('late-checkin.show', $item->activity_id),
+                    };
+                @endphp
+                <a href="{{ $rejectedHref }}" class="{{ $rejectedRowClass }}">
                     <p class="truncate text-sm font-medium text-slate-800 dark:text-slate-200">{{ $item->title }}</p>
                     <p class="text-xs text-slate-400 dark:text-slate-500">
                         {{ $item->date->translatedFormat('d M Y') }}
                         @if ($item->type === 'external')
                             · <span class="text-brand-purple-500 dark:text-brand-purple-400">{{ __('กิจกรรมเทียบชั่วโมง') }}</span>
+                        @elseif ($item->type === 'credit_transfer')
+                            · <span class="text-brand-purple-500 dark:text-brand-purple-400">{{ __('เทียบโอนตำแหน่ง') }}</span>
                         @else
                             · <span class="text-brand-purple-500 dark:text-brand-purple-400">{{ __('เช็กชื่อย้อนหลัง') }}</span>
                         @endif

@@ -21,6 +21,7 @@
                 ['route' => 'admin.dashboard', 'label' => __('แดชบอร์ด')],
                 ['route' => 'admin.activities.index', 'label' => __('กิจกรรม')],
                 ['route' => 'admin.external-activities.index', 'label' => __('คำร้องภายนอก')],
+                ['route' => 'admin.credit-transfers.index', 'label' => __('เทียบโอนตำแหน่ง')],
                 ['route' => 'admin.late-checkins.index', 'label' => __('เช็กชื่อย้อนหลัง')],
                 ['route' => 'admin.students.index', 'label' => __('นักศึกษา')],
             ]
@@ -29,6 +30,7 @@
                 ['route' => 'activities.index', 'label' => __('เช็คกิจกรรม')],
                 ['route' => 'checkin.show', 'label' => __('เช็คด้วย QR Code')],
                 ['route' => 'external-activities.index', 'label' => __('คำร้องภายนอก')],
+                ['route' => 'credit-transfers.index', 'label' => __('เทียบโอนตำแหน่ง')],
             ];
     @endphp
 

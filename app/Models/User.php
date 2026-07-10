@@ -85,6 +85,11 @@ class User extends Authenticatable
         return $this->hasMany(ExternalActivityRequest::class);
     }
 
+    public function creditTransferRequests(): HasMany
+    {
+        return $this->hasMany(CreditTransferRequest::class);
+    }
+
     /**
      * Current year of study, self-reported at profile setup rather than
      * derived from enrollment_year — students who repeated a year or took
