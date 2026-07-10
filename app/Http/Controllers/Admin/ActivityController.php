@@ -10,6 +10,7 @@ use App\Models\Faculty;
 use App\Notifications\ActivityCreated;
 use App\Notifications\ActivityMissed;
 use App\Notifications\ActivityUpdated;
+use App\Services\AcademicYearCalculator;
 use App\Services\ActivityCodeGenerator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -28,6 +29,14 @@ class ActivityController extends Controller
      */
     public function index(Request $request)
     {
+        // On a fresh visit (no academic_year in the query string at all) default
+        // to the current academic year so the list isn't cluttered with every
+        // past year; an explicit "-- ทุกปีการศึกษา --" selection posts an empty
+        // value and is respected as "show all" rather than re-defaulted.
+        $academicYear = $request->has('academic_year')
+            ? $request->input('academic_year')
+            : (string) AcademicYearCalculator::forDate(now());
+
         $activities = Activity::withCount([
             'attendances',
             'attendances as flagged_count' => fn ($query) => $query->where('status', 'flagged'),
@@ -36,7 +45,7 @@ class ActivityController extends Controller
                 $query->where('title', 'like', '%'.$request->string('search').'%');
             })
             ->when($request->filled('status'), fn ($query) => $query->where('status', $request->input('status')))
-            ->when($request->filled('academic_year'), fn ($query) => $query->where('academic_year', $request->input('academic_year')))
+            ->when($academicYear !== '', fn ($query) => $query->where('academic_year', $academicYear))
             ->when($request->filled('semester'), fn ($query) => $query->where('semester', $request->input('semester')))
             ->latest('start_at')
             ->paginate(20)
@@ -48,7 +57,7 @@ class ActivityController extends Controller
             ->orderByDesc('academic_year')
             ->pluck('academic_year');
 
-        return view('admin.activities.index', compact('activities', 'academicYears'));
+        return view('admin.activities.index', compact('activities', 'academicYears', 'academicYear'));
     }
 
     /**

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Activity;
 use App\Models\Faculty;
 use App\Models\LateCheckInRequest;
+use App\Services\AcademicYearCalculator;
 use Illuminate\Http\Request;
 
 class ActivityController extends Controller
@@ -38,11 +39,17 @@ class ActivityController extends Controller
             ->orderByDesc('academic_year')
             ->pluck('academic_year');
 
+        // Same "default to current year, but respect an explicit 'all years'
+        // choice" rule as the admin activity list.
+        $academicYear = $request->has('academic_year')
+            ? $request->input('academic_year')
+            : (string) AcademicYearCalculator::forDate(now());
+
         $faculties = Faculty::orderBy('name_th')->get();
 
         $baseQuery = fn () => Activity::query()
             ->when($request->filled('activity_level'), fn ($query) => $query->where('activity_level', $request->input('activity_level')))
-            ->when($request->filled('academic_year'), fn ($query) => $query->where('academic_year', $request->input('academic_year')))
+            ->when($academicYear !== '', fn ($query) => $query->where('academic_year', $academicYear))
             ->when($request->filled('faculty_id'), function ($query) use ($request) {
                 $facultyId = $request->input('faculty_id');
 
@@ -84,6 +91,6 @@ class ActivityController extends Controller
             ->whereIn('activity_id', $activities->pluck('id'))
             ->pluck('status', 'activity_id');
 
-        return view('student.activities.index', compact('activities', 'checkedInActivityIds', 'lateCheckInStatuses', 'academicYears', 'faculties', 'statusGroup'));
+        return view('student.activities.index', compact('activities', 'checkedInActivityIds', 'lateCheckInStatuses', 'academicYears', 'academicYear', 'faculties', 'statusGroup'));
     }
 }

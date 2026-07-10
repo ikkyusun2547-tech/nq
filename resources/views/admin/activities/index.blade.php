@@ -67,7 +67,7 @@
             />
 
             <x-premium-select
-                name="academic_year" :options="$academicYearOptions" :selected="request('academic_year')"
+                name="academic_year" :options="$academicYearOptions" :selected="$academicYear"
                 placeholder="{{ __('-- ทุกปีการศึกษา --') }}" autosubmit
             />
 

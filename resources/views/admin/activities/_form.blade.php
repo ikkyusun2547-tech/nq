@@ -83,8 +83,7 @@
         <div>
             <label class="mb-1 block text-sm font-medium text-slate-600 dark:text-slate-400">{{ __('ปีการศึกษา') }}</label>
             @php
-                $now = now();
-                $currentAcademicYear = $now->year + 543 - ($now->month >= 6 ? 0 : 1);
+                $currentAcademicYear = \App\Services\AcademicYearCalculator::forDate(now());
             @endphp
             <input type="number" name="academic_year" value="{{ old('academic_year', $activity->academic_year ?? $currentAcademicYear) }}" required
                 min="2540" max="{{ date('Y') + 544 }}"
