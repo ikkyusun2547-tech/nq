@@ -8,8 +8,8 @@ use App\Models\CreditTransferRequest;
 use App\Models\User;
 use App\Notifications\CreditTransferRequestSubmitted;
 use App\Services\AcademicYearCalculator;
+use App\Services\SafeNotifier;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Notification;
 
 class CreditTransferController extends Controller
 {
@@ -42,7 +42,7 @@ class CreditTransferController extends Controller
         ]);
 
         $admins = User::whereIn('role', ['admin', 'super_admin'])->get();
-        Notification::send($admins, new CreditTransferRequestSubmitted($creditTransferRequest->load('user')));
+        SafeNotifier::send($admins, new CreditTransferRequestSubmitted($creditTransferRequest->load('user')));
 
         return redirect()
             ->route('credit-transfers.index')

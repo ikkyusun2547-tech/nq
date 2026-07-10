@@ -9,7 +9,7 @@ use App\Models\Attendance;
 use App\Models\LateCheckInRequest;
 use App\Models\User;
 use App\Notifications\LateCheckInRequestSubmitted;
-use Illuminate\Support\Facades\Notification;
+use App\Services\SafeNotifier;
 
 class LateCheckInController extends Controller
 {
@@ -41,7 +41,7 @@ class LateCheckInController extends Controller
         ]);
 
         $admins = User::whereIn('role', ['admin', 'super_admin'])->get();
-        Notification::send($admins, new LateCheckInRequestSubmitted($lateCheckInRequest->load(['user', 'activity'])));
+        SafeNotifier::send($admins, new LateCheckInRequestSubmitted($lateCheckInRequest->load(['user', 'activity'])));
 
         return redirect()
             ->route('activities.index', ['status_group' => 'ended'])

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\CreditTransferRequest;
 use App\Notifications\CreditTransferRequestReviewed;
+use App\Services\SafeNotifier;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
@@ -60,7 +61,7 @@ class CreditTransferApprovalController extends Controller
             'reviewed_at' => now(),
         ]);
 
-        $creditTransferRequest->user->notify(new CreditTransferRequestReviewed($creditTransferRequest));
+        SafeNotifier::send($creditTransferRequest->user, new CreditTransferRequestReviewed($creditTransferRequest));
 
         return back()->with('status', __('อนุมัติคำร้องสำเร็จ'));
     }
@@ -82,7 +83,7 @@ class CreditTransferApprovalController extends Controller
             'reviewed_at' => now(),
         ]);
 
-        $creditTransferRequest->user->notify(new CreditTransferRequestReviewed($creditTransferRequest));
+        SafeNotifier::send($creditTransferRequest->user, new CreditTransferRequestReviewed($creditTransferRequest));
 
         return back()->with('status', __('ปฏิเสธคำร้องสำเร็จ'));
     }

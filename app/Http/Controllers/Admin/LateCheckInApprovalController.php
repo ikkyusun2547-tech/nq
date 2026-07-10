@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Attendance;
 use App\Models\LateCheckInRequest;
 use App\Notifications\LateCheckInRequestReviewed;
+use App\Services\SafeNotifier;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -86,7 +87,7 @@ class LateCheckInApprovalController extends Controller
             throw $e;
         }
 
-        $lateCheckInRequest->user->notify(new LateCheckInRequestReviewed($lateCheckInRequest));
+        SafeNotifier::send($lateCheckInRequest->user, new LateCheckInRequestReviewed($lateCheckInRequest));
 
         return back()->with('status', __('อนุมัติคำร้องสำเร็จ'));
     }
@@ -108,7 +109,7 @@ class LateCheckInApprovalController extends Controller
             'reviewed_at' => now(),
         ]);
 
-        $lateCheckInRequest->user->notify(new LateCheckInRequestReviewed($lateCheckInRequest));
+        SafeNotifier::send($lateCheckInRequest->user, new LateCheckInRequestReviewed($lateCheckInRequest));
 
         return back()->with('status', __('ปฏิเสธคำร้องสำเร็จ'));
     }

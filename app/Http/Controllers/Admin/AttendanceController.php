@@ -9,8 +9,8 @@ use App\Models\Activity;
 use App\Models\Faculty;
 use App\Notifications\AttendanceApproved;
 use App\Services\DynamicQrTokenGenerator;
+use App\Services\SafeNotifier;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Notification;
 use Maatwebsite\Excel\Facades\Excel;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
@@ -117,7 +117,7 @@ class AttendanceController extends Controller
             ]);
 
         foreach ($newlyApproved as $attendance) {
-            $attendance->user->notify(new AttendanceApproved($attendance));
+            SafeNotifier::send($attendance->user, new AttendanceApproved($attendance));
         }
 
         return back()->with('status', __('อัปเดตสถานะสำเร็จ :count รายการ', ['count' => $count]));

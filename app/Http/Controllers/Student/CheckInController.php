@@ -8,7 +8,7 @@ use App\Http\Requests\CheckInRequest;
 use App\Models\User;
 use App\Notifications\AttendanceFlagged;
 use App\Services\AttendanceAutomationService;
-use Illuminate\Support\Facades\Notification;
+use App\Services\SafeNotifier;
 use Illuminate\Validation\ValidationException;
 
 class CheckInController extends Controller
@@ -37,7 +37,7 @@ class CheckInController extends Controller
 
         if ($attendance->status === 'flagged') {
             $admins = User::whereIn('role', ['admin', 'super_admin'])->get();
-            Notification::send($admins, new AttendanceFlagged($attendance->load(['user', 'activity'])));
+            SafeNotifier::send($admins, new AttendanceFlagged($attendance->load(['user', 'activity'])));
         }
 
         return response()->json([

@@ -12,9 +12,9 @@ use App\Notifications\ActivityMissed;
 use App\Notifications\ActivityUpdated;
 use App\Services\AcademicYearCalculator;
 use App\Services\ActivityCodeGenerator;
+use App\Services\SafeNotifier;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -238,7 +238,7 @@ class ActivityController extends Controller
         $students = $activity->eligibleStudentsQuery()->get();
 
         if ($students->isNotEmpty()) {
-            Notification::send($students, new ActivityCreated($activity));
+            SafeNotifier::send($students, new ActivityCreated($activity));
         }
     }
 
@@ -252,7 +252,7 @@ class ActivityController extends Controller
         $missing = $activity->missingStudentsQuery()->get();
 
         if ($missing->isNotEmpty()) {
-            Notification::send($missing, new ActivityMissed($activity));
+            SafeNotifier::send($missing, new ActivityMissed($activity));
         }
     }
 
@@ -267,7 +267,7 @@ class ActivityController extends Controller
         $students = $activity->eligibleStudentsQuery()->get();
 
         if ($students->isNotEmpty()) {
-            Notification::send($students, new ActivityUpdated($activity));
+            SafeNotifier::send($students, new ActivityUpdated($activity));
         }
     }
 

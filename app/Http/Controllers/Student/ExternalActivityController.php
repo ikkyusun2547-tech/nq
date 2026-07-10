@@ -8,8 +8,8 @@ use App\Models\ExternalActivityRequest;
 use App\Models\User;
 use App\Notifications\ExternalActivityRequestSubmitted;
 use App\Services\AcademicYearCalculator;
+use App\Services\SafeNotifier;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Notification;
 
 class ExternalActivityController extends Controller
 {
@@ -40,7 +40,7 @@ class ExternalActivityController extends Controller
         ]);
 
         $admins = User::whereIn('role', ['admin', 'super_admin'])->get();
-        Notification::send($admins, new ExternalActivityRequestSubmitted($externalActivityRequest->load('user')));
+        SafeNotifier::send($admins, new ExternalActivityRequestSubmitted($externalActivityRequest->load('user')));
 
         return redirect()
             ->route('external-activities.index')

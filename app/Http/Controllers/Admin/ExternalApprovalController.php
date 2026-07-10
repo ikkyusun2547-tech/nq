@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\ExternalActivityRequest;
 use App\Notifications\ExternalActivityRequestReviewed;
+use App\Services\SafeNotifier;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
@@ -61,7 +62,7 @@ class ExternalApprovalController extends Controller
             'reviewed_at' => now(),
         ]);
 
-        $externalActivityRequest->user->notify(new ExternalActivityRequestReviewed($externalActivityRequest));
+        SafeNotifier::send($externalActivityRequest->user, new ExternalActivityRequestReviewed($externalActivityRequest));
 
         return back()->with('status', __('อนุมัติคำร้องสำเร็จ'));
     }
@@ -83,7 +84,7 @@ class ExternalApprovalController extends Controller
             'reviewed_at' => now(),
         ]);
 
-        $externalActivityRequest->user->notify(new ExternalActivityRequestReviewed($externalActivityRequest));
+        SafeNotifier::send($externalActivityRequest->user, new ExternalActivityRequestReviewed($externalActivityRequest));
 
         return back()->with('status', __('ปฏิเสธคำร้องสำเร็จ'));
     }
