@@ -106,11 +106,13 @@
 
                         @if ($checkedInActivityIds->contains($activity->id))
                             <span class="absolute left-3 top-3 inline-flex items-center gap-1 rounded-full bg-white/90 px-2.5 py-1 text-xs font-medium text-brand-green-700 shadow-soft dark:bg-slate-900/90 dark:text-brand-green-400">
-                                ✓ {{ __('เช็กชื่อแล้ว') }}
+                                <svg class="h-3 w-3 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                {{ __('เช็กชื่อแล้ว') }}
                             </span>
                         @elseif ($activity->status === 'closed')
                             <span class="absolute left-3 top-3 inline-flex items-center gap-1 rounded-full bg-red-500/95 px-2.5 py-1 text-xs font-medium text-white shadow-soft backdrop-blur">
-                                ⚠ {{ __('พลาดกิจกรรมนี้') }}
+                                <svg class="h-3 w-3 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/></svg>
+                                {{ __('พลาดกิจกรรมนี้') }}
                             </span>
                         @endif
                     </div>
@@ -126,7 +128,8 @@
                             </span>
                             @if ($activity->wasRecentlyUpdatedSignificantly())
                                 <span class="inline-flex items-center gap-1 rounded-full bg-sky-50 px-2 py-0.5 text-[0.68rem] font-medium text-sky-700 dark:bg-sky-500/10 dark:text-sky-400">
-                                    🔄 {{ __('อัปเดตแล้ว') }}
+                                    <svg class="h-2.5 w-2.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"/></svg>
+                                    {{ __('อัปเดตแล้ว') }}
                                 </span>
                             @endif
                         </div>

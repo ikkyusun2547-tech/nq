@@ -125,7 +125,7 @@ class Activity extends Model
     }
 
     /**
-     * Whether to show the "🔄 อัปเดตแล้ว" badge to students — true for a
+     * Whether to show the "อัปเดตแล้ว" badge to students — true for a
      * week after an edit that changed something they'd actually need to
      * know about (time/location/check-in method), then fades on its own
      * without needing per-student dismissal tracking.
