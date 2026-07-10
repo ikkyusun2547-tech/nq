@@ -135,6 +135,7 @@
     "ไม่สามารถเปิดกล้องหน้าได้: กรุณาอนุญาตการใช้กล้อง": "Unable to open front camera: please allow camera access",
     "อุปกรณ์นี้ไม่รองรับการระบุตำแหน่ง GPS": "This device does not support GPS location",
     "กรุณาอนุญาตการเข้าถึงตำแหน่ง GPS เพื่อเช็กชื่อ": "Please allow GPS location access to check in",
+    "หาตำแหน่ง GPS ไม่สำเร็จ (หมดเวลารอ) กรุณาลองใหม่ หรือตรวจสอบว่าอนุญาตสิทธิ์เข้าถึงตำแหน่งให้เบราว์เซอร์นี้แล้วในตั้งค่าเครื่อง": "Couldn't get your GPS location (timed out). Please try again, or check that this browser has location permission enabled in your device settings.",
     "เกิดข้อผิดพลาด กรุณาลองใหม่": "An error occurred, please try again",
     "การเชื่อมต่อล้มเหลว กรุณาลองใหม่อีกครั้ง": "Connection failed, please try again",
     "เช็กชื่อสำเร็จ! บันทึกชั่วโมงกิจกรรมเรียบร้อยแล้ว": "Check-in successful! Your activity hours have been recorded.",

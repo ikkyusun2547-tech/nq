@@ -174,9 +174,31 @@
                     return;
                 }
 
+                // Chrome on iOS has a known bug where getCurrentPosition's own
+                // `timeout` option is silently ignored — if the permission
+                // prompt or location fix never resolves, neither callback ever
+                // fires and the UI hangs on "submitting" forever. This manual
+                // backstop guarantees we always leave that state.
+                let settled = false;
+                const giveUp = setTimeout(() => {
+                    if (settled) return;
+                    settled = true;
+                    this.showError('{{ __('หาตำแหน่ง GPS ไม่สำเร็จ (หมดเวลารอ) กรุณาลองใหม่ หรือตรวจสอบว่าอนุญาตสิทธิ์เข้าถึงตำแหน่งให้เบราว์เซอร์นี้แล้วในตั้งค่าเครื่อง') }}');
+                }, 12000);
+
                 navigator.geolocation.getCurrentPosition(
-                    (position) => this.sendPayload(position.coords.latitude, position.coords.longitude),
-                    () => this.showError('{{ __('กรุณาอนุญาตการเข้าถึงตำแหน่ง GPS เพื่อเช็กชื่อ') }}'),
+                    (position) => {
+                        if (settled) return;
+                        settled = true;
+                        clearTimeout(giveUp);
+                        this.sendPayload(position.coords.latitude, position.coords.longitude);
+                    },
+                    () => {
+                        if (settled) return;
+                        settled = true;
+                        clearTimeout(giveUp);
+                        this.showError('{{ __('กรุณาอนุญาตการเข้าถึงตำแหน่ง GPS เพื่อเช็กชื่อ') }}');
+                    },
                     { enableHighAccuracy: true, timeout: 10000 },
                 );
             },
