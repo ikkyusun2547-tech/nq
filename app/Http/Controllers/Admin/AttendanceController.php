@@ -10,6 +10,7 @@ use App\Models\Faculty;
 use App\Notifications\AttendanceApproved;
 use App\Services\DynamicQrTokenGenerator;
 use App\Services\SafeNotifier;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
@@ -43,6 +44,30 @@ class AttendanceController extends Controller
             'secondsUntilNextRotation' => $qrTokens->secondsUntilNextRotation(),
             'rotationSeconds' => DynamicQrTokenGenerator::WINDOW_SECONDS,
         ]);
+    }
+
+    /**
+     * Printable backup QR for when there's no live screen at the venue
+     * (dead projector, no signal for the kiosk page). Doesn't rotate, so any
+     * check-in made with it always lands as flagged — see
+     * AttendanceAutomationService::checkIn().
+     */
+    public function qrPrint(Activity $activity, DynamicQrTokenGenerator $qrTokens)
+    {
+        $token = $qrTokens->generateStatic($activity);
+        $svg = QrCode::format('svg')->size(420)->margin(1)->generate($token);
+
+        // dompdf doesn't render inline <svg> markup reliably, but handles it
+        // fine as a normal image once it's a data URI behind an <img> tag.
+        $qrDataUri = 'data:image/svg+xml;base64,'.base64_encode($svg);
+
+        $pdf = Pdf::loadView('admin.attendance.qr-print-pdf', [
+            'activity' => $activity,
+            'qrDataUri' => $qrDataUri,
+            'generatedAt' => now(),
+        ])->setPaper('a4', 'portrait');
+
+        return $pdf->download('qr-backup-'.($activity->activity_code ?? $activity->id).'.pdf');
     }
 
     /**

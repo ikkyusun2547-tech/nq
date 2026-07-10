@@ -430,5 +430,8 @@
     "ติดตั้ง": "Install",
     "ไม่ใช่ตอนนี้": "Not now",
 
-    "ใบสรุปกิจกรรม (PDF)": "Activity Summary (PDF)"
+    "ใบสรุปกิจกรรม (PDF)": "Activity Summary (PDF)",
+
+    "เช็กชื่อด้วย QR สำรอง (แบบพิมพ์)": "Checked in with the printed backup QR",
+    "ไม่มีจอแสดงหน้างาน? ดาวน์โหลด QR สำรองสำหรับพิมพ์": "No screen at the venue? Download a printable backup QR"
 }

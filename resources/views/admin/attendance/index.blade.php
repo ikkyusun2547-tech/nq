@@ -7,6 +7,7 @@
         'GPS_OUT_OF_BOUNDS' => __('GPS เกินรัศมี'),
         'DEVICE_SHARING_SUSPECTED' => __('ต้องสงสัยใช้เครื่องร่วมกัน'),
         'SELF_REPORTED' => __('รายงานตนเอง (ไม่มี GPS ยืนยัน)'),
+        'PRINTED_QR_USED' => __('เช็กชื่อด้วย QR สำรอง (แบบพิมพ์)'),
     ];
     $badgeDot = [
         'auto_approved' => 'bg-brand-green-500',

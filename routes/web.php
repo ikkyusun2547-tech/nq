@@ -144,6 +144,7 @@ Route::middleware(['auth', 'srru.email'])->group(function () {
 
         Route::get('/activities/{activity}/qr-display', [AttendanceController::class, 'qrDisplay'])->name('attendance.qr-display');
         Route::get('/activities/{activity}/qr-fragment', [AttendanceController::class, 'qrFragment'])->name('attendance.qr-fragment');
+        Route::get('/activities/{activity}/qr-print', [AttendanceController::class, 'qrPrint'])->name('attendance.qr-print');
         Route::get('/activities/{activity}/attendance', [AttendanceController::class, 'index'])->name('attendance.index');
         Route::post('/activities/{activity}/attendance/bulk-approve', [AttendanceController::class, 'bulkApprove'])->name('attendance.bulk-approve');
         Route::get('/activities/{activity}/attendance/export', [AttendanceController::class, 'exportExcel'])->name('attendance.export');
