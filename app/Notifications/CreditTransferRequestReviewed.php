@@ -3,17 +3,11 @@
 namespace App\Notifications;
 
 use App\Models\CreditTransferRequest;
-use Illuminate\Notifications\Notification;
 
-class CreditTransferRequestReviewed extends Notification
+class CreditTransferRequestReviewed extends BaseNotification
 {
     public function __construct(private CreditTransferRequest $request)
     {
-    }
-
-    public function via(object $notifiable): array
-    {
-        return ['database'];
     }
 
     public function toDatabase(object $notifiable): array

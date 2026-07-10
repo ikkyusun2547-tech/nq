@@ -3,17 +3,11 @@
 namespace App\Notifications;
 
 use App\Models\Activity;
-use Illuminate\Notifications\Notification;
 
-class ActivityCreated extends Notification
+class ActivityCreated extends BaseNotification
 {
     public function __construct(private Activity $activity)
     {
-    }
-
-    public function via(object $notifiable): array
-    {
-        return ['database'];
     }
 
     public function toDatabase(object $notifiable): array

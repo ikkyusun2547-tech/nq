@@ -3,17 +3,11 @@
 namespace App\Notifications;
 
 use App\Models\Attendance;
-use Illuminate\Notifications\Notification;
 
-class AttendanceFlagged extends Notification
+class AttendanceFlagged extends BaseNotification
 {
     public function __construct(private Attendance $attendance)
     {
-    }
-
-    public function via(object $notifiable): array
-    {
-        return ['database'];
     }
 
     public function toDatabase(object $notifiable): array

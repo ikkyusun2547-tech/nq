@@ -3,17 +3,11 @@
 namespace App\Notifications;
 
 use App\Models\ExternalActivityRequest;
-use Illuminate\Notifications\Notification;
 
-class ExternalActivityRequestSubmitted extends Notification
+class ExternalActivityRequestSubmitted extends BaseNotification
 {
     public function __construct(private ExternalActivityRequest $request)
     {
-    }
-
-    public function via(object $notifiable): array
-    {
-        return ['database'];
     }
 
     public function toDatabase(object $notifiable): array

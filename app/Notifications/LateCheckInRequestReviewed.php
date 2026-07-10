@@ -3,17 +3,11 @@
 namespace App\Notifications;
 
 use App\Models\LateCheckInRequest;
-use Illuminate\Notifications\Notification;
 
-class LateCheckInRequestReviewed extends Notification
+class LateCheckInRequestReviewed extends BaseNotification
 {
     public function __construct(private LateCheckInRequest $request)
     {
-    }
-
-    public function via(object $notifiable): array
-    {
-        return ['database'];
     }
 
     public function toDatabase(object $notifiable): array
