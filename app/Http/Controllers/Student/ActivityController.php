@@ -40,9 +40,11 @@ class ActivityController extends Controller
             ->pluck('academic_year');
 
         // Same "default to current year, but respect an explicit 'all years'
-        // choice" rule as the admin activity list.
+        // choice" rule as the admin activity list. Cast to string because
+        // ConvertEmptyStringsToNull turns that empty submission into null
+        // before it reaches here.
         $academicYear = $request->has('academic_year')
-            ? $request->input('academic_year')
+            ? (string) $request->input('academic_year')
             : (string) AcademicYearCalculator::forDate(now());
 
         $faculties = Faculty::orderBy('name_th')->get();

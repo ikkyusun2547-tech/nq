@@ -32,9 +32,11 @@ class ActivityController extends Controller
         // On a fresh visit (no academic_year in the query string at all) default
         // to the current academic year so the list isn't cluttered with every
         // past year; an explicit "-- ทุกปีการศึกษา --" selection posts an empty
-        // value and is respected as "show all" rather than re-defaulted.
+        // value and is respected as "show all" rather than re-defaulted. Cast
+        // to string because ConvertEmptyStringsToNull turns that empty
+        // submission into null before it reaches here.
         $academicYear = $request->has('academic_year')
-            ? $request->input('academic_year')
+            ? (string) $request->input('academic_year')
             : (string) AcademicYearCalculator::forDate(now());
 
         $activities = Activity::withCount([

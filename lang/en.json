@@ -365,5 +365,7 @@
     "ไม่เกิน": "up to",
     "เกินโควตาคำร้องกิจกรรมภายนอก :cap ชั่วโมงต่อปีการศึกษา (คงเหลือ :remaining ชั่วโมง)": "Exceeds the external activity request quota of :cap hours per academic year (:remaining remaining)",
     "เหลือโควตาคำร้องกิจกรรมภายนอก": "External activity request quota remaining:",
-    "ชั่วโมง สำหรับปีการศึกษา": "hours for academic year"
+    "ชั่วโมง สำหรับปีการศึกษา": "hours for academic year",
+    "แนวโน้มการเช็กชื่อรายเดือน": "Monthly check-in trend",
+    "ทุกปีการศึกษา": "All academic years"
 }

@@ -17,12 +17,21 @@
     $maxCategoryHours = max(1, max($categoryHours));
     $maxTrend = max(1, $monthlyTrend->max('count'));
     $maxFaculty = max(1, $facultyParticipation->max('total') ?? 1);
+    $academicYearScopeLabel = $academicYear !== '' ? __('ปีการศึกษา :year', ['year' => $academicYear]) : __('ทุกปีการศึกษา');
 @endphp
 <div class="mx-auto max-w-[90rem]">
     <div class="overflow-hidden rounded-2xl brand-gradient p-6 text-white shadow-sm sm:p-8">
         <h1 class="text-xl font-semibold sm:text-2xl">{{ __('แผงควบคุมกองพัฒนานักศึกษา') }}</h1>
         <p class="mt-1 text-sm text-white/80">{{ __('มหาวิทยาลัยราชภัฏสุรินทร์') }}</p>
     </div>
+
+    <form method="GET" action="{{ route('admin.dashboard') }}" class="mt-4 max-w-xs">
+        @php $academicYearOptions = $academicYears->mapWithKeys(fn ($y) => [$y => __('ปีการศึกษา :year', ['year' => $y])])->all(); @endphp
+        <x-premium-select
+            name="academic_year" :options="$academicYearOptions" :selected="$academicYear"
+            placeholder="{{ __('-- ทุกปีการศึกษา --') }}" autosubmit
+        />
+    </form>
 
     <!-- Stat cards -->
     <div class="mt-6 grid grid-cols-2 gap-4 lg:grid-cols-3 xl:grid-cols-6">
@@ -52,7 +61,10 @@
     <!-- Charts -->
     <div class="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
         <div class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-gray-200 dark:bg-slate-900 dark:ring-slate-700">
-            <h2 class="mb-4 text-sm font-semibold text-gray-700 dark:text-slate-200">{{ __('ชั่วโมงกิจกรรมแยกตามหมวดหมู่') }}</h2>
+            <div class="mb-4 flex items-center justify-between">
+                <h2 class="text-sm font-semibold text-gray-700 dark:text-slate-200">{{ __('ชั่วโมงกิจกรรมแยกตามหมวดหมู่') }}</h2>
+                <span class="text-xs text-gray-400 dark:text-slate-500">{{ $academicYearScopeLabel }}</span>
+            </div>
             <div class="space-y-3">
                 @foreach ($categoryHours as $category => $hours)
                     <div>
@@ -69,7 +81,12 @@
         </div>
 
         <div class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-gray-200 dark:bg-slate-900 dark:ring-slate-700">
-            <h2 class="mb-4 text-sm font-semibold text-gray-700 dark:text-slate-200">{{ __('แนวโน้มการเช็กชื่อ 6 เดือนล่าสุด') }}</h2>
+            <div class="mb-4 flex items-center justify-between">
+                <h2 class="text-sm font-semibold text-gray-700 dark:text-slate-200">
+                    {{ $academicYear !== '' ? __('แนวโน้มการเช็กชื่อรายเดือน') : __('แนวโน้มการเช็กชื่อ 6 เดือนล่าสุด') }}
+                </h2>
+                <span class="text-xs text-gray-400 dark:text-slate-500">{{ $academicYearScopeLabel }}</span>
+            </div>
             <div class="flex h-40 items-end justify-between gap-2">
                 @foreach ($monthlyTrend as $point)
                     <div class="flex flex-1 flex-col items-center gap-2">
@@ -87,7 +104,10 @@
     <div class="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-3">
         <!-- Faculty participation -->
         <div class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-gray-200 dark:bg-slate-900 dark:ring-slate-700">
-            <h2 class="mb-4 text-sm font-semibold text-gray-700 dark:text-slate-200">{{ __('การเข้าร่วมแยกตามคณะ') }}</h2>
+            <div class="mb-4 flex items-center justify-between">
+                <h2 class="text-sm font-semibold text-gray-700 dark:text-slate-200">{{ __('การเข้าร่วมแยกตามคณะ') }}</h2>
+                <span class="text-xs text-gray-400 dark:text-slate-500">{{ $academicYearScopeLabel }}</span>
+            </div>
             @forelse ($facultyParticipation as $row)
                 <div class="mb-3 last:mb-0">
                     <div class="mb-1 flex items-center justify-between text-xs text-gray-500 dark:text-slate-400">
