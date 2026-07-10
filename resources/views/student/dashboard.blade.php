@@ -13,7 +13,7 @@
     $activitiesPct = min(100, $summary['required_activities'] > 0 ? round($summary['total_activities'] / $summary['required_activities'] * 100) : 0);
 @endphp
 
-<div class="mx-auto max-w-4xl">
+<div class="mx-auto max-w-4xl" x-data="{ showDetail: false, detail: null }">
     <!-- VIP digital passport card -->
     <div class="relative overflow-hidden rounded-3xl brand-gradient p-6 text-white shadow-soft-lg sm:p-8">
         <div class="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-white/5 blur-2xl"></div>
@@ -134,7 +134,7 @@
         </div>
     </div>
 
-    <div class="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
+    <div class="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-3">
         <!-- Approved check-ins -->
         <div class="space-y-3 rounded-2xl glass-card p-5 shadow-soft">
             <h2 class="flex items-center gap-1.5 text-sm font-semibold text-slate-900 dark:text-slate-100">
@@ -142,18 +142,39 @@
                 {{ __('กิจกรรมที่อนุมัติแล้ว') }}
             </h2>
             @forelse ($approvedActivities as $item)
-                <div class="flex items-center justify-between gap-3 rounded-xl bg-brand-green-50/50 px-3.5 py-2.5 dark:bg-brand-green-500/5">
+                @php
+                    $rowClass = 'flex w-full items-center justify-between gap-3 rounded-xl bg-brand-green-50/50 px-3.5 py-2.5 text-left transition-colors hover:bg-brand-green-100/60 dark:bg-brand-green-500/5 dark:hover:bg-brand-green-500/10';
+                @endphp
+                @if ($item->type === 'external')
+                    <a href="{{ route('external-activities.index') }}" class="{{ $rowClass }}">
+                @elseif ($item->checkin_method === 'late_request')
+                    <a href="{{ route('late-checkin.show', $item->activity_id) }}" class="{{ $rowClass }}">
+                @else
+                    <button type="button" @click="detail = {{ Illuminate\Support\Js::from([
+                        'title' => $item->title,
+                        'date' => $item->date->translatedFormat('d M Y H:i'),
+                        'hours' => $item->hours,
+                        'location' => $item->location_name,
+                        'photo' => $item->photo_url,
+                    ]) }}; showDetail = true" class="{{ $rowClass }}">
+                @endif
                     <div class="min-w-0">
                         <p class="truncate text-sm font-medium text-slate-800 dark:text-slate-200">{{ $item->title }}</p>
                         <p class="text-xs text-slate-400 dark:text-slate-500">
                             {{ $item->date->translatedFormat('d M Y') }}
                             @if ($item->type === 'external')
                                 · <span class="text-brand-purple-500 dark:text-brand-purple-400">{{ __('กิจกรรมเทียบชั่วโมง') }}</span>
+                            @elseif ($item->checkin_method === 'late_request')
+                                · <span class="text-brand-purple-500 dark:text-brand-purple-400">{{ __('เช็กชื่อย้อนหลัง') }}</span>
                             @endif
                         </p>
                     </div>
                     <span class="shrink-0 text-xs font-medium text-brand-green-700 dark:text-brand-green-400">{{ __(':hours ชม.', ['hours' => $item->hours]) }}</span>
-                </div>
+                @if ($item->type === 'external' || $item->checkin_method === 'late_request')
+                    </a>
+                @else
+                    </button>
+                @endif
             @empty
                 <p class="py-4 text-center text-xs text-slate-400 dark:text-slate-500">{{ __('ยังไม่มีกิจกรรมที่ได้รับการอนุมัติ') }}</p>
             @endforelse
@@ -181,6 +202,79 @@
             @empty
                 <p class="py-4 text-center text-xs text-slate-400 dark:text-slate-500">{{ __('ไม่มีกิจกรรมที่รอตรวจสอบ') }}</p>
             @endforelse
+        </div>
+
+        <!-- Rejected -->
+        <div class="space-y-3 rounded-2xl glass-card p-5 shadow-soft">
+            <h2 class="flex items-center gap-1.5 text-sm font-semibold text-slate-900 dark:text-slate-100">
+                <span class="h-2 w-2 rounded-full bg-red-500"></span>
+                {{ __('กิจกรรมที่ถูกปฏิเสธ') }}
+            </h2>
+            @forelse ($rejectedActivities as $item)
+                @php
+                    $rejectedRowClass = 'block w-full rounded-xl bg-red-50/50 px-3.5 py-2.5 text-left transition-colors hover:bg-red-100/60 dark:bg-red-500/5 dark:hover:bg-red-500/10';
+                @endphp
+                <a href="{{ $item->type === 'external' ? route('external-activities.index') : route('late-checkin.show', $item->activity_id) }}" class="{{ $rejectedRowClass }}">
+                    <p class="truncate text-sm font-medium text-slate-800 dark:text-slate-200">{{ $item->title }}</p>
+                    <p class="text-xs text-slate-400 dark:text-slate-500">
+                        {{ $item->date->translatedFormat('d M Y') }}
+                        @if ($item->type === 'external')
+                            · <span class="text-brand-purple-500 dark:text-brand-purple-400">{{ __('กิจกรรมเทียบชั่วโมง') }}</span>
+                        @else
+                            · <span class="text-brand-purple-500 dark:text-brand-purple-400">{{ __('เช็กชื่อย้อนหลัง') }}</span>
+                        @endif
+                    </p>
+                    @if ($item->reject_reason)
+                        <p class="mt-1 truncate text-xs text-red-500 dark:text-red-400">{{ __('เหตุผล:') }} {{ $item->reject_reason }}</p>
+                    @endif
+                </a>
+            @empty
+                <p class="py-4 text-center text-xs text-slate-400 dark:text-slate-500">{{ __('ไม่มีกิจกรรมที่ถูกปฏิเสธ') }}</p>
+            @endforelse
+        </div>
+    </div>
+
+    <!-- Check-in detail popup (realtime/self-report only — external and late-request rows link out instead) -->
+    <div
+        x-show="showDetail" x-cloak @click.outside="showDetail = false" @keydown.escape.window="showDetail = false"
+        x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+        x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-brand-purple-950/70 p-4 backdrop-blur-sm"
+    >
+        <div
+            @click.outside="showDetail = false" x-show="detail"
+            x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 scale-95 translate-y-2" x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+            class="w-full max-w-sm rounded-[2rem] bg-gradient-to-br from-white/60 via-white/10 to-brand-green-200/40 p-[1.5px] shadow-soft-lg dark:from-white/10 dark:via-white/5 dark:to-brand-green-500/20"
+        >
+            <div class="rounded-[calc(2rem-1.5px)] bg-white p-5 dark:bg-slate-900">
+                <template x-if="detail">
+                    <div>
+                        <div class="mb-3 flex items-start justify-between gap-3">
+                            <p class="font-semibold leading-snug text-slate-900 dark:text-slate-100" x-text="detail.title"></p>
+                            <button @click="showDetail = false" class="shrink-0 rounded-full p-1 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 dark:text-slate-500 dark:hover:bg-slate-800 dark:hover:text-slate-300">
+                                <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                            </button>
+                        </div>
+                        <div class="mb-3 overflow-hidden rounded-2xl bg-black/5 shadow-soft dark:bg-black/20">
+                            <img :src="detail.photo" class="max-h-72 w-full object-contain">
+                        </div>
+                        <dl class="space-y-1.5 text-sm">
+                            <div class="flex justify-between gap-3">
+                                <dt class="text-slate-400 dark:text-slate-500">{{ __('เวลาเช็กชื่อ') }}</dt>
+                                <dd class="font-medium text-slate-700 dark:text-slate-200" x-text="detail.date"></dd>
+                            </div>
+                            <div class="flex justify-between gap-3" x-show="detail.location">
+                                <dt class="text-slate-400 dark:text-slate-500">{{ __('สถานที่') }}</dt>
+                                <dd class="font-medium text-slate-700 dark:text-slate-200" x-text="detail.location"></dd>
+                            </div>
+                            <div class="flex justify-between gap-3">
+                                <dt class="text-slate-400 dark:text-slate-500">{{ __('ชั่วโมงที่ได้รับ') }}</dt>
+                                <dd class="font-semibold text-brand-green-700 dark:text-brand-green-400" x-text="detail.hours + ' {{ __('ชม.') }}'"></dd>
+                            </div>
+                        </dl>
+                    </div>
+                </template>
+            </div>
         </div>
     </div>
 </div>

@@ -21,12 +21,13 @@
                 ['route' => 'admin.dashboard', 'label' => __('แดชบอร์ด')],
                 ['route' => 'admin.activities.index', 'label' => __('กิจกรรม')],
                 ['route' => 'admin.external-activities.index', 'label' => __('คำร้องภายนอก')],
+                ['route' => 'admin.late-checkins.index', 'label' => __('เช็กชื่อย้อนหลัง')],
                 ['route' => 'admin.students.index', 'label' => __('นักศึกษา')],
             ]
             : [
                 ['route' => 'dashboard', 'label' => __('แดชบอร์ด')],
-                ['route' => 'activities.index', 'label' => __('กิจกรรม')],
-                ['route' => 'checkin.show', 'label' => __('เช็กชื่อ')],
+                ['route' => 'activities.index', 'label' => __('เช็คกิจกรรม')],
+                ['route' => 'checkin.show', 'label' => __('เช็คด้วย QR Code')],
                 ['route' => 'external-activities.index', 'label' => __('คำร้องภายนอก')],
             ];
     @endphp

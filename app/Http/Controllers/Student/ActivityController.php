@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Student;
 use App\Http\Controllers\Controller;
 use App\Models\Activity;
 use App\Models\Faculty;
+use App\Models\LateCheckInRequest;
 use Illuminate\Http\Request;
 
 class ActivityController extends Controller
@@ -79,6 +80,10 @@ class ActivityController extends Controller
             ->whereIn('activity_id', $activities->pluck('id'))
             ->pluck('activity_id');
 
-        return view('student.activities.index', compact('activities', 'checkedInActivityIds', 'academicYears', 'faculties', 'statusGroup'));
+        $lateCheckInStatuses = LateCheckInRequest::where('user_id', $user->id)
+            ->whereIn('activity_id', $activities->pluck('id'))
+            ->pluck('status', 'activity_id');
+
+        return view('student.activities.index', compact('activities', 'checkedInActivityIds', 'lateCheckInStatuses', 'academicYears', 'faculties', 'statusGroup'));
     }
 }

@@ -41,15 +41,22 @@ class ActivityEvaluationService
     {
         $criteria = self::CRITERIA[$user->program_type] ?? self::CRITERIA['normal'];
 
-        $totalActivities = Attendance::where('user_id', $user->id)
-            ->where('status', 'auto_approved')
+        // 'practice' (กิจกรรมซ้อม/เตรียมงาน) credits hours but isn't a real
+        // university activity yet, so it's excluded from the 25-activity
+        // graduation count while still contributing to total_hours below.
+        $totalActivities = Attendance::query()
+            ->join('activities', 'activities.id', '=', 'attendances.activity_id')
+            ->where('attendances.user_id', $user->id)
+            ->where('attendances.status', 'auto_approved')
+            ->where('activities.activity_type', '!=', 'practice')
             ->count();
 
         $creditedHoursFromActivities = (int) Attendance::query()
             ->join('activities', 'activities.id', '=', 'attendances.activity_id')
             ->where('attendances.user_id', $user->id)
             ->where('attendances.status', 'auto_approved')
-            ->sum('activities.credit_hours');
+            ->selectRaw('COALESCE(SUM(COALESCE(attendances.credited_hours, activities.credit_hours)), 0) as total')
+            ->value('total');
 
         $externalHours = (int) ExternalActivityRequest::where('user_id', $user->id)
             ->where('status', 'approved')
@@ -103,7 +110,7 @@ class ActivityEvaluationService
             ->join('activities', 'activities.id', '=', 'attendances.activity_id')
             ->whereIn('attendances.user_id', $studentIds)
             ->where('attendances.status', 'auto_approved')
-            ->selectRaw('attendances.user_id as user_id, count(*) as activity_count, sum(activities.credit_hours) as activity_hours')
+            ->selectRaw("attendances.user_id as user_id, sum(case when activities.activity_type != 'practice' then 1 else 0 end) as activity_count, sum(COALESCE(attendances.credited_hours, activities.credit_hours)) as activity_hours")
             ->groupBy('attendances.user_id')
             ->get()
             ->keyBy('user_id');
@@ -145,7 +152,7 @@ class ActivityEvaluationService
             ->join('activities', 'activities.id', '=', 'attendances.activity_id')
             ->where('attendances.user_id', $user->id)
             ->where('attendances.status', 'auto_approved')
-            ->selectRaw('activities.activity_category as category, sum(activities.credit_hours) as hours')
+            ->selectRaw('activities.activity_category as category, sum(COALESCE(attendances.credited_hours, activities.credit_hours)) as hours')
             ->groupBy('activities.activity_category')
             ->pluck('hours', 'category')
             ->each(function ($hours, $category) use (&$breakdown) {

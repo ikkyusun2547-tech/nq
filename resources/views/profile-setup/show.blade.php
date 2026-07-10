@@ -113,7 +113,7 @@
                             <div class="relative">
                                 <select
                                     name="title_prefix" required
-                                    class="w-full appearance-none rounded-xl border border-slate-200 bg-white py-2.5 pl-3.5 pr-9 text-sm text-slate-700 shadow-soft transition-all duration-200 focus:border-brand-purple-500 focus:outline-none focus:ring-4 focus:ring-brand-purple-500/10 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
+                                    class="w-full appearance-none rounded-xl border bg-white py-2.5 pl-3.5 pr-9 text-sm text-slate-700 shadow-soft transition-all duration-200 focus:outline-none focus:ring-4 dark:bg-slate-800 dark:text-slate-100 @error('title_prefix') border-red-400 focus:border-red-500 focus:ring-red-500/10 dark:border-red-500/70 @else border-slate-200 focus:border-brand-purple-500 focus:ring-brand-purple-500/10 dark:border-slate-600 @enderror"
                                 >
                                     <option value="">-- {{ __('เลือก') }} --</option>
                                     @foreach (['นาย', 'นาง', 'นางสาว'] as $prefix)
@@ -133,7 +133,7 @@
                                 </span>
                                 <input
                                     type="text" name="first_name" value="{{ old('first_name') }}" required
-                                    class="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-3.5 text-sm text-slate-700 placeholder:text-slate-400 shadow-soft transition-all duration-200 focus:border-brand-purple-500 focus:outline-none focus:ring-4 focus:ring-brand-purple-500/10 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500"
+                                    class="w-full rounded-xl border bg-white py-2.5 pl-10 pr-3.5 text-sm text-slate-700 placeholder:text-slate-400 shadow-soft transition-all duration-200 focus:outline-none focus:ring-4 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 @error('first_name') border-red-400 focus:border-red-500 focus:ring-red-500/10 dark:border-red-500/70 @else border-slate-200 focus:border-brand-purple-500 focus:ring-brand-purple-500/10 dark:border-slate-600 @enderror"
                                     placeholder="{{ __('กรอกชื่อ') }}"
                                 >
                             </div>
@@ -144,7 +144,7 @@
                         <label class="mb-2 block text-sm font-medium text-slate-600 dark:text-slate-400">{{ __('นามสกุล') }}</label>
                         <input
                             type="text" name="last_name" value="{{ old('last_name') }}" required
-                            class="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-700 placeholder:text-slate-400 shadow-soft transition-all duration-200 focus:border-brand-purple-500 focus:outline-none focus:ring-4 focus:ring-brand-purple-500/10 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500"
+                            class="w-full rounded-xl border bg-white px-3.5 py-2.5 text-sm text-slate-700 placeholder:text-slate-400 shadow-soft transition-all duration-200 focus:outline-none focus:ring-4 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 @error('last_name') border-red-400 focus:border-red-500 focus:ring-red-500/10 dark:border-red-500/70 @else border-slate-200 focus:border-brand-purple-500 focus:ring-brand-purple-500/10 dark:border-slate-600 @enderror"
                             placeholder="{{ __('กรอกนามสกุล') }}"
                         >
                     </div>
@@ -158,7 +158,7 @@
                             <input
                                 type="text" name="student_id" value="{{ old('student_id') }}" required
                                 inputmode="numeric" pattern="\d{11}" maxlength="11"
-                                class="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-3.5 text-sm tracking-wide text-slate-700 placeholder:text-slate-400 shadow-soft transition-all duration-200 focus:border-brand-purple-500 focus:outline-none focus:ring-4 focus:ring-brand-purple-500/10 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500"
+                                class="w-full rounded-xl border bg-white py-2.5 pl-10 pr-3.5 text-sm tracking-wide text-slate-700 placeholder:text-slate-400 shadow-soft transition-all duration-200 focus:outline-none focus:ring-4 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 @error('student_id') border-red-400 focus:border-red-500 focus:ring-red-500/10 dark:border-red-500/70 @else border-slate-200 focus:border-brand-purple-500 focus:ring-brand-purple-500/10 dark:border-slate-600 @enderror"
                                 placeholder="{{ __('รหัส 11 หลัก') }}"
                             >
                         </div>
@@ -182,7 +182,7 @@
                                 <input
                                     type="number" name="enrollment_year" value="{{ old('enrollment_year') }}" required
                                     min="2540" max="{{ date('Y') + 543 }}"
-                                    class="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-3.5 text-sm text-slate-700 placeholder:text-slate-400 shadow-soft transition-all duration-200 focus:border-brand-purple-500 focus:outline-none focus:ring-4 focus:ring-brand-purple-500/10 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500"
+                                    class="w-full rounded-xl border bg-white py-2.5 pl-10 pr-3.5 text-sm text-slate-700 placeholder:text-slate-400 shadow-soft transition-all duration-200 focus:outline-none focus:ring-4 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 @error('enrollment_year') border-red-400 focus:border-red-500 focus:ring-red-500/10 dark:border-red-500/70 @else border-slate-200 focus:border-brand-purple-500 focus:ring-brand-purple-500/10 dark:border-slate-600 @enderror"
                                     placeholder="{{ __('เช่น :year', ['year' => date('Y') + 543]) }}"
                                 >
                             </div>
@@ -196,7 +196,7 @@
                                 </span>
                                 <select
                                     name="year_level" required
-                                    class="w-full appearance-none rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-9 text-sm text-slate-700 shadow-soft transition-all duration-200 focus:border-brand-purple-500 focus:outline-none focus:ring-4 focus:ring-brand-purple-500/10 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
+                                    class="w-full appearance-none rounded-xl border bg-white py-2.5 pl-10 pr-9 text-sm text-slate-700 shadow-soft transition-all duration-200 focus:outline-none focus:ring-4 dark:bg-slate-800 dark:text-slate-100 @error('year_level') border-red-400 focus:border-red-500 focus:ring-red-500/10 dark:border-red-500/70 @else border-slate-200 focus:border-brand-purple-500 focus:ring-brand-purple-500/10 dark:border-slate-600 @enderror"
                                 >
                                     <option value="">-- {{ __('เลือกชั้นปี') }} --</option>
                                     @foreach ([1, 2, 3, 4] as $year)
@@ -212,7 +212,7 @@
 
                     <div>
                         <label class="mb-2 block text-sm font-medium text-slate-600 dark:text-slate-400">{{ __('ประเภทหลักสูตร') }}</label>
-                        <div class="grid grid-cols-2 gap-2.5">
+                        <div class="grid grid-cols-2 gap-2.5 @error('program_type') rounded-xl ring-2 ring-red-400 @enderror">
                             <label class="flex cursor-pointer items-center justify-center rounded-xl border border-slate-200 bg-white px-2 py-2.5 text-sm shadow-soft transition-all duration-200 has-[:checked]:border-brand-purple-500 has-[:checked]:bg-brand-purple-50 has-[:checked]:text-brand-purple-700 has-[:checked]:shadow-none has-[:focus-visible]:ring-4 has-[:focus-visible]:ring-brand-purple-500/10 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:has-[:checked]:bg-brand-purple-500/10 dark:has-[:checked]:text-brand-purple-400 dark:has-[:focus-visible]:ring-brand-purple-500/20">
                                 <input type="radio" name="program_type" value="normal" required class="sr-only">
                                 {{ __('ภาคปกติ') }}
@@ -232,7 +232,7 @@
                             </span>
                             <select
                                 name="faculty_id" x-model="facultyId" @change="loadMajors()" required
-                                class="w-full appearance-none rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-9 text-sm text-slate-700 shadow-soft transition-all duration-200 focus:border-brand-purple-500 focus:outline-none focus:ring-4 focus:ring-brand-purple-500/10 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
+                                class="w-full appearance-none rounded-xl border bg-white py-2.5 pl-10 pr-9 text-sm text-slate-700 shadow-soft transition-all duration-200 focus:outline-none focus:ring-4 dark:bg-slate-800 dark:text-slate-100 @error('faculty_id') border-red-400 focus:border-red-500 focus:ring-red-500/10 dark:border-red-500/70 @else border-slate-200 focus:border-brand-purple-500 focus:ring-brand-purple-500/10 dark:border-slate-600 @enderror"
                             >
                                 <option value="">-- {{ __('เลือกคณะ') }} --</option>
                                 @foreach ($faculties as $faculty)
@@ -253,7 +253,7 @@
                             </span>
                             <select
                                 name="major_id" required :disabled="! facultyId || loadingMajors"
-                                class="w-full appearance-none rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-9 text-sm text-slate-700 shadow-soft transition-all duration-200 focus:border-brand-purple-500 focus:outline-none focus:ring-4 focus:ring-brand-purple-500/10 disabled:bg-slate-50 disabled:text-slate-400 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:disabled:bg-slate-800/60 dark:disabled:text-slate-500"
+                                class="w-full appearance-none rounded-xl border bg-white py-2.5 pl-10 pr-9 text-sm text-slate-700 shadow-soft transition-all duration-200 focus:outline-none focus:ring-4 disabled:bg-slate-50 disabled:text-slate-400 dark:bg-slate-800 dark:text-slate-100 dark:disabled:bg-slate-800/60 dark:disabled:text-slate-500 @error('major_id') border-red-400 focus:border-red-500 focus:ring-red-500/10 dark:border-red-500/70 @else border-slate-200 focus:border-brand-purple-500 focus:ring-brand-purple-500/10 dark:border-slate-600 @enderror"
                             >
                                 <option value="">-- <span x-text="loadingMajors ? '{{ __('กำลังโหลด...') }}' : '{{ __('เลือกสาขาวิชา') }}'"></span> --</option>
                                 <template x-for="major in majors" :key="major.id">

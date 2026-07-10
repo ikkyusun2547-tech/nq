@@ -6,7 +6,9 @@ use App\Exceptions\QrTokenException;
 use App\Models\Activity;
 use App\Models\Attendance;
 use App\Models\User;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 
 class AttendanceAutomationService
@@ -71,17 +73,90 @@ class AttendanceAutomationService
             $reasons[] = 'DEVICE_SHARING_SUSPECTED';
         }
 
-        return Attendance::create([
-            'user_id' => $user->id,
-            'activity_id' => $activity->id,
-            'checkin_time' => now(),
-            'student_lat' => $lat,
-            'student_lng' => $lng,
-            'distance_meters' => (int) round($distance),
-            'device_uuid' => $deviceUuid,
-            'photo_path' => $photo->store('attendance-selfies', 'public'),
-            'status' => empty($reasons) ? 'auto_approved' : 'flagged',
-            'flag_reason' => empty($reasons) ? null : implode(',', $reasons),
-        ]);
+        $photoPath = $photo->store('attendance-selfies', 'public');
+
+        try {
+            return Attendance::create([
+                'user_id' => $user->id,
+                'activity_id' => $activity->id,
+                'checkin_method' => 'realtime',
+                'checkin_time' => now(),
+                'student_lat' => $lat,
+                'student_lng' => $lng,
+                'distance_meters' => (int) round($distance),
+                'device_uuid' => $deviceUuid,
+                'photo_path' => $photoPath,
+                'status' => empty($reasons) ? 'auto_approved' : 'flagged',
+                'flag_reason' => empty($reasons) ? null : implode(',', $reasons),
+            ]);
+        } catch (QueryException $e) {
+            Storage::disk('public')->delete($photoPath);
+
+            if ($e->getCode() === '23000') {
+                throw ValidationException::withMessages([
+                    'qr_token' => 'คุณเช็กชื่อกิจกรรมนี้ไปแล้ว',
+                ]);
+            }
+
+            throw $e;
+        }
+    }
+
+    /**
+     * Self-report check-in: no QR/GPS verification, just a time window and
+     * an evidence photo — always lands as flagged since there's nothing
+     * automated to vouch for it, an admin must review the photo themselves.
+     *
+     * @throws ValidationException
+     */
+    public function selfReportCheckIn(User $user, Activity $activity, UploadedFile $photo): Attendance
+    {
+        if (! $activity->usesSelfReportCheckIn()) {
+            throw ValidationException::withMessages([
+                'photo' => __('กิจกรรมนี้ไม่ได้เปิดให้เช็กชื่อแบบรายงานตนเอง'),
+            ]);
+        }
+
+        if (! $activity->acceptsCheckIn()) {
+            throw ValidationException::withMessages([
+                'photo' => __('ไม่อยู่ในช่วงเวลาที่เปิดให้เช็กชื่อ'),
+            ]);
+        }
+
+        if (! $activity->isEligibleFor($user)) {
+            throw ValidationException::withMessages([
+                'photo' => __('คุณไม่มีสิทธิ์เข้าร่วมกิจกรรมนี้'),
+            ]);
+        }
+
+        if (Attendance::where('user_id', $user->id)->where('activity_id', $activity->id)->exists()) {
+            throw ValidationException::withMessages([
+                'photo' => __('คุณเช็กชื่อกิจกรรมนี้ไปแล้ว'),
+            ]);
+        }
+
+        $photoPath = $photo->store('attendance-selfies', 'public');
+
+        try {
+            return Attendance::create([
+                'user_id' => $user->id,
+                'activity_id' => $activity->id,
+                'checkin_method' => 'self_report',
+                'checkin_time' => now(),
+                'photo_path' => $photoPath,
+                'status' => 'flagged',
+                'flag_reason' => 'SELF_REPORTED',
+            ]);
+        } catch (QueryException $e) {
+            Storage::disk('public')->delete($photoPath);
+
+            if ($e->getCode() === '23000') {
+                throw ValidationException::withMessages([
+                    'photo' => __('คุณเช็กชื่อกิจกรรมนี้ไปแล้ว'),
+                ]);
+            }
+
+            throw $e;
+        }
     }
 }

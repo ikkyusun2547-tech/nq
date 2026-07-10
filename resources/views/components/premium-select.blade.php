@@ -36,6 +36,8 @@
         $firstReal = collect($flat)->first(fn ($item) => ! $item['heading']);
         $selectedStr = $firstReal['value'] ?? '';
     }
+
+    $hasError = $errors->has($name);
 @endphp
 
 <div
@@ -96,8 +98,8 @@
         type="button" @click="open = ! open" aria-haspopup="listbox" :aria-expanded="open"
         class="flex w-full items-center justify-between gap-2 rounded-xl border bg-white py-2.5 pl-3.5 pr-3 text-left text-sm shadow-soft transition-all duration-200 dark:bg-slate-800"
         :class="open
-            ? 'border-brand-purple-500 ring-4 ring-brand-purple-500/10 text-slate-900 dark:text-slate-100'
-            : 'border-slate-200 text-slate-700 hover:border-brand-purple-300 dark:border-slate-600 dark:text-slate-100 dark:hover:border-brand-purple-500/50'"
+            ? '{{ $hasError ? 'border-red-400 ring-4 ring-red-500/10' : 'border-brand-purple-500 ring-4 ring-brand-purple-500/10' }} text-slate-900 dark:text-slate-100'
+            : '{{ $hasError ? 'border-red-300 dark:border-red-500/70' : 'border-slate-200 dark:border-slate-600' }} text-slate-700 hover:border-brand-purple-300 dark:text-slate-100 dark:hover:border-brand-purple-500/50'"
     >
         <span class="truncate" :class="selected === '' && 'text-slate-400 dark:text-slate-500'" x-text="label"></span>
         <svg class="h-4 w-4 shrink-0 text-slate-400 transition-transform duration-200" :class="open && 'rotate-180'" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>

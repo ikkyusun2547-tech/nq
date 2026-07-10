@@ -80,7 +80,7 @@ class DashboardController extends Controller
         Attendance::query()
             ->join('activities', 'activities.id', '=', 'attendances.activity_id')
             ->where('attendances.status', 'auto_approved')
-            ->selectRaw('activities.activity_category as category, sum(activities.credit_hours) as hours')
+            ->selectRaw('activities.activity_category as category, sum(COALESCE(attendances.credited_hours, activities.credit_hours)) as hours')
             ->groupBy('activities.activity_category')
             ->pluck('hours', 'category')
             ->each(function ($hours, $category) use (&$breakdown) {

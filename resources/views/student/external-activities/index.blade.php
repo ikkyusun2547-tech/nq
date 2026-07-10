@@ -16,10 +16,13 @@
         'rejected' => 'bg-red-50 text-red-700 dark:bg-red-500/10 dark:text-red-400',
     ];
     $statusLabel = ['pending' => __('รอตรวจสอบ'), 'approved' => __('อนุมัติแล้ว'), 'rejected' => __('ถูกปฏิเสธ')];
-    $inputClass = 'w-full rounded-2xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-700 placeholder:text-slate-400 shadow-soft transition-all duration-200 focus:border-brand-green-500 focus:outline-none focus:ring-4 focus:ring-brand-green-500/10 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500';
+    $inputClass = fn (string $field) => 'w-full rounded-2xl border bg-white px-3.5 py-2.5 text-sm text-slate-700 placeholder:text-slate-400 shadow-soft transition-all duration-200 focus:outline-none focus:ring-4 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 '
+        .($errors->has($field)
+            ? 'border-red-400 focus:border-red-500 focus:ring-red-500/10 dark:border-red-500/70'
+            : 'border-slate-200 focus:border-brand-green-500 focus:ring-brand-green-500/10 dark:border-slate-600');
 @endphp
 
-<div class="mx-auto max-w-md" x-data="{ showForm: false }">
+<div class="mx-auto max-w-md" x-data="{ showForm: {{ $errors->any() ? 'true' : 'false' }} }">
     <div class="mb-4 flex items-center justify-between gap-3 rounded-3xl brand-gradient p-6 shadow-soft-lg">
         <div>
             <p class="text-xs font-medium uppercase tracking-[0.2em] text-violet-200/70">{{ __('เทียบชั่วโมงกิจกรรม') }}</p>
@@ -51,15 +54,15 @@
             @csrf
             <div>
                 <label class="mb-1.5 block text-sm font-medium text-slate-600 dark:text-slate-400">{{ __('ชื่อกิจกรรม') }}</label>
-                <input type="text" name="title" value="{{ old('title') }}" required class="{{ $inputClass }}">
+                <input type="text" name="title" value="{{ old('title') }}" required class="{{ $inputClass('title') }}">
             </div>
             <div>
                 <label class="mb-1.5 block text-sm font-medium text-slate-600 dark:text-slate-400">{{ __('หน่วยงานผู้จัด') }}</label>
-                <input type="text" name="organization" value="{{ old('organization') }}" required class="{{ $inputClass }}">
+                <input type="text" name="organization" value="{{ old('organization') }}" required class="{{ $inputClass('organization') }}">
             </div>
             <div>
                 <label class="mb-1.5 block text-sm font-medium text-slate-600 dark:text-slate-400">{{ __('วันที่จัดกิจกรรม') }}</label>
-                <input type="date" name="activity_date" value="{{ old('activity_date') }}" max="{{ date('Y-m-d') }}" required class="{{ $inputClass }}">
+                <input type="date" name="activity_date" value="{{ old('activity_date') }}" max="{{ date('Y-m-d') }}" required class="{{ $inputClass('activity_date') }}">
             </div>
             <div>
                 <label class="mb-1.5 block text-sm font-medium text-slate-600 dark:text-slate-400">{{ __('หมวดหมู่กิจกรรม') }}</label>
@@ -70,13 +73,13 @@
             </div>
             <div>
                 <label class="mb-1.5 block text-sm font-medium text-slate-600 dark:text-slate-400">{{ __('จำนวนชั่วโมงที่ขอเทียบ') }}</label>
-                <input type="number" name="hours_requested" value="{{ old('hours_requested') }}" min="1" max="200" required class="{{ $inputClass }}">
+                <input type="number" name="hours_requested" value="{{ old('hours_requested') }}" min="1" max="200" required class="{{ $inputClass('hours_requested') }}">
             </div>
             <div>
                 <label class="mb-1.5 block text-sm font-medium text-slate-600 dark:text-slate-400">{{ __('ภาพหลักฐาน (เกียรติบัตร/ภาพเข้าร่วม, ไม่เกิน 2MB)') }}</label>
                 <div
                     x-data="{ fileName: '', previewUrl: null }"
-                    class="relative flex flex-col items-center justify-center gap-2 overflow-hidden rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50/60 p-5 text-center transition-colors duration-200 dark:border-slate-600 dark:bg-slate-800/40"
+                    class="relative flex flex-col items-center justify-center gap-2 overflow-hidden rounded-2xl border-2 border-dashed bg-slate-50/60 p-5 text-center transition-colors duration-200 dark:bg-slate-800/40 @error('proof_image') border-red-400 dark:border-red-500/70 @else border-slate-200 dark:border-slate-600 @enderror"
                     :class="previewUrl && 'border-brand-green-300 bg-brand-green-50/40 dark:border-brand-green-500/40 dark:bg-brand-green-500/5'"
                 >
                     <template x-if="! previewUrl">

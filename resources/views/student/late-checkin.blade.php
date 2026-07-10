@@ -1,0 +1,134 @@
+@extends('layouts.dashboard')
+
+@section('content')
+@php
+    $statusDot = ['pending' => 'bg-amber-500', 'approved' => 'bg-brand-green-500', 'rejected' => 'bg-red-500'];
+    $statusBadge = [
+        'pending' => 'bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400',
+        'approved' => 'bg-brand-green-50 text-brand-green-700 dark:bg-brand-green-500/10 dark:text-brand-green-400',
+        'rejected' => 'bg-red-50 text-red-700 dark:bg-red-500/10 dark:text-red-400',
+    ];
+    $statusLabel = ['pending' => __('รอตรวจสอบ'), 'approved' => __('อนุมัติแล้ว'), 'rejected' => __('ถูกปฏิเสธ')];
+@endphp
+<div class="mx-auto max-w-md">
+    <div class="mb-4 flex items-center justify-between">
+        <h1 class="text-lg font-semibold text-gray-900 dark:text-slate-100">{{ __('ขอเช็กชื่อย้อนหลัง') }}</h1>
+        <a href="{{ route('activities.index', ['status_group' => 'ended']) }}" class="text-sm text-gray-400 hover:text-gray-600 dark:text-slate-500 dark:hover:text-slate-300">&larr; {{ __('กลับ') }}</a>
+    </div>
+
+    <div class="rounded-3xl glass-card p-5 shadow-soft-lg sm:p-6">
+        <div class="flex items-start justify-between gap-2">
+            <div>
+                <h2 class="font-semibold text-slate-900 dark:text-slate-100">{{ $activity->title }}</h2>
+                @if ($activity->location_name)
+                    <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">{{ $activity->location_name }}</p>
+                @endif
+                <p class="mt-1 text-xs text-slate-400 dark:text-slate-500">{{ $activity->start_at->translatedFormat('d M Y H:i') }}</p>
+            </div>
+            @if ($existingRequest)
+                <span class="inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium {{ $statusBadge[$existingRequest->status] }}">
+                    <span class="relative flex h-1.5 w-1.5">
+                        <span @class(['absolute inline-flex h-full w-full animate-ping rounded-full opacity-60', $statusDot[$existingRequest->status]])></span>
+                        <span @class(['relative inline-flex h-1.5 w-1.5 rounded-full', $statusDot[$existingRequest->status]])></span>
+                    </span>
+                    {{ $statusLabel[$existingRequest->status] }}
+                </span>
+            @endif
+        </div>
+
+        @if ($existingRequest)
+            <div class="mt-4 space-y-2 rounded-2xl bg-slate-50/70 p-3.5 text-sm dark:bg-slate-800/40">
+                <p class="text-slate-700 dark:text-slate-200">
+                    <span class="text-slate-400 dark:text-slate-500">{{ __('เหตุผลที่แจ้งไว้:') }}</span>
+                    {{ $existingRequest->reason }}
+                </p>
+                @if ($existingRequest->status === 'approved')
+                    <p class="text-slate-700 dark:text-slate-200">
+                        <span class="text-slate-400 dark:text-slate-500">{{ __('ชั่วโมงที่ได้รับ:') }}</span>
+                        @if ($existingRequest->hours_approved !== null && $existingRequest->hours_approved != $activity->credit_hours)
+                            <span class="text-slate-400 line-through">{{ $activity->credit_hours }}</span>
+                            <span class="font-semibold text-brand-green-700 dark:text-brand-green-400">{{ $existingRequest->hours_credited }}</span> {{ __('ชม.') }}
+                        @else
+                            <span class="font-medium">{{ $existingRequest->hours_credited }} {{ __('ชม.') }}</span>
+                        @endif
+                    </p>
+                @endif
+                @if ($existingRequest->status === 'rejected' && $existingRequest->reject_reason)
+                    <p class="rounded-xl bg-red-50 px-3 py-2 text-xs text-red-600 dark:bg-red-500/10 dark:text-red-400">{{ __('เหตุผลที่ปฏิเสธ:') }} {{ $existingRequest->reject_reason }}</p>
+                @endif
+                @if ($existingRequest->admin_comment)
+                    <p class="rounded-xl bg-brand-purple-50 px-3 py-2 text-xs text-brand-purple-700 dark:bg-brand-purple-500/10 dark:text-brand-purple-400">{{ __('ความเห็นกองพัฒนานักศึกษา:') }} {{ $existingRequest->admin_comment }}</p>
+                @endif
+                <div class="overflow-hidden rounded-xl bg-black/5 dark:bg-black/20">
+                    <img src="{{ asset('storage/'.$existingRequest->proof_image_path) }}" class="max-h-56 w-full object-contain">
+                </div>
+            </div>
+        @endif
+
+        @if (! $existingRequest || $existingRequest->status === 'rejected')
+            @unless ($existingRequest)
+                <p class="mt-3 rounded-xl bg-amber-50 px-3.5 py-2.5 text-xs text-amber-700 dark:bg-amber-500/10 dark:text-amber-400">
+                    {{ __('ใช้สำหรับกรณีที่คุณเข้าร่วมกิจกรรมนี้จริง แต่ลืมหรือไม่สะดวกเช็กชื่อตอนกิจกรรมยังเปิดรับ คำร้องต้องรอเจ้าหน้าที่ตรวจสอบและอนุมัติก่อนจึงจะได้รับชั่วโมงกิจกรรม') }}
+                </p>
+            @endunless
+
+            @if ($errors->any())
+                <div class="mt-4 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700 shadow-soft ring-1 ring-red-100 dark:bg-red-500/10 dark:text-red-400 dark:ring-red-500/20">
+                    <ul class="list-inside list-disc space-y-1">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
+            <form method="POST" action="{{ route('late-checkin.store', $activity) }}" enctype="multipart/form-data" class="mt-4 space-y-4">
+            @csrf
+            <div>
+                <label class="mb-1.5 block text-sm font-medium text-slate-600 dark:text-slate-400">{{ __('เหตุผลที่ไม่ได้เช็กชื่อตอนนั้น') }}</label>
+                <textarea
+                    name="reason" rows="3" maxlength="500" required
+                    placeholder="{{ __('เช่น ลืมสแกน QR, มือถือแบตหมดตอนจะสแกน') }}"
+                    class="w-full resize-none rounded-2xl border bg-white px-3.5 py-2.5 text-sm text-slate-700 placeholder:text-slate-400 shadow-soft transition-all duration-200 focus:outline-none focus:ring-4 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 @error('reason') border-red-400 focus:border-red-500 focus:ring-red-500/10 dark:border-red-500/70 @else border-slate-200 focus:border-brand-purple-500 focus:ring-brand-purple-500/10 dark:border-slate-600 @enderror"
+                >{{ old('reason') }}</textarea>
+            </div>
+
+            <div>
+                <label class="mb-1.5 block text-sm font-medium text-slate-600 dark:text-slate-400">{{ __('รูปหลักฐานการเข้าร่วมกิจกรรม (ไม่เกิน 2MB)') }}</label>
+                <div
+                    x-data="{ fileName: '', previewUrl: null }"
+                    class="relative flex flex-col items-center justify-center gap-2 overflow-hidden rounded-2xl border-2 border-dashed bg-slate-50/60 p-5 text-center transition-colors duration-200 dark:bg-slate-800/40 @error('proof_image') border-red-400 dark:border-red-500/70 @else border-slate-200 dark:border-slate-600 @enderror"
+                    :class="previewUrl && 'border-brand-green-300 bg-brand-green-50/40 dark:border-brand-green-500/40 dark:bg-brand-green-500/5'"
+                >
+                    <template x-if="! previewUrl">
+                        <div class="flex flex-col items-center gap-1.5 text-slate-400 dark:text-slate-500">
+                            <svg class="h-8 w-8" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 16.5V9.75m0 0l-3.75 3.75M12 9.75l3.75 3.75M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z"/></svg>
+                            <p class="text-xs font-medium">{{ __('คลิกเพื่อเลือกรูปภาพ (ถ่ายใหม่หรือเลือกจากคลังภาพ)') }}</p>
+                            <p class="text-[0.68rem] text-slate-350 dark:text-slate-600">PNG, JPG {{ __('ไม่เกิน') }} 2MB</p>
+                        </div>
+                    </template>
+                    <template x-if="previewUrl">
+                        <img :src="previewUrl" class="max-h-44 rounded-xl object-contain shadow-soft">
+                    </template>
+                    <p class="max-w-full truncate text-xs font-medium text-slate-600 dark:text-slate-300" x-show="fileName" x-text="fileName"></p>
+
+                    <input
+                        type="file" name="proof_image" accept="image/*" required
+                        class="absolute inset-0 h-full w-full cursor-pointer opacity-0"
+                        @change="
+                            const file = $event.target.files[0];
+                            fileName = file ? file.name : '';
+                            previewUrl = file ? URL.createObjectURL(file) : null;
+                        "
+                    >
+                </div>
+            </div>
+
+            <button type="submit" class="w-full rounded-xl bg-brand-green-500 px-4 py-3 text-sm font-semibold text-brand-purple-950 shadow-soft transition-all duration-300 hover:-translate-y-0.5 hover:bg-brand-green-400 hover:shadow-lg">
+                {{ $existingRequest ? __('ส่งคำร้องใหม่อีกครั้ง') : __('ส่งคำร้อง') }}
+            </button>
+        </form>
+        @endif
+    </div>
+</div>
+@endsection

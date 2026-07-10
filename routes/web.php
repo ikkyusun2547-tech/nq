@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\AttendanceController;
 use App\Http\Controllers\Admin\ClearanceReportController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\ExternalApprovalController;
+use App\Http\Controllers\Admin\LateCheckInApprovalController;
 use App\Http\Controllers\Admin\StudentController;
 use App\Http\Controllers\Auth\GoogleAuthController;
 use App\Http\Controllers\NotificationController;
@@ -13,6 +14,8 @@ use App\Http\Controllers\Student\ActivityController as StudentActivityController
 use App\Http\Controllers\Student\CheckInController;
 use App\Http\Controllers\Student\DashboardController;
 use App\Http\Controllers\Student\ExternalActivityController;
+use App\Http\Controllers\Student\LateCheckInController;
+use App\Http\Controllers\Student\SelfCheckInController;
 use App\Models\Faculty;
 use Illuminate\Support\Facades\Route;
 
@@ -102,6 +105,12 @@ Route::middleware(['auth', 'srru.email'])->group(function () {
         Route::get('/checkin', [CheckInController::class, 'show'])->name('checkin.show');
         Route::post('/checkin', [CheckInController::class, 'store'])->name('checkin.store');
 
+        Route::get('/activities/{activity}/self-checkin', [SelfCheckInController::class, 'show'])->name('self-checkin.show');
+        Route::post('/activities/{activity}/self-checkin', [SelfCheckInController::class, 'store'])->name('self-checkin.store');
+
+        Route::get('/activities/{activity}/late-checkin', [LateCheckInController::class, 'show'])->name('late-checkin.show');
+        Route::post('/activities/{activity}/late-checkin', [LateCheckInController::class, 'store'])->name('late-checkin.store');
+
         Route::get('/external-activities', [ExternalActivityController::class, 'index'])->name('external-activities.index');
         Route::post('/external-activities', [ExternalActivityController::class, 'store'])->name('external-activities.store');
 
@@ -109,6 +118,7 @@ Route::middleware(['auth', 'srru.email'])->group(function () {
         Route::get('/notifications/poll', [NotificationController::class, 'poll'])->name('notifications.poll');
         Route::post('/notifications/{notification}/read', [NotificationController::class, 'read'])->name('notifications.read');
         Route::post('/notifications/read-all', [NotificationController::class, 'readAll'])->name('notifications.read-all');
+        Route::delete('/notifications/destroy-all', [NotificationController::class, 'destroyAll'])->name('notifications.destroy-all');
         Route::delete('/notifications/{notification}', [NotificationController::class, 'destroy'])->name('notifications.destroy');
     });
 
@@ -130,6 +140,10 @@ Route::middleware(['auth', 'srru.email'])->group(function () {
         Route::get('/external-activities', [ExternalApprovalController::class, 'index'])->name('external-activities.index');
         Route::post('/external-activities/{externalActivityRequest}/approve', [ExternalApprovalController::class, 'approve'])->name('external-activities.approve');
         Route::post('/external-activities/{externalActivityRequest}/reject', [ExternalApprovalController::class, 'reject'])->name('external-activities.reject');
+
+        Route::get('/late-checkins', [LateCheckInApprovalController::class, 'index'])->name('late-checkins.index');
+        Route::post('/late-checkins/{lateCheckInRequest}/approve', [LateCheckInApprovalController::class, 'approve'])->name('late-checkins.approve');
+        Route::post('/late-checkins/{lateCheckInRequest}/reject', [LateCheckInApprovalController::class, 'reject'])->name('late-checkins.reject');
 
         Route::get('/reports/clearance', [ClearanceReportController::class, 'exportPdf'])->name('reports.clearance');
     });

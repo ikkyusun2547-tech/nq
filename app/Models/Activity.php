@@ -31,6 +31,9 @@ class Activity extends Model
         'location_lng',
         'allowed_radius',
         'qr_secret',
+        'checkin_method',
+        'checkin_opens_at',
+        'checkin_closes_at',
         'status',
     ];
 
@@ -43,6 +46,9 @@ class Activity extends Model
         return [
             'start_at' => 'datetime',
             'end_at' => 'datetime',
+            'checkin_opens_at' => 'datetime',
+            'checkin_closes_at' => 'datetime',
+            'important_updated_at' => 'datetime',
             'academic_year' => 'integer',
             'location_lat' => 'decimal:8',
             'location_lng' => 'decimal:8',
@@ -62,6 +68,11 @@ class Activity extends Model
     public function attendances(): HasMany
     {
         return $this->hasMany(Attendance::class);
+    }
+
+    public function lateCheckInRequests(): HasMany
+    {
+        return $this->hasMany(LateCheckInRequest::class);
     }
 
     public function restrictedFaculties(): BelongsToMany
@@ -85,7 +96,44 @@ class Activity extends Model
 
     public function acceptsCheckIn(): bool
     {
-        return in_array($this->status, ['open', 'ongoing'], true);
+        if (! in_array($this->status, ['open', 'ongoing'], true)) {
+            return false;
+        }
+
+        if ($this->usesSelfReportCheckIn()) {
+            return $this->checkin_opens_at
+                && $this->checkin_closes_at
+                && now()->between($this->checkin_opens_at, $this->checkin_closes_at);
+        }
+
+        return true;
+    }
+
+    public function usesSelfReportCheckIn(): bool
+    {
+        return $this->checkin_method === 'self_report';
+    }
+
+    /**
+     * A student can only ask to be checked in retroactively once the
+     * activity has genuinely wrapped up (status closed) — not while it's
+     * still open/ongoing, where the normal check-in flow already applies.
+     */
+    public function acceptsLateRequest(): bool
+    {
+        return $this->status === 'closed';
+    }
+
+    /**
+     * Whether to show the "🔄 อัปเดตแล้ว" badge to students — true for a
+     * week after an edit that changed something they'd actually need to
+     * know about (time/location/check-in method), then fades on its own
+     * without needing per-student dismissal tracking.
+     */
+    public function wasRecentlyUpdatedSignificantly(): bool
+    {
+        return $this->important_updated_at !== null
+            && $this->important_updated_at->gt(now()->subDays(7));
     }
 
     public function isEligibleFor(User $user): bool

@@ -57,4 +57,11 @@ class NotificationController extends Controller
 
         return back()->with('status', __('ลบการแจ้งเตือนแล้ว'));
     }
+
+    public function destroyAll(Request $request)
+    {
+        $request->user()->notifications()->delete();
+
+        return back()->with('status', __('ลบการแจ้งเตือนทั้งหมดแล้ว'));
+    }
 }

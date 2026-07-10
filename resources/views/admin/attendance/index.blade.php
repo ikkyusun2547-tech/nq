@@ -6,6 +6,7 @@
     $reasonLabel = [
         'GPS_OUT_OF_BOUNDS' => __('GPS เกินรัศมี'),
         'DEVICE_SHARING_SUSPECTED' => __('ต้องสงสัยใช้เครื่องร่วมกัน'),
+        'SELF_REPORTED' => __('รายงานตนเอง (ไม่มี GPS ยืนยัน)'),
     ];
     $badgeDot = [
         'auto_approved' => 'bg-brand-green-500',
@@ -40,7 +41,12 @@
 >
     <div class="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-3xl brand-gradient p-6 text-white shadow-soft-lg sm:p-8">
         <div>
-            <p class="text-xs font-medium uppercase tracking-[0.2em] text-violet-200/70">Live Event Control</p>
+            <p class="text-xs font-medium uppercase tracking-[0.2em] text-violet-200/70">
+                Live Event Control
+                @if ($activity->activity_code)
+                    · <span class="font-mono">{{ $activity->activity_code }}</span>
+                @endif
+            </p>
             <h1 class="mt-1 text-xl font-bold sm:text-2xl">{{ $activity->title }}</h1>
             <p class="mt-1 text-sm text-violet-100/70">{{ __('ผู้เช็กชื่อทั้งหมด :count คน', ['count' => $attendances->count()]) }}</p>
         </div>
@@ -172,7 +178,11 @@
                         <td class="whitespace-nowrap px-3 py-3 text-slate-500 dark:text-slate-400">{{ $att->user->current_year }}</td>
                         <td class="whitespace-nowrap px-3 py-3 text-slate-500 dark:text-slate-400">{{ $att->checkin_time->format('H:i:s') }}</td>
                         <td class="whitespace-nowrap px-3 py-3 @class(['font-semibold text-red-600 dark:text-red-400' => $att->status === 'flagged', 'text-slate-500 dark:text-slate-400' => $att->status !== 'flagged'])">
-                            {{ $att->distance_meters }} m
+                            @if (is_null($att->distance_meters))
+                                <span class="text-slate-400 dark:text-slate-500">—</span>
+                            @else
+                                {{ $att->distance_meters }} m
+                            @endif
                         </td>
                         <td class="whitespace-nowrap px-3 py-3">
                             <span @class([
@@ -194,8 +204,12 @@
                             @endif
                         </td>
                         <td class="whitespace-nowrap px-3 py-3">
-                            <button @click="lightboxUrl = '{{ asset('storage/'.$att->photo_path) }}'" type="button" class="font-medium text-brand-purple-600 transition-colors hover:text-brand-purple-800 dark:text-brand-purple-400 dark:hover:text-brand-purple-300">{{ __('รูปเซลฟี') }}</button>
-                            <a href="https://www.google.com/maps?q={{ $att->student_lat }},{{ $att->student_lng }}" target="_blank" class="ml-2 font-medium text-brand-purple-600 transition-colors hover:text-brand-purple-800 dark:text-brand-purple-400 dark:hover:text-brand-purple-300">{{ __('แผนที่') }}</a>
+                            <button @click="lightboxUrl = '{{ asset('storage/'.$att->photo_path) }}'" type="button" class="font-medium text-brand-purple-600 transition-colors hover:text-brand-purple-800 dark:text-brand-purple-400 dark:hover:text-brand-purple-300">
+                                {{ in_array($att->checkin_method, ['self_report', 'late_request'], true) ? __('รูปหลักฐาน') : __('รูปเซลฟี') }}
+                            </button>
+                            @if ($att->student_lat !== null && $att->student_lng !== null)
+                                <a href="https://www.google.com/maps?q={{ $att->student_lat }},{{ $att->student_lng }}" target="_blank" class="ml-2 font-medium text-brand-purple-600 transition-colors hover:text-brand-purple-800 dark:text-brand-purple-400 dark:hover:text-brand-purple-300">{{ __('แผนที่') }}</a>
+                            @endif
                         </td>
                     </tr>
                 @empty

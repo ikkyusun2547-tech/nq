@@ -5,21 +5,17 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class Attendance extends Model
+class LateCheckInRequest extends Model
 {
     protected $fillable = [
         'user_id',
         'activity_id',
-        'checkin_method',
-        'checkin_time',
-        'student_lat',
-        'student_lng',
-        'distance_meters',
-        'credited_hours',
-        'device_uuid',
-        'photo_path',
+        'reason',
+        'proof_image_path',
         'status',
-        'flag_reason',
+        'hours_approved',
+        'reject_reason',
+        'admin_comment',
         'reviewed_by',
         'reviewed_at',
     ];
@@ -27,9 +23,6 @@ class Attendance extends Model
     protected function casts(): array
     {
         return [
-            'checkin_time' => 'datetime',
-            'student_lat' => 'decimal:8',
-            'student_lng' => 'decimal:8',
             'reviewed_at' => 'datetime',
         ];
     }
@@ -49,13 +42,17 @@ class Attendance extends Model
         return $this->belongsTo(User::class, 'reviewed_by');
     }
 
-    public function scopeFlagged($query)
+    public function scopePending($query)
     {
-        return $query->where('status', 'flagged');
+        return $query->where('status', 'pending');
     }
 
-    public function scopeCredited($query)
+    /**
+     * The hours actually credited: what an admin overrode to, or the
+     * activity's normal credit_hours if never adjusted.
+     */
+    public function getHoursCreditedAttribute(): int
     {
-        return $query->where('status', 'auto_approved');
+        return $this->hours_approved ?? $this->activity->credit_hours;
     }
 }

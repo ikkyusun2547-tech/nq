@@ -23,7 +23,9 @@
     x-data="{
         activityType: '{{ old('activity_type', $activity->activity_type ?? 'elective') }}',
         creditHours: {{ old('credit_hours', $activity->credit_hours ?? 1) }},
+        checkinMethod: '{{ old('checkin_method', $activity->checkin_method ?? 'realtime') }}',
         lockCredit() { if (this.activityType === 'core') { this.creditHours = 5; } },
+        refreshMap() { this.$nextTick(() => window.__activityMap && window.__activityMap.invalidateSize()); },
     }"
     x-init="lockCredit()"
 >
@@ -31,7 +33,7 @@
         <div class="md:col-span-2">
             <label class="mb-1 block text-sm font-medium text-slate-600 dark:text-slate-400">{{ __('ชื่อกิจกรรม') }}</label>
             <input type="text" name="title" value="{{ old('title', $activity->title ?? '') }}" required
-                class="w-full rounded-2xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-700 placeholder:text-slate-400 shadow-soft transition-all duration-200 focus:border-brand-purple-500 focus:outline-none focus:ring-4 focus:ring-brand-purple-500/10 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500">
+                class="w-full rounded-2xl border bg-white px-3.5 py-2.5 text-sm text-slate-700 placeholder:text-slate-400 shadow-soft transition-all duration-200 focus:outline-none focus:ring-4 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 @error('title') border-red-400 focus:border-red-500 focus:ring-red-500/10 dark:border-red-500/70 @else border-slate-300 focus:border-brand-purple-500 focus:ring-brand-purple-500/10 dark:border-slate-600 @enderror">
         </div>
 
         <div class="md:col-span-2">
@@ -86,7 +88,7 @@
             @endphp
             <input type="number" name="academic_year" value="{{ old('academic_year', $activity->academic_year ?? $currentAcademicYear) }}" required
                 min="2540" max="{{ date('Y') + 544 }}"
-                class="w-full rounded-2xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-700 placeholder:text-slate-400 shadow-soft transition-all duration-200 focus:border-brand-purple-500 focus:outline-none focus:ring-4 focus:ring-brand-purple-500/10 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500">
+                class="w-full rounded-2xl border bg-white px-3.5 py-2.5 text-sm text-slate-700 placeholder:text-slate-400 shadow-soft transition-all duration-200 focus:outline-none focus:ring-4 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 @error('academic_year') border-red-400 focus:border-red-500 focus:ring-red-500/10 dark:border-red-500/70 @else border-slate-300 focus:border-brand-purple-500 focus:ring-brand-purple-500/10 dark:border-slate-600 @enderror">
         </div>
 
         <div>
@@ -98,9 +100,9 @@
             />
         </div>
 
-        <div>
+        <div class="md:col-span-2">
             <label class="mb-2 block text-sm font-medium text-slate-600 dark:text-slate-400">{{ __('ลักษณะกิจกรรม') }}</label>
-            <div class="grid grid-cols-2 gap-3">
+            <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
                 <label class="flex cursor-pointer items-center gap-2 rounded-xl border border-slate-200 bg-slate-50/50 px-3 py-2.5 text-sm shadow-soft transition-all duration-200 has-[:checked]:border-brand-purple-500 has-[:checked]:bg-brand-purple-50 has-[:checked]:text-brand-purple-700 dark:border-slate-700 dark:bg-slate-800/40 dark:has-[:checked]:bg-brand-purple-500/10 dark:has-[:checked]:text-brand-purple-400">
                     <input type="radio" name="activity_type" value="core" x-model="activityType" @change="lockCredit()" class="text-brand-purple-600 focus:ring-brand-purple-500">
                     {{ __('บังคับแกน') }}
@@ -108,6 +110,13 @@
                 <label class="flex cursor-pointer items-center gap-2 rounded-xl border border-slate-200 bg-slate-50/50 px-3 py-2.5 text-sm shadow-soft transition-all duration-200 has-[:checked]:border-brand-purple-500 has-[:checked]:bg-brand-purple-50 has-[:checked]:text-brand-purple-700 dark:border-slate-700 dark:bg-slate-800/40 dark:has-[:checked]:bg-brand-purple-500/10 dark:has-[:checked]:text-brand-purple-400">
                     <input type="radio" name="activity_type" value="elective" x-model="activityType" @change="lockCredit()" class="text-brand-purple-600 focus:ring-brand-purple-500">
                     {{ __('บังคับเลือก') }}
+                </label>
+                <label class="flex cursor-pointer items-start gap-2 rounded-xl border border-slate-200 bg-slate-50/50 px-3 py-2.5 text-sm shadow-soft transition-all duration-200 has-[:checked]:border-brand-purple-500 has-[:checked]:bg-brand-purple-50 has-[:checked]:text-brand-purple-700 dark:border-slate-700 dark:bg-slate-800/40 dark:has-[:checked]:bg-brand-purple-500/10 dark:has-[:checked]:text-brand-purple-400">
+                    <input type="radio" name="activity_type" value="practice" x-model="activityType" @change="lockCredit()" class="mt-0.5 text-brand-purple-600 focus:ring-brand-purple-500">
+                    <span>
+                        <span class="block">{{ __('กิจกรรมซ้อม/เตรียมงาน') }}</span>
+                        <span class="block text-xs text-slate-400 dark:text-slate-500">{{ __('นับชั่วโมงสะสม แต่ไม่นับเป็น 1 ใน 25 กิจกรรม') }}</span>
+                    </span>
                 </label>
             </div>
         </div>
@@ -118,7 +127,7 @@
                 type="number" name="credit_hours" x-model.number="creditHours" :readonly="activityType === 'core'"
                 :class="activityType === 'core' ? 'bg-slate-100 text-slate-400 dark:bg-slate-800 dark:text-slate-500' : ''"
                 min="1" max="100" required
-                class="w-full rounded-2xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-700 placeholder:text-slate-400 shadow-soft transition-all duration-200 focus:border-brand-purple-500 focus:outline-none focus:ring-4 focus:ring-brand-purple-500/10 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500"
+                class="w-full rounded-2xl border bg-white px-3.5 py-2.5 text-sm text-slate-700 placeholder:text-slate-400 shadow-soft transition-all duration-200 focus:outline-none focus:ring-4 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 @error('credit_hours') border-red-400 focus:border-red-500 focus:ring-red-500/10 dark:border-red-500/70 @else border-slate-300 focus:border-brand-purple-500 focus:ring-brand-purple-500/10 dark:border-slate-600 @enderror"
             >
             <p class="mt-1 text-xs text-slate-400 dark:text-slate-500" x-show="activityType === 'core'">{{ __('กิจกรรมบังคับแกนถูกกำหนดไว้ที่ :hours ชั่วโมงตามเกณฑ์สถาบัน', ['hours' => 5]) }}</p>
         </div>
@@ -141,42 +150,82 @@
             <label class="mb-1 block text-sm font-medium text-slate-600 dark:text-slate-400">{{ __('วันเวลาเริ่มกิจกรรม') }}</label>
             <input type="datetime-local" name="start_at"
                 value="{{ old('start_at', isset($activity->start_at) ? $activity->start_at->format('Y-m-d\TH:i') : '') }}" required
-                class="w-full rounded-2xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-700 placeholder:text-slate-400 shadow-soft transition-all duration-200 focus:border-brand-purple-500 focus:outline-none focus:ring-4 focus:ring-brand-purple-500/10 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500">
+                class="w-full rounded-2xl border bg-white px-3.5 py-2.5 text-sm text-slate-700 placeholder:text-slate-400 shadow-soft transition-all duration-200 focus:outline-none focus:ring-4 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 @error('start_at') border-red-400 focus:border-red-500 focus:ring-red-500/10 dark:border-red-500/70 @else border-slate-300 focus:border-brand-purple-500 focus:ring-brand-purple-500/10 dark:border-slate-600 @enderror">
         </div>
 
         <div>
             <label class="mb-1 block text-sm font-medium text-slate-600 dark:text-slate-400">{{ __('วันเวลาสิ้นสุดกิจกรรม') }}</label>
             <input type="datetime-local" name="end_at"
                 value="{{ old('end_at', isset($activity->end_at) ? $activity->end_at->format('Y-m-d\TH:i') : '') }}" required
-                class="w-full rounded-2xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-700 placeholder:text-slate-400 shadow-soft transition-all duration-200 focus:border-brand-purple-500 focus:outline-none focus:ring-4 focus:ring-brand-purple-500/10 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500">
+                class="w-full rounded-2xl border bg-white px-3.5 py-2.5 text-sm text-slate-700 placeholder:text-slate-400 shadow-soft transition-all duration-200 focus:outline-none focus:ring-4 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 @error('end_at') border-red-400 focus:border-red-500 focus:ring-red-500/10 dark:border-red-500/70 @else border-slate-300 focus:border-brand-purple-500 focus:ring-brand-purple-500/10 dark:border-slate-600 @enderror">
+        </div>
+    </div>
+
+    <div class="mt-6 rounded-2xl glass-card p-5 shadow-soft">
+        <label class="mb-2 block text-sm font-medium text-slate-600 dark:text-slate-400">{{ __('วิธีเช็กชื่อ') }}</label>
+        <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <label class="flex cursor-pointer items-start gap-2 rounded-xl border border-slate-200 bg-slate-50/50 px-3 py-2.5 text-sm shadow-soft transition-all duration-200 has-[:checked]:border-brand-purple-500 has-[:checked]:bg-brand-purple-50 has-[:checked]:text-brand-purple-700 dark:border-slate-700 dark:bg-slate-800/40 dark:has-[:checked]:bg-brand-purple-500/10 dark:has-[:checked]:text-brand-purple-400">
+                <input type="radio" name="checkin_method" value="realtime" x-model="checkinMethod" @change="refreshMap()" class="mt-0.5 text-brand-purple-600 focus:ring-brand-purple-500">
+                <span>
+                    <span class="block font-medium">{{ __('สแกน QR + GPS + เซลฟี') }}</span>
+                    <span class="block text-xs text-slate-400 dark:text-slate-500">{{ __('เช็กชื่อหน้างานแบบเรียลไทม์ (ค่าเริ่มต้น)') }}</span>
+                </span>
+            </label>
+            <label class="flex cursor-pointer items-start gap-2 rounded-xl border border-slate-200 bg-slate-50/50 px-3 py-2.5 text-sm shadow-soft transition-all duration-200 has-[:checked]:border-brand-purple-500 has-[:checked]:bg-brand-purple-50 has-[:checked]:text-brand-purple-700 dark:border-slate-700 dark:bg-slate-800/40 dark:has-[:checked]:bg-brand-purple-500/10 dark:has-[:checked]:text-brand-purple-400">
+                <input type="radio" name="checkin_method" value="self_report" x-model="checkinMethod" class="mt-0.5 text-brand-purple-600 focus:ring-brand-purple-500">
+                <span>
+                    <span class="block font-medium">{{ __('รายงานตนเอง + แนบรูปหลักฐาน') }}</span>
+                    <span class="block text-xs text-slate-400 dark:text-slate-500">{{ __('ไม่ใช้ QR/GPS — สำหรับสถานที่ที่ฉาย QR ไม่ได้ ต้องรอแอดมินตรวจสอบก่อนอนุมัติเสมอ') }}</span>
+                </span>
+            </label>
         </div>
     </div>
 
     <div class="mt-6 rounded-2xl glass-card p-5 shadow-soft">
         <label class="mb-1 block text-sm font-medium text-slate-600 dark:text-slate-400">{{ __('สถานที่จัดกิจกรรม') }}</label>
         <input type="text" name="location_name" value="{{ old('location_name', $activity->location_name ?? '') }}" required
-            class="mb-4 w-full rounded-2xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-700 placeholder:text-slate-400 shadow-soft transition-all duration-200 focus:border-brand-purple-500 focus:outline-none focus:ring-4 focus:ring-brand-purple-500/10 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500">
+            class="mb-4 w-full rounded-2xl border bg-white px-3.5 py-2.5 text-sm text-slate-700 placeholder:text-slate-400 shadow-soft transition-all duration-200 focus:outline-none focus:ring-4 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 @error('location_name') border-red-400 focus:border-red-500 focus:ring-red-500/10 dark:border-red-500/70 @else border-slate-300 focus:border-brand-purple-500 focus:ring-brand-purple-500/10 dark:border-slate-600 @enderror">
 
-        <label class="mb-2 block text-sm font-medium text-slate-600 dark:text-slate-400">{{ __('ปักหมุดสถานที่จัดกิจกรรม (คลิกบนแผนที่)') }}</label>
-        <div id="activity-map" class="h-72 w-full overflow-hidden rounded-2xl ring-1 ring-brand-purple-100 dark:ring-brand-purple-500/20"></div>
-        <div class="mt-3 grid grid-cols-3 gap-3">
-            <div>
-                <label class="mb-1 block text-xs text-slate-400 dark:text-slate-500">Latitude</label>
-                <input type="text" id="location_lat" name="location_lat" readonly
-                    value="{{ old('location_lat', $activity->location_lat ?? '') }}"
-                    class="w-full rounded-xl border border-slate-200 bg-slate-100/70 px-3.5 py-2.5 text-sm text-slate-500 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-400">
+        <div x-show="checkinMethod === 'realtime'" x-cloak>
+            <label class="mb-2 block text-sm font-medium text-slate-600 dark:text-slate-400">{{ __('ปักหมุดสถานที่จัดกิจกรรม (คลิกบนแผนที่)') }}</label>
+            <div id="activity-map" class="h-72 w-full overflow-hidden rounded-2xl ring-1 ring-brand-purple-100 dark:ring-brand-purple-500/20"></div>
+            <div class="mt-3 grid grid-cols-3 gap-3">
+                <div>
+                    <label class="mb-1 block text-xs text-slate-400 dark:text-slate-500">Latitude</label>
+                    <input type="text" id="location_lat" name="location_lat" readonly
+                        value="{{ old('location_lat', $activity->location_lat ?? '') }}"
+                        class="w-full rounded-xl border bg-slate-100/70 px-3.5 py-2.5 text-sm text-slate-500 dark:bg-slate-800 dark:text-slate-400 @error('location_lat') border-red-400 dark:border-red-500/70 @else border-slate-200 dark:border-slate-600 @enderror">
+                </div>
+                <div>
+                    <label class="mb-1 block text-xs text-slate-400 dark:text-slate-500">Longitude</label>
+                    <input type="text" id="location_lng" name="location_lng" readonly
+                        value="{{ old('location_lng', $activity->location_lng ?? '') }}"
+                        class="w-full rounded-xl border bg-slate-100/70 px-3.5 py-2.5 text-sm text-slate-500 dark:bg-slate-800 dark:text-slate-400 @error('location_lng') border-red-400 dark:border-red-500/70 @else border-slate-200 dark:border-slate-600 @enderror">
+                </div>
+                <div>
+                    <label class="mb-1 block text-xs text-slate-400 dark:text-slate-500">{{ __('รัศมีปลอดภัย (เมตร)') }}</label>
+                    <input type="number" id="allowed_radius" name="allowed_radius" min="10" max="5000"
+                        value="{{ old('allowed_radius', $activity->allowed_radius ?? 100) }}"
+                        class="w-full rounded-2xl border bg-white px-3.5 py-2.5 text-sm text-slate-700 placeholder:text-slate-400 shadow-soft transition-all duration-200 focus:outline-none focus:ring-4 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 @error('allowed_radius') border-red-400 focus:border-red-500 focus:ring-red-500/10 dark:border-red-500/70 @else border-slate-300 focus:border-brand-purple-500 focus:ring-brand-purple-500/10 dark:border-slate-600 @enderror">
+                </div>
             </div>
-            <div>
-                <label class="mb-1 block text-xs text-slate-400 dark:text-slate-500">Longitude</label>
-                <input type="text" id="location_lng" name="location_lng" readonly
-                    value="{{ old('location_lng', $activity->location_lng ?? '') }}"
-                    class="w-full rounded-xl border border-slate-200 bg-slate-100/70 px-3.5 py-2.5 text-sm text-slate-500 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-400">
-            </div>
-            <div>
-                <label class="mb-1 block text-xs text-slate-400 dark:text-slate-500">{{ __('รัศมีปลอดภัย (เมตร)') }}</label>
-                <input type="number" id="allowed_radius" name="allowed_radius" min="10" max="5000"
-                    value="{{ old('allowed_radius', $activity->allowed_radius ?? 100) }}"
-                    class="w-full rounded-2xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-700 placeholder:text-slate-400 shadow-soft transition-all duration-200 focus:border-brand-purple-500 focus:outline-none focus:ring-4 focus:ring-brand-purple-500/10 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500">
+        </div>
+
+        <div x-show="checkinMethod === 'self_report'" x-cloak>
+            <label class="mb-2 block text-sm font-medium text-slate-600 dark:text-slate-400">{{ __('ช่วงเวลาที่เปิดให้เช็กชื่อแบบรายงานตนเอง') }}</label>
+            <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div>
+                    <label class="mb-1 block text-xs text-slate-400 dark:text-slate-500">{{ __('เปิดให้เช็กชื่อตั้งแต่') }}</label>
+                    <input type="datetime-local" name="checkin_opens_at"
+                        value="{{ old('checkin_opens_at', isset($activity->checkin_opens_at) ? $activity->checkin_opens_at->format('Y-m-d\TH:i') : '') }}"
+                        class="w-full rounded-2xl border bg-white px-3.5 py-2.5 text-sm text-slate-700 shadow-soft transition-all duration-200 focus:outline-none focus:ring-4 dark:bg-slate-800 dark:text-slate-100 @error('checkin_opens_at') border-red-400 focus:border-red-500 focus:ring-red-500/10 dark:border-red-500/70 @else border-slate-300 focus:border-brand-purple-500 focus:ring-brand-purple-500/10 dark:border-slate-600 @enderror">
+                </div>
+                <div>
+                    <label class="mb-1 block text-xs text-slate-400 dark:text-slate-500">{{ __('ปิดรับเช็กชื่อเมื่อ') }}</label>
+                    <input type="datetime-local" name="checkin_closes_at"
+                        value="{{ old('checkin_closes_at', isset($activity->checkin_closes_at) ? $activity->checkin_closes_at->format('Y-m-d\TH:i') : '') }}"
+                        class="w-full rounded-2xl border bg-white px-3.5 py-2.5 text-sm text-slate-700 shadow-soft transition-all duration-200 focus:outline-none focus:ring-4 dark:bg-slate-800 dark:text-slate-100 @error('checkin_closes_at') border-red-400 focus:border-red-500 focus:ring-red-500/10 dark:border-red-500/70 @else border-slate-300 focus:border-brand-purple-500 focus:ring-brand-purple-500/10 dark:border-slate-600 @enderror">
+                </div>
             </div>
         </div>
     </div>
@@ -242,6 +291,7 @@
         const initialLng = parseFloat(lngInput.value) || 103.4936;
 
         const map = L.map('activity-map').setView([initialLat, initialLng], 16);
+        window.__activityMap = map;
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; OpenStreetMap contributors',
         }).addTo(map);
