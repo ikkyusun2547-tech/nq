@@ -407,5 +407,19 @@
     "คำร้องเทียบโอนชั่วโมงได้รับการอนุมัติ": "Credit transfer request approved",
     "คำร้องเทียบโอนชั่วโมงถูกปฏิเสธ": "Credit transfer request rejected",
     "คำร้องเทียบโอนชั่วโมงได้รับอนุมัติ :hours ชม.": "Credit transfer request approved for :hours hrs",
-    "คำร้องเทียบโอนชั่วโมงถูกปฏิเสธ: :reason": "Credit transfer request rejected: :reason"
+    "คำร้องเทียบโอนชั่วโมงถูกปฏิเสธ: :reason": "Credit transfer request rejected: :reason",
+
+    "นำเข้ารายชื่อนักศึกษา": "Import Student Roster",
+    "อัปโหลดไฟล์ Excel/CSV ตามเทมเพลตด้านล่าง ระบบจะสร้างบัญชีนักศึกษาให้อัตโนมัติ (จับคู่ด้วยรหัสนักศึกษาหรืออีเมล) เมื่อนักศึกษาล็อกอินด้วย Google ครั้งแรกด้วยอีเมลที่ตรงกัน จะข้ามขั้นตอนกรอกโปรไฟล์ไปเข้าแดชบอร์ดได้ทันที": "Upload an Excel/CSV file following the template below. The system will automatically create student accounts (matched by student ID or email). When a student first logs in with Google using a matching email, they'll skip profile setup and go straight to their dashboard.",
+    "ดาวน์โหลดเทมเพลต": "Download Template",
+    "คอลัมน์ \"คณะ\" และ \"สาขา\" ต้องสะกดตรงกับที่มีอยู่ในระบบทุกตัวอักษร (ดูรายชื่อที่ถูกต้องได้จากตัวกรองคณะ/สาขาในหน้ารายชื่อนักศึกษา) — ไม่ต้องใส่คำย่อวุฒิการศึกษาต่อท้ายชื่อสาขา": "The \"Faculty\" and \"Major\" columns must match the system's spelling exactly (check the correct names via the faculty/major filters on the student directory page) — do not append the degree abbreviation to the major name.",
+    "ผลการนำเข้า": "Import Results",
+    "สร้างใหม่ :count คน": ":count new accounts created",
+    "อัปเดตข้อมูลเดิม :count คน": ":count existing accounts updated",
+    "ผิดพลาด :count แถว": ":count rows failed",
+    "แถวที่ :row:": "Row :row:",
+    "คลิกเพื่อเลือกไฟล์ Excel (.xlsx) หรือ CSV": "Click to select an Excel (.xlsx) or CSV file",
+    "นำเข้ารายชื่อ": "Import Roster",
+    "ไม่พบสาขา \":major\" ในคณะ \":faculty\"": "Major \":major\" not found under faculty \":faculty\"",
+    "รหัสนักศึกษาและอีเมลตรงกับคนละบัญชีที่มีอยู่แล้วในระบบ": "The student ID and email match two different existing accounts"
 }

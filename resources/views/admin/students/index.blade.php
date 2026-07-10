@@ -17,9 +17,15 @@
             <p class="text-xs font-medium uppercase tracking-[0.2em] text-violet-200/70">{{ __('กองพัฒนานักศึกษา') }}</p>
             <h1 class="mt-1 text-xl font-bold text-white sm:text-2xl">{{ __('ข้อมูลนักศึกษาในระบบ') }}</h1>
         </div>
-        <span class="rounded-xl bg-white/10 px-4 py-2 text-sm font-medium text-white shadow-soft ring-1 ring-white/15 backdrop-blur">
-            {{ __('ทั้งหมด :count คน', ['count' => $students->total()]) }}
-        </span>
+        <div class="flex flex-wrap items-center gap-3">
+            <span class="rounded-xl bg-white/10 px-4 py-2 text-sm font-medium text-white shadow-soft ring-1 ring-white/15 backdrop-blur">
+                {{ __('ทั้งหมด :count คน', ['count' => $students->total()]) }}
+            </span>
+            <a href="{{ route('admin.students.import.create') }}"
+                class="rounded-xl bg-white/10 px-4 py-2 text-sm font-medium text-white shadow-soft ring-1 ring-white/15 backdrop-blur transition-all duration-300 hover:-translate-y-0.5 hover:bg-white/15">
+                {{ __('นำเข้ารายชื่อนักศึกษา') }}
+            </a>
+        </div>
     </div>
 
     <form method="GET" action="{{ route('admin.students.index') }}" class="mt-4 space-y-3">

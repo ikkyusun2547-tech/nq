@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\ExternalApprovalController;
 use App\Http\Controllers\Admin\CreditTransferApprovalController;
 use App\Http\Controllers\Admin\LateCheckInApprovalController;
 use App\Http\Controllers\Admin\StudentController;
+use App\Http\Controllers\Admin\StudentImportController;
 use App\Http\Controllers\Auth\GoogleAuthController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileSetupController;
@@ -131,6 +132,9 @@ Route::middleware(['auth', 'srru.email'])->group(function () {
         Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
 
         Route::get('/students', [StudentController::class, 'index'])->name('students.index');
+        Route::get('/students/import', [StudentImportController::class, 'create'])->name('students.import.create');
+        Route::post('/students/import', [StudentImportController::class, 'store'])->name('students.import.store');
+        Route::get('/students/import/template', [StudentImportController::class, 'template'])->name('students.import.template');
         Route::get('/students/{student}', [StudentController::class, 'show'])->name('students.show');
 
         Route::resource('activities', ActivityController::class)->except(['show']);
