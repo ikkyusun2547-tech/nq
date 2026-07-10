@@ -7,6 +7,7 @@ use App\Http\Requests\ExternalActivityStoreRequest;
 use App\Models\ExternalActivityRequest;
 use App\Models\User;
 use App\Notifications\ExternalActivityRequestSubmitted;
+use App\Services\AcademicYearCalculator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Notification;
 
@@ -18,7 +19,13 @@ class ExternalActivityController extends Controller
             ->latest('activity_date')
             ->paginate(10);
 
-        return view('student.external-activities.index', compact('requests'));
+        $currentAcademicYear = AcademicYearCalculator::forDate(now());
+        $hoursUsed = ExternalActivityRequest::hoursUsedInAcademicYear(
+            $request->user()->id, $currentAcademicYear, 'created_at'
+        );
+        $hoursRemaining = max(0, ExternalActivityRequest::ANNUAL_HOUR_CAP - $hoursUsed);
+
+        return view('student.external-activities.index', compact('requests', 'currentAcademicYear', 'hoursRemaining'));
     }
 
     public function store(ExternalActivityStoreRequest $request)

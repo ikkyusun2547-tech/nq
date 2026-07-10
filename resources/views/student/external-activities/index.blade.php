@@ -40,6 +40,12 @@
     </button>
 
     <div x-show="showForm" x-cloak class="mb-6 rounded-3xl glass-card p-5 shadow-soft-lg">
+        <p class="mb-4 rounded-xl bg-brand-purple-50 px-4 py-3 text-xs text-brand-purple-700 shadow-soft ring-1 ring-brand-purple-100 dark:bg-brand-purple-500/10 dark:text-brand-purple-400 dark:ring-brand-purple-500/20">
+            {{ __('เหลือโควตาคำร้องกิจกรรมภายนอก') }}
+            <span class="font-semibold">{{ $hoursRemaining }}</span> / {{ \App\Models\ExternalActivityRequest::ANNUAL_HOUR_CAP }}
+            {{ __('ชั่วโมง สำหรับปีการศึกษา') }} {{ $currentAcademicYear }}
+        </p>
+
         @if ($errors->any())
             <div class="mb-4 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700 shadow-soft ring-1 ring-red-100 dark:bg-red-500/10 dark:text-red-400 dark:ring-red-500/20">
                 <ul class="list-inside list-disc space-y-1">
@@ -73,7 +79,7 @@
             </div>
             <div>
                 <label class="mb-1.5 block text-sm font-medium text-slate-600 dark:text-slate-400">{{ __('จำนวนชั่วโมงที่ขอเทียบ') }}</label>
-                <input type="number" name="hours_requested" value="{{ old('hours_requested') }}" min="1" max="200" required class="{{ $inputClass('hours_requested') }}">
+                <input type="number" name="hours_requested" value="{{ old('hours_requested') }}" min="1" max="{{ $hoursRemaining }}" required class="{{ $inputClass('hours_requested') }}">
             </div>
             <div>
                 <label class="mb-1.5 block text-sm font-medium text-slate-600 dark:text-slate-400">{{ __('ภาพหลักฐาน (เกียรติบัตร/ภาพเข้าร่วม, ไม่เกิน 2MB)') }}</label>
