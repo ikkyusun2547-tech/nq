@@ -19,6 +19,7 @@ use App\Http\Controllers\Student\DashboardController;
 use App\Http\Controllers\Student\ExternalActivityController;
 use App\Http\Controllers\Student\LateCheckInController;
 use App\Http\Controllers\Student\SelfCheckInController;
+use App\Http\Controllers\Student\TranscriptController;
 use App\Models\Faculty;
 use Illuminate\Support\Facades\Route;
 
@@ -119,6 +120,8 @@ Route::middleware(['auth', 'srru.email'])->group(function () {
 
         Route::get('/credit-transfers', [CreditTransferController::class, 'index'])->name('credit-transfers.index');
         Route::post('/credit-transfers', [CreditTransferController::class, 'store'])->name('credit-transfers.store');
+
+        Route::get('/transcript', [TranscriptController::class, 'download'])->name('transcript.download');
 
         Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
         Route::get('/notifications/poll', [NotificationController::class, 'poll'])->name('notifications.poll');

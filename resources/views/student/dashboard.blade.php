@@ -57,34 +57,41 @@
     </div>
 
     <!-- Clearance status tile: icon + label carries meaning, never color alone -->
-    <div class="mt-4 flex items-center gap-3 rounded-2xl p-5 shadow-soft ring-1
+    <div class="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl p-5 shadow-soft ring-1
         {{ $summary['is_cleared'] ? 'bg-brand-green-50 ring-brand-green-100 dark:bg-brand-green-500/10 dark:ring-brand-green-500/20' : 'bg-amber-50 ring-amber-200 dark:bg-amber-500/10 dark:ring-amber-500/20' }}">
-        <span class="relative flex h-10 w-10 shrink-0 items-center justify-center">
-            <span @class([
-                'absolute inline-flex h-full w-full animate-ping rounded-full opacity-40',
-                'bg-brand-green-400' => $summary['is_cleared'],
-                'bg-amber-400' => ! $summary['is_cleared'],
-            ])></span>
-            <span @class([
-                'relative flex h-10 w-10 items-center justify-center rounded-full text-lg font-bold text-white',
-                'bg-brand-green-500' => $summary['is_cleared'],
-                'bg-amber-500' => ! $summary['is_cleared'],
-            ])>{{ $summary['is_cleared'] ? '✓' : '!' }}</span>
-        </span>
-        <div>
-            @if ($summary['is_cleared'])
-                <p class="text-sm font-semibold text-brand-green-800 dark:text-brand-green-400">{{ __('ผ่านเกณฑ์รับใบรับรองกิจกรรมแล้ว') }}</p>
-                <p class="text-xs text-brand-green-700 dark:text-brand-green-400">{{ __('สะสมครบ :activities กิจกรรม / :hours ชั่วโมง', ['activities' => $summary['total_activities'], 'hours' => $summary['total_hours']]) }}</p>
-            @else
-                <p class="text-sm font-semibold text-amber-800 dark:text-amber-400">{{ __('ยังไม่ผ่านเกณฑ์') }}</p>
-                <p class="text-xs text-amber-700 dark:text-amber-400">
-                    {{ __('ขาดอีก :activities กิจกรรม และ :hours ชั่วโมง', [
-                        'activities' => max(0, $summary['required_activities'] - $summary['total_activities']),
-                        'hours' => max(0, $summary['required_hours'] - $summary['total_hours']),
-                    ]) }}
-                </p>
-            @endif
+        <div class="flex items-center gap-3">
+            <span class="relative flex h-10 w-10 shrink-0 items-center justify-center">
+                <span @class([
+                    'absolute inline-flex h-full w-full animate-ping rounded-full opacity-40',
+                    'bg-brand-green-400' => $summary['is_cleared'],
+                    'bg-amber-400' => ! $summary['is_cleared'],
+                ])></span>
+                <span @class([
+                    'relative flex h-10 w-10 items-center justify-center rounded-full text-lg font-bold text-white',
+                    'bg-brand-green-500' => $summary['is_cleared'],
+                    'bg-amber-500' => ! $summary['is_cleared'],
+                ])>{{ $summary['is_cleared'] ? '✓' : '!' }}</span>
+            </span>
+            <div>
+                @if ($summary['is_cleared'])
+                    <p class="text-sm font-semibold text-brand-green-800 dark:text-brand-green-400">{{ __('ผ่านเกณฑ์รับใบรับรองกิจกรรมแล้ว') }}</p>
+                    <p class="text-xs text-brand-green-700 dark:text-brand-green-400">{{ __('สะสมครบ :activities กิจกรรม / :hours ชั่วโมง', ['activities' => $summary['total_activities'], 'hours' => $summary['total_hours']]) }}</p>
+                @else
+                    <p class="text-sm font-semibold text-amber-800 dark:text-amber-400">{{ __('ยังไม่ผ่านเกณฑ์') }}</p>
+                    <p class="text-xs text-amber-700 dark:text-amber-400">
+                        {{ __('ขาดอีก :activities กิจกรรม และ :hours ชั่วโมง', [
+                            'activities' => max(0, $summary['required_activities'] - $summary['total_activities']),
+                            'hours' => max(0, $summary['required_hours'] - $summary['total_hours']),
+                        ]) }}
+                    </p>
+                @endif
+            </div>
         </div>
+        <a href="{{ route('transcript.download') }}"
+            class="inline-flex shrink-0 items-center gap-1.5 rounded-xl bg-white/70 px-3 py-2 text-xs font-semibold text-brand-purple-700 shadow-soft ring-1 ring-brand-purple-100 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg dark:bg-slate-900/50 dark:text-brand-purple-400 dark:ring-brand-purple-500/20">
+            <svg class="h-3.5 w-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg>
+            {{ __('ใบสรุปกิจกรรม (PDF)') }}
+        </a>
     </div>
 
     <div class="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
