@@ -36,7 +36,35 @@ class NotificationController extends Controller
         $notif = $request->user()->notifications()->findOrFail($notification);
         $notif->markAsRead();
 
-        return redirect($notif->data['url'] ?? route('dashboard'));
+        return redirect($this->relativePath($notif->data['url'] ?? null) ?? route('dashboard'));
+    }
+
+    /**
+     * A notification's url is built with route()/url() at the moment it's
+     * created and baked permanently into its stored data — including
+     * whatever scheme+host that request happened to be on (localhost,
+     * 127.0.0.1, an ngrok tunnel...). Redirecting to that absolute URL
+     * verbatim can silently send the browser to a different origin than the
+     * one it's actually authenticated on, which looks identical to a broken
+     * link: the session cookie for the origin you're on never gets sent to
+     * the other one, so the destination's own auth middleware bounces you to
+     * its /login instead. Stripping back down to just the path keeps the
+     * browser on the current origin no matter which origin created it.
+     */
+    private function relativePath(?string $url): ?string
+    {
+        if (! $url) {
+            return null;
+        }
+
+        $parts = parse_url($url);
+        $path = $parts['path'] ?? '/';
+
+        if (isset($parts['query'])) {
+            $path .= '?'.$parts['query'];
+        }
+
+        return $path;
     }
 
     public function readAll(Request $request)

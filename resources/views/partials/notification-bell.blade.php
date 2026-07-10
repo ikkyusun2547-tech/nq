@@ -58,6 +58,12 @@
                     @csrf
                     <button type="submit" class="text-xs font-medium text-brand-purple-600 hover:underline dark:text-brand-purple-400">{{ __('อ่านทั้งหมด') }}</button>
                 </form>
+                <form method="POST" action="{{ route('notifications.destroy-all') }}" x-show="items.length > 0"
+                    onsubmit="return confirm('{{ __('ลบการแจ้งเตือนทั้งหมด? การลบไม่สามารถย้อนกลับได้') }}')">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="text-xs font-medium text-red-500 hover:underline dark:text-red-400">{{ __('ลบทั้งหมด') }}</button>
+                </form>
                 <button type="button" @click="open = false"
                     class="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 dark:text-slate-500 dark:hover:bg-slate-800 dark:hover:text-slate-300"
                     aria-label="{{ __('ปิด') }}"
@@ -73,17 +79,20 @@
             </template>
             <template x-for="item in items" :key="item.id">
                 <div class="group flex items-start transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/60" :class="! item.read ? 'bg-brand-purple-50/60 dark:bg-brand-purple-500/[0.06]' : ''">
-                    <div class="flex min-w-0 flex-1 items-start gap-3 py-3 pl-4 pr-1">
-                        <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full" :class="(icons[item.icon] || icons.check).tint">
-                            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" :d="(icons[item.icon] || icons.check).path"/></svg>
-                        </span>
-                        <span class="min-w-0 flex-1">
-                            <span class="block truncate text-sm font-medium text-slate-800 dark:text-slate-100" x-text="item.title"></span>
-                            <span class="mt-0.5 block text-xs text-slate-500 dark:text-slate-400" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;" x-text="item.body"></span>
-                            <span class="mt-1 block text-[0.65rem] text-slate-400 dark:text-slate-500" x-text="item.created_at"></span>
-                        </span>
-                        <span x-show="! item.read" class="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-brand-purple-500"></span>
-                    </div>
+                    <form method="POST" :action="'{{ url('notifications') }}/' + item.id + '/read'" class="min-w-0 flex-1">
+                        @csrf
+                        <button type="submit" class="flex w-full min-w-0 items-start gap-3 py-3 pl-4 pr-1 text-left">
+                            <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full" :class="(icons[item.icon] || icons.check).tint">
+                                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" :d="(icons[item.icon] || icons.check).path"/></svg>
+                            </span>
+                            <span class="min-w-0 flex-1">
+                                <span class="block truncate text-sm font-medium text-slate-800 dark:text-slate-100" x-text="item.title"></span>
+                                <span class="mt-0.5 block text-xs text-slate-500 dark:text-slate-400" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;" x-text="item.body"></span>
+                                <span class="mt-1 block text-[0.65rem] text-slate-400 dark:text-slate-500" x-text="item.created_at"></span>
+                            </span>
+                            <span x-show="! item.read" class="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-brand-purple-500"></span>
+                        </button>
+                    </form>
                     <button type="button" @click="remove(item)"
                         class="mr-2 mt-3 shrink-0 rounded-lg p-1.5 text-slate-300 opacity-0 transition-all hover:bg-red-50 hover:text-red-500 group-hover:opacity-100 dark:text-slate-600 dark:hover:bg-red-500/10 dark:hover:text-red-400"
                         aria-label="{{ __('ลบการแจ้งเตือน') }}"

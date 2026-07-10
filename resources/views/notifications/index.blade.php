@@ -41,35 +41,9 @@
             @foreach ($notifications as $notification)
                 @php $meta = $iconMeta[$notification->data['icon'] ?? 'check'] ?? $iconMeta['check']; @endphp
                 <div class="group flex items-start gap-1 rounded-2xl bg-white shadow-sm ring-1 ring-gray-200 transition hover:ring-brand-purple-300 dark:bg-slate-900 dark:ring-slate-700 {{ $notification->read_at ? '' : 'bg-brand-purple-50/40 dark:bg-brand-purple-500/[0.05]' }}">
-                    @if ($isAdmin)
-                        <form method="POST" action="{{ route('notifications.read', $notification->id) }}" class="min-w-0 flex-1">
-                            @csrf
-                            <button type="submit" class="flex w-full items-start gap-3 p-4 text-left">
-                                <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl {{ $meta['tint'] }}">
-                                    <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $meta['path'] }}"/></svg>
-                                </span>
-                                <span class="min-w-0 flex-1">
-                                    <span class="block text-sm font-medium text-gray-900 dark:text-slate-100">{{ __($notification->data['title_key'] ?? '') }}</span>
-                                    <span class="mt-0.5 block text-sm text-gray-500 dark:text-slate-400">{{ __($notification->data['body_key'] ?? '', $notification->data['body_params'] ?? []) }}</span>
-                                    <span class="mt-1.5 block text-xs text-gray-400 dark:text-slate-500">{{ $notification->created_at->diffForHumans() }}</span>
-                                </span>
-                                @unless ($notification->read_at)
-                                    <span class="mt-2 h-2 w-2 shrink-0 rounded-full bg-brand-purple-500"></span>
-                                @endunless
-                            </button>
-                        </form>
-                        <form method="POST" action="{{ route('notifications.destroy', $notification->id) }}" class="shrink-0 pr-3 pt-4"
-                            onsubmit="return confirm('{{ __('ลบการแจ้งเตือนนี้?') }}')">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit"
-                                class="rounded-lg p-1.5 text-slate-300 opacity-0 transition-all hover:bg-red-50 hover:text-red-500 group-hover:opacity-100 dark:text-slate-600 dark:hover:bg-red-500/10 dark:hover:text-red-400"
-                                aria-label="{{ __('ลบการแจ้งเตือน') }}">
-                                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
-                            </button>
-                        </form>
-                    @else
-                        <div class="flex w-full items-start gap-3 p-4">
+                    <form method="POST" action="{{ route('notifications.read', $notification->id) }}" class="min-w-0 flex-1">
+                        @csrf
+                        <button type="submit" class="flex w-full items-start gap-3 p-4 text-left">
                             <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl {{ $meta['tint'] }}">
                                 <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $meta['path'] }}"/></svg>
                             </span>
@@ -81,18 +55,18 @@
                             @unless ($notification->read_at)
                                 <span class="mt-2 h-2 w-2 shrink-0 rounded-full bg-brand-purple-500"></span>
                             @endunless
-                        </div>
-                        <form method="POST" action="{{ route('notifications.destroy', $notification->id) }}" class="shrink-0 pr-3 pt-4"
-                            onsubmit="return confirm('{{ __('ลบการแจ้งเตือนนี้?') }}')">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit"
-                                class="rounded-lg p-1.5 text-slate-300 opacity-0 transition-all hover:bg-red-50 hover:text-red-500 group-hover:opacity-100 dark:text-slate-600 dark:hover:bg-red-500/10 dark:hover:text-red-400"
-                                aria-label="{{ __('ลบการแจ้งเตือน') }}">
-                                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
-                            </button>
-                        </form>
-                    @endif
+                        </button>
+                    </form>
+                    <form method="POST" action="{{ route('notifications.destroy', $notification->id) }}" class="shrink-0 pr-3 pt-4"
+                        onsubmit="return confirm('{{ __('ลบการแจ้งเตือนนี้?') }}')">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit"
+                            class="rounded-lg p-1.5 text-slate-300 opacity-0 transition-all hover:bg-red-50 hover:text-red-500 group-hover:opacity-100 dark:text-slate-600 dark:hover:bg-red-500/10 dark:hover:text-red-400"
+                            aria-label="{{ __('ลบการแจ้งเตือน') }}">
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                        </button>
+                    </form>
                 </div>
             @endforeach
         </div>
