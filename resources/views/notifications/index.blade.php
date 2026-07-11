@@ -13,17 +13,11 @@
 @endphp
 
 <div class="mx-auto max-w-2xl">
-    <div class="mb-4 flex items-center justify-between gap-3 rounded-3xl brand-gradient p-6 shadow-soft-lg">
-        <div>
-            <p class="text-xs font-medium uppercase tracking-[0.2em] text-violet-200/70">{{ __('ศูนย์การแจ้งเตือน') }}</p>
-            <h1 class="mt-1 text-lg font-bold text-white">{{ __('การแจ้งเตือน') }}</h1>
-        </div>
-        <a href="{{ $isAdmin ? route('admin.dashboard') : route('dashboard') }}"
-            class="inline-flex items-center gap-1.5 rounded-xl bg-white/10 px-3.5 py-2 text-sm font-medium text-white shadow-soft ring-1 ring-white/15 backdrop-blur transition-all duration-300 hover:-translate-y-0.5 hover:bg-white/15">
-            <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/></svg>
-            {{ __('กลับ') }}
-        </a>
-    </div>
+    <x-brand-header
+        eyebrow="{{ __('ศูนย์การแจ้งเตือน') }}"
+        :title="__('การแจ้งเตือน')"
+        :back="$isAdmin ? route('admin.dashboard') : route('dashboard')"
+    />
 
     @if ($notifications->isNotEmpty())
         <div class="mb-4 flex justify-end gap-4">

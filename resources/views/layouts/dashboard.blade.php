@@ -30,8 +30,7 @@
                 ['route' => 'dashboard', 'label' => __('แดชบอร์ด')],
                 ['route' => 'activities.index', 'label' => __('เช็คกิจกรรม')],
                 ['route' => 'checkin.show', 'label' => __('เช็คด้วย QR Code')],
-                ['route' => 'external-activities.index', 'label' => __('คำร้องภายนอก')],
-                ['route' => 'credit-transfers.index', 'label' => __('เทียบโอนตำแหน่ง')],
+                ['route' => 'hour-requests.index', 'label' => __('ขอชั่วโมง')],
             ];
     @endphp
 
@@ -82,17 +81,19 @@
 
         <div x-show="mobileOpen" x-cloak class="border-t border-white/10 md:hidden">
             <div class="space-y-1 px-4 py-3">
-                @foreach ($navItems as $item)
-                    <a href="{{ route($item['route']) }}"
-                        @class([
-                            'block rounded-lg px-3.5 py-2.5 text-sm font-medium',
-                            'bg-brand-green-500/15 text-brand-green-400' => request()->routeIs($item['route'].'*'),
-                            'text-violet-200/70 hover:bg-white/5' => ! request()->routeIs($item['route'].'*'),
-                        ])>
-                        {{ $item['label'] }}
-                    </a>
-                @endforeach
-                <div class="mt-2 flex items-center justify-between border-t border-white/10 pt-3">
+                @if ($isAdmin)
+                    @foreach ($navItems as $item)
+                        <a href="{{ route($item['route']) }}"
+                            @class([
+                                'block rounded-lg px-3.5 py-2.5 text-sm font-medium',
+                                'bg-brand-green-500/15 text-brand-green-400' => request()->routeIs($item['route'].'*'),
+                                'text-violet-200/70 hover:bg-white/5' => ! request()->routeIs($item['route'].'*'),
+                            ])>
+                            {{ $item['label'] }}
+                        </a>
+                    @endforeach
+                @endif
+                <div class="{{ $isAdmin ? 'mt-2 border-t border-white/10 pt-3' : '' }} flex items-center justify-between">
                     <span class="text-sm text-violet-200/70">{{ auth()->user()->name_thai ?? auth()->user()->name }}</span>
                     <div class="flex items-center gap-3">
                         @include('partials.theme-toggle')
@@ -107,7 +108,7 @@
         </div>
     </nav>
 
-    <main class="mx-auto max-w-[90rem] px-4 py-6 sm:px-6 sm:py-8">
+    <main class="mx-auto max-w-[90rem] px-4 py-6 sm:px-6 sm:py-8 {{ ! $isAdmin ? 'pb-28 md:pb-8' : '' }}">
         @if (session('status'))
             <div class="mb-4 rounded-xl bg-brand-green-50 px-4 py-3 text-sm text-brand-green-700 ring-1 ring-brand-green-100 dark:bg-brand-green-500/10 dark:text-brand-green-400 dark:ring-brand-green-500/20">
                 {{ session('status') }}
@@ -122,6 +123,10 @@
 
         @yield('content')
     </main>
+
+    @unless ($isAdmin)
+        @include('partials.mobile-tab-bar')
+    @endunless
 
     @include('partials.pwa-install-banner')
     @stack('scripts')

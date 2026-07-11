@@ -20,10 +20,7 @@
     $academicYearScopeLabel = $academicYear !== '' ? __('ปีการศึกษา :year', ['year' => $academicYear]) : __('ทุกปีการศึกษา');
 @endphp
 <div class="mx-auto max-w-[90rem]">
-    <div class="overflow-hidden rounded-2xl brand-gradient p-6 text-white shadow-sm sm:p-8">
-        <h1 class="text-xl font-semibold sm:text-2xl">{{ __('แผงควบคุมกองพัฒนานักศึกษา') }}</h1>
-        <p class="mt-1 text-sm text-white/80">{{ __('มหาวิทยาลัยราชภัฏสุรินทร์') }}</p>
-    </div>
+    <x-brand-header :title="__('แผงควบคุมกองพัฒนานักศึกษา')" :subtitle="__('มหาวิทยาลัยราชภัฏสุรินทร์')" />
 
     <form method="GET" action="{{ route('admin.dashboard') }}" class="mt-4 max-w-xs">
         @php $academicYearOptions = $academicYears->mapWithKeys(fn ($y) => [$y => __('ปีการศึกษา :year', ['year' => $y])])->all(); @endphp
@@ -49,7 +46,7 @@
         @foreach ($cards as $card)
             @php $tag = isset($card['href']) ? 'a' : 'div'; @endphp
             <{{ $tag }} @if(isset($card['href'])) href="{{ $card['href'] }}" @endif
-                class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-gray-200 transition dark:bg-slate-900 dark:ring-slate-700 @if(isset($card['href'])) hover:ring-brand-purple-300 dark:hover:ring-brand-purple-500/40 @endif">
+                class="rounded-2xl glass-card p-4 shadow-soft transition @if(isset($card['href'])) hover:-translate-y-0.5 hover:shadow-lg @endif">
                 <span class="flex h-9 w-9 items-center justify-center rounded-xl {{ $card['tint'] }}">
                     <svg class="h-4.5 w-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="{{ $card['icon'] }}"/></svg>
                 </span>
@@ -61,33 +58,27 @@
 
     <!-- Charts -->
     <div class="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <div class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-gray-200 dark:bg-slate-900 dark:ring-slate-700">
-            <div class="mb-4 flex items-center justify-between">
-                <h2 class="text-sm font-semibold text-gray-700 dark:text-slate-200">{{ __('ชั่วโมงกิจกรรมแยกตามหมวดหมู่') }}</h2>
-                <span class="text-xs text-gray-400 dark:text-slate-500">{{ $academicYearScopeLabel }}</span>
-            </div>
-            <div class="space-y-3">
-                @foreach ($categoryHours as $category => $hours)
-                    <div>
-                        <div class="mb-1 flex items-center justify-between text-xs text-gray-500 dark:text-slate-400">
-                            <span>{{ $categoryMeta[$category]['label'] ?? $category }}</span>
-                            <span class="tabular-nums font-medium text-gray-700 dark:text-slate-200">{{ __(':hours ชม.', ['hours' => number_format($hours)]) }}</span>
-                        </div>
-                        <div class="h-2 w-full overflow-hidden rounded-full bg-gray-100 dark:bg-slate-800">
-                            <div class="h-full rounded-full {{ $categoryMeta[$category]['bar'] ?? 'bg-slate-400' }}" style="width: {{ max(3, round($hours / $maxCategoryHours * 100)) }}%"></div>
-                        </div>
+        <x-section-card icon="M4 20V10M12 20V4M20 20V14" :title="__('ชั่วโมงกิจกรรมแยกตามหมวดหมู่')">
+            <x-slot:action>
+                <span class="text-xs text-slate-400 dark:text-slate-500">{{ $academicYearScopeLabel }}</span>
+            </x-slot:action>
+            @foreach ($categoryHours as $category => $hours)
+                <div>
+                    <div class="mb-1 flex items-center justify-between text-xs text-gray-500 dark:text-slate-400">
+                        <span>{{ $categoryMeta[$category]['label'] ?? $category }}</span>
+                        <span class="tabular-nums font-medium text-gray-700 dark:text-slate-200">{{ __(':hours ชม.', ['hours' => number_format($hours)]) }}</span>
                     </div>
-                @endforeach
-            </div>
-        </div>
+                    <div class="h-2 w-full overflow-hidden rounded-full bg-gray-100 dark:bg-slate-800">
+                        <div class="h-full rounded-full {{ $categoryMeta[$category]['bar'] ?? 'bg-slate-400' }}" style="width: {{ max(3, round($hours / $maxCategoryHours * 100)) }}%"></div>
+                    </div>
+                </div>
+            @endforeach
+        </x-section-card>
 
-        <div class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-gray-200 dark:bg-slate-900 dark:ring-slate-700">
-            <div class="mb-4 flex items-center justify-between">
-                <h2 class="text-sm font-semibold text-gray-700 dark:text-slate-200">
-                    {{ $academicYear !== '' ? __('แนวโน้มการเช็กชื่อรายเดือน') : __('แนวโน้มการเช็กชื่อ 6 เดือนล่าสุด') }}
-                </h2>
-                <span class="text-xs text-gray-400 dark:text-slate-500">{{ $academicYearScopeLabel }}</span>
-            </div>
+        <x-section-card icon="M3 17l6-6 4 4 8-8M21 7v6h-6" :title="$academicYear !== '' ? __('แนวโน้มการเช็กชื่อรายเดือน') : __('แนวโน้มการเช็กชื่อ 6 เดือนล่าสุด')">
+            <x-slot:action>
+                <span class="text-xs text-slate-400 dark:text-slate-500">{{ $academicYearScopeLabel }}</span>
+            </x-slot:action>
             <div class="flex h-40 items-end justify-between gap-2">
                 @foreach ($monthlyTrend as $point)
                     <div class="flex flex-1 flex-col items-center gap-2">
@@ -99,18 +90,17 @@
                     </div>
                 @endforeach
             </div>
-        </div>
+        </x-section-card>
     </div>
 
     <div class="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-3">
         <!-- Faculty participation -->
-        <div class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-gray-200 dark:bg-slate-900 dark:ring-slate-700">
-            <div class="mb-4 flex items-center justify-between">
-                <h2 class="text-sm font-semibold text-gray-700 dark:text-slate-200">{{ __('การเข้าร่วมแยกตามคณะ') }}</h2>
-                <span class="text-xs text-gray-400 dark:text-slate-500">{{ $academicYearScopeLabel }}</span>
-            </div>
+        <x-section-card icon="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21" :title="__('การเข้าร่วมแยกตามคณะ')">
+            <x-slot:action>
+                <span class="text-xs text-slate-400 dark:text-slate-500">{{ $academicYearScopeLabel }}</span>
+            </x-slot:action>
             @forelse ($facultyParticipation as $row)
-                <div class="mb-3 last:mb-0">
+                <div>
                     <div class="mb-1 flex items-center justify-between text-xs text-gray-500 dark:text-slate-400">
                         <span class="truncate pr-2">{{ $row->faculty }}</span>
                         <span class="shrink-0 tabular-nums font-medium text-gray-700 dark:text-slate-200">{{ number_format($row->total) }}</span>
@@ -122,14 +112,13 @@
             @empty
                 <p class="py-6 text-center text-xs text-gray-400 dark:text-slate-500">{{ __('ยังไม่มีข้อมูลการเช็กชื่อ') }}</p>
             @endforelse
-        </div>
+        </x-section-card>
 
         <!-- Upcoming activities -->
-        <div class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-gray-200 dark:bg-slate-900 dark:ring-slate-700 lg:col-span-2">
-            <div class="mb-4 flex items-center justify-between">
-                <h2 class="text-sm font-semibold text-gray-700 dark:text-slate-200">{{ __('กิจกรรมที่กำลังจะถึง') }}</h2>
+        <x-section-card icon="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" :title="__('กิจกรรมที่กำลังจะถึง')" class="lg:col-span-2">
+            <x-slot:action>
                 <a href="{{ route('admin.activities.index') }}" class="text-xs font-medium text-brand-purple-600 hover:underline dark:text-brand-purple-400">{{ __('ดูทั้งหมด') }} &rarr;</a>
-            </div>
+            </x-slot:action>
             <div class="divide-y divide-gray-100 dark:divide-slate-800">
                 @forelse ($upcomingActivities as $activity)
                     <a href="{{ route('admin.attendance.index', $activity) }}" class="flex items-center gap-3 py-2.5 first:pt-0 last:pb-0 hover:opacity-80">
@@ -146,15 +135,14 @@
                     <p class="py-6 text-center text-xs text-gray-400 dark:text-slate-500">{{ __('ไม่มีกิจกรรมที่กำลังจะถึง') }}</p>
                 @endforelse
             </div>
-        </div>
+        </x-section-card>
     </div>
 
     @if ($pendingRequests->isNotEmpty())
-        <div class="mt-6 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-gray-200 dark:bg-slate-900 dark:ring-slate-700">
-            <div class="mb-4 flex items-center justify-between">
-                <h2 class="text-sm font-semibold text-gray-700 dark:text-slate-200">{{ __('คำร้องกิจกรรมภายนอกล่าสุด') }}</h2>
+        <x-section-card icon="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" :title="__('คำร้องกิจกรรมภายนอกล่าสุด')" class="mt-6">
+            <x-slot:action>
                 <a href="{{ route('admin.external-activities.index') }}" class="text-xs font-medium text-brand-purple-600 hover:underline dark:text-brand-purple-400">{{ __('ดูทั้งหมด') }} &rarr;</a>
-            </div>
+            </x-slot:action>
             <div class="divide-y divide-gray-100 dark:divide-slate-800">
                 @foreach ($pendingRequests as $request)
                     <a href="{{ route('admin.external-activities.index') }}" class="flex items-center gap-3 py-2.5 first:pt-0 last:pb-0 hover:opacity-80">
@@ -169,32 +157,32 @@
                     </a>
                 @endforeach
             </div>
-        </div>
+        </x-section-card>
     @endif
 
     <div class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <a href="{{ route('admin.activities.index') }}" class="group rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-200 transition hover:ring-brand-green-300 dark:bg-slate-900 dark:ring-slate-700">
+        <a href="{{ route('admin.activities.index') }}" class="group rounded-2xl glass-card p-6 shadow-soft transition hover:-translate-y-0.5 hover:shadow-lg">
             <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-green-50 text-brand-green-600 group-hover:bg-brand-green-100 dark:bg-brand-green-500/10 dark:text-brand-green-400">
                 <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
             </span>
             <p class="mt-3 font-medium text-gray-900 dark:text-slate-100">{{ __('จัดการกิจกรรม') }}</p>
             <p class="mt-1 text-sm text-gray-400 dark:text-slate-500">{{ __('สร้าง/แก้ไขกิจกรรม กำหนดสิทธิ์ผู้เข้าร่วม') }}</p>
         </a>
-        <a href="{{ route('admin.external-activities.index') }}" class="group rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-200 transition hover:ring-brand-purple-300 dark:bg-slate-900 dark:ring-slate-700">
+        <a href="{{ route('admin.external-activities.index') }}" class="group rounded-2xl glass-card p-6 shadow-soft transition hover:-translate-y-0.5 hover:shadow-lg">
             <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-purple-50 text-brand-purple-600 group-hover:bg-brand-purple-100 dark:bg-brand-purple-500/10 dark:text-brand-purple-400">
                 <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
             </span>
             <p class="mt-3 font-medium text-gray-900 dark:text-slate-100">{{ __('คำร้องกิจกรรมภายนอก') }}</p>
             <p class="mt-1 text-sm text-gray-400 dark:text-slate-500">{{ __('ตรวจสอบและอนุมัติ/ปฏิเสธคำร้อง') }}</p>
         </a>
-        <a href="{{ route('admin.credit-transfers.index') }}" class="group rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-200 transition hover:ring-brand-purple-300 dark:bg-slate-900 dark:ring-slate-700">
+        <a href="{{ route('admin.credit-transfers.index') }}" class="group rounded-2xl glass-card p-6 shadow-soft transition hover:-translate-y-0.5 hover:shadow-lg">
             <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-purple-50 text-brand-purple-600 group-hover:bg-brand-purple-100 dark:bg-brand-purple-500/10 dark:text-brand-purple-400">
                 <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.5 6.75h15m-15 0A2.25 2.25 0 002.25 9v6a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 15V9a2.25 2.25 0 00-2.25-2.25m-15 0V5.25A2.25 2.25 0 016.75 3h10.5a2.25 2.25 0 012.25 2.25v1.5m-15 0h15"/></svg>
             </span>
             <p class="mt-3 font-medium text-gray-900 dark:text-slate-100">{{ __('คำร้องเทียบโอนชั่วโมงจากตำแหน่ง') }}</p>
             <p class="mt-1 text-sm text-gray-400 dark:text-slate-500">{{ __('ตรวจสอบ อนุมัติหมวดหมู่ และให้เครดิตชั่วโมง') }}</p>
         </a>
-        <a href="{{ route('admin.reports.clearance', ['year' => 4]) }}" class="group rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-200 transition hover:ring-brand-green-300 dark:bg-slate-900 dark:ring-slate-700">
+        <a href="{{ route('admin.reports.clearance', ['year' => 4]) }}" class="group rounded-2xl glass-card p-6 shadow-soft transition hover:-translate-y-0.5 hover:shadow-lg">
             <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-green-50 text-brand-green-600 group-hover:bg-brand-green-100 dark:bg-brand-green-500/10 dark:text-brand-green-400">
                 <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
             </span>

@@ -39,15 +39,13 @@
 @endphp
 
 <div class="mx-auto max-w-6xl">
-    <div class="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-3xl brand-gradient p-6 shadow-soft-lg sm:p-8">
-        <div>
-            <p class="text-xs font-medium uppercase tracking-[0.2em] text-violet-200/70">{{ __('กองพัฒนานักศึกษา') }}</p>
-            <h1 class="mt-1 text-xl font-bold text-white sm:text-2xl">{{ $pageTitle }}</h1>
-        </div>
-        <span class="rounded-xl bg-white/10 px-4 py-2 text-sm font-medium text-white shadow-soft ring-1 ring-white/15 backdrop-blur">
-            {{ __(':count กิจกรรม', ['count' => $activities->total()]) }}
-        </span>
-    </div>
+    <x-brand-header eyebrow="{{ __('กองพัฒนานักศึกษา') }}" :title="$pageTitle">
+        <x-slot:actions>
+            <span class="rounded-xl bg-white/10 px-4 py-2 text-sm font-medium text-white shadow-soft ring-1 ring-white/15 backdrop-blur">
+                {{ __(':count กิจกรรม', ['count' => $activities->total()]) }}
+            </span>
+        </x-slot:actions>
+    </x-brand-header>
 
     <div class="mb-4 flex flex-wrap gap-2 text-sm">
         @foreach ($statusGroupTabs as $value => $label)
@@ -117,6 +115,8 @@
                         @endif
                     </div>
 
+                    <div class="flex flex-1">
+                        <div class="w-[5px] shrink-0 {{ $categoryMeta[$activity->activity_category]['dot'] ?? 'bg-slate-400' }}"></div>
                     <div class="flex flex-1 flex-col p-4">
                         <div class="mb-2 flex flex-wrap items-center gap-x-3 gap-y-1.5">
                             <span class="inline-flex items-center gap-1.5 text-xs font-medium text-slate-500 dark:text-slate-400">
@@ -193,6 +193,7 @@
                                 <span class="text-xs text-slate-400 dark:text-slate-500">{{ $levelLabel[$activity->activity_level] ?? '' }}</span>
                             @endif
                         </div>
+                    </div>
                     </div>
                 </div>
             @endforeach

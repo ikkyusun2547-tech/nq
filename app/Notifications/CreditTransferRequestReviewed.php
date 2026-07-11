@@ -21,7 +21,7 @@ class CreditTransferRequestReviewed extends BaseNotification
             'body_params' => $approved
                 ? ['hours' => $this->request->hours_credited]
                 : ['reason' => $this->request->reject_reason],
-            'url' => route('credit-transfers.index'),
+            'url' => route('hour-requests.index', ['tab' => 'credit']),
         ];
     }
 }

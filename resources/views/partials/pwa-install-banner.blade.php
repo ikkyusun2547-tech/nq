@@ -9,7 +9,7 @@
     x-transition:leave="transition ease-in duration-150"
     x-transition:leave-start="opacity-100 translate-y-0"
     x-transition:leave-end="opacity-0 translate-y-4"
-    class="fixed inset-x-4 bottom-4 z-50 sm:inset-x-auto sm:right-4 sm:w-96"
+    class="fixed inset-x-4 z-50 {{ ! ($isAdmin ?? false) ? 'bottom-24 md:bottom-4' : 'bottom-4' }} sm:inset-x-auto sm:right-4 sm:w-96"
 >
     <div class="flex items-start gap-3 rounded-2xl bg-white p-4 shadow-soft-lg ring-1 ring-black/5 dark:bg-slate-900 dark:ring-white/10">
         <img src="{{ asset('images/icons/icon-192.png') }}" alt="" class="h-11 w-11 shrink-0 rounded-xl shadow-soft">

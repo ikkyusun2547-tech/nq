@@ -9,48 +9,41 @@
         'volunteer' => ['label' => __('จิตอาสา/บำเพ็ญประโยชน์'), 'dot' => 'bg-brand-purple-500'],
         'ethics' => ['label' => __('คุณธรรมจริยธรรม'), 'dot' => 'bg-fuchsia-400'],
     ];
-    $hoursPct = min(100, $summary['required_hours'] > 0 ? round($summary['total_hours'] / $summary['required_hours'] * 100) : 0);
-    $activitiesPct = min(100, $summary['required_activities'] > 0 ? round($summary['total_activities'] / $summary['required_activities'] * 100) : 0);
 @endphp
 
 <div class="mx-auto max-w-4xl" x-data="{ showDetail: false, detail: null }">
-    <!-- VIP digital passport card -->
-    <div class="relative overflow-hidden rounded-3xl brand-gradient p-6 text-white shadow-soft-lg sm:p-8">
-        <div class="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-white/5 blur-2xl"></div>
-        <div class="pointer-events-none absolute -bottom-20 -left-10 h-56 w-56 rounded-full bg-brand-green-500/10 blur-2xl"></div>
-
-        <div class="relative flex items-start justify-between gap-4">
-            <div>
-                <p class="text-[11px] font-medium uppercase tracking-[0.2em] text-violet-200/70">Activity Passport · SRRU</p>
-                <h1 class="mt-1.5 text-2xl font-bold tracking-tight sm:text-3xl">{{ auth()->user()->name_thai }}</h1>
-                <p class="mt-1.5 text-sm font-light text-violet-100/80">
-                    {{ auth()->user()->faculty?->name_th }} · {{ auth()->user()->major?->name_th }}
-                </p>
-            </div>
-            @if ($summary['current_year'])
+    <x-brand-header
+        eyebrow="Activity Passport · SRRU"
+        :title="auth()->user()->name_thai"
+        :subtitle="trim((auth()->user()->faculty?->name_th ?? '').' · '.(auth()->user()->major?->name_th ?? ''), ' ·')"
+        :decorated="true"
+    >
+        @if ($summary['current_year'])
+            <x-slot:actions>
                 <span class="shrink-0 rounded-xl bg-white/10 px-3 py-2 text-center ring-1 ring-white/15 backdrop-blur">
                     <span class="block text-[10px] uppercase tracking-wider text-violet-200/70">{{ __('ชั้นปีที่') }}</span>
                     <span class="block text-lg font-bold leading-none text-brand-green-400">{{ $summary['current_year'] }}</span>
                 </span>
-            @endif
-        </div>
-
-        <div class="relative mt-6 flex items-center justify-between border-t border-white/10 pt-4">
-            <span class="font-mono text-xs tracking-widest text-violet-200/60">{{ __('รหัส :id', ['id' => auth()->user()->student_id]) }}</span>
-            <span class="text-xs text-violet-200/60">{{ auth()->user()->program_type === 'special' ? __('ภาคพิเศษ (กศ.บป.)') : __('ภาคปกติ') }}</span>
-        </div>
-    </div>
+            </x-slot:actions>
+        @endif
+        <x-slot:footer>
+            <div class="flex items-center justify-between">
+                <span class="font-mono text-xs tracking-widest text-violet-200/60">{{ __('รหัส :id', ['id' => auth()->user()->student_id]) }}</span>
+                <span class="text-xs text-violet-200/60">{{ auth()->user()->program_type === 'special' ? __('ภาคพิเศษ (กศ.บป.)') : __('ภาคปกติ') }}</span>
+            </div>
+        </x-slot:footer>
+    </x-brand-header>
 
     <div class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
         <a href="{{ route('checkin.show') }}"
             class="flex items-center justify-center gap-2 rounded-2xl bg-brand-green-500 p-4 text-center text-sm font-semibold text-brand-purple-950 shadow-soft transition-all duration-300 hover:-translate-y-0.5 hover:bg-brand-green-400 hover:shadow-lg">
             {{ __('สแกน QR เช็กชื่อ') }}
         </a>
-        <a href="{{ route('external-activities.index') }}"
+        <a href="{{ route('hour-requests.index', ['tab' => 'external']) }}"
             class="flex items-center justify-center gap-2 rounded-2xl bg-white p-4 text-center text-sm font-semibold text-brand-purple-700 shadow-soft ring-1 ring-brand-purple-100 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg dark:bg-slate-900 dark:text-brand-purple-400 dark:ring-brand-purple-500/20">
             {{ __('ยื่นคำร้องกิจกรรมภายนอก') }}
         </a>
-        <a href="{{ route('credit-transfers.index') }}"
+        <a href="{{ route('hour-requests.index', ['tab' => 'credit']) }}"
             class="flex items-center justify-center gap-2 rounded-2xl bg-white p-4 text-center text-sm font-semibold text-brand-purple-700 shadow-soft ring-1 ring-brand-purple-100 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg dark:bg-slate-900 dark:text-brand-purple-400 dark:ring-brand-purple-500/20">
             {{ __('เทียบโอนชั่วโมงจากตำแหน่ง') }}
         </a>
@@ -96,27 +89,15 @@
 
     <div class="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
         <!-- Overall hours / activities meters -->
-        <div class="space-y-5 rounded-2xl glass-card p-5 shadow-soft">
-            <div>
-                <div class="mb-1.5 flex items-baseline justify-between text-sm">
-                    <span class="font-medium text-slate-700 dark:text-slate-300">{{ __('ชั่วโมงสะสมรวม') }}</span>
-                    <span class="text-slate-400 dark:text-slate-400">{{ $summary['total_hours'] }} <span class="text-slate-300 dark:text-slate-500">/ {{ $summary['required_hours'] }} {{ __('ชม.') }}</span></span>
-                </div>
-                <div class="h-2.5 w-full overflow-hidden rounded-full bg-brand-purple-50 dark:bg-brand-purple-500/10">
-                    <div class="h-full rounded-full bg-gradient-to-r from-brand-purple-500 to-brand-green-400 glow-emerald" style="width: {{ $hoursPct }}%"></div>
-                </div>
-            </div>
-            <div>
-                <div class="mb-1.5 flex items-baseline justify-between text-sm">
-                    <span class="font-medium text-slate-700 dark:text-slate-300">{{ __('จำนวนกิจกรรมสะสม') }}</span>
-                    <span class="text-slate-400 dark:text-slate-400">{{ $summary['total_activities'] }} <span class="text-slate-300 dark:text-slate-500">/ {{ $summary['required_activities'] }} {{ __('งาน') }}</span></span>
-                </div>
-                <div class="h-2.5 w-full overflow-hidden rounded-full bg-brand-purple-50 dark:bg-brand-purple-500/10">
-                    <div class="h-full rounded-full bg-gradient-to-r from-brand-purple-500 to-brand-green-400 glow-emerald" style="width: {{ $activitiesPct }}%"></div>
-                </div>
-            </div>
+        <div class="flex flex-col gap-3">
+            <x-progress-card
+                :activities="$summary['total_activities']"
+                :required-activities="$summary['required_activities']"
+                :hours="$summary['total_hours']"
+                :required-hours="$summary['required_hours']"
+            />
             @if ($summary['yearly_target_hours'])
-                <p class="text-xs text-slate-400 dark:text-slate-500">{{ __('เป้าหมายชั่วโมงกิจกรรมของชั้นปีที่ :year คือ :hours ชั่วโมง/ปี', [
+                <p class="px-1 text-xs text-slate-400 dark:text-slate-500">{{ __('เป้าหมายชั่วโมงกิจกรรมของชั้นปีที่ :year คือ :hours ชั่วโมง/ปี', [
                     'year' => $summary['current_year'],
                     'hours' => $summary['yearly_target_hours'],
                 ]) }}</p>
@@ -124,8 +105,7 @@
         </div>
 
         <!-- Category breakdown (5 ด้าน) -->
-        <div class="space-y-4 rounded-2xl glass-card p-5 shadow-soft">
-            <h2 class="text-sm font-semibold text-slate-900 dark:text-slate-100">{{ __('ชั่วโมงสะสมแยกตามหมวดหมู่ (5 ด้าน)') }}</h2>
+        <x-section-card icon="M4 20V10M12 20V4M20 20V14" :title="__('ชั่วโมงสะสมแยกตามหมวดหมู่ (5 ด้าน)')">
             @foreach ($categoryMeta as $key => $meta)
                 @php $hours = $summary['category_hours'][$key] ?? 0; @endphp
                 <div>
@@ -142,24 +122,20 @@
                     </div>
                 </div>
             @endforeach
-        </div>
+        </x-section-card>
     </div>
 
     <div class="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-3">
         <!-- Approved check-ins -->
-        <div class="space-y-3 rounded-2xl glass-card p-5 shadow-soft">
-            <h2 class="flex items-center gap-1.5 text-sm font-semibold text-slate-900 dark:text-slate-100">
-                <span class="h-2 w-2 rounded-full bg-brand-green-500"></span>
-                {{ __('กิจกรรมที่อนุมัติแล้ว') }}
-            </h2>
+        <x-section-card icon="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" :title="__('กิจกรรมที่อนุมัติแล้ว')">
             @forelse ($approvedActivities as $item)
                 @php
                     $rowClass = 'flex w-full items-center justify-between gap-3 rounded-xl bg-brand-green-50/50 px-3.5 py-2.5 text-left transition-colors hover:bg-brand-green-100/60 dark:bg-brand-green-500/5 dark:hover:bg-brand-green-500/10';
                 @endphp
                 @if ($item->type === 'external')
-                    <a href="{{ route('external-activities.index') }}" class="{{ $rowClass }}">
+                    <a href="{{ route('hour-requests.index', ['tab' => 'external']) }}" class="{{ $rowClass }}">
                 @elseif ($item->type === 'credit_transfer')
-                    <a href="{{ route('credit-transfers.index') }}" class="{{ $rowClass }}">
+                    <a href="{{ route('hour-requests.index', ['tab' => 'credit']) }}" class="{{ $rowClass }}">
                 @elseif ($item->checkin_method === 'late_request')
                     <a href="{{ route('late-checkin.show', $item->activity_id) }}" class="{{ $rowClass }}">
                 @else
@@ -193,14 +169,10 @@
             @empty
                 <p class="py-4 text-center text-xs text-slate-400 dark:text-slate-500">{{ __('ยังไม่มีกิจกรรมที่ได้รับการอนุมัติ') }}</p>
             @endforelse
-        </div>
+        </x-section-card>
 
         <!-- Pending review -->
-        <div class="space-y-3 rounded-2xl glass-card p-5 shadow-soft">
-            <h2 class="flex items-center gap-1.5 text-sm font-semibold text-slate-900 dark:text-slate-100">
-                <span class="h-2 w-2 rounded-full bg-amber-500"></span>
-                {{ __('กิจกรรมที่ลงแล้วรออนุมัติ') }}
-            </h2>
+        <x-section-card icon="M12 6.75V12l3.75 1.875M21 12a9 9 0 11-18 0 9 9 0 0118 0z" :title="__('กิจกรรมที่ลงแล้วรออนุมัติ')">
             @forelse ($pendingActivities as $item)
                 <div class="flex items-center justify-between gap-3 rounded-xl bg-amber-50/50 px-3.5 py-2.5 dark:bg-amber-500/5">
                     <div class="min-w-0">
@@ -219,22 +191,18 @@
             @empty
                 <p class="py-4 text-center text-xs text-slate-400 dark:text-slate-500">{{ __('ไม่มีกิจกรรมที่รอตรวจสอบ') }}</p>
             @endforelse
-        </div>
+        </x-section-card>
 
         <!-- Rejected -->
-        <div class="space-y-3 rounded-2xl glass-card p-5 shadow-soft">
-            <h2 class="flex items-center gap-1.5 text-sm font-semibold text-slate-900 dark:text-slate-100">
-                <span class="h-2 w-2 rounded-full bg-red-500"></span>
-                {{ __('กิจกรรมที่ถูกปฏิเสธ') }}
-            </h2>
+        <x-section-card icon="M9 9l6 6m0-6l-6 6M21 12a9 9 0 11-18 0 9 9 0 0118 0z" :title="__('กิจกรรมที่ถูกปฏิเสธ')">
             @forelse ($rejectedActivities as $item)
                 @php
                     $rejectedRowClass = 'block w-full rounded-xl bg-red-50/50 px-3.5 py-2.5 text-left transition-colors hover:bg-red-100/60 dark:bg-red-500/5 dark:hover:bg-red-500/10';
                 @endphp
                 @php
                     $rejectedHref = match ($item->type) {
-                        'external' => route('external-activities.index'),
-                        'credit_transfer' => route('credit-transfers.index'),
+                        'external' => route('hour-requests.index', ['tab' => 'external']),
+                        'credit_transfer' => route('hour-requests.index', ['tab' => 'credit']),
                         default => route('late-checkin.show', $item->activity_id),
                     };
                 @endphp
@@ -257,7 +225,7 @@
             @empty
                 <p class="py-4 text-center text-xs text-slate-400 dark:text-slate-500">{{ __('ไม่มีกิจกรรมที่ถูกปฏิเสธ') }}</p>
             @endforelse
-        </div>
+        </x-section-card>
     </div>
 
     <!-- Check-in detail popup (realtime/self-report only — external and late-request rows link out instead) -->

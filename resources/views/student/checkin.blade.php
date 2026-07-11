@@ -10,15 +10,13 @@
         </a>
     </div>
 
-    <div class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200 dark:bg-slate-900 dark:ring-slate-700">
+    <div class="overflow-hidden rounded-2xl glass-card shadow-soft">
         <!-- Step indicator -->
-        <div class="flex border-b border-gray-100 text-xs dark:border-slate-800">
-            <div class="flex-1 py-2 text-center" :class="step === 'scan' ? 'font-semibold text-brand-green-700' : 'text-gray-400 dark:text-slate-500'">1. {{ __('สแกน QR') }}</div>
-            <div class="flex-1 py-2 text-center" :class="step === 'selfie' ? 'font-semibold text-brand-green-700' : 'text-gray-400 dark:text-slate-500'">2. {{ __('ถ่ายเซลฟี') }}</div>
-            <div class="flex-1 py-2 text-center" :class="['submitting','done','error'].includes(step) ? 'font-semibold text-brand-green-700' : 'text-gray-400 dark:text-slate-500'">3. {{ __('ยืนยัน') }}</div>
+        <div class="px-5 py-4">
+            <x-step-indicator :steps="[__('สแกน QR'), __('ถ่ายเซลฟี'), __('ยืนยัน')]" current="stepIndex" />
         </div>
 
-        <div class="p-5">
+        <div class="border-t border-brand-purple-100 p-5 dark:border-slate-700/60">
             <!-- Step 1: Scan QR -->
             <template x-if="step === 'scan'">
                 <div>
@@ -57,19 +55,25 @@
 
             <template x-if="step === 'done'">
                 <div class="py-6 text-center">
-                    <div class="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full"
+                    <div class="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full"
                         :class="resultStatus === 'auto_approved' ? 'bg-brand-green-100 text-brand-green-600 dark:bg-brand-green-500/10 dark:text-brand-green-400' : 'bg-amber-100 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400'">
-                        <span x-text="resultStatus === 'auto_approved' ? '✓' : '!'" class="text-2xl"></span>
+                        <svg x-show="resultStatus === 'auto_approved'" class="h-9 w-9" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        <svg x-show="resultStatus !== 'auto_approved'" class="h-9 w-9" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/></svg>
                     </div>
-                    <p class="text-sm font-medium text-gray-900 dark:text-slate-100" x-text="resultMessage"></p>
-                    <a href="{{ route('dashboard') }}" class="mt-4 inline-block text-sm text-brand-purple-600 hover:underline dark:text-brand-purple-400 dark:hover:text-brand-purple-300">{{ __('กลับหน้าแดชบอร์ด') }}</a>
+                    <p class="text-base font-semibold text-gray-900 dark:text-slate-100" x-text="resultStatus === 'auto_approved' ? '{{ __('เช็กชื่อสำเร็จ') }}' : '{{ __('ส่งคำขอสำเร็จ') }}'"></p>
+                    <p class="mt-1 text-sm text-gray-500 dark:text-slate-400" x-text="resultMessage"></p>
+                    <a href="{{ route('dashboard') }}" class="mt-5 block w-full rounded-xl bg-brand-purple-700 px-4 py-3 text-sm font-semibold text-white shadow-soft transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg">{{ __('กลับหน้าแดชบอร์ด') }}</a>
                 </div>
             </template>
 
             <template x-if="step === 'error'">
                 <div class="py-6 text-center">
-                    <p class="text-sm font-medium text-red-600" x-text="resultMessage"></p>
-                    <button @click="resetToScan()" class="mt-4 text-sm text-brand-purple-600 hover:underline dark:text-brand-purple-400 dark:hover:text-brand-purple-300">{{ __('สแกนใหม่อีกครั้ง') }}</button>
+                    <div class="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-red-100 text-red-600 dark:bg-red-500/10 dark:text-red-400">
+                        <svg class="h-9 w-9" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </div>
+                    <p class="text-base font-semibold text-red-600 dark:text-red-400">{{ __('เกิดข้อผิดพลาด') }}</p>
+                    <p class="mt-1 text-sm text-gray-500 dark:text-slate-400" x-text="resultMessage"></p>
+                    <button @click="resetToScan()" class="mt-5 block w-full rounded-xl bg-brand-purple-700 px-4 py-3 text-sm font-semibold text-white shadow-soft transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg">{{ __('สแกนใหม่อีกครั้ง') }}</button>
                 </div>
             </template>
         </div>
@@ -90,6 +94,12 @@
             qrToken: null,
             photoBlob: null,
             scanner: null,
+
+            get stepIndex() {
+                if (this.step === 'scan') return 0;
+                if (this.step === 'selfie') return 1;
+                return 2;
+            },
 
             init() {
                 this.$nextTick(() => this.startScanner());

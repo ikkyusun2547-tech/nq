@@ -21,7 +21,7 @@ class ExternalActivityRequestReviewed extends BaseNotification
             'body_params' => $approved
                 ? ['title' => $this->request->title, 'hours' => $this->request->hours_credited]
                 : ['title' => $this->request->title, 'reason' => $this->request->reject_reason],
-            'url' => route('external-activities.index'),
+            'url' => route('hour-requests.index', ['tab' => 'external']),
         ];
     }
 }

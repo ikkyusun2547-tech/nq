@@ -17,7 +17,9 @@ use App\Http\Controllers\Student\CheckInController;
 use App\Http\Controllers\Student\CreditTransferController;
 use App\Http\Controllers\Student\DashboardController;
 use App\Http\Controllers\Student\ExternalActivityController;
+use App\Http\Controllers\Student\HourRequestController;
 use App\Http\Controllers\Student\LateCheckInController;
+use App\Http\Controllers\Student\ProfileController;
 use App\Http\Controllers\Student\SelfCheckInController;
 use App\Http\Controllers\Student\TranscriptController;
 use App\Models\Faculty;
@@ -115,11 +117,16 @@ Route::middleware(['auth', 'srru.email'])->group(function () {
         Route::get('/activities/{activity}/late-checkin', [LateCheckInController::class, 'show'])->name('late-checkin.show');
         Route::post('/activities/{activity}/late-checkin', [LateCheckInController::class, 'store'])->name('late-checkin.store');
 
-        Route::get('/external-activities', [ExternalActivityController::class, 'index'])->name('external-activities.index');
+        Route::get('/hour-requests', [HourRequestController::class, 'index'])->name('hour-requests.index');
+
+        // Kept so old bookmarks/links still land on the right tab of the merged page.
+        Route::get('/external-activities', fn () => redirect()->route('hour-requests.index', ['tab' => 'external']))->name('external-activities.index');
         Route::post('/external-activities', [ExternalActivityController::class, 'store'])->name('external-activities.store');
 
-        Route::get('/credit-transfers', [CreditTransferController::class, 'index'])->name('credit-transfers.index');
+        Route::get('/credit-transfers', fn () => redirect()->route('hour-requests.index', ['tab' => 'credit']))->name('credit-transfers.index');
         Route::post('/credit-transfers', [CreditTransferController::class, 'store'])->name('credit-transfers.store');
+
+        Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
 
         Route::get('/transcript', [TranscriptController::class, 'download'])->name('transcript.download');
 
