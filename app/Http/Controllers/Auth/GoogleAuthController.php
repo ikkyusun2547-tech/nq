@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Exceptions\AccountBannedException;
+use App\Exceptions\UnauthorizedEmailDomainException;
 use App\Http\Controllers\Controller;
-use App\Models\User;
+use App\Services\Auth\GoogleUserProvisioner;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Str;
 use Laravel\Socialite\Facades\Socialite;
 use Throwable;
 
@@ -59,27 +60,16 @@ class GoogleAuthController extends Controller
             ]);
         }
 
-        $domain = config('services.srru.email_domain');
-
-        if (! Str::endsWith($googleUser->getEmail(), '@'.$domain)) {
+        try {
+            $user = app(GoogleUserProvisioner::class)->provision(
+                email: $googleUser->getEmail(),
+                googleId: $googleUser->getId(),
+                name: $googleUser->getName() ?? $googleUser->getNickname(),
+                avatarUrl: $googleUser->getAvatar(),
+            );
+        } catch (UnauthorizedEmailDomainException|AccountBannedException $e) {
             return redirect()->route('login')->withErrors([
-                'email' => __('อนุญาตเฉพาะบัญชีอีเมลของมหาวิทยาลัย (@:domain) เท่านั้น', ['domain' => $domain]),
-            ]);
-        }
-
-        $user = User::updateOrCreate(
-            ['email' => $googleUser->getEmail()],
-            [
-                'name' => $googleUser->getName() ?? $googleUser->getNickname() ?? $googleUser->getEmail(),
-                'google_id' => $googleUser->getId(),
-                'avatar_url' => $googleUser->getAvatar(),
-                'email_verified_at' => now(),
-            ]
-        );
-
-        if ($user->account_status === 'banned') {
-            return redirect()->route('login')->withErrors([
-                'email' => __('บัญชีนี้ถูกระงับการใช้งาน กรุณาติดต่อกองพัฒนานักศึกษา'),
+                'email' => $e->getMessage(),
             ]);
         }
 

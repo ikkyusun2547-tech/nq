@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "117414332519",
+    "project_id": "srru-student-activity",
+    "storage_bucket": "srru-student-activity.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:117414332519:android:9319e89fa630ea3f80ecc2",
+        "android_client_info": {
+          "package_name": "th.ac.srru.mobile"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAgBmD2MxQXMf51jYekjoC0HRKAILIIOps"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
