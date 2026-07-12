@@ -146,7 +146,7 @@ class _LateCheckInScreenState extends ConsumerState<LateCheckInScreen> {
                           ),
                           const SizedBox(height: 16),
                           Text(
-                            'คุณมีคำร้องขอเช็กชื่อย้อนหลังอยู่แล้ว\nสถานะ: ${_existing!.status}'
+                            'คุณมีคำร้องขอเช็คชื่อย้อนหลังอยู่แล้ว\nสถานะ: ${_existing!.status}'
                             '${_existing!.rejectReason != null ? '\nเหตุผล: ${_existing!.rejectReason}' : ''}',
                             textAlign: TextAlign.center,
                           ),
@@ -181,7 +181,7 @@ class _LateCheckInScreenState extends ConsumerState<LateCheckInScreen> {
                               const SizedBox(width: 12),
                               const Expanded(
                                 child: Text(
-                                  'ขอเช็กชื่อย้อนหลัง',
+                                  'ขอเช็คชื่อย้อนหลัง',
                                   style: TextStyle(
                                     fontWeight: FontWeight.w700,
                                     fontSize: 15,
@@ -193,7 +193,7 @@ class _LateCheckInScreenState extends ConsumerState<LateCheckInScreen> {
                           TextField(
                             controller: _reasonController,
                             decoration: const InputDecoration(
-                              labelText: 'เหตุผลที่ขอเช็กชื่อย้อนหลัง',
+                              labelText: 'เหตุผลที่ขอเช็คชื่อย้อนหลัง',
                             ),
                             maxLines: 3,
                           ),

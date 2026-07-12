@@ -14,14 +14,18 @@ import '../../core/widgets/section_card.dart';
 /// workflow (submit proof, wait for approval, see status), so they live on
 /// one screen with a tab switcher instead of two separate bottom-nav tabs.
 class HourRequestsScreen extends ConsumerStatefulWidget {
-  const HourRequestsScreen({super.key});
+  const HourRequestsScreen({super.key, this.initialTab = 0});
+
+  /// 0 = external activities, 1 = credit transfers — lets callers (e.g. the
+  /// dashboard's quick actions and feed rows) land on the relevant tab.
+  final int initialTab;
 
   @override
   ConsumerState<HourRequestsScreen> createState() => _HourRequestsScreenState();
 }
 
 class _HourRequestsScreenState extends ConsumerState<HourRequestsScreen> {
-  int _tab = 0;
+  late int _tab = widget.initialTab;
   bool _showForm = false;
 
   static const _statusColors = {
@@ -33,7 +37,7 @@ class _HourRequestsScreenState extends ConsumerState<HourRequestsScreen> {
   static const _statusLabels = {
     'pending': 'รอตรวจสอบ',
     'approved': 'อนุมัติแล้ว',
-    'rejected': 'ไม่ผ่านการอนุมัติ',
+    'rejected': 'ถูกปฏิเสธ',
   };
 
   void _selectTab(int tab) {
@@ -230,12 +234,11 @@ class _HourRequestsScreenState extends ConsumerState<HourRequestsScreen> {
                       ],
                     ),
                   ),
-                  Text(
-                    '${r.hoursCredited} ชม.',
-                    style: const TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
-                    ),
+                  _HoursCell(
+                    status: r.status,
+                    requested: r.hoursRequested,
+                    approved: r.hoursApproved,
+                    credited: r.hoursCredited,
                   ),
                 ],
               ),
@@ -405,15 +408,69 @@ class _HourRequestsScreenState extends ConsumerState<HourRequestsScreen> {
                       ],
                     ),
                   ),
-                  Text(
-                    '${r.hoursCredited} ชม.',
-                    style: const TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
-                    ),
+                  _HoursCell(
+                    status: r.status,
+                    requested: r.hoursRequested,
+                    approved: r.hoursApproved,
+                    credited: r.hoursCredited,
                   ),
                 ],
               ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Shows the credited hours; if an admin approved fewer hours than the
+/// student requested, shows the original request struck through next to the
+/// actual credit — matching the web hour-requests table.
+class _HoursCell extends StatelessWidget {
+  const _HoursCell({
+    required this.status,
+    required this.requested,
+    required this.approved,
+    required this.credited,
+  });
+
+  final String status;
+  final int requested;
+  final int? approved;
+  final int credited;
+
+  @override
+  Widget build(BuildContext context) {
+    final isPartial =
+        status == 'approved' && approved != null && approved != requested;
+
+    if (!isPartial) {
+      return Text(
+        '$credited ชม.',
+        style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+      );
+    }
+
+    return RichText(
+      textAlign: TextAlign.right,
+      text: TextSpan(
+        style: DefaultTextStyle.of(context).style,
+        children: [
+          TextSpan(
+            text: '$requested ',
+            style: TextStyle(
+              fontSize: 12,
+              color: context.surfaceColors.textSecondary,
+              decoration: TextDecoration.lineThrough,
+            ),
+          ),
+          TextSpan(
+            text: '$credited ชม.',
+            style: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+              color: AppColors.green600,
             ),
           ),
         ],

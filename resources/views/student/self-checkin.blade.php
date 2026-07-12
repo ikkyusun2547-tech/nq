@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="mx-auto max-w-md">
-    <x-brand-header :title="__('เช็กชื่อแบบรายงานตนเอง')" :back="route('activities.index')" />
+    <x-brand-header :title="__('เช็คชื่อแบบรายงานตนเอง')" :back="route('activities.index')" />
 
     <div class="rounded-3xl glass-card p-5 shadow-soft-lg sm:p-6">
         <h2 class="font-semibold text-slate-900 dark:text-slate-100">{{ $activity->title }}</h2>
@@ -12,7 +12,7 @@
 
         @if ($activity->checkin_opens_at && $activity->checkin_closes_at)
             <p class="mt-2 text-xs text-slate-400 dark:text-slate-500">
-                {{ __('เปิดให้เช็กชื่อ :from – :to', [
+                {{ __('เปิดให้เช็คชื่อ :from – :to', [
                     'from' => $activity->checkin_opens_at->translatedFormat('d M Y H:i'),
                     'to' => $activity->checkin_closes_at->translatedFormat('d M Y H:i'),
                 ]) }}
@@ -31,7 +31,7 @@
 
         @if (! $activity->acceptsCheckIn())
             <p class="mt-4 rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-700 shadow-soft ring-1 ring-amber-100 dark:bg-amber-500/10 dark:text-amber-400 dark:ring-amber-500/20">
-                {{ __('ยังไม่อยู่ในช่วงเวลาที่เปิดให้เช็กชื่อกิจกรรมนี้') }}
+                {{ __('ยังไม่อยู่ในช่วงเวลาที่เปิดให้เช็คชื่อกิจกรรมนี้') }}
             </p>
         @else
             <form method="POST" action="{{ route('self-checkin.store', $activity) }}" enctype="multipart/form-data" class="mt-4 space-y-4">
@@ -68,9 +68,9 @@
                 </div>
 
                 <button type="submit" class="w-full rounded-xl bg-brand-green-500 px-4 py-3 text-sm font-semibold text-brand-purple-950 shadow-soft transition-all duration-300 hover:-translate-y-0.5 hover:bg-brand-green-400 hover:shadow-lg">
-                    {{ __('ส่งหลักฐานเพื่อเช็กชื่อ') }}
+                    {{ __('ส่งหลักฐานเพื่อเช็คชื่อ') }}
                 </button>
-                <p class="text-center text-xs text-slate-400 dark:text-slate-500">{{ __('การเช็กชื่อแบบนี้ต้องรอเจ้าหน้าที่ตรวจสอบก่อนจึงจะได้รับชั่วโมงกิจกรรม') }}</p>
+                <p class="text-center text-xs text-slate-400 dark:text-slate-500">{{ __('การเช็คชื่อแบบนี้ต้องรอเจ้าหน้าที่ตรวจสอบก่อนจึงจะได้รับชั่วโมงกิจกรรม') }}</p>
             </form>
         @endif
     </div>

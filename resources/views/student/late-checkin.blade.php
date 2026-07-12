@@ -11,7 +11,7 @@
     $statusLabel = ['pending' => __('รอตรวจสอบ'), 'approved' => __('อนุมัติแล้ว'), 'rejected' => __('ถูกปฏิเสธ')];
 @endphp
 <div class="mx-auto max-w-md">
-    <x-brand-header :title="__('ขอเช็กชื่อย้อนหลัง')" :back="route('activities.index', ['status_group' => 'ended'])" />
+    <x-brand-header :title="__('ขอเช็คชื่อย้อนหลัง')" :back="route('activities.index', ['status_group' => 'ended'])" />
 
     <div class="rounded-3xl glass-card p-5 shadow-soft-lg sm:p-6">
         <div class="flex items-start justify-between gap-2">
@@ -65,7 +65,7 @@
         @if (! $existingRequest || $existingRequest->status === 'rejected')
             @unless ($existingRequest)
                 <p class="mt-3 rounded-xl bg-amber-50 px-3.5 py-2.5 text-xs text-amber-700 dark:bg-amber-500/10 dark:text-amber-400">
-                    {{ __('ใช้สำหรับกรณีที่คุณเข้าร่วมกิจกรรมนี้จริง แต่ลืมหรือไม่สะดวกเช็กชื่อตอนกิจกรรมยังเปิดรับ คำร้องต้องรอเจ้าหน้าที่ตรวจสอบและอนุมัติก่อนจึงจะได้รับชั่วโมงกิจกรรม') }}
+                    {{ __('ใช้สำหรับกรณีที่คุณเข้าร่วมกิจกรรมนี้จริง แต่ลืมหรือไม่สะดวกเช็คชื่อตอนกิจกรรมยังเปิดรับ คำร้องต้องรอเจ้าหน้าที่ตรวจสอบและอนุมัติก่อนจึงจะได้รับชั่วโมงกิจกรรม') }}
                 </p>
             @endunless
 
@@ -82,7 +82,7 @@
             <form method="POST" action="{{ route('late-checkin.store', $activity) }}" enctype="multipart/form-data" class="mt-4 space-y-4">
             @csrf
             <div>
-                <label class="mb-1.5 block text-sm font-medium text-slate-600 dark:text-slate-400">{{ __('เหตุผลที่ไม่ได้เช็กชื่อตอนนั้น') }}</label>
+                <label class="mb-1.5 block text-sm font-medium text-slate-600 dark:text-slate-400">{{ __('เหตุผลที่ไม่ได้เช็คชื่อตอนนั้น') }}</label>
                 <textarea
                     name="reason" rows="3" maxlength="500" required
                     placeholder="{{ __('เช่น ลืมสแกน QR, มือถือแบตหมดตอนจะสแกน') }}"

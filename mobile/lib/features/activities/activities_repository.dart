@@ -22,13 +22,21 @@ class ActivitiesRepository {
 
   final ApiClient apiClient;
 
-  Future<ActivitiesPage> fetch({String statusGroup = 'open', int page = 1, String? activityLevel}) async {
+  Future<ActivitiesPage> fetch({
+    String statusGroup = 'open',
+    int page = 1,
+    String? activityLevel,
+    String? activityCategory,
+    String? search,
+  }) async {
     final response = await apiClient.dio.get(
       '/activities',
       queryParameters: {
         'status_group': statusGroup,
         'page': page,
         'activity_level': ?activityLevel,
+        'activity_category': ?activityCategory,
+        'search': ?search,
       },
     );
     final data = response.data as Map<String, dynamic>;

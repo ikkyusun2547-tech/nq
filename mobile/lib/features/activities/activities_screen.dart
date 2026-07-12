@@ -9,7 +9,7 @@ import '../checkin/checkin_flow_screen.dart';
 import '../self_checkin/self_checkin_screen.dart';
 import '../late_checkin/late_checkin_screen.dart';
 
-class ActivitiesScreen extends ConsumerWidget {
+class ActivitiesScreen extends ConsumerStatefulWidget {
   const ActivitiesScreen({super.key});
 
   static const _statusGroups = {
@@ -24,12 +24,54 @@ class ActivitiesScreen extends ConsumerWidget {
     'faculty': 'ระดับคณะ',
   };
 
+  static const _categories = {
+    null: 'ทุกหมวดหมู่',
+    'culture': 'ทำนุบำรุงศิลปวัฒนธรรม',
+    'academic': 'วิชาการ',
+    'sports': 'กีฬาและส่งเสริมสุขภาพ',
+    'volunteer': 'จิตอาสา/บำเพ็ญประโยชน์',
+    'ethics': 'คุณธรรมจริยธรรม',
+  };
+
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ActivitiesScreen> createState() => _ActivitiesScreenState();
+}
+
+class _ActivitiesScreenState extends ConsumerState<ActivitiesScreen> {
+  final _searchController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    // Only need to redraw for the clear (x) button's visibility — the
+    // provider itself is updated on submit, not per keystroke.
+    _searchController.addListener(() => setState(() {}));
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  void _openFilterSheet() {
+    showModalBottomSheet(
+      context: context,
+      showDragHandle: true,
+      isScrollControlled: true,
+      builder: (_) => const _FilterSheet(),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final statusGroup = ref.watch(activitiesStatusGroupProvider);
     final levelFilter = ref.watch(activitiesLevelFilterProvider);
+    final categoryFilter = ref.watch(activitiesCategoryFilterProvider);
     final page = ref.watch(activitiesPageProvider);
     final tokens = context.surfaceColors;
+    final activeFilterCount =
+        (levelFilter != null ? 1 : 0) + (categoryFilter != null ? 1 : 0);
 
     return Scaffold(
       body: SafeArea(
@@ -43,8 +85,110 @@ class ActivitiesScreen extends ConsumerWidget {
                 title: 'กิจกรรม',
                 subtitle: 'เลือกกิจกรรมที่เข้าร่วมได้',
               ),
+              // Search + filter-sheet trigger on one row, status tabs below —
+              // the level/category pickers used to sit here too as two more
+              // always-visible scrolling chip rows, which buried the actual
+              // activity list under four rows of controls before content
+              // even started. They now live behind the filter button instead.
               Padding(
-                padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+                padding: const EdgeInsets.fromLTRB(20, 16, 20, 10),
+                child: Row(
+                  spacing: 8,
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: _searchController,
+                        textInputAction: TextInputAction.search,
+                        onSubmitted: (value) => ref
+                            .read(activitiesSearchProvider.notifier)
+                            .set(value.trim()),
+                        decoration: InputDecoration(
+                          hintText: 'ค้นหากิจกรรม',
+                          prefixIcon: const Icon(Icons.search, size: 20),
+                          suffixIcon: _searchController.text.isEmpty
+                              ? null
+                              : IconButton(
+                                  icon: const Icon(Icons.close, size: 18),
+                                  onPressed: () {
+                                    _searchController.clear();
+                                    ref
+                                        .read(activitiesSearchProvider.notifier)
+                                        .set('');
+                                  },
+                                ),
+                          isDense: true,
+                          filled: true,
+                          fillColor: tokens.surface,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(14),
+                            borderSide: BorderSide(color: tokens.border),
+                          ),
+                        ),
+                      ),
+                    ),
+                    Material(
+                      color: activeFilterCount > 0
+                          ? AppColors.purple700
+                          : tokens.surface,
+                      borderRadius: BorderRadius.circular(14),
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(14),
+                        onTap: _openFilterSheet,
+                        child: Container(
+                          width: 46,
+                          height: 46,
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(14),
+                            border: activeFilterCount > 0
+                                ? null
+                                : Border.all(color: tokens.border),
+                          ),
+                          child: Stack(
+                            clipBehavior: Clip.none,
+                            children: [
+                              Icon(
+                                Icons.tune,
+                                size: 20,
+                                color: activeFilterCount > 0
+                                    ? Colors.white
+                                    : tokens.textSecondary,
+                              ),
+                              if (activeFilterCount > 0)
+                                Positioned(
+                                  top: -6,
+                                  right: -6,
+                                  child: Container(
+                                    padding: const EdgeInsets.all(3),
+                                    constraints: const BoxConstraints(
+                                      minWidth: 16,
+                                      minHeight: 16,
+                                    ),
+                                    decoration: const BoxDecoration(
+                                      color: AppColors.green500,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Text(
+                                      '$activeFilterCount',
+                                      textAlign: TextAlign.center,
+                                      style: const TextStyle(
+                                        fontSize: 9,
+                                        fontWeight: FontWeight.w700,
+                                        color: AppColors.purple950,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
                 child: Container(
                   padding: const EdgeInsets.all(4),
                   decoration: BoxDecoration(
@@ -53,7 +197,7 @@ class ActivitiesScreen extends ConsumerWidget {
                     border: Border.all(color: tokens.border),
                   ),
                   child: Row(
-                    children: _statusGroups.entries.map((e) {
+                    children: ActivitiesScreen._statusGroups.entries.map((e) {
                       final selected = e.key == statusGroup;
 
                       return Expanded(
@@ -75,56 +219,6 @@ class ActivitiesScreen extends ConsumerWidget {
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                 fontSize: 13,
-                                fontWeight: FontWeight.w600,
-                                color: selected
-                                    ? Colors.white
-                                    : tokens.textSecondary,
-                              ),
-                            ),
-                          ),
-                        ),
-                      );
-                    }).toList(),
-                  ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 8),
-                child: SizedBox(
-                  height: 36,
-                  child: ListView(
-                    scrollDirection: Axis.horizontal,
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    children: _activityLevels.entries.map((e) {
-                      final selected = e.key == levelFilter;
-
-                      return Padding(
-                        padding: const EdgeInsets.only(right: 8),
-                        child: GestureDetector(
-                          onTap: () => ref
-                              .read(activitiesLevelFilterProvider.notifier)
-                              .set(e.key),
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 200),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 14,
-                              vertical: 8,
-                            ),
-                            decoration: BoxDecoration(
-                              color: selected
-                                  ? AppColors.purple700
-                                  : tokens.surface,
-                              borderRadius: BorderRadius.circular(20),
-                              border: Border.all(
-                                color: selected
-                                    ? AppColors.purple700
-                                    : tokens.border,
-                              ),
-                            ),
-                            child: Text(
-                              e.value,
-                              style: TextStyle(
-                                fontSize: 12,
                                 fontWeight: FontWeight.w600,
                                 color: selected
                                     ? Colors.white
@@ -177,6 +271,171 @@ class ActivitiesScreen extends ConsumerWidget {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Level + category pickers, moved out of the always-visible screen body
+/// (see ActivitiesScreen._openFilterSheet) into a sheet so they only take up
+/// space when the student actually wants to narrow the list down.
+class _FilterSheet extends ConsumerWidget {
+  const _FilterSheet();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final levelFilter = ref.watch(activitiesLevelFilterProvider);
+    final categoryFilter = ref.watch(activitiesCategoryFilterProvider);
+    final tokens = context.surfaceColors;
+    final hasFilters = levelFilter != null || categoryFilter != null;
+
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'ตัวกรอง',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+                ),
+                if (hasFilters)
+                  TextButton(
+                    onPressed: () {
+                      ref.read(activitiesLevelFilterProvider.notifier).set(null);
+                      ref
+                          .read(activitiesCategoryFilterProvider.notifier)
+                          .set(null);
+                    },
+                    child: const Text('ล้างตัวกรอง'),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'ระดับ',
+              style: TextStyle(
+                fontSize: 12.5,
+                fontWeight: FontWeight.w600,
+                color: tokens.textSecondary,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: ActivitiesScreen._activityLevels.entries.map((e) {
+                final selected = e.key == levelFilter;
+
+                return _FilterChip(
+                  label: e.value,
+                  selected: selected,
+                  color: AppColors.purple700,
+                  onTap: () => ref
+                      .read(activitiesLevelFilterProvider.notifier)
+                      .set(e.key),
+                );
+              }).toList(),
+            ),
+            const SizedBox(height: 20),
+            Text(
+              'หมวดหมู่',
+              style: TextStyle(
+                fontSize: 12.5,
+                fontWeight: FontWeight.w600,
+                color: tokens.textSecondary,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: ActivitiesScreen._categories.entries.map((e) {
+                final selected = e.key == categoryFilter;
+                final color = e.key == null
+                    ? tokens.textSecondary
+                    : (AppColors.categoryColors[e.key] ?? Colors.grey);
+
+                return _FilterChip(
+                  label: e.value,
+                  selected: selected,
+                  color: color,
+                  dotColor: e.key != null ? color : null,
+                  onTap: () => ref
+                      .read(activitiesCategoryFilterProvider.notifier)
+                      .set(e.key),
+                );
+              }).toList(),
+            ),
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('เสร็จสิ้น'),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _FilterChip extends StatelessWidget {
+  const _FilterChip({
+    required this.label,
+    required this.selected,
+    required this.color,
+    required this.onTap,
+    this.dotColor,
+  });
+
+  final String label;
+  final bool selected;
+  final Color color;
+  final Color? dotColor;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = context.surfaceColors;
+
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+        decoration: BoxDecoration(
+          color: selected ? color.withValues(alpha: 0.15) : Colors.transparent,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: selected ? color : tokens.border),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (dotColor != null) ...[
+              Container(
+                width: 6,
+                height: 6,
+                decoration: BoxDecoration(color: dotColor, shape: BoxShape.circle),
+              ),
+              const SizedBox(width: 6),
+            ],
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 12.5,
+                fontWeight: FontWeight.w600,
+                color: selected ? color : tokens.textSecondary,
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -437,7 +696,7 @@ class _ActivityCard extends StatelessWidget {
   Widget _buildAction(BuildContext context) {
     if (checkedIn) {
       return _statusChip(
-        'เช็กชื่อแล้ว',
+        'เช็คชื่อแล้ว',
         AppColors.statusApproved,
         Icons.check_circle_outline,
       );
@@ -461,7 +720,7 @@ class _ActivityCard extends StatelessWidget {
             ),
           ),
           icon: const Icon(Icons.history, size: 18),
-          label: const Text('ขอเช็กชื่อย้อนหลัง'),
+          label: const Text('ขอเช็คชื่อย้อนหลัง'),
         ),
       );
     }
@@ -496,7 +755,7 @@ class _ActivityCard extends StatelessWidget {
           ),
         ),
         icon: const Icon(Icons.qr_code_scanner, size: 18),
-        label: const Text('สแกน QR เช็กชื่อ'),
+        label: const Text('สแกน QR เช็คชื่อ'),
       ),
     );
   }

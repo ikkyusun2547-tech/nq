@@ -15,7 +15,7 @@ class ActivityMissed extends BaseNotification
         return [
             'icon' => 'flag',
             'title_key' => 'คุณพลาดกิจกรรมนี้',
-            'body_key' => 'กิจกรรม ":title" ปิดรับเช็กชื่อแล้วและคุณไม่ได้เช็กชื่อเข้าร่วม หากเข้าร่วมจริงสามารถยื่นคำร้องขอเช็กชื่อย้อนหลังได้',
+            'body_key' => 'กิจกรรม ":title" ปิดรับเช็คชื่อแล้วและคุณไม่ได้เช็คชื่อเข้าร่วม หากเข้าร่วมจริงสามารถยื่นคำร้องขอเช็คชื่อย้อนหลังได้',
             'body_params' => ['title' => $this->activity->title],
             'url' => route('late-checkin.show', $this->activity),
         ];

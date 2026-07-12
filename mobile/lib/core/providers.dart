@@ -33,8 +33,26 @@ final deviceTokenRepositoryProvider = Provider<DeviceTokenRepository>((ref) {
 });
 
 final pushNotificationServiceProvider = Provider<PushNotificationService>((ref) {
-  return PushNotificationService(deviceTokenRepository: ref.watch(deviceTokenRepositoryProvider));
+  return PushNotificationService(
+    deviceTokenRepository: ref.watch(deviceTokenRepositoryProvider),
+    ref: ref,
+  );
 });
+
+/// Which HomeShell bottom-nav tab is showing. Deliberately not autoDispose —
+/// a tapped push notification (see push_notifications.dart) can set this
+/// before HomeShell has ever been built (cold start), and the value must
+/// survive until it mounts and reads it.
+class HomeTabIndexNotifier extends Notifier<int> {
+  @override
+  int build() => 0;
+
+  void set(int value) => state = value;
+}
+
+final homeTabIndexProvider = NotifierProvider<HomeTabIndexNotifier, int>(
+  HomeTabIndexNotifier.new,
+);
 
 final profileSetupRepositoryProvider = Provider<ProfileSetupRepository>((ref) {
   return ProfileSetupRepository(apiClient: ref.watch(apiClientProvider));
@@ -75,11 +93,43 @@ final activitiesLevelFilterProvider = NotifierProvider.autoDispose<ActivityLevel
   ActivityLevelNotifier.new,
 );
 
+/// null = ทุกหมวดหมู่ (no filter, matches any activity_category).
+class ActivityCategoryNotifier extends Notifier<String?> {
+  @override
+  String? build() => null;
+
+  void set(String? value) => state = value;
+}
+
+final activitiesCategoryFilterProvider = NotifierProvider.autoDispose<ActivityCategoryNotifier, String?>(
+  ActivityCategoryNotifier.new,
+);
+
+/// Empty = no text filter. Set on search-field submit, not per-keystroke, to
+/// match the web's submit-on-Enter behavior and avoid a request per letter.
+class ActivitySearchNotifier extends Notifier<String> {
+  @override
+  String build() => '';
+
+  void set(String value) => state = value;
+}
+
+final activitiesSearchProvider = NotifierProvider.autoDispose<ActivitySearchNotifier, String>(
+  ActivitySearchNotifier.new,
+);
+
 final activitiesPageProvider = FutureProvider.autoDispose((ref) {
   final statusGroup = ref.watch(activitiesStatusGroupProvider);
   final level = ref.watch(activitiesLevelFilterProvider);
+  final category = ref.watch(activitiesCategoryFilterProvider);
+  final search = ref.watch(activitiesSearchProvider);
 
-  return ref.watch(activitiesRepositoryProvider).fetch(statusGroup: statusGroup, activityLevel: level);
+  return ref.watch(activitiesRepositoryProvider).fetch(
+    statusGroup: statusGroup,
+    activityLevel: level,
+    activityCategory: category,
+    search: search.isEmpty ? null : search,
+  );
 });
 
 final checkInRepositoryProvider = Provider<CheckInRepository>((ref) {

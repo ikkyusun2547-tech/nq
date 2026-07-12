@@ -2,13 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/models/app_notification.dart';
+import '../../core/notification_routing.dart';
 import '../../core/providers.dart';
 import '../../core/theme.dart';
 import '../../core/widgets/section_card.dart';
 
-class NotificationsScreen extends ConsumerWidget {
+class NotificationsScreen extends ConsumerStatefulWidget {
   const NotificationsScreen({super.key});
 
+  @override
+  ConsumerState<NotificationsScreen> createState() => _NotificationsScreenState();
+}
+
+class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
   static const _icons = {
     'check': Icons.check_circle_outline,
     'reject': Icons.cancel_outlined,
@@ -25,6 +31,12 @@ class NotificationsScreen extends ConsumerWidget {
     'external': Color(0xFF8B5CF6),
   };
 
+  // Dismissible items must disappear from the list on this exact build (not
+  // after the delete request round-trips) or Flutter throws "A dismissed
+  // Dismissible widget is still part of the tree" the next time this screen
+  // rebuilds with the same key still present.
+  final _dismissedIds = <String>{};
+
   String _relativeTime(DateTime time) {
     final diff = DateTime.now().difference(time);
     if (diff.inMinutes < 1) return 'เมื่อสักครู่';
@@ -35,7 +47,7 @@ class NotificationsScreen extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final page = ref.watch(notificationsPageProvider);
     final tokens = context.surfaceColors;
 
@@ -52,16 +64,66 @@ class NotificationsScreen extends ConsumerWidget {
       ref.invalidate(unreadNotificationCountProvider);
     }
 
+    void openNotification(AppNotification notification) {
+      markRead(notification);
+      ref
+          .read(homeTabIndexProvider.notifier)
+          .set(homeTabIndexForUrl(notification.url));
+      Navigator.of(context).pop();
+    }
+
+    Future<void> deleteOne(AppNotification notification) async {
+      setState(() => _dismissedIds.add(notification.id));
+      try {
+        await ref.read(notificationsRepositoryProvider).delete(notification.id);
+      } finally {
+        ref.invalidate(unreadNotificationCountProvider);
+      }
+    }
+
+    Future<void> deleteAll() async {
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: const Text('ลบการแจ้งเตือนทั้งหมด?'),
+          content: const Text('ลบแล้วไม่สามารถกู้คืนได้'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('ยกเลิก'),
+            ),
+            FilledButton(
+              style: FilledButton.styleFrom(
+                backgroundColor: AppColors.statusRejected,
+              ),
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text('ลบทั้งหมด'),
+            ),
+          ],
+        ),
+      );
+      if (confirmed != true) return;
+
+      await ref.read(notificationsRepositoryProvider).deleteAll();
+      _dismissedIds.clear();
+      ref.invalidate(notificationsPageProvider);
+      ref.invalidate(unreadNotificationCountProvider);
+    }
+
     return Scaffold(
       body: SafeArea(
         bottom: false,
         child: RefreshIndicator(
-          onRefresh: () => ref.refresh(notificationsPageProvider.future),
+          onRefresh: () {
+            setState(_dismissedIds.clear);
+            return ref.refresh(notificationsPageProvider.future);
+          },
           child: ListView(
             padding: EdgeInsets.zero,
             children: [
               BrandHeader(
                 title: 'การแจ้งเตือน',
+                subtitle: 'ความเคลื่อนไหวล่าสุดของกิจกรรมและคำร้องของคุณ',
                 leading: IconButton(
                   icon: const Icon(Icons.arrow_back, color: Colors.white),
                   onPressed: () => Navigator.of(context).pop(),
@@ -72,6 +134,12 @@ class NotificationsScreen extends ConsumerWidget {
                       icon: const Icon(Icons.done_all, color: Colors.white),
                       tooltip: 'อ่านทั้งหมดแล้ว',
                       onPressed: markAllRead,
+                    ),
+                  if ((page.value?.notifications ?? const []).isNotEmpty)
+                    IconButton(
+                      icon: const Icon(Icons.delete_sweep_outlined, color: Colors.white),
+                      tooltip: 'ลบทั้งหมด',
+                      onPressed: deleteAll,
                     ),
                 ],
               ),
@@ -86,39 +154,67 @@ class NotificationsScreen extends ConsumerWidget {
                     padding: const EdgeInsets.only(top: 80),
                     child: Center(child: Text('โหลดข้อมูลไม่สำเร็จ: $error')),
                   ),
-                  data: (data) => data.notifications.isEmpty
-                      ? Padding(
-                          padding: const EdgeInsets.only(top: 80),
-                          child: Center(
-                            child: Column(
-                              children: [
-                                Icon(
-                                  Icons.notifications_none,
-                                  size: 48,
-                                  color: tokens.textSecondary,
-                                ),
-                                const SizedBox(height: 12),
-                                Text(
-                                  'ยังไม่มีการแจ้งเตือน',
-                                  style: TextStyle(color: tokens.textSecondary),
-                                ),
-                              ],
-                            ),
+                  data: (data) {
+                    final visible = data.notifications
+                        .where((n) => !_dismissedIds.contains(n.id))
+                        .toList();
+
+                    if (visible.isEmpty) {
+                      return Padding(
+                        padding: const EdgeInsets.only(top: 80),
+                        child: Center(
+                          child: Column(
+                            children: [
+                              Icon(
+                                Icons.notifications_none,
+                                size: 48,
+                                color: tokens.textSecondary,
+                              ),
+                              const SizedBox(height: 12),
+                              Text(
+                                'ยังไม่มีการแจ้งเตือน',
+                                style: TextStyle(color: tokens.textSecondary),
+                              ),
+                            ],
                           ),
-                        )
-                      : Column(
-                          children: data.notifications
+                        ),
+                      );
+                    }
+
+                    return Column(
+                          children: visible
                               .map(
-                                (n) => _NotificationTile(
-                                  notification: n,
-                                  icon: _icons[n.icon] ?? Icons.notifications_outlined,
-                                  color: _iconColors[n.icon] ?? AppColors.purple600,
-                                  timeLabel: _relativeTime(n.createdAt),
-                                  onTap: () => markRead(n),
+                                (n) => Dismissible(
+                                  key: ValueKey(n.id),
+                                  direction: DismissDirection.endToStart,
+                                  background: Container(
+                                    margin: const EdgeInsets.only(bottom: 12),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 20,
+                                    ),
+                                    alignment: Alignment.centerRight,
+                                    decoration: BoxDecoration(
+                                      color: AppColors.statusRejected,
+                                      borderRadius: BorderRadius.circular(16),
+                                    ),
+                                    child: const Icon(
+                                      Icons.delete_outline,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                  onDismissed: (_) => deleteOne(n),
+                                  child: _NotificationTile(
+                                    notification: n,
+                                    icon: _icons[n.icon] ?? Icons.notifications_outlined,
+                                    color: _iconColors[n.icon] ?? AppColors.purple600,
+                                    timeLabel: _relativeTime(n.createdAt),
+                                    onTap: () => openNotification(n),
+                                  ),
                                 ),
                               )
                               .toList(),
-                        ),
+                        );
+                  },
                 ),
               ),
             ],

@@ -15,7 +15,7 @@ class ActivityUpdated extends BaseNotification
         return [
             'icon' => 'flag',
             'title_key' => 'กิจกรรมที่คุณมีสิทธิ์เข้าร่วมมีการอัปเดต',
-            'body_key' => 'กิจกรรม ":title" มีการเปลี่ยนแปลงวันเวลา สถานที่ หรือวิธีเช็กชื่อ กรุณาตรวจสอบรายละเอียดอีกครั้ง',
+            'body_key' => 'กิจกรรม ":title" มีการเปลี่ยนแปลงวันเวลา สถานที่ หรือวิธีเช็คชื่อ กรุณาตรวจสอบรายละเอียดอีกครั้ง',
             'body_params' => ['title' => $this->activity->title],
             'url' => route('activities.index'),
         ];

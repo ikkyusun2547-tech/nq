@@ -3,7 +3,7 @@
 @section('content')
 <div class="mx-auto max-w-md" x-data="checkinApp()" x-init="init()">
     <div class="mb-4 flex items-center justify-between">
-        <h1 class="text-lg font-semibold text-gray-900 dark:text-slate-100">{{ __('เช็กชื่อเข้าร่วมกิจกรรม') }}</h1>
+        <h1 class="text-lg font-semibold text-gray-900 dark:text-slate-100">{{ __('เช็คชื่อเข้าร่วมกิจกรรม') }}</h1>
         <a href="{{ route('dashboard') }}" class="inline-flex items-center gap-1 text-sm text-gray-400 hover:text-gray-600 dark:text-slate-500 dark:hover:text-slate-300">
             <svg class="h-3.5 w-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/></svg>
             {{ __('กลับ') }}
@@ -60,7 +60,7 @@
                         <svg x-show="resultStatus === 'auto_approved'" class="h-9 w-9" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                         <svg x-show="resultStatus !== 'auto_approved'" class="h-9 w-9" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/></svg>
                     </div>
-                    <p class="text-base font-semibold text-gray-900 dark:text-slate-100" x-text="resultStatus === 'auto_approved' ? '{{ __('เช็กชื่อสำเร็จ') }}' : '{{ __('ส่งคำขอสำเร็จ') }}'"></p>
+                    <p class="text-base font-semibold text-gray-900 dark:text-slate-100" x-text="resultStatus === 'auto_approved' ? '{{ __('เช็คชื่อสำเร็จ') }}' : '{{ __('ส่งคำขอสำเร็จ') }}'"></p>
                     <p class="mt-1 text-sm text-gray-500 dark:text-slate-400" x-text="resultMessage"></p>
                     <a href="{{ route('dashboard') }}" class="mt-5 block w-full rounded-xl bg-brand-purple-700 px-4 py-3 text-sm font-semibold text-white shadow-soft transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg">{{ __('กลับหน้าแดชบอร์ด') }}</a>
                 </div>
@@ -210,7 +210,7 @@
                         if (settled) return;
                         settled = true;
                         clearTimeout(giveUp);
-                        this.showError('{{ __('กรุณาอนุญาตการเข้าถึงตำแหน่ง GPS เพื่อเช็กชื่อ') }}');
+                        this.showError('{{ __('กรุณาอนุญาตการเข้าถึงตำแหน่ง GPS เพื่อเช็คชื่อ') }}');
                     },
                     { enableHighAccuracy: true, timeout: 10000 },
                 );

@@ -37,7 +37,7 @@
     <div class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
         <a href="{{ route('checkin.show') }}"
             class="flex items-center justify-center gap-2 rounded-2xl bg-brand-green-500 p-4 text-center text-sm font-semibold text-brand-purple-950 shadow-soft transition-all duration-300 hover:-translate-y-0.5 hover:bg-brand-green-400 hover:shadow-lg">
-            {{ __('สแกน QR เช็กชื่อ') }}
+            {{ __('สแกน QR เช็คชื่อ') }}
         </a>
         <a href="{{ route('hour-requests.index', ['tab' => 'external']) }}"
             class="flex items-center justify-center gap-2 rounded-2xl bg-white p-4 text-center text-sm font-semibold text-brand-purple-700 shadow-soft ring-1 ring-brand-purple-100 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg dark:bg-slate-900 dark:text-brand-purple-400 dark:ring-brand-purple-500/20">
@@ -156,7 +156,7 @@
                             @elseif ($item->type === 'credit_transfer')
                                 · <span class="text-brand-purple-500 dark:text-brand-purple-400">{{ __('เทียบโอนตำแหน่ง') }}</span>
                             @elseif ($item->checkin_method === 'late_request')
-                                · <span class="text-brand-purple-500 dark:text-brand-purple-400">{{ __('เช็กชื่อย้อนหลัง') }}</span>
+                                · <span class="text-brand-purple-500 dark:text-brand-purple-400">{{ __('เช็คชื่อย้อนหลัง') }}</span>
                             @endif
                         </p>
                     </div>
@@ -185,6 +185,9 @@
                                 · <span class="text-brand-purple-500 dark:text-brand-purple-400">{{ __('เทียบโอนตำแหน่ง') }}</span>
                             @endif
                         </p>
+                        @if (! empty($item->flag_reason))
+                            <p class="mt-1 truncate text-xs text-amber-600 dark:text-amber-400">{{ __('เหตุผลที่ต้องตรวจสอบ:') }} {{ $item->flag_reason }}</p>
+                        @endif
                     </div>
                     <span class="shrink-0 text-xs font-medium text-amber-600 dark:text-amber-400">{{ __(':hours ชม.', ['hours' => $item->hours]) }}</span>
                 </div>
@@ -200,13 +203,19 @@
                     $rejectedRowClass = 'block w-full rounded-xl bg-red-50/50 px-3.5 py-2.5 text-left transition-colors hover:bg-red-100/60 dark:bg-red-500/5 dark:hover:bg-red-500/10';
                 @endphp
                 @php
-                    $rejectedHref = match ($item->type) {
-                        'external' => route('hour-requests.index', ['tab' => 'external']),
-                        'credit_transfer' => route('hour-requests.index', ['tab' => 'credit']),
-                        default => route('late-checkin.show', $item->activity_id),
+                    // A rejected external/credit request can be resubmitted, and a
+                    // rejected late check-in request has its own review page — but
+                    // a rejected real-time/self-report check-in (checkin_method
+                    // realtime/self_report) has no resubmission path (the event
+                    // already happened), so it stays a plain, non-clickable row.
+                    $rejectedHref = match (true) {
+                        $item->type === 'external' => route('hour-requests.index', ['tab' => 'external']),
+                        $item->type === 'credit_transfer' => route('hour-requests.index', ['tab' => 'credit']),
+                        ($item->checkin_method ?? null) === 'late_request' => route('late-checkin.show', $item->activity_id),
+                        default => null,
                     };
                 @endphp
-                <a href="{{ $rejectedHref }}" class="{{ $rejectedRowClass }}">
+                <{{ $rejectedHref ? 'a' : 'div' }} @if($rejectedHref) href="{{ $rejectedHref }}" @endif class="{{ $rejectedRowClass }}">
                     <p class="truncate text-sm font-medium text-slate-800 dark:text-slate-200">{{ $item->title }}</p>
                     <p class="text-xs text-slate-400 dark:text-slate-500">
                         {{ $item->date->translatedFormat('d M Y') }}
@@ -214,14 +223,14 @@
                             · <span class="text-brand-purple-500 dark:text-brand-purple-400">{{ __('กิจกรรมเทียบชั่วโมง') }}</span>
                         @elseif ($item->type === 'credit_transfer')
                             · <span class="text-brand-purple-500 dark:text-brand-purple-400">{{ __('เทียบโอนตำแหน่ง') }}</span>
-                        @else
-                            · <span class="text-brand-purple-500 dark:text-brand-purple-400">{{ __('เช็กชื่อย้อนหลัง') }}</span>
+                        @elseif (($item->checkin_method ?? null) === 'late_request')
+                            · <span class="text-brand-purple-500 dark:text-brand-purple-400">{{ __('เช็คชื่อย้อนหลัง') }}</span>
                         @endif
                     </p>
                     @if ($item->reject_reason)
                         <p class="mt-1 truncate text-xs text-red-500 dark:text-red-400">{{ __('เหตุผล:') }} {{ $item->reject_reason }}</p>
                     @endif
-                </a>
+                </{{ $rejectedHref ? 'a' : 'div' }}>
             @empty
                 <p class="py-4 text-center text-xs text-slate-400 dark:text-slate-500">{{ __('ไม่มีกิจกรรมที่ถูกปฏิเสธ') }}</p>
             @endforelse
@@ -254,7 +263,7 @@
                         </div>
                         <dl class="space-y-1.5 text-sm">
                             <div class="flex justify-between gap-3">
-                                <dt class="text-slate-400 dark:text-slate-500">{{ __('เวลาเช็กชื่อ') }}</dt>
+                                <dt class="text-slate-400 dark:text-slate-500">{{ __('เวลาเช็คชื่อ') }}</dt>
                                 <dd class="font-medium text-slate-700 dark:text-slate-200" x-text="detail.date"></dd>
                             </div>
                             <div class="flex justify-between gap-3" x-show="detail.location">

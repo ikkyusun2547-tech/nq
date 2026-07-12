@@ -16,8 +16,8 @@ class LateCheckInRequestSubmitted extends BaseNotification
 
         return [
             'icon' => 'external',
-            'title_key' => 'คำร้องขอเช็กชื่อย้อนหลังใหม่',
-            'body_key' => ':name ขอเช็กชื่อย้อนหลังกิจกรรม ":title" รอตรวจสอบ',
+            'title_key' => 'คำร้องขอเช็คชื่อย้อนหลังใหม่',
+            'body_key' => ':name ขอเช็คชื่อย้อนหลังกิจกรรม ":title" รอตรวจสอบ',
             'body_params' => ['name' => $studentName, 'title' => $this->request->activity->title],
             'url' => route('admin.late-checkins.index'),
         ];

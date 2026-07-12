@@ -47,6 +47,7 @@ class DashboardFeedItem {
     this.locationName,
     this.photoUrl,
     this.rejectReason,
+    this.flagReason,
   });
 
   final String? title;
@@ -60,6 +61,10 @@ class DashboardFeedItem {
   final String? photoUrl;
   final String? rejectReason;
 
+  /// Why an auto-flagged check-in (e.g. GPS out of bounds, device sharing
+  /// suspected) is sitting in "รอตรวจสอบ" instead of auto-approved.
+  final String? flagReason;
+
   factory DashboardFeedItem.fromJson(Map<String, dynamic> json) {
     return DashboardFeedItem(
       title: json['title'] as String?,
@@ -72,6 +77,7 @@ class DashboardFeedItem {
       locationName: json['location_name'] as String?,
       photoUrl: json['photo_url'] as String?,
       rejectReason: json['reject_reason'] as String?,
+      flagReason: json['flag_reason'] as String?,
     );
   }
 }

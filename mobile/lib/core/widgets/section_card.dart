@@ -139,44 +139,53 @@ class BrandHeader extends StatelessWidget {
                   ),
                 ],
               ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  ?leading,
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          title,
-                          style: const TextStyle(
-                            fontSize: 22,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.white,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        if (subtitle != null) ...[
-                          const SizedBox(height: 6),
-                          Text(
-                            subtitle!,
-                            style: TextStyle(
-                              fontSize: 13,
-                              color: Colors.white.withValues(alpha: 0.85),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      ?leading,
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              title,
+                              style: const TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.white,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
-                        if (footer != null) ...[
-                          const SizedBox(height: 16),
-                          footer!,
-                        ],
-                      ],
-                    ),
+                            if (subtitle != null) ...[
+                              const SizedBox(height: 6),
+                              Text(
+                                subtitle!,
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: Colors.white.withValues(alpha: 0.85),
+                                ),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+                      ...?actions,
+                    ],
                   ),
-                  ...?actions,
+                  // Full card width, not just the title column, so it sits
+                  // symmetrically inside the purple bar regardless of
+                  // whether `actions` (e.g. the notification bell) narrows
+                  // the title row.
+                  if (footer != null) ...[
+                    const SizedBox(height: 16),
+                    footer!,
+                  ],
                 ],
               ),
             ),

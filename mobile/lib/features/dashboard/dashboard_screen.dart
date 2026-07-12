@@ -13,6 +13,8 @@ import '../../core/providers.dart';
 import '../../core/theme.dart';
 import '../../core/widgets/section_card.dart';
 import '../auth/auth_controller.dart';
+import '../checkin/checkin_flow_screen.dart';
+import '../hour_requests/hour_requests_screen.dart';
 import '../notifications/notifications_screen.dart';
 import '../transcript/transcript_screen.dart';
 
@@ -52,6 +54,9 @@ class DashboardScreen extends ConsumerWidget {
                   title: data.summary.isCleared
                       ? 'ผ่านเกณฑ์กิจกรรมแล้ว 🎉'
                       : 'พอร์ตกิจกรรม',
+                  subtitle: data.summary.isCleared
+                      ? 'คุณทำกิจกรรมครบตามเกณฑ์ที่กำหนดแล้ว'
+                      : 'ภาพรวมกิจกรรมและชั่วโมงสะสมของคุณ',
                   actions: const [_NotificationBellButton()],
                   footer: user != null
                       ? _StudentIdentitySection(
@@ -66,7 +71,22 @@ class DashboardScreen extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     spacing: 16,
                     children: [
+                      const _QuickActions(),
                       _ProgressCard(summary: data.summary),
+                      if (data.summary.currentYear != null &&
+                          data.summary.yearlyTargetHours != null)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 4),
+                          child: Text(
+                            'เป้าหมายชั่วโมงกิจกรรมของชั้นปีที่ '
+                            '${data.summary.currentYear} คือ '
+                            '${data.summary.yearlyTargetHours} ชั่วโมง/ปี',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: context.surfaceColors.textSecondary,
+                            ),
+                          ),
+                        ),
                       SectionCard(
                         icon: Icons.pie_chart_outline,
                         title: 'ชั่วโมงตามหมวดหมู่',
@@ -113,7 +133,7 @@ class DashboardScreen extends ConsumerWidget {
                         ),
                       if (data.rejected.isNotEmpty)
                         _FeedSection(
-                          title: 'ไม่ผ่านการอนุมัติ',
+                          title: 'ถูกปฏิเสธ',
                           items: data.rejected,
                         ),
                     ],
@@ -297,6 +317,105 @@ class _NotificationBellButton extends ConsumerWidget {
   }
 }
 
+/// Mirrors the three shortcut buttons on the web dashboard (scan QR, submit
+/// external activity, submit credit transfer) so students don't have to hop
+/// to bottom-nav tabs first.
+class _QuickActions extends StatelessWidget {
+  const _QuickActions();
+
+  @override
+  Widget build(BuildContext context) {
+    return IntrinsicHeight(
+      child: Row(
+        spacing: 10,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Expanded(
+            child: _QuickActionButton(
+              label: 'สแกน QR\nเช็คชื่อ',
+              filled: true,
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const CheckInFlowScreen()),
+              ),
+            ),
+          ),
+          Expanded(
+            child: _QuickActionButton(
+              label: 'ยื่นกิจกรรม\nภายนอก',
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => const HourRequestsScreen(initialTab: 0),
+                ),
+              ),
+            ),
+          ),
+          Expanded(
+            child: _QuickActionButton(
+              label: 'เทียบโอน\nชั่วโมง',
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => const HourRequestsScreen(initialTab: 1),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _QuickActionButton extends StatelessWidget {
+  const _QuickActionButton({
+    required this.label,
+    required this.onTap,
+    this.filled = false,
+  });
+
+  final String label;
+  final VoidCallback onTap;
+  final bool filled;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final tokens = context.surfaceColors;
+
+    return Material(
+      color: filled ? AppColors.green500 : tokens.surface,
+      borderRadius: BorderRadius.circular(16),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 10),
+          alignment: Alignment.center,
+          decoration: filled
+              ? null
+              : BoxDecoration(
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: tokens.border),
+                ),
+          child: Text(
+            label,
+            textAlign: TextAlign.center,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontSize: 11.5,
+              height: 1.3,
+              fontWeight: FontWeight.w700,
+              color: filled
+                  ? AppColors.purple950
+                  : (isDark ? AppColors.purple400 : AppColors.purple700),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _ProgressCard extends StatelessWidget {
   const _ProgressCard({required this.summary});
 
@@ -425,6 +544,45 @@ class _FeedSection extends StatelessWidget {
     'credit_transfer': Icons.swap_horiz,
   };
 
+  // Matches dashboard.blade.php's "· <type>" annotation next to the date.
+  static String? _typeLabel(DashboardFeedItem item) => switch (item.type) {
+    'external' => 'กิจกรรมเทียบชั่วโมง',
+    'credit_transfer' => 'เทียบโอนตำแหน่ง',
+    _ => item.checkinMethod == 'late_request' ? 'เช็คชื่อย้อนหลัง' : null,
+  };
+
+  void _onTap(BuildContext context, DashboardFeedItem item) {
+    switch (item.type) {
+      case 'external':
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => const HourRequestsScreen(initialTab: 0),
+          ),
+        );
+        return;
+      case 'credit_transfer':
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => const HourRequestsScreen(initialTab: 1),
+          ),
+        );
+        return;
+    }
+
+    // Plain check-ins (realtime/self-report) carry a selfie + location to
+    // show, same as the web dashboard's detail popup. Late check-ins don't
+    // have a mobile equivalent of the web's edit-request page yet, so they
+    // stay non-interactive here.
+    if (item.checkinMethod != 'late_request' && item.photoUrl != null) {
+      showModalBottomSheet(
+        context: context,
+        showDragHandle: true,
+        isScrollControlled: true,
+        builder: (_) => _CheckinDetailSheet(item: item),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final statusColor = switch (title) {
@@ -438,60 +596,200 @@ class _FeedSection extends StatelessWidget {
       title: title,
       children: items
           .map(
-            (item) => Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  width: 32,
-                  height: 32,
-                  decoration: BoxDecoration(
-                    color: statusColor.withValues(alpha: 0.12),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    _typeIcons[item.type] ?? Icons.event_note,
-                    size: 16,
-                    color: statusColor,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        item.title ?? '',
-                        style: const TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      if (item.rejectReason != null || item.date != null)
-                        Text(
-                          item.rejectReason ?? item.date ?? '',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: context.surfaceColors.textSecondary,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                    ],
-                  ),
-                ),
-                if (item.hours != null)
-                  Text(
-                    '${item.hours} ชม.',
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-              ],
+            (item) => _FeedRow(
+              item: item,
+              statusColor: statusColor,
+              icon: _typeIcons[item.type] ?? Icons.event_note,
+              typeLabel: _typeLabel(item),
+              onTap: title == 'รอตรวจสอบ' ? null : () => _onTap(context, item),
             ),
           )
           .toList(),
+    );
+  }
+}
+
+class _FeedRow extends StatelessWidget {
+  const _FeedRow({
+    required this.item,
+    required this.statusColor,
+    required this.icon,
+    required this.typeLabel,
+    required this.onTap,
+  });
+
+  final DashboardFeedItem item;
+  final Color statusColor;
+  final IconData icon;
+  final String? typeLabel;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final subtitle = [
+      item.rejectReason ?? item.date,
+      if (typeLabel != null) typeLabel,
+    ].whereType<String>().join(' · ');
+
+    // Matches dashboard.blade.php: a flagged check-in's reason (GPS out of
+    // bounds, device sharing suspected, ...) shows on its own line, not
+    // folded into the date/type subtitle above.
+    final flagReason = item.flagReason;
+
+    final row = Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: 32,
+          height: 32,
+          decoration: BoxDecoration(
+            color: statusColor.withValues(alpha: 0.12),
+            shape: BoxShape.circle,
+          ),
+          child: Icon(icon, size: 16, color: statusColor),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                item.title ?? '',
+                style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+              if (subtitle.isNotEmpty)
+                Text(
+                  subtitle,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: context.surfaceColors.textSecondary,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              if (flagReason != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 2),
+                  child: Text(
+                    'เหตุผลที่ต้องตรวจสอบ: $flagReason',
+                    style: const TextStyle(
+                      fontSize: 11.5,
+                      color: AppColors.statusPending,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+            ],
+          ),
+        ),
+        if (item.hours != null)
+          Text(
+            '${item.hours} ชม.',
+            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+          ),
+      ],
+    );
+
+    if (onTap == null) return row;
+
+    return InkWell(
+      borderRadius: BorderRadius.circular(12),
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 2),
+        child: row,
+      ),
+    );
+  }
+}
+
+/// The mobile equivalent of the web dashboard's Alpine-driven detail popup —
+/// selfie, check-in time, location, and hours credited for a realtime/
+/// self-report check-in.
+class _CheckinDetailSheet extends StatelessWidget {
+  const _CheckinDetailSheet({required this.item});
+
+  final DashboardFeedItem item;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.fromLTRB(
+        20,
+        0,
+        20,
+        20 + MediaQuery.of(context).viewInsets.bottom,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            item.title ?? '',
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+          ),
+          const SizedBox(height: 12),
+          if (item.photoUrl != null)
+            ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: Image.network(
+                item.photoUrl!,
+                width: double.infinity,
+                fit: BoxFit.contain,
+              ),
+            ),
+          const SizedBox(height: 12),
+          _DetailRow(label: 'เวลาเช็คชื่อ', value: item.date ?? '-'),
+          if (item.locationName != null)
+            _DetailRow(label: 'สถานที่', value: item.locationName!),
+          _DetailRow(
+            label: 'ชั่วโมงที่ได้รับ',
+            value: '${item.hours ?? 0} ชม.',
+            valueColor: AppColors.green600,
+          ),
+          SizedBox(height: MediaQuery.of(context).padding.bottom),
+        ],
+      ),
+    );
+  }
+}
+
+class _DetailRow extends StatelessWidget {
+  const _DetailRow({required this.label, required this.value, this.valueColor});
+
+  final String label;
+  final String value;
+  final Color? valueColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 3),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 13,
+              color: context.surfaceColors.textSecondary,
+            ),
+          ),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: valueColor,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

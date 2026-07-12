@@ -1,9 +1,10 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'core/push_notifications.dart';
+import 'core/push_notifications.dart' show navigatorKey, firebaseMessagingBackgroundHandler;
 import 'core/theme.dart';
 import 'features/auth/auth_controller.dart';
 import 'features/auth/login_screen.dart';
@@ -12,8 +13,12 @@ import 'features/profile_setup/profile_setup_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
-  FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+  // No Firebase web app is registered for this project (Android-only, see
+  // android/app/google-services.json) — skip so web builds don't crash on boot.
+  if (!kIsWeb) {
+    await Firebase.initializeApp();
+    FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+  }
   runApp(const ProviderScope(child: SrruActivityApp()));
 }
 
@@ -23,6 +28,7 @@ class SrruActivityApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      navigatorKey: navigatorKey,
       title: 'ระบบกิจกรรมนักศึกษา',
       theme: buildAppTheme(),
       darkTheme: buildAppTheme(brightness: Brightness.dark),

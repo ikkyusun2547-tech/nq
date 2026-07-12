@@ -14,8 +14,8 @@ class AttendanceApproved extends BaseNotification
     {
         return [
             'icon' => 'check',
-            'title_key' => 'การเช็กชื่อของคุณได้รับการอนุมัติแล้ว',
-            'body_key' => 'เจ้าหน้าที่ตรวจสอบและอนุมัติการเช็กชื่อกิจกรรม ":title" ให้คุณแล้ว',
+            'title_key' => 'การเช็คชื่อของคุณได้รับการอนุมัติแล้ว',
+            'body_key' => 'เจ้าหน้าที่ตรวจสอบและอนุมัติการเช็คชื่อกิจกรรม ":title" ให้คุณแล้ว',
             'body_params' => ['title' => $this->attendance->activity->title],
             'url' => route('dashboard'),
         ];

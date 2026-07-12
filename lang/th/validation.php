@@ -178,9 +178,9 @@ return [
         'location_lat' => 'พิกัดละติจูด',
         'location_lng' => 'พิกัดลองจิจูด',
         'allowed_radius' => 'รัศมีปลอดภัย',
-        'checkin_method' => 'วิธีเช็กชื่อ',
-        'checkin_opens_at' => 'เวลาเปิดรับเช็กชื่อ',
-        'checkin_closes_at' => 'เวลาปิดรับเช็กชื่อ',
+        'checkin_method' => 'วิธีเช็คชื่อ',
+        'checkin_opens_at' => 'เวลาเปิดรับเช็คชื่อ',
+        'checkin_closes_at' => 'เวลาปิดรับเช็คชื่อ',
         'status' => 'สถานะ',
         'faculty_ids' => 'คณะ',
         'faculty_ids.*' => 'คณะ',
@@ -189,12 +189,12 @@ return [
         'target_years' => 'ชั้นปี',
         'target_years.*' => 'ชั้นปี',
 
-        // เช็กชื่อ
+        // เช็คชื่อ
         'qr_token' => 'QR Code',
         'location_lat_checkin' => 'ตำแหน่ง GPS',
         'device_uuid' => 'รหัสอุปกรณ์',
         'photo' => 'รูปภาพ',
-        'attendance_ids' => 'รายการเช็กชื่อ',
+        'attendance_ids' => 'รายการเช็คชื่อ',
 
         // คำร้องกิจกรรมภายนอก
         'organization' => 'หน่วยงานผู้จัด',

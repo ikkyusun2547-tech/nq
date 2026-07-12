@@ -49,7 +49,7 @@
 
     <div class="mb-4 flex flex-wrap gap-2 text-sm">
         @foreach ($statusGroupTabs as $value => $label)
-            <a href="{{ route('activities.index', array_merge(request()->only(['activity_level', 'academic_year', 'faculty_id']), ['status_group' => $value])) }}"
+            <a href="{{ route('activities.index', array_merge(request()->only(['activity_level', 'activity_category', 'search', 'academic_year', 'faculty_id']), ['status_group' => $value])) }}"
                 @class([
                     'rounded-full px-3.5 py-1.5 font-medium transition-all duration-200',
                     'bg-brand-purple-600 text-white shadow-soft' => $statusGroup === $value,
@@ -60,25 +60,45 @@
         @endforeach
     </div>
 
-    <form method="GET" action="{{ route('activities.index') }}" class="mb-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
+    <form method="GET" action="{{ route('activities.index') }}" class="mb-5 space-y-3">
         <input type="hidden" name="status_group" value="{{ $statusGroup }}">
 
-        @php $facultyOptions = $faculties->pluck('name_th', 'id')->all(); $academicYearOptions = $academicYears->mapWithKeys(fn ($y) => [$y => __('ปีการศึกษา :year', ['year' => $y])])->all(); @endphp
+        @php
+            $facultyOptions = $faculties->pluck('name_th', 'id')->all();
+            $academicYearOptions = $academicYears->mapWithKeys(fn ($y) => [$y => __('ปีการศึกษา :year', ['year' => $y])])->all();
+            $categoryOptions = collect($categoryMeta)->map(fn ($meta) => $meta['label'])->all();
+        @endphp
 
-        <x-premium-select
-            name="activity_level" :options="$levelLabel" :selected="request('activity_level')"
-            placeholder="{{ __('-- ทุกระดับ (รวม) --') }}" autosubmit
-        />
+        <div class="relative">
+            <svg class="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
+            <input
+                type="search" name="search" value="{{ request('search') }}"
+                placeholder="{{ __('ค้นหากิจกรรม (ชื่อหรือหน่วยงานจัด)') }}"
+                class="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-3.5 text-sm shadow-soft transition-all duration-200 placeholder:text-slate-400 focus:border-brand-purple-500 focus:outline-none focus:ring-4 focus:ring-brand-purple-500/10 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500"
+            >
+        </div>
 
-        <x-premium-select
-            name="faculty_id" :options="$facultyOptions" :selected="request('faculty_id')"
-            placeholder="{{ __('-- ทุกคณะ (แยกดูได้) --') }}" autosubmit
-        />
+        <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <x-premium-select
+                name="activity_category" :options="$categoryOptions" :selected="request('activity_category')"
+                placeholder="{{ __('-- ทุกหมวดหมู่ --') }}" autosubmit
+            />
 
-        <x-premium-select
-            name="academic_year" :options="$academicYearOptions" :selected="$academicYear"
-            placeholder="{{ __('-- ทุกปีการศึกษา --') }}" autosubmit
-        />
+            <x-premium-select
+                name="activity_level" :options="$levelLabel" :selected="request('activity_level')"
+                placeholder="{{ __('-- ทุกระดับ (รวม) --') }}" autosubmit
+            />
+
+            <x-premium-select
+                name="faculty_id" :options="$facultyOptions" :selected="request('faculty_id')"
+                placeholder="{{ __('-- ทุกคณะ (แยกดูได้) --') }}" autosubmit
+            />
+
+            <x-premium-select
+                name="academic_year" :options="$academicYearOptions" :selected="$academicYear"
+                placeholder="{{ __('-- ทุกปีการศึกษา --') }}" autosubmit
+            />
+        </div>
     </form>
 
     @if ($activities->isEmpty())
@@ -105,7 +125,7 @@
                         @if ($checkedInActivityIds->contains($activity->id))
                             <span class="absolute left-3 top-3 inline-flex items-center gap-1 rounded-full bg-white/90 px-2.5 py-1 text-xs font-medium text-brand-green-700 shadow-soft dark:bg-slate-900/90 dark:text-brand-green-400">
                                 <svg class="h-3 w-3 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                {{ __('เช็กชื่อแล้ว') }}
+                                {{ __('เช็คชื่อแล้ว') }}
                             </span>
                         @elseif ($activity->status === 'closed')
                             <span class="absolute left-3 top-3 inline-flex items-center gap-1 rounded-full bg-red-500/95 px-2.5 py-1 text-xs font-medium text-white shadow-soft backdrop-blur">
@@ -170,9 +190,9 @@
                             <span class="text-xs font-medium text-brand-purple-600 dark:text-brand-purple-400">{{ __(':hours ชม.', ['hours' => $activity->credit_hours]) }}</span>
                             @if (in_array($activity->status, ['open', 'ongoing'], true))
                                 @if ($activity->usesSelfReportCheckIn())
-                                    <a href="{{ route('self-checkin.show', $activity) }}" class="text-sm font-medium text-brand-purple-600 transition-colors hover:text-brand-purple-800 dark:text-brand-purple-400 dark:hover:text-brand-purple-300">{{ __('ไปเช็กชื่อ') }} &rarr;</a>
+                                    <a href="{{ route('self-checkin.show', $activity) }}" class="text-sm font-medium text-brand-purple-600 transition-colors hover:text-brand-purple-800 dark:text-brand-purple-400 dark:hover:text-brand-purple-300">{{ __('ไปเช็คชื่อ') }} &rarr;</a>
                                 @else
-                                    <a href="{{ route('checkin.show') }}" class="text-sm font-medium text-brand-purple-600 transition-colors hover:text-brand-purple-800 dark:text-brand-purple-400 dark:hover:text-brand-purple-300">{{ __('ไปเช็กชื่อ') }} &rarr;</a>
+                                    <a href="{{ route('checkin.show') }}" class="text-sm font-medium text-brand-purple-600 transition-colors hover:text-brand-purple-800 dark:text-brand-purple-400 dark:hover:text-brand-purple-300">{{ __('ไปเช็คชื่อ') }} &rarr;</a>
                                 @endif
                             @elseif ($activity->status === 'closed' && ! $checkedInActivityIds->contains($activity->id))
                                 @php $lateStatus = $lateCheckInStatuses[$activity->id] ?? null; @endphp
@@ -182,7 +202,7 @@
                                     @elseif ($lateStatus === 'rejected')
                                         {{ __('ยื่นคำร้องใหม่') }} &rarr;
                                     @else
-                                        {{ __('ขอเช็กชื่อย้อนหลัง') }} &rarr;
+                                        {{ __('ขอเช็คชื่อย้อนหลัง') }} &rarr;
                                     @endif
                                 </a>
                             @elseif ($activity->status === 'closed' && ($lateCheckInStatuses[$activity->id] ?? null) === 'approved')

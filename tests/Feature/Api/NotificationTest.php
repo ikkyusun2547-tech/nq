@@ -34,8 +34,8 @@ class NotificationTest extends TestCase
             'type' => 'App\\Notifications\\AttendanceApproved',
             'data' => [
                 'icon' => 'check',
-                'title_key' => 'การเช็กชื่อของคุณได้รับการอนุมัติแล้ว',
-                'body_key' => 'เจ้าหน้าที่ตรวจสอบและอนุมัติการเช็กชื่อกิจกรรม ":title" ให้คุณแล้ว',
+                'title_key' => 'การเช็คชื่อของคุณได้รับการอนุมัติแล้ว',
+                'body_key' => 'เจ้าหน้าที่ตรวจสอบและอนุมัติการเช็คชื่อกิจกรรม ":title" ให้คุณแล้ว',
                 'body_params' => ['title' => 'ทดสอบกิจกรรม'],
                 'url' => '/dashboard',
             ],
@@ -62,8 +62,8 @@ class NotificationTest extends TestCase
         $response->assertOk();
         $response->assertJsonCount(2, 'data');
         $response->assertJsonPath('unread_count', 1);
-        $response->assertJsonPath('data.0.title', 'การเช็กชื่อของคุณได้รับการอนุมัติแล้ว');
-        $response->assertJsonPath('data.0.body', 'เจ้าหน้าที่ตรวจสอบและอนุมัติการเช็กชื่อกิจกรรม "ทดสอบกิจกรรม" ให้คุณแล้ว');
+        $response->assertJsonPath('data.0.title', 'การเช็คชื่อของคุณได้รับการอนุมัติแล้ว');
+        $response->assertJsonPath('data.0.body', 'เจ้าหน้าที่ตรวจสอบและอนุมัติการเช็คชื่อกิจกรรม "ทดสอบกิจกรรม" ให้คุณแล้ว');
     }
 
     public function test_it_does_not_leak_another_users_notifications(): void

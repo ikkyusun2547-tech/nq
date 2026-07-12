@@ -31,7 +31,7 @@ abstract class BaseNotification extends Notification
             ->greeting(__('สวัสดีคุณ :name', ['name' => $name]))
             ->line(__($data['body_key'], $data['body_params'] ?? []))
             ->when(isset($data['url']), fn (MailMessage $mail) => $mail->action(__('ดูรายละเอียด'), $data['url']))
-            ->salutation(__('ระบบเช็กชื่อกิจกรรมนักศึกษา SRRU'));
+            ->salutation(__('ระบบเช็คชื่อกิจกรรมนักศึกษา SRRU'));
     }
 
     /**

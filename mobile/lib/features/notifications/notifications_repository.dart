@@ -46,4 +46,8 @@ class NotificationsRepository {
   Future<void> markRead(String id) => apiClient.dio.post('/notifications/$id/read');
 
   Future<void> markAllRead() => apiClient.dio.post('/notifications/read-all');
+
+  Future<void> delete(String id) => apiClient.dio.delete('/notifications/$id');
+
+  Future<void> deleteAll() => apiClient.dio.delete('/notifications/destroy-all');
 }

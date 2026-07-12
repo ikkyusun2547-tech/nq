@@ -19,9 +19,13 @@ enum _Step { scan, selfie, location, submitting, done }
 /// even though native geolocation is more reliable than the web app's
 /// Chrome-iOS workaround was — cheap insurance) -> submit multipart.
 class CheckInFlowScreen extends ConsumerStatefulWidget {
-  const CheckInFlowScreen({super.key, required this.activity});
+  const CheckInFlowScreen({super.key, this.activity});
 
-  final Activity activity;
+  /// Null when entered from the dashboard's generic "สแกน QR เช็คชื่อ" quick
+  /// action (mirrors the web's activity-less `/checkin` route) — the scanned
+  /// QR token alone resolves the activity server-side, this is only used to
+  /// title the app bar.
+  final Activity? activity;
 
   @override
   ConsumerState<CheckInFlowScreen> createState() => _CheckInFlowScreenState();
@@ -71,7 +75,7 @@ class _CheckInFlowScreenState extends ConsumerState<CheckInFlowScreen> {
       if (permission == LocationPermission.denied ||
           permission == LocationPermission.deniedForever) {
         setState(
-          () => _errorMessage = 'กรุณาอนุญาตการเข้าถึงตำแหน่งเพื่อเช็กชื่อ',
+          () => _errorMessage = 'กรุณาอนุญาตการเข้าถึงตำแหน่งเพื่อเช็คชื่อ',
         );
         return;
       }
@@ -128,30 +132,28 @@ class _CheckInFlowScreenState extends ConsumerState<CheckInFlowScreen> {
       });
     } catch (_) {
       setState(() {
-        _errorMessage = 'เช็กชื่อไม่สำเร็จ กรุณาลองใหม่อีกครั้ง';
+        _errorMessage = 'เช็คชื่อไม่สำเร็จ กรุณาลองใหม่อีกครั้ง';
         _step = _Step.location;
       });
     }
   }
 
-  static const _stepLabels = [
-    'สแกน QR',
-    'ถ่ายเซลฟี',
-    'ยืนยันตำแหน่ง',
-    'เสร็จสิ้น',
-  ];
+  // Matches resources/views/student/checkin.blade.php's 3-step indicator —
+  // location/submit/done collapse into the same "ยืนยัน" stage there.
+  static const _stepLabels = ['สแกน QR', 'ถ่ายเซลฟี', 'ยืนยัน'];
 
   int get _stepIndex => switch (_step) {
     _Step.scan => 0,
     _Step.selfie => 1,
-    _Step.location || _Step.submitting => 2,
-    _Step.done => 3,
+    _Step.location || _Step.submitting || _Step.done => 2,
   };
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(widget.activity.title)),
+      appBar: AppBar(
+        title: Text(widget.activity?.title ?? 'สแกน QR เช็คชื่อ'),
+      ),
       body: Column(
         children: [
           _StepIndicator(labels: _stepLabels, currentIndex: _stepIndex),

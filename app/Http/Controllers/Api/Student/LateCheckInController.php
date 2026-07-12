@@ -50,7 +50,7 @@ class LateCheckInController extends Controller
         SafeNotifier::send($admins, new LateCheckInRequestSubmitted($lateCheckInRequest->load(['user', 'activity'])));
 
         return response()->json([
-            'message' => __('ส่งคำร้องขอเช็กชื่อย้อนหลังสำเร็จ รอเจ้าหน้าที่ตรวจสอบ'),
+            'message' => __('ส่งคำร้องขอเช็คชื่อย้อนหลังสำเร็จ รอเจ้าหน้าที่ตรวจสอบ'),
             'request' => new LateCheckInRequestResource($lateCheckInRequest),
         ]);
     }
@@ -66,7 +66,7 @@ class LateCheckInController extends Controller
         abort_if(
             Attendance::where('user_id', $user->id)->where('activity_id', $activity->id)->exists(),
             422,
-            __('คุณเช็กชื่อกิจกรรมนี้ไปแล้ว')
+            __('คุณเช็คชื่อกิจกรรมนี้ไปแล้ว')
         );
 
         abort_if(
@@ -75,7 +75,7 @@ class LateCheckInController extends Controller
                 ->whereIn('status', ['pending', 'approved'])
                 ->exists(),
             422,
-            __('คุณส่งคำร้องขอเช็กชื่อย้อนหลังสำหรับกิจกรรมนี้ไปแล้ว')
+            __('คุณส่งคำร้องขอเช็คชื่อย้อนหลังสำหรับกิจกรรมนี้ไปแล้ว')
         );
     }
 }

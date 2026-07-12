@@ -42,6 +42,15 @@ class ActivityController extends Controller
 
         $baseQuery = fn () => Activity::query()
             ->when($request->filled('activity_level'), fn ($query) => $query->where('activity_level', $request->input('activity_level')))
+            ->when($request->filled('activity_category'), fn ($query) => $query->where('activity_category', $request->input('activity_category')))
+            ->when($request->filled('search'), function ($query) use ($request) {
+                $search = $request->input('search');
+
+                $query->where(function ($q) use ($search) {
+                    $q->where('title', 'like', "%{$search}%")
+                        ->orWhere('organizer_name', 'like', "%{$search}%");
+                });
+            })
             ->when($academicYear !== '', fn ($query) => $query->where('academic_year', $academicYear))
             ->when($request->filled('faculty_id'), function ($query) use ($request) {
                 $facultyId = $request->input('faculty_id');

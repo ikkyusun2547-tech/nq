@@ -20,6 +20,8 @@ class CreditTransferRequest {
     required this.position,
     required this.positionLabel,
     required this.academicYear,
+    required this.hoursRequested,
+    this.hoursApproved,
     required this.hoursCredited,
     required this.status,
     this.rejectReason,
@@ -29,6 +31,8 @@ class CreditTransferRequest {
   final String position;
   final String positionLabel;
   final int academicYear;
+  final int hoursRequested;
+  final int? hoursApproved;
   final int hoursCredited;
   final String status;
   final String? rejectReason;
@@ -39,6 +43,8 @@ class CreditTransferRequest {
       position: json['position'] as String,
       positionLabel: json['position_label'] as String,
       academicYear: json['academic_year'] as int,
+      hoursRequested: json['hours_requested'] as int,
+      hoursApproved: json['hours_approved'] as int?,
       hoursCredited: json['hours_credited'] as int,
       status: json['status'] as String,
       rejectReason: json['reject_reason'] as String?,

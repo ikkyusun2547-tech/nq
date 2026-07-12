@@ -1,20 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/providers.dart';
 import '../../core/theme.dart';
 import '../activities/activities_screen.dart';
 import '../dashboard/dashboard_screen.dart';
 import '../hour_requests/hour_requests_screen.dart';
 import '../profile/profile_screen.dart';
 
-class HomeShell extends StatefulWidget {
+/// Tab index lives in homeTabIndexProvider (not local State) so a tapped
+/// push notification can switch tabs from outside the widget tree — see
+/// PushNotificationService._handleNotificationTap.
+class HomeShell extends ConsumerWidget {
   const HomeShell({super.key});
-
-  @override
-  State<HomeShell> createState() => _HomeShellState();
-}
-
-class _HomeShellState extends State<HomeShell> {
-  int _index = 0;
 
   static const _screens = [
     DashboardScreen(),
@@ -47,11 +45,12 @@ class _HomeShellState extends State<HomeShell> {
   ];
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final tokens = context.surfaceColors;
+    final index = ref.watch(homeTabIndexProvider);
 
     return Scaffold(
-      body: IndexedStack(index: _index, children: _screens),
+      body: IndexedStack(index: index, children: _screens),
       bottomNavigationBar: Container(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         decoration: BoxDecoration(
@@ -72,13 +71,13 @@ class _HomeShellState extends State<HomeShell> {
           top: false,
           child: Row(
             children: List.generate(_items.length, (i) {
-              final selected = i == _index;
+              final selected = i == index;
               final item = _items[i];
 
               return Expanded(
                 child: GestureDetector(
                   behavior: HitTestBehavior.opaque,
-                  onTap: () => setState(() => _index = i),
+                  onTap: () => ref.read(homeTabIndexProvider.notifier).set(i),
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 220),
                     curve: Curves.easeOut,

@@ -35,7 +35,7 @@ class AttendanceAutomationService
 
         if (! $activity->acceptsCheckIn()) {
             throw ValidationException::withMessages([
-                'qr_token' => __('กิจกรรมนี้ไม่ได้เปิดรับเช็กชื่อในขณะนี้'),
+                'qr_token' => __('กิจกรรมนี้ไม่ได้เปิดรับเช็คชื่อในขณะนี้'),
             ]);
         }
 
@@ -47,7 +47,7 @@ class AttendanceAutomationService
 
         if (Attendance::where('user_id', $user->id)->where('activity_id', $activity->id)->exists()) {
             throw ValidationException::withMessages([
-                'qr_token' => 'คุณเช็กชื่อกิจกรรมนี้ไปแล้ว',
+                'qr_token' => 'คุณเช็คชื่อกิจกรรมนี้ไปแล้ว',
             ]);
         }
 
@@ -102,7 +102,7 @@ class AttendanceAutomationService
 
             if ($e->getCode() === '23000') {
                 throw ValidationException::withMessages([
-                    'qr_token' => 'คุณเช็กชื่อกิจกรรมนี้ไปแล้ว',
+                    'qr_token' => 'คุณเช็คชื่อกิจกรรมนี้ไปแล้ว',
                 ]);
             }
 
@@ -121,13 +121,13 @@ class AttendanceAutomationService
     {
         if (! $activity->usesSelfReportCheckIn()) {
             throw ValidationException::withMessages([
-                'photo' => __('กิจกรรมนี้ไม่ได้เปิดให้เช็กชื่อแบบรายงานตนเอง'),
+                'photo' => __('กิจกรรมนี้ไม่ได้เปิดให้เช็คชื่อแบบรายงานตนเอง'),
             ]);
         }
 
         if (! $activity->acceptsCheckIn()) {
             throw ValidationException::withMessages([
-                'photo' => __('ไม่อยู่ในช่วงเวลาที่เปิดให้เช็กชื่อ'),
+                'photo' => __('ไม่อยู่ในช่วงเวลาที่เปิดให้เช็คชื่อ'),
             ]);
         }
 
@@ -139,7 +139,7 @@ class AttendanceAutomationService
 
         if (Attendance::where('user_id', $user->id)->where('activity_id', $activity->id)->exists()) {
             throw ValidationException::withMessages([
-                'photo' => __('คุณเช็กชื่อกิจกรรมนี้ไปแล้ว'),
+                'photo' => __('คุณเช็คชื่อกิจกรรมนี้ไปแล้ว'),
             ]);
         }
 
@@ -160,7 +160,7 @@ class AttendanceAutomationService
 
             if ($e->getCode() === '23000') {
                 throw ValidationException::withMessages([
-                    'photo' => __('คุณเช็กชื่อกิจกรรมนี้ไปแล้ว'),
+                    'photo' => __('คุณเช็คชื่อกิจกรรมนี้ไปแล้ว'),
                 ]);
             }
 

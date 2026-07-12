@@ -16,8 +16,8 @@ class AttendanceFlagged extends BaseNotification
 
         return [
             'icon' => 'flag',
-            'title_key' => 'การเช็กชื่อติดธงแดง',
-            'body_key' => ':name เช็กชื่อกิจกรรม ":title" แต่ระบบตรวจพบความผิดปกติ',
+            'title_key' => 'การเช็คชื่อติดธงแดง',
+            'body_key' => ':name เช็คชื่อกิจกรรม ":title" แต่ระบบตรวจพบความผิดปกติ',
             'body_params' => ['name' => $studentName, 'title' => $this->attendance->activity->title],
             'url' => route('admin.attendance.index', $this->attendance->activity),
         ];

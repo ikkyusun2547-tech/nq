@@ -35,4 +35,18 @@ class NotificationController extends Controller
 
         return response()->json(['message' => __('อ่านทั้งหมดแล้ว')]);
     }
+
+    public function destroy(Request $request, string $notification)
+    {
+        $request->user()->notifications()->where('id', $notification)->first()?->delete();
+
+        return response()->json(['message' => __('ลบการแจ้งเตือนแล้ว')]);
+    }
+
+    public function destroyAll(Request $request)
+    {
+        $request->user()->notifications()->delete();
+
+        return response()->json(['message' => __('ลบการแจ้งเตือนทั้งหมดแล้ว')]);
+    }
 }
