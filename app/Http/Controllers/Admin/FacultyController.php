@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Faculty;
+use App\Services\AuditLogger;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
@@ -29,7 +30,8 @@ class FacultyController extends Controller
             'name_en' => ['nullable', 'string', 'max:255'],
         ]);
 
-        Faculty::create($validated);
+        $faculty = Faculty::create($validated);
+        AuditLogger::log('created', __('คณะ'), $faculty->name_th);
 
         return redirect()->route('admin.faculties.index')->with('status', __('เพิ่มคณะสำเร็จ'));
     }
@@ -50,6 +52,7 @@ class FacultyController extends Controller
         ]);
 
         $faculty->update($validated);
+        AuditLogger::log('updated', __('คณะ'), $faculty->name_th);
 
         return redirect()->route('admin.faculties.edit', $faculty)->with('status', __('บันทึกข้อมูลคณะสำเร็จ'));
     }
@@ -60,7 +63,9 @@ class FacultyController extends Controller
             return back()->with('error', __('ไม่สามารถลบคณะ ":name" ได้ เนื่องจากยังมีนักศึกษาหรือสาขาผูกอยู่', ['name' => $faculty->name_th]));
         }
 
+        $name = $faculty->name_th;
         $faculty->delete();
+        AuditLogger::log('deleted', __('คณะ'), $name);
 
         return redirect()->route('admin.faculties.index')->with('status', __('ลบคณะสำเร็จ'));
     }

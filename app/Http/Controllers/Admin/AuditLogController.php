@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Attendance;
+use App\Models\AuditLog;
 use App\Models\CreditTransferRequest;
 use App\Models\ExternalActivityRequest;
 use App\Models\LateCheckInRequest;
@@ -15,7 +16,9 @@ use Illuminate\Pagination\LengthAwarePaginator;
  * own record (attendance, external activity, credit transfer, late
  * check-in), but until now the only way to see "what has this admin done"
  * was opening each record type's list separately and reading the reviewer
- * column row by row. This merges all four into one chronological feed.
+ * column row by row. This merges those four with App\Models\AuditLog (role
+ * changes, bans, faculty/major edits, graduation-criteria updates — actions
+ * that don't carry their own reviewed_by trail) into one chronological feed.
  */
 class AuditLogController extends Controller
 {
@@ -71,10 +74,22 @@ class AuditLogController extends Controller
                 'reviewed_at' => $req->reviewed_at,
             ]);
 
+        $adminActions = AuditLog::with(['actor', 'subjectUser'])
+            ->get()
+            ->map(fn ($log) => (object) [
+                'reviewer' => $log->actor,
+                'action' => $log->action,
+                'type_label' => $log->type_label,
+                'student' => $log->subjectUser,
+                'title' => $log->title,
+                'reviewed_at' => $log->created_at,
+            ]);
+
         $entries = $attendances
             ->concat($externalRequests)
             ->concat($creditTransfers)
             ->concat($lateCheckIns)
+            ->concat($adminActions)
             ->when($request->filled('reviewer_id'), fn ($c) => $c->where('reviewer.id', (int) $request->input('reviewer_id')))
             ->sortByDesc('reviewed_at')
             ->values();
@@ -99,6 +114,7 @@ class AuditLogController extends Controller
             ->concat($externalRequests)
             ->concat($creditTransfers)
             ->concat($lateCheckIns)
+            ->concat($adminActions)
             ->pluck('reviewer')
             ->filter()
             ->unique('id')

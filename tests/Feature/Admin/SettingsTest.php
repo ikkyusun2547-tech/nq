@@ -56,6 +56,7 @@ class SettingsTest extends TestCase
         $this->assertSame(120, $criteria['normal']['required_hours']);
         $this->assertSame(45, $criteria['normal']['yearly_targets'][1]);
         $this->assertSame(60, $criteria['special']['required_hours']);
+        $this->assertDatabaseHas('audit_logs', ['actor_id' => $superAdmin->id, 'action' => 'updated', 'type_label' => 'เกณฑ์การจบการศึกษา']);
     }
 
     public function test_it_validates_criteria_input(): void

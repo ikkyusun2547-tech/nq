@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Services\AuditLogger;
 use Illuminate\Http\Request;
 
 /**
@@ -50,16 +51,25 @@ class UserManagementController extends Controller
 
     public function promote(Request $request, User $user)
     {
-        abort_if($user->role !== 'student', 422, __('ผู้ใช้นี้เป็นแอดมินอยู่แล้ว'));
+        // A plain 422 abort here would render Laravel's raw exception page
+        // on a normal form submit (not fetch/XHR) — these forms are simple
+        // <form method="POST"> submits, so a stale page (two admins acting
+        // on the same row) needs a graceful redirect, not a crash screen.
+        if ($user->role !== 'student') {
+            return back()->with('error', __('ผู้ใช้นี้เป็นแอดมินอยู่แล้ว'));
+        }
 
         $user->update(['role' => 'admin']);
+        AuditLogger::log('promoted', __('ผู้ใช้งาน'), __(':name เป็นแอดมิน', ['name' => $user->name_thai ?? $user->name]), $user);
 
         return back()->with('status', __('เลื่อนสิทธิ์ :name เป็นแอดมินแล้ว', ['name' => $user->name_thai ?? $user->name]));
     }
 
     public function demote(Request $request, User $user)
     {
-        abort_if($user->role === 'student', 422, __('ผู้ใช้นี้เป็นนักศึกษาอยู่แล้ว'));
+        if ($user->role === 'student') {
+            return back()->with('error', __('ผู้ใช้นี้เป็นนักศึกษาอยู่แล้ว'));
+        }
 
         // Checked before the self-demote guard below so the last super admin
         // demoting themselves gets the accurate reason (must keep at least
@@ -68,21 +78,27 @@ class UserManagementController extends Controller
         // route itself requires that role), self-demotion is the only way
         // this branch is actually reachable.
         if ($user->role === 'super_admin' && User::where('role', 'super_admin')->count() <= 1) {
-            abort(422, __('ต้องมีผู้ดูแลระบบสูงสุดอย่างน้อย 1 คนเสมอ'));
+            return back()->with('error', __('ต้องมีผู้ดูแลระบบสูงสุดอย่างน้อย 1 คนเสมอ'));
         }
 
-        abort_if($user->id === $request->user()->id, 422, __('ไม่สามารถลดสิทธิ์ตัวเองได้'));
+        if ($user->id === $request->user()->id) {
+            return back()->with('error', __('ไม่สามารถลดสิทธิ์ตัวเองได้'));
+        }
 
         $user->update(['role' => 'student']);
+        AuditLogger::log('demoted', __('ผู้ใช้งาน'), __(':name เป็นนักศึกษา', ['name' => $user->name_thai ?? $user->name]), $user);
 
         return back()->with('status', __('ลดสิทธิ์ :name เป็นนักศึกษาแล้ว', ['name' => $user->name_thai ?? $user->name]));
     }
 
     public function ban(Request $request, User $user)
     {
-        abort_if($user->id === $request->user()->id, 422, __('ไม่สามารถระงับบัญชีตัวเองได้'));
+        if ($user->id === $request->user()->id) {
+            return back()->with('error', __('ไม่สามารถระงับบัญชีตัวเองได้'));
+        }
 
         $user->update(['account_status' => 'banned']);
+        AuditLogger::log('banned', __('ผู้ใช้งาน'), __('บัญชี :name', ['name' => $user->name_thai ?? $user->name]), $user);
 
         return back()->with('status', __('ระงับการใช้งานบัญชี :name แล้ว', ['name' => $user->name_thai ?? $user->name]));
     }
@@ -90,6 +106,7 @@ class UserManagementController extends Controller
     public function unban(Request $request, User $user)
     {
         $user->update(['account_status' => 'active']);
+        AuditLogger::log('unbanned', __('ผู้ใช้งาน'), __('บัญชี :name', ['name' => $user->name_thai ?? $user->name]), $user);
 
         return back()->with('status', __('ปลดระงับบัญชี :name แล้ว', ['name' => $user->name_thai ?? $user->name]));
     }

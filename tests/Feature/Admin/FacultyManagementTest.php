@@ -35,6 +35,7 @@ class FacultyManagementTest extends TestCase
         ])->assertRedirect(route('admin.faculties.index'));
 
         $this->assertDatabaseHas('faculties', ['code' => 'ENG', 'name_th' => 'คณะวิศวกรรมศาสตร์']);
+        $this->assertDatabaseHas('audit_logs', ['actor_id' => $superAdmin->id, 'action' => 'created', 'title' => 'คณะวิศวกรรมศาสตร์']);
     }
 
     public function test_it_rejects_a_duplicate_faculty_code(): void
@@ -59,6 +60,7 @@ class FacultyManagementTest extends TestCase
         ])->assertRedirect();
 
         $this->assertSame('ชื่อใหม่', $faculty->fresh()->name_th);
+        $this->assertDatabaseHas('audit_logs', ['actor_id' => $superAdmin->id, 'action' => 'updated', 'title' => 'ชื่อใหม่']);
     }
 
     public function test_it_refuses_to_delete_a_faculty_with_students(): void
@@ -75,13 +77,14 @@ class FacultyManagementTest extends TestCase
     public function test_it_deletes_an_empty_faculty(): void
     {
         $superAdmin = $this->superAdmin();
-        $faculty = Faculty::factory()->create();
+        $faculty = Faculty::factory()->create(['name_th' => 'คณะจะลบ']);
 
         $this->actingAs($superAdmin)
             ->delete(route('admin.faculties.destroy', $faculty))
             ->assertRedirect(route('admin.faculties.index'));
 
         $this->assertDatabaseMissing('faculties', ['id' => $faculty->id]);
+        $this->assertDatabaseHas('audit_logs', ['actor_id' => $superAdmin->id, 'action' => 'deleted', 'title' => 'คณะจะลบ']);
     }
 
     public function test_it_adds_a_major_to_a_faculty(): void

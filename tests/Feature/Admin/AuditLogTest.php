@@ -44,6 +44,21 @@ class AuditLogTest extends TestCase
         $response->assertSee('ผู้ตรวจสอบ');
     }
 
+    public function test_it_lists_admin_actions_alongside_reviewed_records(): void
+    {
+        $superAdmin = User::factory()->create(['role' => 'super_admin', 'email' => 'super@srru.ac.th', 'name_thai' => 'ผู้ดูแลระบบ']);
+        $student = User::factory()->create(['role' => 'student', 'email' => 'stu@srru.ac.th', 'name_thai' => 'จะถูกเลื่อนสิทธิ์']);
+
+        $this->actingAs($superAdmin)->post(route('admin.users.promote', $student));
+
+        $response = $this->actingAs($superAdmin)->get(route('admin.audit-log.index'));
+
+        $response->assertOk();
+        $response->assertSee('ผู้ดูแลระบบ');
+        $response->assertSee('จะถูกเลื่อนสิทธิ์');
+        $response->assertSee('เลื่อนสิทธิ์');
+    }
+
     public function test_it_filters_by_reviewer(): void
     {
         $admin = User::factory()->create(['role' => 'admin', 'email' => 'admin@srru.ac.th']);

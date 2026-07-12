@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Setting;
 use App\Services\ActivityEvaluationService;
+use App\Services\AuditLogger;
 use Illuminate\Http\Request;
 
 class SettingsController extends Controller
@@ -41,6 +42,12 @@ class SettingsController extends Controller
         ];
 
         Setting::setJson(ActivityEvaluationService::SETTINGS_KEY, $criteria);
+        AuditLogger::log('updated', __('เกณฑ์การจบการศึกษา'), __('ภาคปกติ :np กิจกรรม/:nh ชม., ภาคพิเศษ :sp กิจกรรม/:sh ชม.', [
+            'np' => $criteria['normal']['required_activities'],
+            'nh' => $criteria['normal']['required_hours'],
+            'sp' => $criteria['special']['required_activities'],
+            'sh' => $criteria['special']['required_hours'],
+        ]));
 
         return back()->with('status', __('บันทึกเกณฑ์การจบการศึกษาสำเร็จ'));
     }

@@ -5,12 +5,24 @@
     $actionBadge = [
         'approved' => 'bg-brand-green-50 text-brand-green-700 dark:bg-brand-green-500/10 dark:text-brand-green-400',
         'rejected' => 'bg-red-50 text-red-700 dark:bg-red-500/10 dark:text-red-400',
+        'created' => 'bg-brand-green-50 text-brand-green-700 dark:bg-brand-green-500/10 dark:text-brand-green-400',
+        'updated' => 'bg-brand-purple-50 text-brand-purple-700 dark:bg-brand-purple-500/10 dark:text-brand-purple-400',
+        'deleted' => 'bg-red-50 text-red-700 dark:bg-red-500/10 dark:text-red-400',
+        'promoted' => 'bg-brand-green-50 text-brand-green-700 dark:bg-brand-green-500/10 dark:text-brand-green-400',
+        'demoted' => 'bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400',
+        'banned' => 'bg-red-50 text-red-700 dark:bg-red-500/10 dark:text-red-400',
+        'unbanned' => 'bg-brand-green-50 text-brand-green-700 dark:bg-brand-green-500/10 dark:text-brand-green-400',
     ];
-    $actionLabel = ['approved' => __('อนุมัติ'), 'rejected' => __('ปฏิเสธ')];
+    $actionLabel = [
+        'approved' => __('อนุมัติ'), 'rejected' => __('ปฏิเสธ'),
+        'created' => __('เพิ่มใหม่'), 'updated' => __('แก้ไข'), 'deleted' => __('ลบ'),
+        'promoted' => __('เลื่อนสิทธิ์'), 'demoted' => __('ลดสิทธิ์'),
+        'banned' => __('ระงับบัญชี'), 'unbanned' => __('ปลดระงับ'),
+    ];
 @endphp
 
 <div class="mx-auto max-w-6xl">
-    <x-brand-header :title="__('ประวัติการอนุมัติ/ปฏิเสธ')" :eyebrow="__('กองพัฒนานักศึกษา')">
+    <x-brand-header :title="__('ประวัติการตรวจสอบและการดำเนินการ')" :eyebrow="__('กองพัฒนานักศึกษา')">
         <x-slot:actions>
             <span class="inline-flex items-center gap-1.5 rounded-xl bg-brand-green-500/20 px-4 py-2 text-sm font-medium text-brand-green-100 shadow-soft ring-1 ring-brand-green-300/30 backdrop-blur">
                 <svg class="h-3.5 w-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
@@ -39,7 +51,7 @@
                     <th class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">{{ __('ผู้ตรวจสอบ') }}</th>
                     <th class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">{{ __('การกระทำ') }}</th>
                     <th class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">{{ __('ประเภท') }}</th>
-                    <th class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">{{ __('นักศึกษา') }}</th>
+                    <th class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">{{ __('บุคคลที่เกี่ยวข้อง') }}</th>
                     <th class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">{{ __('รายการ') }}</th>
                 </tr>
             </thead>
@@ -58,7 +70,7 @@
                             </span>
                         </td>
                         <td class="whitespace-nowrap px-4 py-3 text-slate-500 dark:text-slate-400">{{ $entry->type_label }}</td>
-                        <td class="whitespace-nowrap px-4 py-3 text-slate-700 dark:text-slate-300">{{ $entry->student->name_thai ?? $entry->student->name ?? '-' }}</td>
+                        <td class="whitespace-nowrap px-4 py-3 text-slate-700 dark:text-slate-300">{{ $entry->student?->name_thai ?? $entry->student?->name ?? '-' }}</td>
                         <td class="max-w-xs truncate px-4 py-3 text-slate-500 dark:text-slate-400">{{ $entry->title }}</td>
                     </tr>
                 @empty

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Faculty;
 use App\Models\Major;
+use App\Services\AuditLogger;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
@@ -19,7 +20,8 @@ class MajorController extends Controller
             'degree_abbr' => ['nullable', 'string', 'max:30'],
         ]);
 
-        $faculty->majors()->create($validated);
+        $major = $faculty->majors()->create($validated);
+        AuditLogger::log('created', __('สาขา'), $major->name_th);
 
         return back()->with('status', __('เพิ่มสาขาสำเร็จ'));
     }
@@ -34,6 +36,7 @@ class MajorController extends Controller
         ]);
 
         $major->update($validated);
+        AuditLogger::log('updated', __('สาขา'), $major->name_th);
 
         return back()->with('status', __('บันทึกข้อมูลสาขาสำเร็จ'));
     }
@@ -44,7 +47,9 @@ class MajorController extends Controller
             return back()->with('error', __('ไม่สามารถลบสาขา ":name" ได้ เนื่องจากยังมีนักศึกษาอยู่ในสาขานี้', ['name' => $major->name_th]));
         }
 
+        $name = $major->name_th;
         $major->delete();
+        AuditLogger::log('deleted', __('สาขา'), $name);
 
         return back()->with('status', __('ลบสาขาสำเร็จ'));
     }

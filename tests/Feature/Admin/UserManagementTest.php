@@ -43,6 +43,11 @@ class UserManagementTest extends TestCase
             ->assertRedirect();
 
         $this->assertSame('admin', $student->fresh()->role);
+        $this->assertDatabaseHas('audit_logs', [
+            'actor_id' => $superAdmin->id,
+            'action' => 'promoted',
+            'subject_user_id' => $student->id,
+        ]);
     }
 
     public function test_it_refuses_to_promote_someone_who_is_already_an_admin(): void
@@ -52,7 +57,10 @@ class UserManagementTest extends TestCase
 
         $this->actingAs($superAdmin)
             ->post(route('admin.users.promote', $admin))
-            ->assertStatus(422);
+            ->assertRedirect()
+            ->assertSessionHas('error');
+
+        $this->assertSame('admin', $admin->fresh()->role);
     }
 
     public function test_it_demotes_an_admin_to_student(): void
@@ -73,7 +81,8 @@ class UserManagementTest extends TestCase
 
         $this->actingAs($superAdmin)
             ->post(route('admin.users.demote', $superAdmin))
-            ->assertStatus(422);
+            ->assertRedirect()
+            ->assertSessionHas('error');
 
         $this->assertSame('super_admin', $superAdmin->fresh()->role);
     }
@@ -95,7 +104,8 @@ class UserManagementTest extends TestCase
         // themselves must still be blocked for the "last one" reason.
         $this->actingAs($secondSuperAdmin)
             ->post(route('admin.users.demote', $secondSuperAdmin))
-            ->assertStatus(422);
+            ->assertRedirect()
+            ->assertSessionHas('error');
         $this->assertSame('super_admin', $secondSuperAdmin->fresh()->role);
     }
 
@@ -106,9 +116,11 @@ class UserManagementTest extends TestCase
 
         $this->actingAs($superAdmin)->post(route('admin.users.ban', $student))->assertRedirect();
         $this->assertSame('banned', $student->fresh()->account_status);
+        $this->assertDatabaseHas('audit_logs', ['actor_id' => $superAdmin->id, 'action' => 'banned', 'subject_user_id' => $student->id]);
 
         $this->actingAs($superAdmin)->post(route('admin.users.unban', $student))->assertRedirect();
         $this->assertSame('active', $student->fresh()->account_status);
+        $this->assertDatabaseHas('audit_logs', ['actor_id' => $superAdmin->id, 'action' => 'unbanned', 'subject_user_id' => $student->id]);
     }
 
     public function test_it_refuses_to_ban_yourself(): void
@@ -117,7 +129,8 @@ class UserManagementTest extends TestCase
 
         $this->actingAs($superAdmin)
             ->post(route('admin.users.ban', $superAdmin))
-            ->assertStatus(422);
+            ->assertRedirect()
+            ->assertSessionHas('error');
 
         $this->assertSame('active', $superAdmin->fresh()->account_status);
     }
