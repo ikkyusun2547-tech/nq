@@ -68,10 +68,12 @@ Route::middleware('auth:sanctum')->group(function () {
 
             Route::get('/external-activities', [ExternalActivityController::class, 'index']);
             Route::post('/external-activities', [ExternalActivityController::class, 'store']);
+            Route::delete('/external-activities/{externalActivityRequest}', [ExternalActivityController::class, 'destroy']);
 
             Route::get('/credit-transfers/positions', [CreditTransferController::class, 'positions']);
             Route::get('/credit-transfers', [CreditTransferController::class, 'index']);
             Route::post('/credit-transfers', [CreditTransferController::class, 'store']);
+            Route::delete('/credit-transfers/{creditTransferRequest}', [CreditTransferController::class, 'destroy']);
 
             Route::get('/transcript', [TranscriptController::class, 'download']);
 

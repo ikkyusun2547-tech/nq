@@ -254,6 +254,20 @@ class _HourRequestsScreenState extends ConsumerState<HourRequestsScreen> {
                             ),
                           ),
                         ],
+                        if (r.status == 'pending') ...[
+                          const SizedBox(height: 6),
+                          GestureDetector(
+                            onTap: () => _cancelExternal(r.id),
+                            child: Text(
+                              'ยกเลิกคำร้อง',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.statusRejected,
+                              ),
+                            ),
+                          ),
+                        ],
                       ],
                     ),
                   ),
@@ -270,6 +284,18 @@ class _HourRequestsScreenState extends ConsumerState<HourRequestsScreen> {
         ],
       ),
     );
+  }
+
+  Future<void> _cancelExternal(int id) async {
+    final confirmed = await _confirmCancel();
+    if (confirmed != true) return;
+
+    try {
+      await ref.read(externalActivitiesRepositoryProvider).cancel(id);
+      ref.invalidate(externalActivitiesDataProvider);
+    } catch (_) {
+      _showCancelError();
+    }
   }
 
   Widget _buildTransfers() {
@@ -428,6 +454,20 @@ class _HourRequestsScreenState extends ConsumerState<HourRequestsScreen> {
                             ),
                           ),
                         ],
+                        if (r.status == 'pending') ...[
+                          const SizedBox(height: 6),
+                          GestureDetector(
+                            onTap: () => _cancelTransfer(r.id),
+                            child: Text(
+                              'ยกเลิกคำร้อง',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.statusRejected,
+                              ),
+                            ),
+                          ),
+                        ],
                       ],
                     ),
                   ),
@@ -442,6 +482,49 @@ class _HourRequestsScreenState extends ConsumerState<HourRequestsScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Future<void> _cancelTransfer(int id) async {
+    final confirmed = await _confirmCancel();
+    if (confirmed != true) return;
+
+    try {
+      await ref.read(creditTransfersRepositoryProvider).cancel(id);
+      ref.invalidate(creditTransferRequestsProvider);
+    } catch (_) {
+      _showCancelError();
+    }
+  }
+
+  Future<bool?> _confirmCancel() {
+    return showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('ยกเลิกคำร้องนี้?'),
+        content: const Text('ยกเลิกแล้วต้องยื่นคำร้องใหม่หากต้องการ'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('ไม่ยกเลิก'),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: AppColors.statusRejected,
+            ),
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('ยกเลิกคำร้อง'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showCancelError() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('ยกเลิกคำร้องไม่สำเร็จ กรุณาลองใหม่อีกครั้ง'),
       ),
     );
   }

@@ -4,7 +4,10 @@ import '../../core/api_client.dart';
 import '../../core/models/external_activity_request.dart';
 
 class ExternalActivitiesData {
-  ExternalActivitiesData({required this.hoursRemaining, required this.requests});
+  ExternalActivitiesData({
+    required this.hoursRemaining,
+    required this.requests,
+  });
 
   final int hoursRemaining;
   final List<ExternalActivityRequest> requests;
@@ -42,8 +45,17 @@ class ExternalActivitiesRepository {
         'activity_date': activityDate,
         'activity_category': activityCategory,
         'hours_requested': hoursRequested,
-        'proof_image': await MultipartFile.fromFile(proofImagePath, filename: 'proof.jpg'),
+        'proof_image': await MultipartFile.fromFile(
+          proofImagePath,
+          filename: 'proof.jpg',
+        ),
       }),
     );
+  }
+
+  /// Only valid while the request is still 'pending' — the backend rejects
+  /// (422) any attempt to cancel one an admin has already reviewed.
+  Future<void> cancel(int id) async {
+    await apiClient.dio.delete('/external-activities/$id');
   }
 }

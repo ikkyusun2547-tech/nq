@@ -184,6 +184,16 @@
                     @if ($req->admin_comment)
                         <p class="mt-2 rounded-xl bg-brand-purple-50 px-3 py-2 text-xs text-brand-purple-700 dark:bg-brand-purple-500/10 dark:text-brand-purple-400">{{ __('ความเห็นกองพัฒนานักศึกษา:') }} {{ $req->admin_comment }}</p>
                     @endif
+                    @if ($req->status === 'pending')
+                        <form
+                            method="POST" action="{{ route('external-activities.destroy', $req) }}" class="mt-2.5"
+                            onsubmit="return confirm('{{ __('ยืนยันยกเลิกคำร้องนี้?') }}')"
+                        >
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="text-xs font-medium text-red-500 transition-colors hover:text-red-700 dark:text-red-400 dark:hover:text-red-300">{{ __('ยกเลิกคำร้อง') }}</button>
+                        </form>
+                    @endif
                 </div>
             @empty
                 <p class="py-8 text-center text-sm text-slate-400 dark:text-slate-500">{{ __('ยังไม่มีคำร้องกิจกรรมภายนอก') }}</p>
@@ -301,6 +311,16 @@
                     @endif
                     @if ($req->admin_comment)
                         <p class="mt-2 rounded-xl bg-brand-purple-50 px-3 py-2 text-xs text-brand-purple-700 dark:bg-brand-purple-500/10 dark:text-brand-purple-400">{{ __('ความเห็นกองพัฒนานักศึกษา:') }} {{ $req->admin_comment }}</p>
+                    @endif
+                    @if ($req->status === 'pending')
+                        <form
+                            method="POST" action="{{ route('credit-transfers.destroy', $req) }}" class="mt-2.5"
+                            onsubmit="return confirm('{{ __('ยืนยันยกเลิกคำร้องนี้?') }}')"
+                        >
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="text-xs font-medium text-red-500 transition-colors hover:text-red-700 dark:text-red-400 dark:hover:text-red-300">{{ __('ยกเลิกคำร้อง') }}</button>
+                        </form>
                     @endif
                 </div>
             @empty

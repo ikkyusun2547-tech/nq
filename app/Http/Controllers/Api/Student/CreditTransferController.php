@@ -11,6 +11,7 @@ use App\Notifications\CreditTransferRequestSubmitted;
 use App\Services\AcademicYearCalculator;
 use App\Services\SafeNotifier;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class CreditTransferController extends Controller
 {
@@ -73,6 +74,21 @@ class CreditTransferController extends Controller
             'message' => __('ส่งคำร้องเทียบโอนชั่วโมงสำเร็จ รอเจ้าหน้าที่ตรวจสอบ'),
             'request' => new CreditTransferRequestResource($creditTransferRequest),
         ]);
+    }
+
+    /**
+     * See Student\CreditTransferController::destroy — same "pending only,
+     * hard delete" reasoning, mirrored here for the mobile app.
+     */
+    public function destroy(Request $request, CreditTransferRequest $creditTransferRequest)
+    {
+        abort_unless($creditTransferRequest->user_id === $request->user()->id, 403);
+        abort_unless($creditTransferRequest->status === 'pending', 422, __('ยกเลิกได้เฉพาะคำร้องที่ยังรอตรวจสอบเท่านั้น'));
+
+        Storage::disk('public')->delete($creditTransferRequest->proof_image_path);
+        $creditTransferRequest->delete();
+
+        return response()->json(['message' => __('ยกเลิกคำร้องสำเร็จ')]);
     }
 
     /**

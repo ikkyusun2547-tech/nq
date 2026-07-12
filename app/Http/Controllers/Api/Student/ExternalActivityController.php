@@ -11,6 +11,7 @@ use App\Notifications\ExternalActivityRequestSubmitted;
 use App\Services\AcademicYearCalculator;
 use App\Services\SafeNotifier;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class ExternalActivityController extends Controller
 {
@@ -57,5 +58,20 @@ class ExternalActivityController extends Controller
             'message' => __('ส่งคำร้องสำเร็จ รอเจ้าหน้าที่ตรวจสอบ'),
             'request' => new ExternalActivityRequestResource($externalActivityRequest),
         ]);
+    }
+
+    /**
+     * See Student\ExternalActivityController::destroy — same "pending only,
+     * hard delete" reasoning, mirrored here for the mobile app.
+     */
+    public function destroy(Request $request, ExternalActivityRequest $externalActivityRequest)
+    {
+        abort_unless($externalActivityRequest->user_id === $request->user()->id, 403);
+        abort_unless($externalActivityRequest->status === 'pending', 422, __('ยกเลิกได้เฉพาะคำร้องที่ยังรอตรวจสอบเท่านั้น'));
+
+        Storage::disk('public')->delete($externalActivityRequest->proof_image_path);
+        $externalActivityRequest->delete();
+
+        return response()->json(['message' => __('ยกเลิกคำร้องสำเร็จ')]);
     }
 }

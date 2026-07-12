@@ -8,6 +8,8 @@ use App\Models\CreditTransferRequest;
 use App\Models\User;
 use App\Notifications\CreditTransferRequestSubmitted;
 use App\Services\SafeNotifier;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class CreditTransferController extends Controller
 {
@@ -31,5 +33,25 @@ class CreditTransferController extends Controller
         return redirect()
             ->route('hour-requests.index', ['tab' => 'credit'])
             ->with('status', __('ส่งคำร้องเทียบโอนชั่วโมงสำเร็จ รอเจ้าหน้าที่ตรวจสอบ'));
+    }
+
+    /**
+     * See ExternalActivityController::destroy — same "pending only, hard
+     * delete, graceful redirect instead of a raw abort" reasoning.
+     */
+    public function destroy(Request $request, CreditTransferRequest $creditTransferRequest)
+    {
+        abort_unless($creditTransferRequest->user_id === $request->user()->id, 403);
+
+        if ($creditTransferRequest->status !== 'pending') {
+            return back()->with('error', __('ยกเลิกได้เฉพาะคำร้องที่ยังรอตรวจสอบเท่านั้น'));
+        }
+
+        Storage::disk('public')->delete($creditTransferRequest->proof_image_path);
+        $creditTransferRequest->delete();
+
+        return redirect()
+            ->route('hour-requests.index', ['tab' => 'credit'])
+            ->with('status', __('ยกเลิกคำร้องสำเร็จ'));
     }
 }

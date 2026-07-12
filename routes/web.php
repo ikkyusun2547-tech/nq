@@ -129,9 +129,11 @@ Route::middleware(['auth', 'srru.email'])->group(function () {
         // Kept so old bookmarks/links still land on the right tab of the merged page.
         Route::get('/external-activities', fn () => redirect()->route('hour-requests.index', ['tab' => 'external']))->name('external-activities.index');
         Route::post('/external-activities', [ExternalActivityController::class, 'store'])->name('external-activities.store');
+        Route::delete('/external-activities/{externalActivityRequest}', [ExternalActivityController::class, 'destroy'])->name('external-activities.destroy');
 
         Route::get('/credit-transfers', fn () => redirect()->route('hour-requests.index', ['tab' => 'credit']))->name('credit-transfers.index');
         Route::post('/credit-transfers', [CreditTransferController::class, 'store'])->name('credit-transfers.store');
+        Route::delete('/credit-transfers/{creditTransferRequest}', [CreditTransferController::class, 'destroy'])->name('credit-transfers.destroy');
 
         Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
 
