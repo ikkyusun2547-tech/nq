@@ -28,7 +28,7 @@ class CreditTransferStoreRequest extends FormRequest
         return [
             'position' => ['required', Rule::in(array_keys(CreditTransferRequest::POSITION_HOURS))],
             'academic_year' => ['required', 'integer', 'min:2560', 'max:'.AcademicYearCalculator::forDate(now())],
-            'proof_image' => ['required', 'image', 'max:2048'],
+            'proof_image' => ['required', 'mimes:jpg,jpeg,png,pdf', 'max:2048'],
         ];
     }
 

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:dio/dio.dart';
 
 import '../../core/api_client.dart';
@@ -34,9 +36,11 @@ class CreditTransfersRepository {
       data: FormData.fromMap({
         'position': position,
         'academic_year': academicYear,
+        // See ExternalActivitiesRepository.submit — preserves the real
+        // extension instead of a hardcoded 'proof.jpg'.
         'proof_image': await MultipartFile.fromFile(
           proofImagePath,
-          filename: 'proof.jpg',
+          filename: proofImagePath.split(Platform.pathSeparator).last,
         ),
       }),
     );

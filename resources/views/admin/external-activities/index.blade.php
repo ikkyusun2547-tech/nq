@@ -123,6 +123,7 @@
                             'reject_reason' => $req->reject_reason,
                             'admin_comment' => $req->admin_comment,
                             'proof_image_url' => asset('storage/'.$req->proof_image_path),
+                            'proof_is_pdf' => str_ends_with(strtolower($req->proof_image_path), '.pdf'),
                             'student_name' => $req->user->name_thai ?? $req->user->name,
                             'student_id' => $req->user->student_id,
                             'faculty' => $req->user->faculty?->name_th,
@@ -240,7 +241,15 @@
                         </dl>
 
                         <div class="mb-4 overflow-hidden rounded-2xl bg-black/5 shadow-soft dark:bg-black/20">
-                            <img :src="selected.proof_image_url" class="max-h-96 w-full object-contain">
+                            <template x-if="!selected.proof_is_pdf">
+                                <img :src="selected.proof_image_url" class="max-h-96 w-full object-contain">
+                            </template>
+                            <template x-if="selected.proof_is_pdf">
+                                <a :href="selected.proof_image_url" target="_blank" rel="noopener" class="flex items-center gap-3 px-4 py-6 text-brand-purple-700 hover:bg-black/5 dark:text-brand-purple-300 dark:hover:bg-white/5">
+                                    <svg class="h-8 w-8 shrink-0" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m3.75 9v6m0 0l-2.25-2.25M12 18.75l2.25-2.25M6.75 3H16.5a2.25 2.25 0 012.25 2.25v13.5a2.25 2.25 0 01-2.25 2.25H6.75a2.25 2.25 0 01-2.25-2.25V5.25A2.25 2.25 0 016.75 3z"/></svg>
+                                    <span class="text-sm font-medium">{{ __('เปิดไฟล์ PDF หลักฐาน') }}</span>
+                                </a>
+                            </template>
                         </div>
 
                         <template x-if="selected.status === 'rejected' && selected.reject_reason">

@@ -32,7 +32,7 @@ class ExternalActivityStoreRequest extends FormRequest
             'activity_date' => ['required', 'date', 'before_or_equal:today'],
             'activity_category' => ['required', Rule::in(['culture', 'academic', 'sports', 'volunteer', 'ethics'])],
             'hours_requested' => ['required', 'integer', 'min:1', 'max:200'],
-            'proof_image' => ['required', 'image', 'max:2048'],
+            'proof_image' => ['required', 'mimes:jpg,jpeg,png,pdf', 'max:2048'],
         ];
     }
 

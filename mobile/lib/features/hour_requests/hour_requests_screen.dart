@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:dio/dio.dart';
+import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
@@ -623,6 +624,113 @@ class _TabPill extends StatelessWidget {
   }
 }
 
+enum _ProofSource { camera, gallery, file }
+
+/// Bottom sheet offering "ถ่ายรูป" (camera), "เลือกรูปจากคลังภาพ" (gallery),
+/// or "แนบไฟล์ PDF" (a PDF document) — shared by both proof-evidence pickers
+/// below. Returns the picked file's path, or null if the sheet was
+/// dismissed or the picker itself was cancelled.
+///
+Future<String?> _pickProofImage(BuildContext context) async {
+  final choice = await showModalBottomSheet<_ProofSource>(
+    context: context,
+    showDragHandle: true,
+    builder: (context) => SafeArea(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ListTile(
+            leading: const Icon(Icons.camera_alt_outlined),
+            title: const Text('ถ่ายรูป'),
+            onTap: () => Navigator.of(context).pop(_ProofSource.camera),
+          ),
+          ListTile(
+            leading: const Icon(Icons.photo_library_outlined),
+            title: const Text('เลือกรูปจากคลังภาพ'),
+            onTap: () => Navigator.of(context).pop(_ProofSource.gallery),
+          ),
+          ListTile(
+            leading: const Icon(Icons.picture_as_pdf_outlined),
+            title: const Text('แนบไฟล์ PDF'),
+            onTap: () => Navigator.of(context).pop(_ProofSource.file),
+          ),
+        ],
+      ),
+    ),
+  );
+  if (choice == null) return null;
+
+  if (choice == _ProofSource.file) {
+    const pdfType = XTypeGroup(label: 'PDF', extensions: ['pdf']);
+    final file = await openFile(acceptedTypeGroups: [pdfType]);
+    return file?.path;
+  }
+
+  final photo = await ImagePicker().pickImage(
+    source: choice == _ProofSource.camera
+        ? ImageSource.camera
+        : ImageSource.gallery,
+    imageQuality: 80,
+    maxWidth: 1280,
+  );
+  return photo?.path;
+}
+
+/// Shows a thumbnail for an image proof, or a file chip (icon + name) for a
+/// PDF — Image.file() would just fail silently on a non-image file, so the
+/// two proof-evidence forms below need to branch on the extension rather
+/// than always assuming a picture.
+class _ProofPreview extends StatelessWidget {
+  const _ProofPreview({required this.path});
+
+  final String path;
+
+  @override
+  Widget build(BuildContext context) {
+    if (path.toLowerCase().endsWith('.pdf')) {
+      final tokens = context.surfaceColors;
+
+      return Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: tokens.surface,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: tokens.border),
+        ),
+        child: Row(
+          children: [
+            const Icon(
+              Icons.picture_as_pdf_outlined,
+              color: AppColors.statusRejected,
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                path.split(Platform.pathSeparator).last,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(12),
+      child: Image.file(
+        File(path),
+        height: 150,
+        width: double.infinity,
+        fit: BoxFit.cover,
+      ),
+    );
+  }
+}
+
 class _ExternalActivityForm extends ConsumerStatefulWidget {
   const _ExternalActivityForm({required this.onSubmitted});
 
@@ -652,12 +760,8 @@ class _ExternalActivityFormState extends ConsumerState<_ExternalActivityForm> {
   };
 
   Future<void> _pickPhoto() async {
-    final photo = await ImagePicker().pickImage(
-      source: ImageSource.camera,
-      imageQuality: 80,
-      maxWidth: 1280,
-    );
-    if (photo != null) setState(() => _photoPath = photo.path);
+    final path = await _pickProofImage(context);
+    if (path != null) setState(() => _photoPath = path);
   }
 
   Future<void> _submit() async {
@@ -734,20 +838,11 @@ class _ExternalActivityFormState extends ConsumerState<_ExternalActivityForm> {
               .toList(),
           onChanged: (v) => setState(() => _category = v!),
         ),
-        if (_photoPath != null)
-          ClipRRect(
-            borderRadius: BorderRadius.circular(12),
-            child: Image.file(
-              File(_photoPath!),
-              height: 150,
-              width: double.infinity,
-              fit: BoxFit.cover,
-            ),
-          ),
+        if (_photoPath != null) _ProofPreview(path: _photoPath!),
         OutlinedButton.icon(
           onPressed: _pickPhoto,
-          icon: const Icon(Icons.camera_alt_outlined),
-          label: Text(_photoPath == null ? 'แนบหลักฐาน' : 'ถ่ายใหม่'),
+          icon: const Icon(Icons.add_photo_alternate_outlined),
+          label: Text(_photoPath == null ? 'แนบหลักฐาน' : 'แนบใหม่'),
         ),
         if (_errorMessage != null)
           Text(
@@ -794,12 +889,8 @@ class _CreditTransferFormState extends ConsumerState<_CreditTransferForm> {
   String? _errorMessage;
 
   Future<void> _pickPhoto() async {
-    final photo = await ImagePicker().pickImage(
-      source: ImageSource.camera,
-      imageQuality: 80,
-      maxWidth: 1280,
-    );
-    if (photo != null) setState(() => _photoPath = photo.path);
+    final path = await _pickProofImage(context);
+    if (path != null) setState(() => _photoPath = path);
   }
 
   Future<void> _submit() async {
@@ -870,20 +961,11 @@ class _CreditTransferFormState extends ConsumerState<_CreditTransferForm> {
           keyboardType: TextInputType.number,
           onChanged: (v) => _academicYear = int.tryParse(v) ?? _academicYear,
         ),
-        if (_photoPath != null)
-          ClipRRect(
-            borderRadius: BorderRadius.circular(12),
-            child: Image.file(
-              File(_photoPath!),
-              height: 150,
-              width: double.infinity,
-              fit: BoxFit.cover,
-            ),
-          ),
+        if (_photoPath != null) _ProofPreview(path: _photoPath!),
         OutlinedButton.icon(
           onPressed: _pickPhoto,
-          icon: const Icon(Icons.camera_alt_outlined),
-          label: Text(_photoPath == null ? 'แนบหลักฐาน' : 'ถ่ายใหม่'),
+          icon: const Icon(Icons.add_photo_alternate_outlined),
+          label: Text(_photoPath == null ? 'แนบหลักฐาน' : 'แนบใหม่'),
         ),
         if (_errorMessage != null)
           Text(

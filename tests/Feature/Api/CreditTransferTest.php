@@ -48,6 +48,27 @@ class CreditTransferTest extends TestCase
         ]);
     }
 
+    public function test_it_accepts_a_pdf_as_proof(): void
+    {
+        Storage::fake('public');
+        $user = $this->studentUser();
+        Sanctum::actingAs($user);
+
+        $response = $this->postJson('/api/credit-transfers', [
+            'position' => 'class_leader',
+            'academic_year' => AcademicYearCalculator::forDate(now()),
+            'proof_image' => UploadedFile::fake()->create('proof.pdf', 100, 'application/pdf'),
+        ]);
+
+        $response->assertOk();
+        $this->assertDatabaseHas('credit_transfer_requests', [
+            'user_id' => $user->id,
+            'position' => 'class_leader',
+            'hours_requested' => 50,
+            'status' => 'pending',
+        ]);
+    }
+
     public function test_it_rejects_a_second_claim_in_the_same_academic_year(): void
     {
         Storage::fake('public');

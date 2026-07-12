@@ -49,6 +49,29 @@ class ExternalActivityTest extends TestCase
         ]);
     }
 
+    public function test_it_accepts_a_pdf_as_proof(): void
+    {
+        Storage::fake('public');
+        $user = $this->studentUser();
+        Sanctum::actingAs($user);
+
+        $response = $this->postJson('/api/external-activities', [
+            'title' => 'ค่ายอาสา',
+            'organization' => 'มูลนิธิตัวอย่าง',
+            'activity_date' => now()->subDay()->toDateString(),
+            'activity_category' => 'volunteer',
+            'hours_requested' => 5,
+            'proof_image' => UploadedFile::fake()->create('proof.pdf', 100, 'application/pdf'),
+        ]);
+
+        $response->assertOk();
+        $this->assertDatabaseHas('external_activity_requests', [
+            'user_id' => $user->id,
+            'title' => 'ค่ายอาสา',
+            'status' => 'pending',
+        ]);
+    }
+
     public function test_it_enforces_the_annual_hour_cap(): void
     {
         Storage::fake('public');

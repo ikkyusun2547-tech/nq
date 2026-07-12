@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:dio/dio.dart';
 
 import '../../core/api_client.dart';
@@ -45,9 +47,13 @@ class ExternalActivitiesRepository {
         'activity_date': activityDate,
         'activity_category': activityCategory,
         'hours_requested': hoursRequested,
+        // Preserves the real extension (.jpg/.png/.pdf) rather than a
+        // hardcoded 'proof.jpg' — Laravel's Storage::put keeps whatever
+        // extension the upload arrives with, so a PDF sent as "proof.jpg"
+        // would get stored (and later served) with the wrong one.
         'proof_image': await MultipartFile.fromFile(
           proofImagePath,
-          filename: 'proof.jpg',
+          filename: proofImagePath.split(Platform.pathSeparator).last,
         ),
       }),
     );
