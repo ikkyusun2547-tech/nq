@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
@@ -10,6 +11,8 @@ import '../../core/api_exception.dart';
 import '../../core/models/activity.dart';
 import '../../core/providers.dart';
 import '../../core/theme.dart';
+import '../../core/widgets/app_bottom_nav.dart';
+import '../../core/widgets/section_card.dart';
 import 'checkin_repository.dart';
 
 enum _Step { scan, selfie, location, submitting, done }
@@ -24,7 +27,7 @@ class CheckInFlowScreen extends ConsumerStatefulWidget {
   /// Null when entered from the dashboard's generic "สแกน QR เช็คชื่อ" quick
   /// action (mirrors the web's activity-less `/checkin` route) — the scanned
   /// QR token alone resolves the activity server-side, this is only used to
-  /// title the app bar.
+  /// title the header.
   final Activity? activity;
 
   @override
@@ -38,6 +41,14 @@ class _CheckInFlowScreenState extends ConsumerState<CheckInFlowScreen> {
   Position? _position;
   String? _errorMessage;
   CheckInResult? _result;
+
+  // "ลองอีกครั้ง" (retry) only makes sense for a location-step error that
+  // actually came from fetching location (GPS off, permission denied,
+  // timeout) — those are transient and re-fetching can succeed. A backend
+  // rejection from _submit (already checked in, activity closed, ...) will
+  // fail the exact same way every time, so that case offers a way out
+  // instead. See _buildLocationStep.
+  bool _canRetryLocation = true;
 
   Future<void> _onQrDetected(String token) async {
     if (_qrToken != null) return;
@@ -65,9 +76,24 @@ class _CheckInFlowScreenState extends ConsumerState<CheckInFlowScreen> {
   }
 
   Future<void> _fetchLocation() async {
-    setState(() => _errorMessage = null);
+    setState(() {
+      _errorMessage = null;
+      _canRetryLocation = true;
+    });
 
     try {
+      // Checked separately from permission — a phone can grant the app
+      // location permission while the device-wide GPS/location toggle is
+      // still off, which getCurrentPosition() would otherwise only surface
+      // as an opaque LocationServiceDisabledException down in the catch.
+      if (!await Geolocator.isLocationServiceEnabled()) {
+        setState(
+          () => _errorMessage =
+              'กรุณาเปิดบริการตำแหน่ง (GPS) ในเครื่องก่อนเช็คชื่อ',
+        );
+        return;
+      }
+
       var permission = await Geolocator.checkPermission();
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
@@ -90,7 +116,13 @@ class _CheckInFlowScreenState extends ConsumerState<CheckInFlowScreen> {
       await _submit();
     } on TimeoutException {
       setState(
-        () => _errorMessage = 'ค้นหาตำแหน่งไม่สำเร็จ กรุณาลองใหม่อีกครั้ง',
+        () => _errorMessage =
+            'หาตำแหน่ง GPS ไม่สำเร็จ (หมดเวลารอ) กรุณาลองใหม่ในที่โล่งหรือใกล้หน้าต่าง',
+      );
+    } on LocationServiceDisabledException {
+      setState(
+        () => _errorMessage =
+            'กรุณาเปิดบริการตำแหน่ง (GPS) ในเครื่องก่อนเช็คชื่อ',
       );
     } catch (_) {
       setState(
@@ -125,14 +157,16 @@ class _CheckInFlowScreenState extends ConsumerState<CheckInFlowScreen> {
         _result = result;
         _step = _Step.done;
       });
-    } on ApiException catch (e) {
+    } on DioException catch (e) {
       setState(() {
-        _errorMessage = e.message;
+        _errorMessage = e.asApiException.message;
+        _canRetryLocation = false;
         _step = _Step.location;
       });
     } catch (_) {
       setState(() {
         _errorMessage = 'เช็คชื่อไม่สำเร็จ กรุณาลองใหม่อีกครั้ง';
+        _canRetryLocation = false;
         _step = _Step.location;
       });
     }
@@ -151,45 +185,70 @@ class _CheckInFlowScreenState extends ConsumerState<CheckInFlowScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.activity?.title ?? 'สแกน QR เช็คชื่อ'),
+      // This screen is always Navigator.push-ed on top of HomeShell, never
+      // one of its tabs, so it never inherits HomeShell's own bottom nav —
+      // without one of its own, scanning from the overview page's quick
+      // action dead-ends with only the back arrow. currentIndex -1 matches
+      // none of the 4 tabs, since this screen isn't one of them.
+      bottomNavigationBar: AppBottomNav(
+        currentIndex: -1,
+        onTap: (i) {
+          ref.read(homeTabIndexProvider.notifier).set(i);
+          Navigator.of(context).popUntil((route) => route.isFirst);
+        },
       ),
-      body: Column(
-        children: [
-          _StepIndicator(labels: _stepLabels, currentIndex: _stepIndex),
-          Expanded(
-            child: switch (_step) {
-              _Step.scan => ClipRRect(
-                borderRadius: BorderRadius.circular(20),
-                child: Container(
-                  margin: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-                  clipBehavior: Clip.antiAlias,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: MobileScanner(
-                    onDetect: (capture) {
-                      final token = capture.barcodes.isNotEmpty
-                          ? capture.barcodes.first.rawValue
-                          : null;
-                      if (token != null) _onQrDetected(token);
-                    },
+      body: SafeArea(
+        bottom: false,
+        child: Column(
+          children: [
+            BrandHeader(
+              title: widget.activity?.title ?? 'สแกน QR เช็คชื่อ',
+              subtitle:
+                  'สแกน QR ที่หน้างาน ถ่ายเซลฟี แล้วยืนยันตำแหน่งเพื่อเช็คชื่อ',
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back, color: Colors.white),
+                onPressed: () => Navigator.of(context).pop(),
+              ),
+            ),
+            _StepIndicator(labels: _stepLabels, currentIndex: _stepIndex),
+            Expanded(
+              child: switch (_step) {
+                _Step.scan => ClipRRect(
+                  borderRadius: BorderRadius.circular(20),
+                  child: Container(
+                    margin: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+                    clipBehavior: Clip.antiAlias,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        MobileScanner(
+                          onDetect: (capture) {
+                            final token = capture.barcodes.isNotEmpty
+                                ? capture.barcodes.first.rawValue
+                                : null;
+                            if (token != null) _onQrDetected(token);
+                          },
+                        ),
+                        const _ScanViewfinder(),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-              _Step.selfie => _buildActionStep(
-                icon: Icons.camera_alt_outlined,
-                label: 'ถ่ายเซลฟีเพื่อยืนยันตัวตน',
-                onPressed: _takeSelfie,
-              ),
-              _Step.location => _buildLocationStep(),
-              _Step.submitting => const Center(
-                child: CircularProgressIndicator(),
-              ),
-              _Step.done => _buildDoneStep(),
-            },
-          ),
-        ],
+                _Step.selfie => _buildActionStep(
+                  icon: Icons.camera_alt_outlined,
+                  label: 'ถ่ายเซลฟีเพื่อยืนยันตัวตน',
+                  onPressed: _takeSelfie,
+                ),
+                _Step.location => _buildLocationStep(),
+                _Step.submitting => _buildSubmittingStep(),
+                _Step.done => _buildDoneStep(),
+              },
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -253,23 +312,32 @@ class _CheckInFlowScreenState extends ConsumerState<CheckInFlowScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               if (_errorMessage != null) ...[
+                // This step's errors aren't only GPS-related anymore — a
+                // backend validation failure (already checked in, activity
+                // closed, ...) routes through here too (see _submit's catch
+                // blocks), so a location-specific icon would be wrong for
+                // those. A plain warning icon reads correctly for all of them.
                 Icon(
-                  Icons.location_off_outlined,
+                  Icons.error_outline,
                   size: 40,
                   color: AppColors.statusRejected,
                 ),
                 const SizedBox(height: 12),
                 Text(
                   _errorMessage!,
-                  style: const TextStyle(color: Colors.red),
+                  style: const TextStyle(color: AppColors.statusRejected),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 20),
                 SizedBox(
                   width: double.infinity,
                   child: FilledButton(
-                    onPressed: _fetchLocation,
-                    child: const Text('ลองอีกครั้ง'),
+                    onPressed: _canRetryLocation
+                        ? _fetchLocation
+                        : () => Navigator.of(context).pop(),
+                    child: Text(
+                      _canRetryLocation ? 'ลองอีกครั้ง' : 'กลับสู่หน้าแรก',
+                    ),
                   ),
                 ),
               ] else ...[
@@ -277,6 +345,32 @@ class _CheckInFlowScreenState extends ConsumerState<CheckInFlowScreen> {
                 const SizedBox(height: 16),
                 const Text('กำลังค้นหาตำแหน่งของคุณ...'),
               ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSubmittingStep() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: _StepCard(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(
+                width: 40,
+                height: 40,
+                child: CircularProgressIndicator(strokeWidth: 3),
+              ),
+              const SizedBox(height: 20),
+              const Text(
+                'กำลังตรวจสอบตำแหน่งและส่งข้อมูล...',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 15),
+              ),
             ],
           ),
         ),
@@ -436,4 +530,121 @@ class _StepIndicator extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Purely decorative aim-guide over the live camera preview — a rounded
+/// square frame with corner brackets (the universal "scan here" affordance)
+/// plus an instruction pill, mirroring the web version's helper text. Wrapped
+/// in IgnorePointer so it never intercepts taps meant for the scanner.
+class _ScanViewfinder extends StatelessWidget {
+  const _ScanViewfinder();
+
+  static const _frameSize = 230.0;
+  static const _bracketLength = 28.0;
+  static const _bracketThickness = 4.0;
+
+  @override
+  Widget build(BuildContext context) {
+    return IgnorePointer(
+      child: Stack(
+        children: [
+          Center(
+            child: SizedBox(
+              width: _frameSize,
+              height: _frameSize,
+              child: Stack(
+                children: [
+                  Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.5),
+                        width: 1.5,
+                      ),
+                    ),
+                  ),
+                  _corner(top: -1, left: -1),
+                  _corner(top: -1, right: -1, flipH: true),
+                  _corner(bottom: -1, left: -1, flipV: true),
+                  _corner(bottom: -1, right: -1, flipH: true, flipV: true),
+                ],
+              ),
+            ),
+          ),
+          Positioned(
+            top: 16,
+            left: 16,
+            right: 16,
+            child: Center(
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 8,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.black.withValues(alpha: 0.55),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: const Text(
+                  'เล็งกล้องไปที่ QR Code ที่แสดงหน้างาน',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _corner({
+    double? top,
+    double? bottom,
+    double? left,
+    double? right,
+    bool flipH = false,
+    bool flipV = false,
+  }) {
+    return Positioned(
+      top: top,
+      bottom: bottom,
+      left: left,
+      right: right,
+      child: Transform.flip(
+        flipX: flipH,
+        flipY: flipV,
+        child: CustomPaint(
+          size: const Size(_bracketLength, _bracketLength),
+          painter: _CornerBracketPainter(),
+        ),
+      ),
+    );
+  }
+}
+
+class _CornerBracketPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = AppColors.green500
+      ..strokeWidth = _ScanViewfinder._bracketThickness
+      ..strokeCap = StrokeCap.round
+      ..style = PaintingStyle.stroke;
+
+    final path = Path()
+      ..moveTo(0, size.height)
+      ..lineTo(0, 6)
+      ..quadraticBezierTo(0, 0, 6, 0)
+      ..lineTo(size.width, 0);
+
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

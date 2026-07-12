@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
@@ -8,17 +9,30 @@ import '../../core/api_exception.dart';
 import '../../core/models/credit_transfer_request.dart';
 import '../../core/providers.dart';
 import '../../core/theme.dart';
+import '../../core/widgets/app_bottom_nav.dart';
 import '../../core/widgets/section_card.dart';
 
 /// External activities and credit-transfer requests share the same shape of
 /// workflow (submit proof, wait for approval, see status), so they live on
 /// one screen with a tab switcher instead of two separate bottom-nav tabs.
 class HourRequestsScreen extends ConsumerStatefulWidget {
-  const HourRequestsScreen({super.key, this.initialTab = 0});
+  const HourRequestsScreen({
+    super.key,
+    this.initialTab = 0,
+    this.standalone = false,
+  });
 
   /// 0 = external activities, 1 = credit transfers — lets callers (e.g. the
   /// dashboard's quick actions and feed rows) land on the relevant tab.
   final int initialTab;
+
+  /// True when this instance was `Navigator.push`ed on top of HomeShell
+  /// (the dashboard's quick actions / feed taps) rather than being HomeShell's
+  /// own "ขอชั่วโมง" tab — that copy already sits inside HomeShell's own
+  /// bottom nav, so it must not show a second one. A standalone instance
+  /// shows its own, so tapping "ยื่นกิจกรรมภายนอก" or "เทียบโอนชั่วโมง" from
+  /// the overview page doesn't dead-end with only a back button.
+  final bool standalone;
 
   @override
   ConsumerState<HourRequestsScreen> createState() => _HourRequestsScreenState();
@@ -54,6 +68,15 @@ class _HourRequestsScreenState extends ConsumerState<HourRequestsScreen> {
     final tokens = context.surfaceColors;
 
     return Scaffold(
+      bottomNavigationBar: widget.standalone
+          ? AppBottomNav(
+              currentIndex: 2,
+              onTap: (i) {
+                ref.read(homeTabIndexProvider.notifier).set(i);
+                Navigator.of(context).popUntil((route) => route.isFirst);
+              },
+            )
+          : null,
       body: SafeArea(
         bottom: false,
         child: RefreshIndicator(
@@ -584,8 +607,8 @@ class _ExternalActivityFormState extends ConsumerState<_ExternalActivityForm> {
 
       ref.invalidate(externalActivitiesDataProvider);
       widget.onSubmitted();
-    } on ApiException catch (e) {
-      setState(() => _errorMessage = e.message);
+    } on DioException catch (e) {
+      setState(() => _errorMessage = e.asApiException.message);
     } catch (_) {
       setState(() => _errorMessage = 'ส่งคำร้องไม่สำเร็จ กรุณาลองใหม่อีกครั้ง');
     } finally {
@@ -646,7 +669,10 @@ class _ExternalActivityFormState extends ConsumerState<_ExternalActivityForm> {
         if (_errorMessage != null)
           Text(
             _errorMessage!,
-            style: const TextStyle(color: Colors.red, fontSize: 13),
+            style: const TextStyle(
+              color: AppColors.statusRejected,
+              fontSize: 13,
+            ),
           ),
         FilledButton.icon(
           onPressed: _submitting ? null : _submit,
@@ -715,8 +741,8 @@ class _CreditTransferFormState extends ConsumerState<_CreditTransferForm> {
 
       ref.invalidate(creditTransferRequestsProvider);
       widget.onSubmitted();
-    } on ApiException catch (e) {
-      setState(() => _errorMessage = e.message);
+    } on DioException catch (e) {
+      setState(() => _errorMessage = e.asApiException.message);
     } catch (_) {
       setState(() => _errorMessage = 'ส่งคำร้องไม่สำเร็จ กรุณาลองใหม่อีกครั้ง');
     } finally {
@@ -779,7 +805,10 @@ class _CreditTransferFormState extends ConsumerState<_CreditTransferForm> {
         if (_errorMessage != null)
           Text(
             _errorMessage!,
-            style: const TextStyle(color: Colors.red, fontSize: 13),
+            style: const TextStyle(
+              color: AppColors.statusRejected,
+              fontSize: 13,
+            ),
           ),
         FilledButton.icon(
           onPressed: _submitting ? null : _submit,

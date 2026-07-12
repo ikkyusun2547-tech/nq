@@ -132,10 +132,7 @@ class DashboardScreen extends ConsumerWidget {
                           items: data.approved,
                         ),
                       if (data.rejected.isNotEmpty)
-                        _FeedSection(
-                          title: 'ถูกปฏิเสธ',
-                          items: data.rejected,
-                        ),
+                        _FeedSection(title: 'ถูกปฏิเสธ', items: data.rejected),
                     ],
                   ),
                 ),
@@ -344,7 +341,8 @@ class _QuickActions extends StatelessWidget {
               label: 'ยื่นกิจกรรม\nภายนอก',
               onTap: () => Navigator.of(context).push(
                 MaterialPageRoute(
-                  builder: (_) => const HourRequestsScreen(initialTab: 0),
+                  builder: (_) =>
+                      const HourRequestsScreen(initialTab: 0, standalone: true),
                 ),
               ),
             ),
@@ -354,7 +352,8 @@ class _QuickActions extends StatelessWidget {
               label: 'เทียบโอน\nชั่วโมง',
               onTap: () => Navigator.of(context).push(
                 MaterialPageRoute(
-                  builder: (_) => const HourRequestsScreen(initialTab: 1),
+                  builder: (_) =>
+                      const HourRequestsScreen(initialTab: 1, standalone: true),
                 ),
               ),
             ),
@@ -556,14 +555,16 @@ class _FeedSection extends StatelessWidget {
       case 'external':
         Navigator.of(context).push(
           MaterialPageRoute(
-            builder: (_) => const HourRequestsScreen(initialTab: 0),
+            builder: (_) =>
+                const HourRequestsScreen(initialTab: 0, standalone: true),
           ),
         );
         return;
       case 'credit_transfer':
         Navigator.of(context).push(
           MaterialPageRoute(
-            builder: (_) => const HourRequestsScreen(initialTab: 1),
+            builder: (_) =>
+                const HourRequestsScreen(initialTab: 1, standalone: true),
           ),
         );
         return;

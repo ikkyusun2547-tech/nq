@@ -2,15 +2,9 @@
 
 @section('content')
 <div class="mx-auto max-w-md" x-data="checkinApp()" x-init="init()">
-    <div class="mb-4 flex items-center justify-between">
-        <h1 class="text-lg font-semibold text-gray-900 dark:text-slate-100">{{ __('เช็คชื่อเข้าร่วมกิจกรรม') }}</h1>
-        <a href="{{ route('dashboard') }}" class="inline-flex items-center gap-1 text-sm text-gray-400 hover:text-gray-600 dark:text-slate-500 dark:hover:text-slate-300">
-            <svg class="h-3.5 w-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/></svg>
-            {{ __('กลับ') }}
-        </a>
-    </div>
+    <x-brand-header :title="__('เช็คชื่อเข้าร่วมกิจกรรม')" :back="route('dashboard')" />
 
-    <div class="overflow-hidden rounded-2xl glass-card shadow-soft">
+    <div class="overflow-hidden rounded-3xl glass-card shadow-soft-lg">
         <!-- Step indicator -->
         <div class="px-5 py-4">
             <x-step-indicator :steps="[__('สแกน QR'), __('ถ่ายเซลฟี'), __('ยืนยัน')]" current="stepIndex" />
@@ -20,8 +14,11 @@
             <!-- Step 1: Scan QR -->
             <template x-if="step === 'scan'">
                 <div>
-                    <p class="mb-3 text-sm text-gray-500 dark:text-slate-400">{{ __('เล็งกล้องไปที่ QR Code ที่แสดงหน้างาน') }}</p>
-                    <div id="qr-reader" class="overflow-hidden rounded-xl"></div>
+                    <div class="mb-3 flex items-center gap-2 rounded-xl bg-brand-purple-50 px-3.5 py-2.5 text-sm text-brand-purple-700 dark:bg-brand-purple-500/10 dark:text-brand-purple-400">
+                        <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 4.5a.75.75 0 01.75-.75h3a.75.75 0 010 1.5H5.25v2.25a.75.75 0 01-1.5 0v-3zm12 0a.75.75 0 01.75-.75h3a.75.75 0 01.75.75v3a.75.75 0 01-1.5 0V5.25h-2.25a.75.75 0 01-.75-.75zM4.5 15.75a.75.75 0 01.75.75v2.25h2.25a.75.75 0 010 1.5h-3a.75.75 0 01-.75-.75v-3a.75.75 0 01.75-.75zm15 0a.75.75 0 01.75.75v3a.75.75 0 01-.75.75h-3a.75.75 0 010-1.5h2.25v-2.25a.75.75 0 01.75-.75z"/></svg>
+                        {{ __('เล็งกล้องไปที่ QR Code ที่แสดงหน้างาน') }}
+                    </div>
+                    <div id="qr-reader" class="overflow-hidden rounded-2xl ring-2 ring-brand-purple-100 dark:ring-brand-purple-500/20"></div>
                     <p class="mt-3 text-xs text-red-500" x-show="scanError" x-text="scanError"></p>
                 </div>
             </template>
@@ -32,11 +29,14 @@
                  on devices that refuse to hand the camera to a live preview
                  (NotReadableError) even when the hardware itself is free. -->
             <template x-if="step === 'selfie'">
-                <div>
-                    <p class="mb-3 text-sm text-gray-500 dark:text-slate-400">{{ __('ถ่ายภาพเซลฟีเพื่อยืนยันตัวตน (ใช้กล้องหน้าเท่านั้น)') }}</p>
+                <div class="flex flex-col items-center py-2 text-center">
+                    <div class="mb-5 flex h-18 w-18 items-center justify-center rounded-full bg-brand-purple-50 text-brand-purple-600 dark:bg-brand-purple-500/10 dark:text-brand-purple-400">
+                        <svg class="h-8 w-8" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z"/><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z"/></svg>
+                    </div>
+                    <p class="mb-5 text-sm text-gray-500 dark:text-slate-400">{{ __('ถ่ายภาพเซลฟีเพื่อยืนยันตัวตน (ใช้กล้องหน้าเท่านั้น)') }}</p>
                     <button
                         type="button" @click="$refs.fileInput.click()"
-                        class="w-full rounded-xl bg-brand-green-600 px-4 py-3 text-sm font-semibold text-white hover:bg-brand-green-700"
+                        class="w-full rounded-xl bg-brand-green-500 px-4 py-3 text-sm font-semibold text-brand-purple-950 shadow-soft transition-all duration-300 hover:-translate-y-0.5 hover:bg-brand-green-400 hover:shadow-lg"
                     >
                         {{ __('เปิดกล้องเพื่อถ่ายเซลฟี') }}
                     </button>
@@ -50,7 +50,13 @@
 
             <!-- Step 3: submitting / done / error -->
             <template x-if="step === 'submitting'">
-                <div class="py-10 text-center text-sm text-gray-500 dark:text-slate-400">{{ __('กำลังตรวจสอบตำแหน่งและส่งข้อมูล...') }}</div>
+                <div class="flex flex-col items-center py-10 text-center">
+                    <svg class="h-9 w-9 animate-spin text-brand-purple-500" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-20" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3"></circle>
+                        <path class="opacity-90" fill="currentColor" d="M12 2a10 10 0 0110 10h-3a7 7 0 00-7-7V2z"></path>
+                    </svg>
+                    <p class="mt-4 text-sm text-gray-500 dark:text-slate-400">{{ __('กำลังตรวจสอบตำแหน่งและส่งข้อมูล...') }}</p>
+                </div>
             </template>
 
             <template x-if="step === 'done'">

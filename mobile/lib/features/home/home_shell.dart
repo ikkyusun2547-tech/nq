@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/providers.dart';
-import '../../core/theme.dart';
+import '../../core/widgets/app_bottom_nav.dart';
 import '../activities/activities_screen.dart';
 import '../dashboard/dashboard_screen.dart';
 import '../hour_requests/hour_requests_screen.dart';
@@ -11,7 +11,7 @@ import '../profile/profile_screen.dart';
 /// Tab index lives in homeTabIndexProvider (not local State) so a tapped
 /// push notification can switch tabs from outside the widget tree — see
 /// PushNotificationService._handleNotificationTap.
-class HomeShell extends ConsumerWidget {
+class HomeShell extends ConsumerStatefulWidget {
   const HomeShell({super.key});
 
   static const _screens = [
@@ -21,115 +21,48 @@ class HomeShell extends ConsumerWidget {
     ProfileScreen(),
   ];
 
-  static const _items = [
-    _NavItem(
-      icon: Icons.dashboard_outlined,
-      activeIcon: Icons.dashboard_rounded,
-      label: 'ภาพรวม',
-    ),
-    _NavItem(
-      icon: Icons.calendar_month_outlined,
-      activeIcon: Icons.calendar_month_rounded,
-      label: 'กิจกรรม',
-    ),
-    _NavItem(
-      icon: Icons.fact_check_outlined,
-      activeIcon: Icons.fact_check_rounded,
-      label: 'ขอชั่วโมง',
-    ),
-    _NavItem(
-      icon: Icons.account_circle_outlined,
-      activeIcon: Icons.account_circle_rounded,
-      label: 'โปรไฟล์',
-    ),
-  ];
+  @override
+  ConsumerState<HomeShell> createState() => _HomeShellState();
+}
+
+class _HomeShellState extends ConsumerState<HomeShell>
+    with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final tokens = context.surfaceColors;
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  // A push that arrives while the app is backgrounded only reaches the
+  // system tray (see PushNotificationService's background handler) — nothing
+  // refreshes the bell badge until something re-watches it. Resuming from
+  // background is exactly the moment a student would expect it to be caught
+  // up, so that's the trigger here (foreground-arrival is handled directly
+  // in PushNotificationService._showForegroundNotification instead).
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      ref.invalidate(unreadNotificationCountProvider);
+      ref.invalidate(notificationsPageProvider);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final index = ref.watch(homeTabIndexProvider);
 
     return Scaffold(
-      body: IndexedStack(index: index, children: _screens),
-      bottomNavigationBar: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-        decoration: BoxDecoration(
-          color: tokens.surface,
-          borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(24),
-            topRight: Radius.circular(24),
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.purple900.withValues(alpha: 0.12),
-              blurRadius: 20,
-              offset: const Offset(0, -4),
-            ),
-          ],
-        ),
-        child: SafeArea(
-          top: false,
-          child: Row(
-            children: List.generate(_items.length, (i) {
-              final selected = i == index;
-              final item = _items[i];
-
-              return Expanded(
-                child: GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onTap: () => ref.read(homeTabIndexProvider.notifier).set(i),
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 220),
-                    curve: Curves.easeOut,
-                    padding: const EdgeInsets.symmetric(vertical: 6),
-                    decoration: BoxDecoration(
-                      color: selected
-                          ? AppColors.purple700
-                          : Colors.transparent,
-                      borderRadius: BorderRadius.circular(18),
-                    ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          selected ? item.activeIcon : item.icon,
-                          size: 20,
-                          color: selected ? Colors.white : tokens.textSecondary,
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          item.label,
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: selected
-                                ? FontWeight.w700
-                                : FontWeight.w500,
-                            color: selected
-                                ? Colors.white
-                                : tokens.textSecondary,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              );
-            }),
-          ),
-        ),
+      body: IndexedStack(index: index, children: HomeShell._screens),
+      bottomNavigationBar: AppBottomNav(
+        currentIndex: index,
+        onTap: (i) => ref.read(homeTabIndexProvider.notifier).set(i),
       ),
     );
   }
-}
-
-class _NavItem {
-  const _NavItem({
-    required this.icon,
-    required this.activeIcon,
-    required this.label,
-  });
-
-  final IconData icon;
-  final IconData activeIcon;
-  final String label;
 }
