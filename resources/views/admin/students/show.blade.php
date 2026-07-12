@@ -23,6 +23,9 @@
         'rejected' => 'bg-red-50 text-red-700 dark:bg-red-500/10 dark:text-red-400',
     ];
     $externalLabel = ['pending' => __('รอตรวจสอบ'), 'approved' => __('อนุมัติแล้ว'), 'rejected' => __('ปฏิเสธแล้ว')];
+    // Same badge/label sets apply to late check-ins and credit transfers —
+    // all three request types share the pending/approved/rejected enum.
+    $positionLabels = collect(\App\Models\CreditTransferRequest::POSITION_LABELS)->map(fn ($label) => __($label))->all();
 @endphp
 
 <div class="mx-auto max-w-4xl">
@@ -137,7 +140,7 @@
 
     <div class="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
         <div class="rounded-2xl glass-card p-5 shadow-soft">
-            <h2 class="mb-3 text-sm font-semibold text-slate-900 dark:text-slate-100">{{ __('ประวัติเช็กชื่อล่าสุด') }}</h2>
+            <h2 class="mb-3 text-sm font-semibold text-slate-900 dark:text-slate-100">{{ __('ประวัติเช็คชื่อล่าสุด') }}</h2>
             <div class="space-y-2.5">
                 @forelse ($attendances as $att)
                     <div class="flex items-start justify-between gap-2 rounded-xl bg-white/60 p-3 text-sm shadow-soft dark:bg-slate-800/60">
@@ -150,7 +153,7 @@
                         </span>
                     </div>
                 @empty
-                    <p class="py-6 text-center text-sm text-slate-400 dark:text-slate-500">{{ __('ยังไม่มีประวัติเช็กชื่อ') }}</p>
+                    <p class="py-6 text-center text-sm text-slate-400 dark:text-slate-500">{{ __('ยังไม่มีประวัติเช็คชื่อ') }}</p>
                 @endforelse
             </div>
         </div>
@@ -177,6 +180,58 @@
                     </div>
                 @empty
                     <p class="py-6 text-center text-sm text-slate-400 dark:text-slate-500">{{ __('ยังไม่มีคำร้องกิจกรรมภายนอก') }}</p>
+                @endforelse
+            </div>
+        </div>
+
+        <div class="rounded-2xl glass-card p-5 shadow-soft">
+            <h2 class="mb-3 text-sm font-semibold text-slate-900 dark:text-slate-100">{{ __('คำร้องเช็คชื่อย้อนหลังล่าสุด') }}</h2>
+            <div class="space-y-2.5">
+                @forelse ($lateCheckIns as $req)
+                    <div class="flex items-start justify-between gap-2 rounded-xl bg-white/60 p-3 text-sm shadow-soft dark:bg-slate-800/60">
+                        <div>
+                            <p class="font-medium text-slate-800 dark:text-slate-200">{{ $req->activity->title }}</p>
+                            <p class="text-xs text-slate-400 dark:text-slate-500">
+                                {{ $req->created_at->format('d/m/Y') }} ·
+                                @if ($req->status === 'approved' && $req->hours_approved !== null && $req->hours_approved != $req->activity->credit_hours)
+                                    <span class="text-slate-400 line-through">{{ $req->activity->credit_hours }}</span> {{ $req->hours_credited }} {{ __('ชม.') }}
+                                @else
+                                    {{ $req->activity->credit_hours }} {{ __('ชม.') }}
+                                @endif
+                            </p>
+                        </div>
+                        <span class="shrink-0 rounded-full px-2.5 py-1 text-xs font-medium {{ $externalBadge[$req->status] ?? 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400' }}">
+                            {{ $externalLabel[$req->status] ?? $req->status }}
+                        </span>
+                    </div>
+                @empty
+                    <p class="py-6 text-center text-sm text-slate-400 dark:text-slate-500">{{ __('ยังไม่มีคำร้องเช็คชื่อย้อนหลัง') }}</p>
+                @endforelse
+            </div>
+        </div>
+
+        <div class="rounded-2xl glass-card p-5 shadow-soft">
+            <h2 class="mb-3 text-sm font-semibold text-slate-900 dark:text-slate-100">{{ __('คำร้องเทียบโอนตำแหน่งล่าสุด') }}</h2>
+            <div class="space-y-2.5">
+                @forelse ($creditTransfers as $req)
+                    <div class="flex items-start justify-between gap-2 rounded-xl bg-white/60 p-3 text-sm shadow-soft dark:bg-slate-800/60">
+                        <div>
+                            <p class="font-medium text-slate-800 dark:text-slate-200">{{ $positionLabels[$req->position] ?? $req->position }}</p>
+                            <p class="text-xs text-slate-400 dark:text-slate-500">
+                                {{ __('ปีการศึกษา :year', ['year' => $req->academic_year]) }} ·
+                                @if ($req->status === 'approved' && $req->hours_approved !== null && $req->hours_approved != $req->hours_requested)
+                                    <span class="text-slate-400 line-through">{{ $req->hours_requested }}</span> {{ $req->hours_credited }} {{ __('ชม.') }}
+                                @else
+                                    {{ $req->hours_requested }} {{ __('ชม.') }}
+                                @endif
+                            </p>
+                        </div>
+                        <span class="shrink-0 rounded-full px-2.5 py-1 text-xs font-medium {{ $externalBadge[$req->status] ?? 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400' }}">
+                            {{ $externalLabel[$req->status] ?? $req->status }}
+                        </span>
+                    </div>
+                @empty
+                    <p class="py-6 text-center text-sm text-slate-400 dark:text-slate-500">{{ __('ยังไม่มีคำร้องเทียบโอนตำแหน่ง') }}</p>
                 @endforelse
             </div>
         </div>

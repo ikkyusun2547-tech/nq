@@ -22,6 +22,23 @@ class CreditTransferRequest extends Model
         'class_representative' => 50,
     ];
 
+    /**
+     * Thai labels for the keys above — single source, reused by both admin
+     * (resources/views/admin/credit-transfers/index.blade.php,
+     * admin/students/show.blade.php) and student-facing dashboards
+     * (Student\DashboardController, Api\Student\DashboardController), which
+     * previously each hand-maintained their own identical copy.
+     */
+    public const POSITION_LABELS = [
+        'student_council_president' => 'นายกองค์การบริหารนักศึกษา',
+        'student_club_president' => 'นายกสโมสรนักศึกษา',
+        'student_parliament_president' => 'ประธานสภานักศึกษา',
+        'club_president' => 'ประธานชมรม',
+        'dormitory_president' => 'ประธานหอพักมหาวิทยาลัย',
+        'class_leader' => 'หัวหน้าหมู่เรียน',
+        'class_representative' => 'ตัวแทนหมู่เรียน',
+    ];
+
     protected $fillable = [
         'user_id',
         'position',

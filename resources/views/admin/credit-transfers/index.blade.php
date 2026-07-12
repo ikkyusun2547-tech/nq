@@ -2,15 +2,10 @@
 
 @section('content')
 @php
-    $positionLabels = [
-        'student_council_president' => __('นายกองค์การบริหารนักศึกษา'),
-        'student_club_president' => __('นายกสโมสรนักศึกษา'),
-        'student_parliament_president' => __('ประธานสภานักศึกษา'),
-        'club_president' => __('ประธานชมรม'),
-        'dormitory_president' => __('ประธานหอพักมหาวิทยาลัย'),
-        'class_leader' => __('หัวหน้าหมู่เรียน'),
-        'class_representative' => __('ตัวแทนหมู่เรียน'),
-    ];
+    // Single source: App\Models\CreditTransferRequest::POSITION_LABELS —
+    // also reused by admin/students/show.blade.php and the student
+    // dashboards, so a position rename/addition only needs updating there.
+    $positionLabels = collect(\App\Models\CreditTransferRequest::POSITION_LABELS)->map(fn ($label) => __($label))->all();
     $categoryLabels = [
         'culture' => __('ทำนุบำรุงศิลปวัฒนธรรม'),
         'academic' => __('วิชาการ'),

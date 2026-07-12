@@ -27,6 +27,7 @@ class DashboardFeedItemResource extends JsonResource
             'location_name' => $this->resource->location_name ?? null,
             'photo_url' => $this->resource->photo_url ?? null,
             'reject_reason' => $this->resource->reject_reason ?? null,
+            'flag_reason' => $this->resource->flag_reason ?? null,
         ];
     }
 }

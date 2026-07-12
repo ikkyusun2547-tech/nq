@@ -18,6 +18,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'srru.email' => \App\Http\Middleware\EnsureSrruEmail::class,
             'profile.completed' => \App\Http\Middleware\EnsureProfileCompleted::class,
             'admin' => \App\Http\Middleware\EnsureIsAdmin::class,
+            'super_admin' => \App\Http\Middleware\EnsureIsSuperAdmin::class,
             'api.srru.email' => \App\Http\Middleware\EnsureSrruEmailApi::class,
             'api.profile.completed' => \App\Http\Middleware\EnsureProfileCompletedApi::class,
             'api.locale' => \App\Http\Middleware\SetLocaleApi::class,

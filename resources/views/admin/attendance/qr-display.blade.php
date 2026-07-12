@@ -25,12 +25,12 @@
                     <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand-green-400 opacity-75"></span>
                     <span class="relative inline-flex h-1.5 w-1.5 rounded-full bg-brand-green-400"></span>
                 </span>
-                {{ __('กำลังเช็กชื่อสด') }}
+                {{ __('กำลังเช็คชื่อสด') }}
             </span>
         @else
             <span class="mb-4 inline-flex items-center gap-2 rounded-full bg-red-500/10 px-3.5 py-1.5 text-[0.68rem] font-medium uppercase tracking-[0.2em] text-red-300 ring-1 ring-red-400/20">
                 <span class="h-1.5 w-1.5 rounded-full bg-red-400"></span>
-                {{ __('ปิดรับเช็กชื่อแล้ว') }}
+                {{ __('ปิดรับเช็คชื่อแล้ว') }}
             </span>
         @endif
 
@@ -41,7 +41,7 @@
                 {{ $activity->location_name }}
             </p>
         @endif
-        <p class="mb-9 text-sm font-light tracking-wide text-white/50">{{ __('สแกน QR นี้เพื่อเช็กชื่อเข้าร่วมกิจกรรม') }}</p>
+        <p class="mb-9 text-sm font-light tracking-wide text-white/50">{{ __('สแกน QR นี้เพื่อเช็คชื่อเข้าร่วมกิจกรรม') }}</p>
 
         <div class="qr-frame relative rounded-[2.25rem] p-[1px]">
             <div

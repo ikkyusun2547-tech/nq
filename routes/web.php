@@ -1,14 +1,21 @@
 <?php
 
 use App\Http\Controllers\Admin\ActivityController;
+use App\Http\Controllers\Admin\AnnouncementController;
 use App\Http\Controllers\Admin\AttendanceController;
+use App\Http\Controllers\Admin\AuditLogController;
 use App\Http\Controllers\Admin\ClearanceReportController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\ExternalApprovalController;
 use App\Http\Controllers\Admin\CreditTransferApprovalController;
+use App\Http\Controllers\Admin\FacultyController;
 use App\Http\Controllers\Admin\LateCheckInApprovalController;
+use App\Http\Controllers\Admin\MajorController;
+use App\Http\Controllers\Admin\ParticipationReportController;
+use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Admin\StudentController;
 use App\Http\Controllers\Admin\StudentImportController;
+use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\Auth\GoogleAuthController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileSetupController;
@@ -157,6 +164,10 @@ Route::middleware(['auth', 'srru.email'])->group(function () {
         Route::get('/activities/{activity}/attendance/export', [AttendanceController::class, 'exportExcel'])->name('attendance.export');
         Route::get('/activities/{activity}/attendance/missing-export', [AttendanceController::class, 'exportMissingExcel'])->name('attendance.missing-export');
 
+        Route::get('/attendance/flagged', [AttendanceController::class, 'flaggedIndex'])->name('attendance.flagged');
+        Route::post('/attendance/{attendance}/approve', [AttendanceController::class, 'approve'])->name('attendance.approve');
+        Route::post('/attendance/{attendance}/reject', [AttendanceController::class, 'reject'])->name('attendance.reject');
+
         Route::get('/external-activities', [ExternalApprovalController::class, 'index'])->name('external-activities.index');
         Route::post('/external-activities/{externalActivityRequest}/approve', [ExternalApprovalController::class, 'approve'])->name('external-activities.approve');
         Route::post('/external-activities/{externalActivityRequest}/reject', [ExternalApprovalController::class, 'reject'])->name('external-activities.reject');
@@ -169,6 +180,31 @@ Route::middleware(['auth', 'srru.email'])->group(function () {
         Route::post('/late-checkins/{lateCheckInRequest}/approve', [LateCheckInApprovalController::class, 'approve'])->name('late-checkins.approve');
         Route::post('/late-checkins/{lateCheckInRequest}/reject', [LateCheckInApprovalController::class, 'reject'])->name('late-checkins.reject');
 
+        Route::get('/reports', [ParticipationReportController::class, 'index'])->name('reports.index');
         Route::get('/reports/clearance', [ClearanceReportController::class, 'exportPdf'])->name('reports.clearance');
+        Route::get('/reports/faculty-participation', [ParticipationReportController::class, 'exportExcel'])->name('reports.faculty-participation');
+
+        Route::get('/audit-log', [AuditLogController::class, 'index'])->name('audit-log.index');
+
+        Route::post('/activities/{activity}/duplicate', [ActivityController::class, 'duplicate'])->name('activities.duplicate');
+
+        Route::get('/announcements', [AnnouncementController::class, 'create'])->name('announcements.create');
+        Route::post('/announcements', [AnnouncementController::class, 'store'])->name('announcements.store');
+
+        Route::middleware('super_admin')->group(function () {
+            Route::get('/users', [UserManagementController::class, 'index'])->name('users.index');
+            Route::post('/users/{user}/promote', [UserManagementController::class, 'promote'])->name('users.promote');
+            Route::post('/users/{user}/demote', [UserManagementController::class, 'demote'])->name('users.demote');
+            Route::post('/users/{user}/ban', [UserManagementController::class, 'ban'])->name('users.ban');
+            Route::post('/users/{user}/unban', [UserManagementController::class, 'unban'])->name('users.unban');
+
+            Route::resource('faculties', FacultyController::class)->except(['show']);
+            Route::post('/faculties/{faculty}/majors', [MajorController::class, 'store'])->name('majors.store');
+            Route::put('/majors/{major}', [MajorController::class, 'update'])->name('majors.update');
+            Route::delete('/majors/{major}', [MajorController::class, 'destroy'])->name('majors.destroy');
+
+            Route::get('/settings', [SettingsController::class, 'edit'])->name('settings.edit');
+            Route::put('/settings', [SettingsController::class, 'update'])->name('settings.update');
+        });
     });
 });

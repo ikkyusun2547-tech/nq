@@ -188,7 +188,7 @@ class ActivityController extends Controller
         if ($activity->attendances()->exists()) {
             return redirect()
                 ->route('admin.activities.index')
-                ->with('error', __('ไม่สามารถลบกิจกรรม ":title" ได้ เนื่องจากมีนักศึกษาเช็กชื่อเข้าร่วมแล้ว', ['title' => $activity->title]));
+                ->with('error', __('ไม่สามารถลบกิจกรรม ":title" ได้ เนื่องจากมีนักศึกษาเช็คชื่อเข้าร่วมแล้ว', ['title' => $activity->title]));
         }
 
         if ($activity->banner_url) {
@@ -200,6 +200,57 @@ class ActivityController extends Controller
         return redirect()
             ->route('admin.activities.index')
             ->with('status', __('ลบกิจกรรมสำเร็จ'));
+    }
+
+    /**
+     * Recurring events (orientation every semester, a monthly blood drive)
+     * used to mean retyping every field from scratch — this copies
+     * everything except the parts that must be unique per event (code, QR
+     * secret, status) and drops the new copy straight into edit. start_at/
+     * end_at/checkin windows are copied as-is rather than left blank —
+     * the columns are NOT NULL with no default — so the admin's very first
+     * action on the copy is correcting the (obviously stale) date, not
+     * fighting a save error.
+     */
+    public function duplicate(Request $request, Activity $activity)
+    {
+        $activity->load('restrictions');
+
+        $copy = new Activity($activity->only([
+            'title', 'description', 'organizer_name', 'dress_code',
+            'activity_level', 'activity_category', 'activity_type',
+            'academic_year', 'semester', 'credit_hours', 'capacity',
+            'location_name', 'location_lat', 'location_lng', 'allowed_radius',
+            'checkin_method', 'start_at', 'end_at', 'checkin_opens_at', 'checkin_closes_at',
+        ]));
+        $copy->title = __(':title (สำเนา)', ['title' => $activity->title]);
+        $copy->status = 'draft';
+        $copy->created_by = $request->user()->id;
+        $this->ensureQrSecret($copy);
+
+        DB::transaction(function () use ($copy, $activity) {
+            $copy->activity_seq = $this->activityCodes->nextSequence($copy->academic_year);
+            $copy->activity_code = $this->activityCodes->format(
+                $copy->academic_year,
+                $copy->activity_category,
+                $copy->activity_seq,
+            );
+
+            $copy->save();
+
+            foreach ($activity->restrictions as $restriction) {
+                ActivityRestriction::create([
+                    'activity_id' => $copy->id,
+                    'faculty_id' => $restriction->faculty_id,
+                    'major_id' => $restriction->major_id,
+                    'target_year' => $restriction->target_year,
+                ]);
+            }
+        });
+
+        return redirect()
+            ->route('admin.activities.edit', $copy)
+            ->with('status', __('คัดลอกกิจกรรมสำเร็จ กรุณาตรวจสอบวันเวลาก่อนเผยแพร่'));
     }
 
     /**

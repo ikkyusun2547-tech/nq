@@ -3,12 +3,10 @@
 @section('content')
 @php
     $statusLabel = ['auto_approved' => __('ผ่านอัตโนมัติ'), 'flagged' => __('ติดธงแดง'), 'rejected' => __('ปฏิเสธ')];
-    $reasonLabel = [
-        'GPS_OUT_OF_BOUNDS' => __('GPS เกินรัศมี'),
-        'DEVICE_SHARING_SUSPECTED' => __('ต้องสงสัยใช้เครื่องร่วมกัน'),
-        'SELF_REPORTED' => __('รายงานตนเอง (ไม่มี GPS ยืนยัน)'),
-        'PRINTED_QR_USED' => __('เช็กชื่อด้วย QR สำรอง (แบบพิมพ์)'),
-    ];
+    // Same labels the student sees for their own flagged check-in — see
+    // App\Models\Attendance::REASON_LABELS's docblock for why this must stay
+    // the single source instead of a second hand-maintained copy here.
+    $reasonLabel = collect(\App\Models\Attendance::REASON_LABELS)->map(fn ($label) => __($label))->all();
     $badgeDot = [
         'auto_approved' => 'bg-brand-green-500',
         'flagged' => 'bg-red-500',
@@ -49,7 +47,7 @@
                 @endif
             </p>
             <h1 class="mt-1 text-xl font-bold sm:text-2xl">{{ $activity->title }}</h1>
-            <p class="mt-1 text-sm text-violet-100/70">{{ __('ผู้เช็กชื่อทั้งหมด :count คน', ['count' => $attendances->count()]) }}</p>
+            <p class="mt-1 text-sm text-violet-100/70">{{ __('ผู้เช็คชื่อทั้งหมด :count คน', ['count' => $attendances->count()]) }}</p>
         </div>
         <div class="flex flex-wrap items-center gap-2">
             <button
@@ -57,7 +55,7 @@
                 class="flex items-center gap-2 rounded-xl bg-white/10 px-4 py-2 text-sm font-medium text-white shadow-soft ring-1 ring-white/15 backdrop-blur transition-all duration-300 hover:-translate-y-0.5 hover:bg-white/15"
                 title="{{ __('คำนวณจากรายชื่อนักศึกษาที่มีสิทธิ์เข้าร่วมในระบบ') }}"
             >
-                {{ __('เช็กชื่อแล้ว :checked / ต้องเข้าร่วม :required คน', ['checked' => $checkedInCount, 'required' => $requiredCount]) }}
+                {{ __('เช็คชื่อแล้ว :checked / ต้องเข้าร่วม :required คน', ['checked' => $checkedInCount, 'required' => $requiredCount]) }}
                 @if ($missingStudents->isNotEmpty())
                     <span class="rounded-full bg-amber-400 px-1.5 py-0.5 text-[0.65rem] font-bold text-brand-purple-950">{{ $missingStudents->count() }}</span>
                 @endif
@@ -155,7 +153,7 @@
                     <th class="whitespace-nowrap px-3 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">{{ __('ชื่อ-นามสกุล') }}</th>
                     <th class="whitespace-nowrap px-3 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">{{ __('คณะ/สาขา') }}</th>
                     <th class="whitespace-nowrap px-3 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">{{ __('ชั้นปี') }}</th>
-                    <th class="whitespace-nowrap px-3 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">{{ __('เวลาเช็กชื่อ') }}</th>
+                    <th class="whitespace-nowrap px-3 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">{{ __('เวลาเช็คชื่อ') }}</th>
                     <th class="whitespace-nowrap px-3 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">{{ __('ระยะห่าง') }}</th>
                     <th class="whitespace-nowrap px-3 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">{{ __('สถานะ') }}</th>
                     <th class="whitespace-nowrap px-3 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500"></th>
@@ -215,7 +213,7 @@
                         </td>
                     </tr>
                 @empty
-                    <tr><td colspan="9" class="px-4 py-8 text-center text-slate-400 dark:text-slate-500">{{ __('ยังไม่มีผู้เช็กชื่อ') }}</td></tr>
+                    <tr><td colspan="9" class="px-4 py-8 text-center text-slate-400 dark:text-slate-500">{{ __('ยังไม่มีผู้เช็คชื่อ') }}</td></tr>
                 @endforelse
             </tbody>
         </table>
@@ -287,7 +285,7 @@
                             <span class="shrink-0 text-xs text-slate-400 dark:text-slate-500">{{ __('ปี :year', ['year' => $student->current_year]) }}</span>
                         </div>
                     @empty
-                        <p class="py-10 text-center text-sm text-slate-400 dark:text-slate-500">{{ __('ทุกคนเช็กชื่อครบแล้ว 🎉') }}</p>
+                        <p class="py-10 text-center text-sm text-slate-400 dark:text-slate-500">{{ __('ทุกคนเช็คชื่อครบแล้ว 🎉') }}</p>
                     @endforelse
                 </div>
             </div>

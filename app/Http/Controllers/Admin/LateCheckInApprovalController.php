@@ -81,7 +81,7 @@ class LateCheckInApprovalController extends Controller
             });
         } catch (QueryException $e) {
             if ($e->getCode() === '23000') {
-                return back()->with('error', __('นักศึกษาคนนี้มีการเช็กชื่อกิจกรรมนี้อยู่แล้ว ไม่สามารถอนุมัติซ้ำได้'));
+                return back()->with('error', __('นักศึกษาคนนี้มีการเช็คชื่อกิจกรรมนี้อยู่แล้ว ไม่สามารถอนุมัติซ้ำได้'));
             }
 
             throw $e;

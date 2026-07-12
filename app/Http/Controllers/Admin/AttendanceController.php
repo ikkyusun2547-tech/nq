@@ -6,8 +6,10 @@ use App\Exports\ActivityAttendeesExport;
 use App\Exports\ActivityMissingStudentsExport;
 use App\Http\Controllers\Controller;
 use App\Models\Activity;
+use App\Models\Attendance;
 use App\Models\Faculty;
 use App\Notifications\AttendanceApproved;
+use App\Notifications\AttendanceRejected;
 use App\Services\DynamicQrTokenGenerator;
 use App\Services\SafeNotifier;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -146,6 +148,73 @@ class AttendanceController extends Controller
         }
 
         return back()->with('status', __('อัปเดตสถานะสำเร็จ :count รายการ', ['count' => $count]));
+    }
+
+    /**
+     * Cross-activity queue for flagged check-ins — before this, an admin
+     * could only review flagged rows one activity at a time (via index()
+     * above), and the "flagged attendances" dashboard stat had nowhere to
+     * link to. Also the only way to resolve a flagged row with something
+     * other than "auto_approved" — reject() below is the one place a
+     * plain real-time/self-report check-in can end up rejected.
+     */
+    public function flaggedIndex(Request $request)
+    {
+        $status = $request->input('status', 'flagged');
+        $status = in_array($status, ['flagged', 'rejected', 'all'], true) ? $status : 'flagged';
+
+        $attendances = Attendance::with(['user.faculty', 'user.major', 'activity'])
+            ->when($status !== 'all', fn ($query) => $query->where('status', $status))
+            ->when($status === 'all', fn ($query) => $query->whereIn('status', ['flagged', 'rejected']))
+            ->when($request->filled('search'), function ($query) use ($request) {
+                $search = $request->string('search');
+
+                $query->whereHas('user', function ($userQuery) use ($search) {
+                    $userQuery->where('name_thai', 'like', "%{$search}%")
+                        ->orWhere('name', 'like', "%{$search}%")
+                        ->orWhere('student_id', 'like', "%{$search}%");
+                });
+            })
+            ->latest('checkin_time')
+            ->paginate(20)
+            ->withQueryString();
+
+        return view('admin.attendance.flagged', compact('attendances', 'status'));
+    }
+
+    public function approve(Request $request, Attendance $attendance)
+    {
+        abort_if($attendance->status !== 'flagged', 422, __('รายการนี้ถูกดำเนินการไปแล้ว'));
+
+        $attendance->update([
+            'status' => 'auto_approved',
+            'reviewed_by' => $request->user()->id,
+            'reviewed_at' => now(),
+        ]);
+
+        SafeNotifier::send($attendance->user, new AttendanceApproved($attendance));
+
+        return back()->with('status', __('อนุมัติการเช็คชื่อสำเร็จ'));
+    }
+
+    public function reject(Request $request, Attendance $attendance)
+    {
+        abort_if($attendance->status !== 'flagged', 422, __('รายการนี้ถูกดำเนินการไปแล้ว'));
+
+        $validated = $request->validate([
+            'reject_reason' => ['required', 'string', 'max:500'],
+        ]);
+
+        $attendance->update([
+            'status' => 'rejected',
+            'reject_reason' => $validated['reject_reason'],
+            'reviewed_by' => $request->user()->id,
+            'reviewed_at' => now(),
+        ]);
+
+        SafeNotifier::send($attendance->user, new AttendanceRejected($attendance));
+
+        return back()->with('status', __('ปฏิเสธการเช็คชื่อสำเร็จ'));
     }
 
     public function exportExcel(Activity $activity)

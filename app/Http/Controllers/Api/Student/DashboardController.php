@@ -5,27 +5,13 @@ namespace App\Http\Controllers\Api\Student;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\DashboardFeedItemResource;
 use App\Http\Resources\DashboardSummaryResource;
+use App\Models\CreditTransferRequest;
 use App\Models\LateCheckInRequest;
 use App\Services\ActivityEvaluationService;
 use Illuminate\Http\Request;
 
 class DashboardController extends Controller
 {
-    /**
-     * Thai labels for CreditTransferRequest::POSITION_HOURS keys — kept in
-     * sync with the same map in Student\DashboardController by design (see
-     * that controller's docblock for why it isn't a shared class).
-     */
-    private const POSITION_LABELS = [
-        'student_council_president' => 'นายกองค์การบริหารนักศึกษา',
-        'student_club_president' => 'นายกสโมสรนักศึกษา',
-        'student_parliament_president' => 'ประธานสภานักศึกษา',
-        'club_president' => 'ประธานชมรม',
-        'dormitory_president' => 'ประธานหอพักมหาวิทยาลัย',
-        'class_leader' => 'หัวหน้าหมู่เรียน',
-        'class_representative' => 'ตัวแทนหมู่เรียน',
-    ];
-
     public function show(Request $request, ActivityEvaluationService $evaluator)
     {
         $user = $request->user();
@@ -48,6 +34,7 @@ class DashboardController extends Controller
                 'checkin_method' => $att->checkin_method,
                 'location_name' => $att->activity->location_name,
                 'photo_url' => asset('storage/'.$att->photo_path),
+                'flag_reason' => $att->status === 'flagged' ? $att->flagReasonLabel() : null,
             ]);
 
         $externalRequests = $user->externalActivityRequests()
@@ -65,7 +52,7 @@ class DashboardController extends Controller
             ->whereIn('status', ['approved', 'pending'])
             ->get()
             ->map(fn ($credit) => (object) [
-                'title' => __(self::POSITION_LABELS[$credit->position]),
+                'title' => __(CreditTransferRequest::POSITION_LABELS[$credit->position]),
                 'date' => $credit->created_at,
                 'hours' => $credit->hours_credited,
                 'type' => 'credit_transfer',
@@ -110,7 +97,24 @@ class DashboardController extends Controller
                 'date' => $req->created_at,
                 'type' => 'checkin',
                 'activity_id' => $req->activity_id,
+                'checkin_method' => 'late_request',
                 'reject_reason' => $req->reject_reason,
+            ]);
+
+        // A real-time/self-report check-in the admin rejected — distinct
+        // from a rejected LateCheckInRequest above (see the web
+        // controller's docblock for the same code, kept in sync by design).
+        $rejectedAttendances = $user->attendances()
+            ->where('status', 'rejected')
+            ->with('activity')
+            ->get()
+            ->map(fn ($att) => (object) [
+                'title' => $att->activity->title,
+                'date' => $att->checkin_time,
+                'type' => 'checkin',
+                'activity_id' => $att->activity_id,
+                'checkin_method' => $att->checkin_method,
+                'reject_reason' => $att->reject_reason,
             ]);
 
         $rejectedCreditTransfers = $user->creditTransferRequests()
@@ -123,13 +127,19 @@ class DashboardController extends Controller
                     ->exists();
             })
             ->map(fn ($credit) => (object) [
-                'title' => __(self::POSITION_LABELS[$credit->position]),
+                'title' => __(CreditTransferRequest::POSITION_LABELS[$credit->position]),
                 'date' => $credit->created_at,
                 'type' => 'credit_transfer',
                 'reject_reason' => $credit->reject_reason,
             ]);
 
-        $rejectedActivities = $rejectedExternal->concat($rejectedLateCheckins)->concat($rejectedCreditTransfers)->sortByDesc('date')->take(5)->values();
+        $rejectedActivities = $rejectedExternal
+            ->concat($rejectedLateCheckins)
+            ->concat($rejectedAttendances)
+            ->concat($rejectedCreditTransfers)
+            ->sortByDesc('date')
+            ->take(5)
+            ->values();
 
         return response()->json([
             'summary' => new DashboardSummaryResource($summary),

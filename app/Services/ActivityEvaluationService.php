@@ -5,14 +5,21 @@ namespace App\Services;
 use App\Models\Attendance;
 use App\Models\CreditTransferRequest;
 use App\Models\ExternalActivityRequest;
+use App\Models\Setting;
 use App\Models\User;
 
 class ActivityEvaluationService
 {
+    public const SETTINGS_KEY = 'graduation_criteria';
+
     /**
-     * Institutional graduation criteria: [required activity count, required hours, yearly hour targets by year 1-4].
+     * Institutional graduation criteria: [required activity count, required
+     * hours, yearly hour targets by year 1-4]. Used as-is until an admin
+     * overrides it via Admin\SettingsController — see criteria() below —
+     * so the university's current published requirement always works even
+     * if a setting was never explicitly saved.
      */
-    private const CRITERIA = [
+    public const DEFAULT_CRITERIA = [
         'normal' => [
             'required_activities' => 25,
             'required_hours' => 100,
@@ -28,6 +35,15 @@ class ActivityEvaluationService
     private const CATEGORIES = ['culture', 'academic', 'sports', 'volunteer', 'ethics'];
 
     /**
+     * The criteria actually in effect — an admin-saved override if one
+     * exists, otherwise DEFAULT_CRITERIA untouched.
+     */
+    public function criteria(): array
+    {
+        return Setting::getJson(self::SETTINGS_KEY, self::DEFAULT_CRITERIA);
+    }
+
+    /**
      * Summarize a student's activity-hour progress against SRRU's
      * graduation clearance criteria.
      *
@@ -40,7 +56,8 @@ class ActivityEvaluationService
      */
     public function summarize(User $user): array
     {
-        $criteria = self::CRITERIA[$user->program_type] ?? self::CRITERIA['normal'];
+        $allCriteria = $this->criteria();
+        $criteria = $allCriteria[$user->program_type] ?? $allCriteria['normal'];
 
         // 'practice' (กิจกรรมซ้อม/เตรียมงาน) credits hours but isn't a real
         // university activity yet, so it's excluded from the 25-activity
@@ -133,9 +150,11 @@ class ActivityEvaluationService
             ->groupBy('user_id')
             ->pluck('hours', 'user_id');
 
+        $allCriteria = $this->criteria();
+
         return $students
-            ->map(function (User $user) use ($activityStats, $externalHours, $creditTransferHours) {
-                $criteria = self::CRITERIA[$user->program_type] ?? self::CRITERIA['normal'];
+            ->map(function (User $user) use ($activityStats, $externalHours, $creditTransferHours, $allCriteria) {
+                $criteria = $allCriteria[$user->program_type] ?? $allCriteria['normal'];
                 $stat = $activityStats->get($user->id);
 
                 $totalActivities = (int) ($stat->activity_count ?? 0);

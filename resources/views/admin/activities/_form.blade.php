@@ -161,13 +161,13 @@
     </div>
 
     <div class="mt-6 rounded-2xl glass-card p-5 shadow-soft">
-        <label class="mb-2 block text-sm font-medium text-slate-600 dark:text-slate-400">{{ __('วิธีเช็กชื่อ') }}</label>
+        <label class="mb-2 block text-sm font-medium text-slate-600 dark:text-slate-400">{{ __('วิธีเช็คชื่อ') }}</label>
         <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <label class="flex cursor-pointer items-start gap-2 rounded-xl border border-slate-200 bg-slate-50/50 px-3 py-2.5 text-sm shadow-soft transition-all duration-200 has-[:checked]:border-brand-purple-500 has-[:checked]:bg-brand-purple-50 has-[:checked]:text-brand-purple-700 dark:border-slate-700 dark:bg-slate-800/40 dark:has-[:checked]:bg-brand-purple-500/10 dark:has-[:checked]:text-brand-purple-400">
                 <input type="radio" name="checkin_method" value="realtime" x-model="checkinMethod" @change="refreshMap()" class="mt-0.5 text-brand-purple-600 focus:ring-brand-purple-500">
                 <span>
                     <span class="block font-medium">{{ __('สแกน QR + GPS + เซลฟี') }}</span>
-                    <span class="block text-xs text-slate-400 dark:text-slate-500">{{ __('เช็กชื่อหน้างานแบบเรียลไทม์ (ค่าเริ่มต้น)') }}</span>
+                    <span class="block text-xs text-slate-400 dark:text-slate-500">{{ __('เช็คชื่อหน้างานแบบเรียลไทม์ (ค่าเริ่มต้น)') }}</span>
                 </span>
             </label>
             <label class="flex cursor-pointer items-start gap-2 rounded-xl border border-slate-200 bg-slate-50/50 px-3 py-2.5 text-sm shadow-soft transition-all duration-200 has-[:checked]:border-brand-purple-500 has-[:checked]:bg-brand-purple-50 has-[:checked]:text-brand-purple-700 dark:border-slate-700 dark:bg-slate-800/40 dark:has-[:checked]:bg-brand-purple-500/10 dark:has-[:checked]:text-brand-purple-400">
@@ -211,16 +211,16 @@
         </div>
 
         <div x-show="checkinMethod === 'self_report'" x-cloak>
-            <label class="mb-2 block text-sm font-medium text-slate-600 dark:text-slate-400">{{ __('ช่วงเวลาที่เปิดให้เช็กชื่อแบบรายงานตนเอง') }}</label>
+            <label class="mb-2 block text-sm font-medium text-slate-600 dark:text-slate-400">{{ __('ช่วงเวลาที่เปิดให้เช็คชื่อแบบรายงานตนเอง') }}</label>
             <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div>
-                    <label class="mb-1 block text-xs text-slate-400 dark:text-slate-500">{{ __('เปิดให้เช็กชื่อตั้งแต่') }}</label>
+                    <label class="mb-1 block text-xs text-slate-400 dark:text-slate-500">{{ __('เปิดให้เช็คชื่อตั้งแต่') }}</label>
                     <input type="datetime-local" name="checkin_opens_at"
                         value="{{ old('checkin_opens_at', isset($activity->checkin_opens_at) ? $activity->checkin_opens_at->format('Y-m-d\TH:i') : '') }}"
                         class="w-full rounded-2xl border bg-white px-3.5 py-2.5 text-sm text-slate-700 shadow-soft transition-all duration-200 focus:outline-none focus:ring-4 dark:bg-slate-800 dark:text-slate-100 @error('checkin_opens_at') border-red-400 focus:border-red-500 focus:ring-red-500/10 dark:border-red-500/70 @else border-slate-300 focus:border-brand-purple-500 focus:ring-brand-purple-500/10 dark:border-slate-600 @enderror">
                 </div>
                 <div>
-                    <label class="mb-1 block text-xs text-slate-400 dark:text-slate-500">{{ __('ปิดรับเช็กชื่อเมื่อ') }}</label>
+                    <label class="mb-1 block text-xs text-slate-400 dark:text-slate-500">{{ __('ปิดรับเช็คชื่อเมื่อ') }}</label>
                     <input type="datetime-local" name="checkin_closes_at"
                         value="{{ old('checkin_closes_at', isset($activity->checkin_closes_at) ? $activity->checkin_closes_at->format('Y-m-d\TH:i') : '') }}"
                         class="w-full rounded-2xl border bg-white px-3.5 py-2.5 text-sm text-slate-700 shadow-soft transition-all duration-200 focus:outline-none focus:ring-4 dark:bg-slate-800 dark:text-slate-100 @error('checkin_closes_at') border-red-400 focus:border-red-500 focus:ring-red-500/10 dark:border-red-500/70 @else border-slate-300 focus:border-brand-purple-500 focus:ring-brand-purple-500/10 dark:border-slate-600 @enderror">

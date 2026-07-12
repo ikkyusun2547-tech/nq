@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Faculty;
+use App\Models\LateCheckInRequest;
 use App\Models\User;
 use App\Services\ActivityEvaluationService;
 use Illuminate\Http\Request;
@@ -55,6 +56,19 @@ class StudentController extends Controller
             ->take(10)
             ->get();
 
-        return view('admin.students.show', compact('student', 'summary', 'attendances', 'externalRequests'));
+        $lateCheckIns = LateCheckInRequest::where('user_id', $student->id)
+            ->with('activity')
+            ->latest('created_at')
+            ->take(10)
+            ->get();
+
+        $creditTransfers = $student->creditTransferRequests()
+            ->latest('created_at')
+            ->take(10)
+            ->get();
+
+        return view('admin.students.show', compact(
+            'student', 'summary', 'attendances', 'externalRequests', 'lateCheckIns', 'creditTransfers'
+        ));
     }
 }
