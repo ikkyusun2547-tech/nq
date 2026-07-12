@@ -47,7 +47,10 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {}
 /// otherwise a foreground student would never see approval/rejection
 /// notices arrive in real time.
 class PushNotificationService {
-  PushNotificationService({required this.deviceTokenRepository, required this.ref});
+  PushNotificationService({
+    required this.deviceTokenRepository,
+    required this.ref,
+  });
 
   final DeviceTokenRepository deviceTokenRepository;
   final Ref ref;
@@ -68,7 +71,8 @@ class PushNotificationService {
       // (below) never reach FirebaseMessaging.onMessageOpenedApp — that only
       // fires for the system tray notification FCM auto-displays while
       // backgrounded/terminated. This is the tap handler for our own one.
-      onDidReceiveNotificationResponse: (response) => _routeToUrl(response.payload),
+      onDidReceiveNotificationResponse: (response) =>
+          _routeToUrl(response.payload),
     );
 
     await FirebaseMessaging.instance.requestPermission();
@@ -112,6 +116,12 @@ class PushNotificationService {
   Future<void> _showForegroundNotification(RemoteMessage message) async {
     final notification = message.notification;
     if (notification == null) return;
+
+    // Otherwise the dashboard's bell badge and the notifications list stay
+    // on whatever was cached before this message arrived — nothing else
+    // re-fetches them while the app is already open and foregrounded.
+    ref.invalidate(unreadNotificationCountProvider);
+    ref.invalidate(notificationsPageProvider);
 
     await _localNotifications.show(
       id: message.hashCode.abs() % 100000,

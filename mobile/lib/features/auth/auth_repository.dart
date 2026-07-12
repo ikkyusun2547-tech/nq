@@ -3,7 +3,11 @@ import '../../core/auth_storage.dart';
 import '../../core/models/app_user.dart';
 
 class GoogleLoginResult {
-  GoogleLoginResult({required this.user, required this.profileCompleted, required this.isAdmin});
+  GoogleLoginResult({
+    required this.user,
+    required this.profileCompleted,
+    required this.isAdmin,
+  });
 
   final AppUser user;
   final bool profileCompleted;
@@ -19,9 +23,28 @@ class AuthRepository {
   final AuthStorage authStorage;
 
   Future<GoogleLoginResult> loginWithGoogle(String idToken) async {
-    final response = await apiClient.dio.post('/auth/google', data: {'id_token': idToken});
-    final data = response.data as Map<String, dynamic>;
+    final response = await apiClient.dio.post(
+      '/auth/google',
+      data: {'id_token': idToken},
+    );
 
+    return _sessionFromResponse(response.data as Map<String, dynamic>);
+  }
+
+  /// Debug-only shortcut hitting the local-only GET /_test-login/{user} route
+  /// (see routes/api.php) — mints a real Sanctum token for a seeded account
+  /// without Google OAuth, so the app can be previewed as a student without
+  /// a real @srru.ac.th Google login. Callers must gate this behind
+  /// kDebugMode themselves; the server enforces the local-env restriction.
+  Future<GoogleLoginResult> loginAsTestUser(int userId) async {
+    final response = await apiClient.dio.get('/_test-login/$userId');
+
+    return _sessionFromResponse(response.data as Map<String, dynamic>);
+  }
+
+  Future<GoogleLoginResult> _sessionFromResponse(
+    Map<String, dynamic> data,
+  ) async {
     await authStorage.setToken(data['token'] as String);
 
     return GoogleLoginResult(

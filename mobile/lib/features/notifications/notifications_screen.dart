@@ -11,7 +11,8 @@ class NotificationsScreen extends ConsumerStatefulWidget {
   const NotificationsScreen({super.key});
 
   @override
-  ConsumerState<NotificationsScreen> createState() => _NotificationsScreenState();
+  ConsumerState<NotificationsScreen> createState() =>
+      _NotificationsScreenState();
 }
 
 class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
@@ -77,6 +78,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
       try {
         await ref.read(notificationsRepositoryProvider).delete(notification.id);
       } finally {
+        ref.invalidate(notificationsPageProvider);
         ref.invalidate(unreadNotificationCountProvider);
       }
     }
@@ -137,7 +139,10 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
                     ),
                   if ((page.value?.notifications ?? const []).isNotEmpty)
                     IconButton(
-                      icon: const Icon(Icons.delete_sweep_outlined, color: Colors.white),
+                      icon: const Icon(
+                        Icons.delete_sweep_outlined,
+                        color: Colors.white,
+                      ),
                       tooltip: 'ลบทั้งหมด',
                       onPressed: deleteAll,
                     ),
@@ -182,38 +187,41 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
                     }
 
                     return Column(
-                          children: visible
-                              .map(
-                                (n) => Dismissible(
-                                  key: ValueKey(n.id),
-                                  direction: DismissDirection.endToStart,
-                                  background: Container(
-                                    margin: const EdgeInsets.only(bottom: 12),
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 20,
-                                    ),
-                                    alignment: Alignment.centerRight,
-                                    decoration: BoxDecoration(
-                                      color: AppColors.statusRejected,
-                                      borderRadius: BorderRadius.circular(16),
-                                    ),
-                                    child: const Icon(
-                                      Icons.delete_outline,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                  onDismissed: (_) => deleteOne(n),
-                                  child: _NotificationTile(
-                                    notification: n,
-                                    icon: _icons[n.icon] ?? Icons.notifications_outlined,
-                                    color: _iconColors[n.icon] ?? AppColors.purple600,
-                                    timeLabel: _relativeTime(n.createdAt),
-                                    onTap: () => openNotification(n),
-                                  ),
+                      children: visible
+                          .map(
+                            (n) => Dismissible(
+                              key: ValueKey(n.id),
+                              direction: DismissDirection.endToStart,
+                              background: Container(
+                                margin: const EdgeInsets.only(bottom: 12),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 20,
                                 ),
-                              )
-                              .toList(),
-                        );
+                                alignment: Alignment.centerRight,
+                                decoration: BoxDecoration(
+                                  color: AppColors.statusRejected,
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                                child: const Icon(
+                                  Icons.delete_outline,
+                                  color: Colors.white,
+                                ),
+                              ),
+                              onDismissed: (_) => deleteOne(n),
+                              child: _NotificationTile(
+                                notification: n,
+                                icon:
+                                    _icons[n.icon] ??
+                                    Icons.notifications_outlined,
+                                color:
+                                    _iconColors[n.icon] ?? AppColors.purple600,
+                                timeLabel: _relativeTime(n.createdAt),
+                                onTap: () => openNotification(n),
+                              ),
+                            ),
+                          )
+                          .toList(),
+                    );
                   },
                 ),
               ),

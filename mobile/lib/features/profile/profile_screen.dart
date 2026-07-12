@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -137,10 +138,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         _successMessage = 'บันทึกข้อมูลสำเร็จ';
         _editing = false;
       });
-    } on ApiException catch (e) {
+    } on DioException catch (e) {
+      final apiEx = e.asApiException;
       setState(
         () => _errorMessage =
-            e.errors?.values.firstOrNull?.first?.toString() ?? e.message,
+            apiEx.errors?.values.firstOrNull?.first?.toString() ??
+            apiEx.message,
       );
     } catch (_) {
       setState(
@@ -479,7 +482,7 @@ class _MessageBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = isError ? Colors.red : AppColors.green600;
+    final color = isError ? AppColors.statusRejected : AppColors.green600;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),

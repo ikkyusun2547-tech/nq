@@ -1,5 +1,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <!-- geolocator_android's own plugin manifest doesn't declare these —
+         without them, Geolocator.requestPermission() can never actually
+         grant anything and the check-in flow's location step fails every
+         time, no matter how many times the student retries. -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
     <application
         android:label="mobile"
         android:name="${applicationName}"

@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -30,6 +31,7 @@ class LoginScreen extends ConsumerStatefulWidget {
 class _LoginScreenState extends ConsumerState<LoginScreen> {
   bool _initialized = false;
   bool _signingIn = false;
+  bool _testSigningIn = false;
   String? _errorMessage;
 
   Future<GoogleSignIn> _signIn() async {
@@ -66,15 +68,43 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           () => _errorMessage = 'เข้าสู่ระบบไม่สำเร็จ กรุณาลองใหม่อีกครั้ง',
         );
       }
-    } on ApiException catch (e) {
-      setState(() => _errorMessage = e.message);
     } catch (_) {
+      // loginWithGoogleIdToken never rethrows (it runs inside
+      // AsyncValue.guard) — a backend failure surfaces instead through the
+      // ref.listen below, which sets _errorMessage from the resulting
+      // AsyncError. This branch only ever catches something going wrong
+      // before that call (e.g. the id_token extraction above).
       setState(
         () => _errorMessage = 'เข้าสู่ระบบไม่สำเร็จ กรุณาลองใหม่อีกครั้ง',
       );
     } finally {
       if (mounted) {
         setState(() => _signingIn = false);
+      }
+    }
+  }
+
+  /// Debug-only shortcut for previewing the app as a seeded account without
+  /// a real @srru.ac.th Google login — see AuthRepository.loginAsTestUser.
+  /// User id 2 is the first seeded student in the demo dataset.
+  Future<void> _handleTestSignIn() async {
+    setState(() {
+      _testSigningIn = true;
+      _errorMessage = null;
+    });
+
+    try {
+      await ref.read(authControllerProvider.notifier).loginAsTestUser(2);
+    } catch (_) {
+      // See the matching comment in _handleSignIn — loginAsTestUser also
+      // runs inside AsyncValue.guard, so a backend error surfaces through
+      // ref.listen below, not here.
+      setState(
+        () => _errorMessage = 'เข้าสู่ระบบทดสอบไม่สำเร็จ กรุณาลองใหม่อีกครั้ง',
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _testSigningIn = false);
       }
     }
   }
@@ -192,16 +222,19 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                     vertical: 12,
                                   ),
                                   decoration: BoxDecoration(
-                                    color: Colors.red.shade50,
+                                    color: AppColors.statusRejected.withValues(
+                                      alpha: 0.08,
+                                    ),
                                     borderRadius: BorderRadius.circular(14),
                                     border: Border.all(
-                                      color: Colors.red.shade100,
+                                      color: AppColors.statusRejected
+                                          .withValues(alpha: 0.2),
                                     ),
                                   ),
                                   child: Text(
                                     _errorMessage!,
-                                    style: TextStyle(
-                                      color: Colors.red.shade700,
+                                    style: const TextStyle(
+                                      color: AppColors.statusRejected,
                                       fontSize: 13,
                                     ),
                                     textAlign: TextAlign.center,
@@ -252,6 +285,56 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                 ),
                                 textAlign: TextAlign.center,
                               ),
+                              if (kDebugMode) ...[
+                                const SizedBox(height: 20),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: Divider(
+                                        color: Colors.grey.shade300,
+                                      ),
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 10,
+                                      ),
+                                      child: Text(
+                                        'DEBUG ONLY',
+                                        style: TextStyle(
+                                          fontSize: 10,
+                                          letterSpacing: 0.5,
+                                          color: Colors.grey.shade400,
+                                        ),
+                                      ),
+                                    ),
+                                    Expanded(
+                                      child: Divider(
+                                        color: Colors.grey.shade300,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 12),
+                                SizedBox(
+                                  width: double.infinity,
+                                  child: TextButton(
+                                    onPressed: _testSigningIn
+                                        ? null
+                                        : _handleTestSignIn,
+                                    child: _testSigningIn
+                                        ? const SizedBox(
+                                            width: 16,
+                                            height: 16,
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 2,
+                                            ),
+                                          )
+                                        : const Text(
+                                            'พรีวิวมุมมองนักศึกษา (ไม่ผ่าน Google)',
+                                          ),
+                                  ),
+                                ),
+                              ],
                             ],
                           ),
                         ),

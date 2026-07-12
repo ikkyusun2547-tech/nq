@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
@@ -48,8 +49,8 @@ class _SelfCheckInScreenState extends ConsumerState<SelfCheckInScreen> {
           .read(selfCheckInRepositoryProvider)
           .submit(activityId: widget.activity.id, photoPath: _photoPath!);
       setState(() => _successMessage = message);
-    } on ApiException catch (e) {
-      setState(() => _errorMessage = e.message);
+    } on DioException catch (e) {
+      setState(() => _errorMessage = e.asApiException.message);
     } catch (_) {
       setState(() => _errorMessage = 'ส่งข้อมูลไม่สำเร็จ กรุณาลองใหม่อีกครั้ง');
     } finally {
@@ -118,7 +119,10 @@ class _SelfCheckInScreenState extends ConsumerState<SelfCheckInScreen> {
                     if (_errorMessage != null)
                       Text(
                         _errorMessage!,
-                        style: const TextStyle(color: Colors.red, fontSize: 13),
+                        style: const TextStyle(
+                          color: AppColors.statusRejected,
+                          fontSize: 13,
+                        ),
                       ),
                     FilledButton.icon(
                       onPressed: (_photoPath == null || _submitting)

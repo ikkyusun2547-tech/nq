@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
@@ -80,8 +81,8 @@ class _LateCheckInScreenState extends ConsumerState<LateCheckInScreen> {
             proofImagePath: _photoPath!,
           );
       setState(() => _successMessage = message);
-    } on ApiException catch (e) {
-      setState(() => _errorMessage = e.message);
+    } on DioException catch (e) {
+      setState(() => _errorMessage = e.asApiException.message);
     } catch (_) {
       setState(() => _errorMessage = 'ส่งคำร้องไม่สำเร็จ กรุณาลองใหม่อีกครั้ง');
     } finally {
@@ -234,7 +235,9 @@ class _LateCheckInScreenState extends ConsumerState<LateCheckInScreen> {
                                     Text(
                                       'แตะเพื่อแนบหลักฐาน',
                                       style: TextStyle(
-                                        color: AppColors.purple700,
+                                        color: isDark
+                                            ? AppColors.purple400
+                                            : AppColors.purple700,
                                         fontWeight: FontWeight.w600,
                                       ),
                                     ),
@@ -246,7 +249,7 @@ class _LateCheckInScreenState extends ConsumerState<LateCheckInScreen> {
                             Text(
                               _errorMessage!,
                               style: const TextStyle(
-                                color: Colors.red,
+                                color: AppColors.statusRejected,
                                 fontSize: 13,
                               ),
                             ),

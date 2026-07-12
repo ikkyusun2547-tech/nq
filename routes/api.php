@@ -13,12 +13,32 @@ use App\Http\Controllers\Api\Student\ExternalActivityController;
 use App\Http\Controllers\Api\Student\LateCheckInController;
 use App\Http\Controllers\Api\Student\SelfCheckInController;
 use App\Http\Controllers\Api\Student\TranscriptController;
+use App\Http\Resources\UserResource;
+use App\Models\User;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/ping', fn () => response()->json(['ok' => true]));
 
 Route::post('/auth/google', [AuthController::class, 'loginWithGoogle'])
     ->middleware('throttle:10,1');
+
+// Mobile equivalent of web.php's /_test-login/{user} — mints a real Sanctum
+// token without Google OAuth, so the app can be previewed as any seeded
+// account (e.g. a student) without needing a real @srru.ac.th Google login.
+// Same local-only gate, same response shape as loginWithGoogle.
+if (app()->environment('local')) {
+    Route::get('/_test-login/{user}', function (User $user) {
+        $token = $user->createToken('flutter-mobile-test')->plainTextToken;
+
+        return response()->json([
+            'token' => $token,
+            'token_type' => 'Bearer',
+            'user' => new UserResource($user->load(['faculty', 'major'])),
+            'profile_completed' => $user->hasCompletedProfile(),
+            'is_admin' => $user->isAdmin(),
+        ]);
+    });
+}
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/auth/logout', [AuthController::class, 'logout']);
