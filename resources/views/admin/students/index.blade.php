@@ -12,21 +12,23 @@
 @endphp
 
 <div class="mx-auto max-w-7xl">
-    <div class="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-3xl brand-gradient p-6 shadow-soft-lg sm:p-8">
-        <div>
-            <p class="text-xs font-medium uppercase tracking-[0.2em] text-violet-200/70">{{ __('กองพัฒนานักศึกษา') }}</p>
-            <h1 class="mt-1 text-xl font-bold text-white sm:text-2xl">{{ __('ข้อมูลนักศึกษาในระบบ') }}</h1>
-        </div>
-        <div class="flex flex-wrap items-center gap-3">
+    <x-brand-header :title="__('ข้อมูลนักศึกษาในระบบ')" :eyebrow="__('กองพัฒนานักศึกษา')">
+        <x-slot:actions>
             <span class="rounded-xl bg-white/10 px-4 py-2 text-sm font-medium text-white shadow-soft ring-1 ring-white/15 backdrop-blur">
                 {{ __('ทั้งหมด :count คน', ['count' => $students->total()]) }}
             </span>
+            @if ($bannedCount > 0)
+                <span class="inline-flex items-center gap-1.5 rounded-xl bg-red-500/20 px-4 py-2 text-sm font-medium text-red-100 shadow-soft ring-1 ring-red-300/30 backdrop-blur">
+                    <svg class="h-3.5 w-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>
+                    {{ __('ระงับการใช้งาน :count คน', ['count' => $bannedCount]) }}
+                </span>
+            @endif
             <a href="{{ route('admin.students.import.create') }}"
                 class="rounded-xl bg-white/10 px-4 py-2 text-sm font-medium text-white shadow-soft ring-1 ring-white/15 backdrop-blur transition-all duration-300 hover:-translate-y-0.5 hover:bg-white/15">
                 {{ __('นำเข้ารายชื่อนักศึกษา') }}
             </a>
-        </div>
-    </div>
+        </x-slot:actions>
+    </x-brand-header>
 
     <form method="GET" action="{{ route('admin.students.index') }}" class="mt-4 space-y-3">
         <div class="flex flex-col gap-3 sm:flex-row">

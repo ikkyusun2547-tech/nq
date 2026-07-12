@@ -6,11 +6,7 @@
 @endphp
 
 <div class="mx-auto max-w-3xl">
-    <div class="mb-6 rounded-3xl brand-gradient p-6 shadow-soft-lg sm:p-8">
-        <p class="text-xs font-medium uppercase tracking-[0.2em] text-violet-200/70">{{ __('กองพัฒนานักศึกษา') }}</p>
-        <h1 class="mt-1 text-xl font-bold text-white sm:text-2xl">{{ __('เกณฑ์การจบการศึกษา') }}</h1>
-        <p class="mt-1.5 text-sm font-light text-violet-100/80">{{ __('กำหนดจำนวนกิจกรรมและชั่วโมงที่นักศึกษาต้องสะสมเพื่อผ่านเกณฑ์') }}</p>
-    </div>
+    <x-brand-header :title="__('เกณฑ์การจบการศึกษา')" :eyebrow="__('กองพัฒนานักศึกษา')" :subtitle="__('กำหนดจำนวนกิจกรรมและชั่วโมงที่นักศึกษาต้องสะสมเพื่อผ่านเกณฑ์')" />
 
     @if ($errors->any())
         <div class="mb-4 rounded-2xl bg-red-50 px-4 py-3 text-sm text-red-700 shadow-soft ring-1 ring-red-100 dark:bg-red-500/10 dark:text-red-400 dark:ring-red-500/20">

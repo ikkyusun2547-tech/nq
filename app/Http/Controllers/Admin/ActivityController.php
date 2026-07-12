@@ -59,7 +59,17 @@ class ActivityController extends Controller
             ->orderByDesc('academic_year')
             ->pluck('academic_year');
 
-        return view('admin.activities.index', compact('activities', 'academicYears', 'academicYear'));
+        // Scoped only by academic year (not search/status/semester) so the
+        // status chips always reflect "everything in this year" regardless
+        // of what the table below is currently filtered to — that's what
+        // makes them useful as one-click filter shortcuts.
+        $statusCounts = Activity::query()
+            ->when($academicYear !== '', fn ($query) => $query->where('academic_year', $academicYear))
+            ->selectRaw('status, count(*) as total')
+            ->groupBy('status')
+            ->pluck('total', 'status');
+
+        return view('admin.activities.index', compact('activities', 'academicYears', 'academicYear', 'statusCounts'));
     }
 
     /**

@@ -40,7 +40,12 @@ class UserManagementController extends Controller
             ->paginate(25)
             ->withQueryString();
 
-        return view('admin.users.index', compact('users', 'role'));
+        // Tab-pill counts — independent of the search box so they always
+        // reflect the true size of each role bucket, not just the current view.
+        $roleCounts = User::selectRaw('role, count(*) as total')->groupBy('role')->pluck('total', 'role');
+        $roleCounts['all'] = $roleCounts->sum();
+
+        return view('admin.users.index', compact('users', 'role', 'roleCounts'));
     }
 
     public function promote(Request $request, User $user)

@@ -31,7 +31,14 @@ class CreditTransferApprovalController extends Controller
             ->paginate(20)
             ->withQueryString();
 
-        return view('admin.credit-transfers.index', compact('requests', 'status'));
+        // Tab-pill counts — independent of search/position filters so they
+        // always reflect the true size of each bucket, not just the current view.
+        $tabCounts = CreditTransferRequest::selectRaw('status, count(*) as total')
+            ->groupBy('status')
+            ->pluck('total', 'status');
+        $tabCounts['all'] = $tabCounts->sum();
+
+        return view('admin.credit-transfers.index', compact('requests', 'status', 'tabCounts'));
     }
 
     public function approve(Request $request, CreditTransferRequest $creditTransferRequest)

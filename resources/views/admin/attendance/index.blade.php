@@ -38,18 +38,15 @@
         },
     }"
 >
-    <div class="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-3xl brand-gradient p-6 text-white shadow-soft-lg sm:p-8">
-        <div>
-            <p class="text-xs font-medium uppercase tracking-[0.2em] text-violet-200/70">
-                Live Event Control
-                @if ($activity->activity_code)
-                    · <span class="font-mono">{{ $activity->activity_code }}</span>
-                @endif
-            </p>
-            <h1 class="mt-1 text-xl font-bold sm:text-2xl">{{ $activity->title }}</h1>
-            <p class="mt-1 text-sm text-violet-100/70">{{ __('ผู้เช็คชื่อทั้งหมด :count คน', ['count' => $attendances->count()]) }}</p>
-        </div>
-        <div class="flex flex-wrap items-center gap-2">
+    <x-brand-header :title="$activity->title" :back="route('admin.activities.index')">
+        <x-slot:eyebrow>
+            Live Event Control
+            @if ($activity->activity_code)
+                · <span class="font-mono">{{ $activity->activity_code }}</span>
+            @endif
+        </x-slot:eyebrow>
+        <x-slot:subtitle>{{ __('ผู้เช็คชื่อทั้งหมด :count คน', ['count' => $attendances->count()]) }}</x-slot:subtitle>
+        <x-slot:actions>
             <button
                 type="button" @click="showMissingModal = true"
                 class="flex items-center gap-2 rounded-xl bg-white/10 px-4 py-2 text-sm font-medium text-white shadow-soft ring-1 ring-white/15 backdrop-blur transition-all duration-300 hover:-translate-y-0.5 hover:bg-white/15"
@@ -64,13 +61,8 @@
                 class="rounded-xl bg-white/10 px-4 py-2 text-sm font-medium text-white shadow-soft ring-1 ring-white/15 backdrop-blur transition-all duration-300 hover:-translate-y-0.5 hover:bg-white/15">
                 Export Excel
             </a>
-            <a href="{{ route('admin.activities.index') }}"
-                class="inline-flex items-center gap-1.5 rounded-xl bg-white/10 px-4 py-2 text-sm font-medium text-white shadow-soft ring-1 ring-white/15 backdrop-blur transition-all duration-300 hover:-translate-y-0.5 hover:bg-white/15">
-                <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/></svg>
-                {{ __('กลับ') }}
-            </a>
-        </div>
-    </div>
+        </x-slot:actions>
+    </x-brand-header>
 
     <!-- Filter bar -->
     <form method="GET" action="{{ route('admin.attendance.index', $activity) }}" class="mt-4 space-y-3">

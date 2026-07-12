@@ -34,7 +34,9 @@ class StudentController extends Controller
 
         $faculties = Faculty::with(['majors' => fn ($query) => $query->orderBy('name_th')])->orderBy('name_th')->get();
 
-        return view('admin.students.index', compact('students', 'faculties'));
+        $bannedCount = User::where('role', 'student')->where('account_status', 'banned')->count();
+
+        return view('admin.students.index', compact('students', 'faculties', 'bannedCount'));
     }
 
     public function show(User $student, ActivityEvaluationService $evaluationService)

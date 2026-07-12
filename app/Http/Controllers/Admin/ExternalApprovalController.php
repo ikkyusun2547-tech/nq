@@ -34,7 +34,14 @@ class ExternalApprovalController extends Controller
             ->paginate(20)
             ->withQueryString();
 
-        return view('admin.external-activities.index', compact('requests', 'status'));
+        // Tab-pill counts — independent of search/category filters so they
+        // always reflect the true size of each bucket, not just the current view.
+        $tabCounts = ExternalActivityRequest::selectRaw('status, count(*) as total')
+            ->groupBy('status')
+            ->pluck('total', 'status');
+        $tabCounts['all'] = $tabCounts->sum();
+
+        return view('admin.external-activities.index', compact('requests', 'status', 'tabCounts'));
     }
 
     public function approve(Request $request, ExternalActivityRequest $externalActivityRequest)

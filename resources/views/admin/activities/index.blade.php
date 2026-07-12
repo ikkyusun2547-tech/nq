@@ -23,18 +23,55 @@
         'ongoing' => __('กำลังดำเนินการ'), 'closed' => __('ปิดกิจกรรม'), 'cancelled' => __('ถูกยกเลิก'),
     ];
     $semesterShort = ['1' => __('เทอม 1'), '2' => __('เทอม 2'), '3' => __('ฤดูร้อน')];
+
+    // Same color families as the status badges above, but as solid chip
+    // treatments (icon-bg + border) matching the dashboard's KPI-card
+    // language, so the two most-visited admin pages read as one system.
+    $statusChipColor = [
+        'draft' => ['bg' => 'bg-slate-50 dark:bg-slate-800/60', 'border' => 'border-slate-200 dark:border-slate-700', 'dot' => 'bg-slate-400'],
+        'open' => ['bg' => 'bg-brand-green-50 dark:bg-brand-green-500/10', 'border' => 'border-brand-green-100 dark:border-brand-green-500/20', 'dot' => 'bg-brand-green-500'],
+        'full' => ['bg' => 'bg-amber-50 dark:bg-amber-500/10', 'border' => 'border-amber-100 dark:border-amber-500/20', 'dot' => 'bg-amber-500'],
+        'ongoing' => ['bg' => 'bg-brand-purple-50 dark:bg-brand-purple-500/10', 'border' => 'border-brand-purple-100 dark:border-brand-purple-500/20', 'dot' => 'bg-brand-purple-500'],
+        'closed' => ['bg' => 'bg-slate-50 dark:bg-slate-800/60', 'border' => 'border-slate-200 dark:border-slate-700', 'dot' => 'bg-slate-400'],
+        'cancelled' => ['bg' => 'bg-red-50 dark:bg-red-500/10', 'border' => 'border-red-100 dark:border-red-500/20', 'dot' => 'bg-red-500'],
+    ];
+    $totalActivityCount = $statusCounts->sum();
 @endphp
 
 <div class="mx-auto max-w-7xl">
-    <div class="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-3xl brand-gradient p-6 shadow-soft-lg sm:p-8">
-        <div>
-            <p class="text-xs font-medium uppercase tracking-[0.2em] text-violet-200/70">{{ __('กองพัฒนานักศึกษา') }}</p>
-            <h1 class="mt-1 text-xl font-bold text-white sm:text-2xl">{{ __('รายการกิจกรรมทั้งหมด') }}</h1>
-        </div>
-        <a href="{{ route('admin.activities.create') }}"
-            class="rounded-xl bg-brand-green-500 px-4 py-2.5 text-sm font-semibold text-brand-purple-950 shadow-soft transition-all duration-300 hover:-translate-y-0.5 hover:bg-brand-green-400 hover:shadow-lg">
-            + {{ __('สร้างกิจกรรม') }}
+    <x-brand-header :title="__('รายการกิจกรรมทั้งหมด')" :eyebrow="__('กองพัฒนานักศึกษา')">
+        <x-slot:actions>
+            <a href="{{ route('admin.activities.create') }}"
+                class="inline-flex items-center gap-1.5 rounded-xl bg-brand-green-500 px-4 py-2.5 text-sm font-semibold text-brand-purple-950 shadow-soft transition-all duration-300 hover:-translate-y-0.5 hover:bg-brand-green-400 hover:shadow-lg">
+                <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+                {{ __('สร้างกิจกรรม') }}
+            </a>
+        </x-slot:actions>
+    </x-brand-header>
+
+    <!-- Status chips: at-a-glance counts, doubling as one-click filters -->
+    <div class="flex flex-wrap gap-2">
+        <a href="{{ route('admin.activities.index', array_filter(['academic_year' => $academicYear])) }}"
+            @class([
+                'inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-xs font-medium shadow-soft transition hover:-translate-y-0.5',
+                'border-brand-purple-300 bg-brand-purple-100 text-brand-purple-800 dark:border-brand-purple-500/40 dark:bg-brand-purple-500/20 dark:text-brand-purple-300' => ! request('status'),
+                'border-slate-200 bg-white text-slate-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300' => request('status'),
+            ])>
+            {{ __('ทั้งหมด') }} <span class="tabular-nums font-semibold">{{ number_format($totalActivityCount) }}</span>
         </a>
+        @foreach ($statusLabel as $statusKey => $label)
+            @php $count = $statusCounts[$statusKey] ?? 0; @endphp
+            <a href="{{ route('admin.activities.index', array_filter(['academic_year' => $academicYear, 'status' => $statusKey])) }}"
+                @class([
+                    'inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-xs font-medium shadow-soft transition hover:-translate-y-0.5',
+                    $statusChipColor[$statusKey]['bg'], $statusChipColor[$statusKey]['border'],
+                    'text-slate-800 dark:text-slate-100 ring-1 ring-inset ring-black/5' => request('status') === $statusKey,
+                    'text-slate-500 dark:text-slate-400' => request('status') !== $statusKey,
+                ])>
+                <span class="h-1.5 w-1.5 shrink-0 rounded-full {{ $statusChipColor[$statusKey]['dot'] }}"></span>
+                {{ $label }} <span class="tabular-nums font-semibold">{{ number_format($count) }}</span>
+            </a>
+        @endforeach
     </div>
 
     <form method="GET" action="{{ route('admin.activities.index') }}" class="mt-4 space-y-3">

@@ -185,9 +185,9 @@
 
     @unless ($isAdmin)
         @include('partials.mobile-tab-bar')
+        @include('partials.pwa-install-banner')
     @endunless
 
-    @include('partials.pwa-install-banner')
     @stack('scripts')
 </body>
 </html>

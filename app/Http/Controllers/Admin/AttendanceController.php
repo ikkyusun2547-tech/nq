@@ -179,12 +179,27 @@ class AttendanceController extends Controller
             ->paginate(20)
             ->withQueryString();
 
-        return view('admin.attendance.flagged', compact('attendances', 'status'));
+        // Counts for the tab pills — independent of the search box so the
+        // numbers always describe "everything in that bucket", not just
+        // what's currently filtered into view.
+        $tabCounts = [
+            'flagged' => Attendance::where('status', 'flagged')->count(),
+            'rejected' => Attendance::where('status', 'rejected')->count(),
+        ];
+        $tabCounts['all'] = $tabCounts['flagged'] + $tabCounts['rejected'];
+
+        return view('admin.attendance.flagged', compact('attendances', 'status', 'tabCounts'));
     }
 
     public function approve(Request $request, Attendance $attendance)
     {
-        abort_if($attendance->status !== 'flagged', 422, __('รายการนี้ถูกดำเนินการไปแล้ว'));
+        // A plain 422 abort here would render Laravel's raw exception page
+        // on a normal form POST (this action isn't submitted via fetch/XHR)
+        // — a graceful redirect-with-flash keeps a double-click or
+        // two-admins-same-item race from ever showing a crash screen.
+        if ($attendance->status !== 'flagged') {
+            return back()->with('error', __('รายการนี้ถูกดำเนินการไปแล้ว'));
+        }
 
         $attendance->update([
             'status' => 'auto_approved',
@@ -199,7 +214,9 @@ class AttendanceController extends Controller
 
     public function reject(Request $request, Attendance $attendance)
     {
-        abort_if($attendance->status !== 'flagged', 422, __('รายการนี้ถูกดำเนินการไปแล้ว'));
+        if ($attendance->status !== 'flagged') {
+            return back()->with('error', __('รายการนี้ถูกดำเนินการไปแล้ว'));
+        }
 
         $validated = $request->validate([
             'reject_reason' => ['required', 'string', 'max:500'],

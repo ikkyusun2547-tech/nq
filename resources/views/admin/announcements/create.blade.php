@@ -2,11 +2,7 @@
 
 @section('content')
 <div class="mx-auto max-w-2xl">
-    <div class="mb-6 rounded-3xl brand-gradient p-6 shadow-soft-lg sm:p-8">
-        <p class="text-xs font-medium uppercase tracking-[0.2em] text-violet-200/70">{{ __('กองพัฒนานักศึกษา') }}</p>
-        <h1 class="mt-1 text-xl font-bold text-white sm:text-2xl">{{ __('ส่งประกาศถึงนักศึกษา') }}</h1>
-        <p class="mt-1.5 text-sm font-light text-violet-100/80">{{ __('ข้อความจะไปแสดงในศูนย์การแจ้งเตือนและ push notification ของนักศึกษาที่ตรงเงื่อนไข') }}</p>
-    </div>
+    <x-brand-header :title="__('ส่งประกาศถึงนักศึกษา')" :eyebrow="__('กองพัฒนานักศึกษา')" :subtitle="__('ข้อความจะไปแสดงในศูนย์การแจ้งเตือนและ push notification ของนักศึกษาที่ตรงเงื่อนไข')" />
 
     @if ($errors->any())
         <div class="mb-4 rounded-2xl bg-red-50 px-4 py-3 text-sm text-red-700 shadow-soft ring-1 ring-red-100 dark:bg-red-500/10 dark:text-red-400 dark:ring-red-500/20">

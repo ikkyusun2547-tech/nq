@@ -2,16 +2,17 @@
 
 @section('content')
 <div class="mx-auto max-w-5xl">
-    <div class="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-3xl brand-gradient p-6 shadow-soft-lg sm:p-8">
-        <div>
-            <p class="text-xs font-medium uppercase tracking-[0.2em] text-violet-200/70">{{ __('กองพัฒนานักศึกษา') }}</p>
-            <h1 class="mt-1 text-xl font-bold text-white sm:text-2xl">{{ __('คณะและสาขาวิชา') }}</h1>
-        </div>
-        <a href="{{ route('admin.faculties.create') }}"
-            class="rounded-xl bg-white/10 px-4 py-2 text-sm font-medium text-white shadow-soft ring-1 ring-white/15 backdrop-blur transition-all duration-300 hover:-translate-y-0.5 hover:bg-white/15">
-            {{ __('เพิ่มคณะใหม่') }}
-        </a>
-    </div>
+    <x-brand-header :title="__('คณะและสาขาวิชา')" :eyebrow="__('กองพัฒนานักศึกษา')">
+        <x-slot:actions>
+            <span class="rounded-xl bg-white/10 px-4 py-2 text-sm font-medium text-white shadow-soft ring-1 ring-white/15 backdrop-blur">
+                {{ __(':count คณะ', ['count' => $faculties->count()]) }}
+            </span>
+            <a href="{{ route('admin.faculties.create') }}"
+                class="rounded-xl bg-white/10 px-4 py-2 text-sm font-medium text-white shadow-soft ring-1 ring-white/15 backdrop-blur transition-all duration-300 hover:-translate-y-0.5 hover:bg-white/15">
+                {{ __('เพิ่มคณะใหม่') }}
+            </a>
+        </x-slot:actions>
+    </x-brand-header>
 
     <div class="overflow-x-auto rounded-2xl glass-card shadow-soft">
         <table class="min-w-full text-sm">

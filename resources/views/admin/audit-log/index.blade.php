@@ -10,14 +10,20 @@
 @endphp
 
 <div class="mx-auto max-w-6xl">
-    <div class="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-3xl brand-gradient p-6 shadow-soft-lg sm:p-8">
-        <div>
-            <p class="text-xs font-medium uppercase tracking-[0.2em] text-violet-200/70">{{ __('กองพัฒนานักศึกษา') }}</p>
-            <h1 class="mt-1 text-xl font-bold text-white sm:text-2xl">{{ __('ประวัติการอนุมัติ/ปฏิเสธ') }}</h1>
-        </div>
-    </div>
+    <x-brand-header :title="__('ประวัติการอนุมัติ/ปฏิเสธ')" :eyebrow="__('กองพัฒนานักศึกษา')">
+        <x-slot:actions>
+            <span class="inline-flex items-center gap-1.5 rounded-xl bg-brand-green-500/20 px-4 py-2 text-sm font-medium text-brand-green-100 shadow-soft ring-1 ring-brand-green-300/30 backdrop-blur">
+                <svg class="h-3.5 w-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+                {{ __('อนุมัติ :count', ['count' => number_format($actionCounts['approved'])]) }}
+            </span>
+            <span class="inline-flex items-center gap-1.5 rounded-xl bg-red-500/20 px-4 py-2 text-sm font-medium text-red-100 shadow-soft ring-1 ring-red-300/30 backdrop-blur">
+                <svg class="h-3.5 w-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                {{ __('ปฏิเสธ :count', ['count' => number_format($actionCounts['rejected'])]) }}
+            </span>
+        </x-slot:actions>
+    </x-brand-header>
 
-    <form method="GET" action="{{ route('admin.audit-log.index') }}" class="mb-4 max-w-xs">
+    <form method="GET" action="{{ route('admin.audit-log.index') }}" class="mb-4 mt-4 max-w-xs">
         @php $reviewerOptions = $reviewers->mapWithKeys(fn ($u) => [$u->id => $u->name_thai ?? $u->name])->all(); @endphp
         <x-premium-select
             name="reviewer_id" :options="$reviewerOptions" :selected="request('reviewer_id')"

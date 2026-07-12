@@ -2,13 +2,7 @@
 
 @section('content')
 <div class="mx-auto max-w-3xl" x-data="{ addingMajor: false, editingMajorId: null }">
-    <div class="mb-6 rounded-3xl brand-gradient p-6 shadow-soft-lg sm:p-8">
-        <a href="{{ route('admin.faculties.index') }}" class="mb-3 inline-flex items-center gap-1 text-xs font-medium text-violet-200/70 transition-colors hover:text-white">
-            <svg class="h-3.5 w-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/></svg>
-            {{ __('กลับรายชื่อคณะ') }}
-        </a>
-        <h1 class="text-xl font-bold text-white sm:text-2xl">{{ $faculty->name_th }}</h1>
-    </div>
+    <x-brand-header :title="$faculty->name_th" :back="route('admin.faculties.index')" />
 
     @if ($errors->any())
         <div class="mb-4 rounded-2xl bg-red-50 px-4 py-3 text-sm text-red-700 shadow-soft ring-1 ring-red-100 dark:bg-red-500/10 dark:text-red-400 dark:ring-red-500/20">

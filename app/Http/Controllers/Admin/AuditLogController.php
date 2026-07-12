@@ -79,6 +79,13 @@ class AuditLogController extends Controller
             ->sortByDesc('reviewed_at')
             ->values();
 
+        // Counted from the same (reviewer-filtered) collection the table
+        // below paginates, so the summary always matches what's on screen.
+        $actionCounts = [
+            'approved' => $entries->where('action', 'approved')->count(),
+            'rejected' => $entries->where('action', 'rejected')->count(),
+        ];
+
         $page = LengthAwarePaginator::resolveCurrentPage();
         $entries = new LengthAwarePaginator(
             $entries->forPage($page, self::PER_PAGE)->values(),
@@ -98,6 +105,6 @@ class AuditLogController extends Controller
             ->sortBy(fn ($u) => $u->name_thai ?? $u->name)
             ->values();
 
-        return view('admin.audit-log.index', compact('entries', 'reviewers'));
+        return view('admin.audit-log.index', compact('entries', 'reviewers', 'actionCounts'));
     }
 }

@@ -33,27 +33,22 @@
         },
     }"
 >
-    <div class="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-3xl brand-gradient p-6 shadow-soft-lg sm:p-8">
-        <div>
-            <p class="text-xs font-medium uppercase tracking-[0.2em] text-violet-200/70">{{ __('กองพัฒนานักศึกษา') }}</p>
-            <h1 class="mt-1 text-xl font-bold text-white sm:text-2xl">{{ __('การเช็คชื่อติดธงแดง') }}</h1>
-        </div>
-        <a href="{{ route('admin.dashboard') }}"
-            class="inline-flex items-center gap-1.5 rounded-xl bg-white/10 px-4 py-2 text-sm font-medium text-white shadow-soft ring-1 ring-white/15 backdrop-blur transition-all duration-300 hover:-translate-y-0.5 hover:bg-white/15">
-            <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/></svg>
-            {{ __('กลับแดชบอร์ด') }}
-        </a>
-    </div>
+    <x-brand-header :title="__('การเช็คชื่อติดธงแดง')" :eyebrow="__('กองพัฒนานักศึกษา')" :back="route('admin.dashboard')" />
 
     <div class="mb-4 mt-4 flex flex-wrap gap-2 text-sm">
         @foreach ($tabs as $value => $label)
             <a href="{{ route('admin.attendance.flagged', array_merge(request()->only(['search']), ['status' => $value])) }}"
                 @class([
-                    'rounded-full px-3.5 py-1.5 font-medium transition-all duration-200',
+                    'inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 font-medium transition-all duration-200',
                     'bg-gradient-to-r from-brand-purple-600 to-brand-purple-500 text-white shadow-soft' => $status === $value,
                     'bg-white text-slate-500 shadow-soft ring-1 ring-slate-200 hover:-translate-y-0.5 hover:text-brand-purple-600 dark:bg-slate-900 dark:text-slate-400 dark:ring-slate-700 dark:hover:text-brand-purple-400' => $status !== $value,
                 ])>
                 {{ $label }}
+                <span @class([
+                    'rounded-full px-1.5 py-0.5 text-[0.68rem] font-semibold tabular-nums',
+                    'bg-white/20' => $status === $value,
+                    'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400' => $status !== $value,
+                ])>{{ number_format($tabCounts[$value] ?? 0) }}</span>
             </a>
         @endforeach
     </div>
