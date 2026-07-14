@@ -3,11 +3,24 @@
 namespace App\Notifications;
 
 use App\Models\Activity;
+use App\Notifications\Channels\FcmChannel;
 
 class ActivityMissed extends BaseNotification
 {
     public function __construct(private Activity $activity)
     {
+    }
+
+    /**
+     * No 'mail' here (unlike BaseNotification::via()) — same reasoning as
+     * ActivityCreated::via(): this fans out to every student who missed the
+     * activity in a single admin request (see
+     * Admin\ActivityController::notifyMissingStudents) and can be hundreds
+     * for a university-wide activity.
+     */
+    public function via(object $notifiable): array
+    {
+        return ['database', FcmChannel::class];
     }
 
     public function toDatabase(object $notifiable): array

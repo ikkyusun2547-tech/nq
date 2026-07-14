@@ -3,11 +3,23 @@
 namespace App\Notifications;
 
 use App\Models\Activity;
+use App\Notifications\Channels\FcmChannel;
 
 class ActivityUpdated extends BaseNotification
 {
     public function __construct(private Activity $activity)
     {
+    }
+
+    /**
+     * No 'mail' here (unlike BaseNotification::via()) — same reasoning as
+     * ActivityCreated::via(): this fans out to every eligible student in a
+     * single admin request and can be hundreds for a university-wide
+     * activity.
+     */
+    public function via(object $notifiable): array
+    {
+        return ['database', FcmChannel::class];
     }
 
     public function toDatabase(object $notifiable): array
