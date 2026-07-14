@@ -5,14 +5,15 @@ namespace App\Http\Controllers\Api\Student;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\DashboardFeedItemResource;
 use App\Http\Resources\DashboardSummaryResource;
-use App\Models\CreditTransferRequest;
-use App\Models\LateCheckInRequest;
 use App\Services\ActivityEvaluationService;
+use App\Services\StudentActivityFeed;
 use Illuminate\Http\Request;
 
 class DashboardController extends Controller
 {
-    public function show(Request $request, ActivityEvaluationService $evaluator)
+    private const PREVIEW_LIMIT = 5;
+
+    public function show(Request $request, ActivityEvaluationService $evaluator, StudentActivityFeed $feed)
     {
         $user = $request->user();
 
@@ -20,132 +21,21 @@ class DashboardController extends Controller
 
         $summary = $evaluator->summarize($user);
 
-        $checkins = $user->attendances()
-            ->with('activity')
-            ->whereIn('status', ['auto_approved', 'flagged'])
-            ->get()
-            ->map(fn ($att) => (object) [
-                'title' => $att->activity->title,
-                'date' => $att->checkin_time,
-                'hours' => $att->credited_hours ?? $att->activity->credit_hours,
-                'type' => 'checkin',
-                'is_approved' => $att->status === 'auto_approved',
-                'activity_id' => $att->activity_id,
-                'checkin_method' => $att->checkin_method,
-                'location_name' => $att->activity->location_name,
-                'photo_url' => asset('storage/'.$att->photo_path),
-                'flag_reason' => $att->status === 'flagged' ? $att->flagReasonLabel() : null,
-            ]);
-
-        $externalRequests = $user->externalActivityRequests()
-            ->whereIn('status', ['approved', 'pending'])
-            ->get()
-            ->map(fn ($ext) => (object) [
-                'title' => $ext->title,
-                'date' => $ext->activity_date,
-                'hours' => $ext->hours_credited,
-                'type' => 'external',
-                'is_approved' => $ext->status === 'approved',
-            ]);
-
-        $creditTransfers = $user->creditTransferRequests()
-            ->whereIn('status', ['approved', 'pending'])
-            ->get()
-            ->map(fn ($credit) => (object) [
-                'title' => __(CreditTransferRequest::POSITION_LABELS[$credit->position]),
-                'date' => $credit->created_at,
-                'hours' => $credit->hours_credited,
-                'type' => 'credit_transfer',
-                'is_approved' => $credit->status === 'approved',
-            ]);
-
-        $items = $checkins->concat($externalRequests)->concat($creditTransfers)->sortByDesc('date')->values();
-
-        $approvedActivities = $items->where('is_approved', true)->take(5)->values();
-        $pendingActivities = $items->where('is_approved', false)->take(5)->values();
-
-        $rejectedExternal = $user->externalActivityRequests()
-            ->where('status', 'rejected')
-            ->get()
-            ->reject(function ($ext) use ($user) {
-                return $user->externalActivityRequests()
-                    ->where('title', $ext->title)
-                    ->where('organization', $ext->organization)
-                    ->whereDate('activity_date', $ext->activity_date)
-                    ->whereIn('status', ['pending', 'approved'])
-                    ->exists();
-            })
-            ->map(fn ($ext) => (object) [
-                'title' => $ext->title,
-                'date' => $ext->activity_date,
-                'type' => 'external',
-                'reject_reason' => $ext->reject_reason,
-            ]);
-
-        $rejectedLateCheckins = LateCheckInRequest::where('user_id', $user->id)
-            ->where('status', 'rejected')
-            ->whereNotIn('activity_id', function ($query) use ($user) {
-                $query->select('activity_id')
-                    ->from('late_check_in_requests')
-                    ->where('user_id', $user->id)
-                    ->whereIn('status', ['pending', 'approved']);
-            })
-            ->with('activity')
-            ->get()
-            ->map(fn ($req) => (object) [
-                'title' => $req->activity->title,
-                'date' => $req->created_at,
-                'type' => 'checkin',
-                'activity_id' => $req->activity_id,
-                'checkin_method' => 'late_request',
-                'reject_reason' => $req->reject_reason,
-            ]);
-
-        // A real-time/self-report check-in the admin rejected — distinct
-        // from a rejected LateCheckInRequest above (see the web
-        // controller's docblock for the same code, kept in sync by design).
-        $rejectedAttendances = $user->attendances()
-            ->where('status', 'rejected')
-            ->with('activity')
-            ->get()
-            ->map(fn ($att) => (object) [
-                'title' => $att->activity->title,
-                'date' => $att->checkin_time,
-                'type' => 'checkin',
-                'activity_id' => $att->activity_id,
-                'checkin_method' => $att->checkin_method,
-                'reject_reason' => $att->reject_reason,
-            ]);
-
-        $rejectedCreditTransfers = $user->creditTransferRequests()
-            ->where('status', 'rejected')
-            ->get()
-            ->reject(function ($credit) use ($user) {
-                return $user->creditTransferRequests()
-                    ->where('academic_year', $credit->academic_year)
-                    ->whereIn('status', ['pending', 'approved'])
-                    ->exists();
-            })
-            ->map(fn ($credit) => (object) [
-                'title' => __(CreditTransferRequest::POSITION_LABELS[$credit->position]),
-                'date' => $credit->created_at,
-                'type' => 'credit_transfer',
-                'reject_reason' => $credit->reject_reason,
-            ]);
-
-        $rejectedActivities = $rejectedExternal
-            ->concat($rejectedLateCheckins)
-            ->concat($rejectedAttendances)
-            ->concat($rejectedCreditTransfers)
-            ->sortByDesc('date')
-            ->take(5)
-            ->values();
+        $items = $feed->approvedAndPending($user);
+        $approved = $items->where('is_approved', true);
+        $pending = $items->where('is_approved', false);
+        $rejected = $feed->rejected($user);
 
         return response()->json([
             'summary' => new DashboardSummaryResource($summary),
-            'approved' => DashboardFeedItemResource::collection($approvedActivities),
-            'pending' => DashboardFeedItemResource::collection($pendingActivities),
-            'rejected' => DashboardFeedItemResource::collection($rejectedActivities),
+            'approved' => DashboardFeedItemResource::collection($approved->take(self::PREVIEW_LIMIT)->values()),
+            'pending' => DashboardFeedItemResource::collection($pending->take(self::PREVIEW_LIMIT)->values()),
+            'rejected' => DashboardFeedItemResource::collection($rejected->take(self::PREVIEW_LIMIT)->values()),
+            // "ดูทั้งหมด" only makes sense once the preview is actually hiding
+            // something — see the mobile/web activity-history screens.
+            'has_more_approved' => $approved->count() > self::PREVIEW_LIMIT,
+            'has_more_pending' => $pending->count() > self::PREVIEW_LIMIT,
+            'has_more_rejected' => $rejected->count() > self::PREVIEW_LIMIT,
         ]);
     }
 }

@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\FacultyController;
 use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\ProfileSetupController;
 use App\Http\Controllers\Api\Student\ActivityController;
+use App\Http\Controllers\Api\Student\ActivityHistoryController;
 use App\Http\Controllers\Api\Student\CheckInController;
 use App\Http\Controllers\Api\Student\CreditTransferController;
 use App\Http\Controllers\Api\Student\DashboardController;
@@ -14,6 +15,7 @@ use App\Http\Controllers\Api\Student\LateCheckInController;
 use App\Http\Controllers\Api\Student\SelfCheckInController;
 use App\Http\Controllers\Api\Student\TranscriptController;
 use App\Http\Resources\UserResource;
+use App\Models\Activity;
 use App\Models\User;
 use Illuminate\Support\Facades\Route;
 
@@ -58,8 +60,12 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::middleware('api.profile.completed')->group(function () {
             Route::get('/dashboard', [DashboardController::class, 'show']);
+            Route::get('/activity-history', [ActivityHistoryController::class, 'index']);
             Route::get('/activities', [ActivityController::class, 'index']);
             Route::post('/checkin', [CheckInController::class, 'store']);
+            Route::get('/activities/{activity}/checkin-requirements', function (Activity $activity) {
+                return response()->json(['requires_gps' => $activity->requiresGpsCheck()]);
+            });
 
             Route::post('/activities/{activity}/self-checkin', [SelfCheckInController::class, 'store']);
 

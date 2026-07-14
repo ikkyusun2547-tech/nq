@@ -128,6 +128,11 @@
     <div class="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-3">
         <!-- Approved check-ins -->
         <x-section-card icon="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" :title="__('กิจกรรมที่อนุมัติแล้ว')">
+            @if ($hasMoreApproved)
+                <x-slot:action>
+                    <a href="{{ route('activity-history.index', ['status' => 'approved']) }}" class="text-xs font-medium text-brand-purple-600 hover:underline dark:text-brand-purple-400">{{ __('ดูทั้งหมด') }} &rarr;</a>
+                </x-slot:action>
+            @endif
             @forelse ($approvedActivities as $item)
                 @php
                     $rowClass = 'flex w-full items-center justify-between gap-3 rounded-xl bg-brand-green-50/50 px-3.5 py-2.5 text-left transition-colors hover:bg-brand-green-100/60 dark:bg-brand-green-500/5 dark:hover:bg-brand-green-500/10';
@@ -173,6 +178,11 @@
 
         <!-- Pending review -->
         <x-section-card icon="M12 6.75V12l3.75 1.875M21 12a9 9 0 11-18 0 9 9 0 0118 0z" :title="__('กิจกรรมที่ลงแล้วรออนุมัติ')">
+            @if ($hasMorePending)
+                <x-slot:action>
+                    <a href="{{ route('activity-history.index', ['status' => 'pending']) }}" class="text-xs font-medium text-brand-purple-600 hover:underline dark:text-brand-purple-400">{{ __('ดูทั้งหมด') }} &rarr;</a>
+                </x-slot:action>
+            @endif
             @forelse ($pendingActivities as $item)
                 <div class="flex items-center justify-between gap-3 rounded-xl bg-amber-50/50 px-3.5 py-2.5 dark:bg-amber-500/5">
                     <div class="min-w-0">
@@ -187,6 +197,13 @@
                         </p>
                         @if (! empty($item->flag_reason))
                             <p class="mt-1 truncate text-xs text-amber-600 dark:text-amber-400">{{ __('เหตุผลที่ต้องตรวจสอบ:') }} {{ $item->flag_reason }}</p>
+                            @if (config('support.email'))
+                                <a href="mailto:{{ config('support.email') }}?subject={{ urlencode(__('สอบถามเรื่องการเช็คชื่อติดธงแดง: :title', ['title' => $item->title])) }}"
+                                    class="mt-1 inline-flex items-center gap-1 text-xs font-medium text-brand-purple-600 hover:underline dark:text-brand-purple-400">
+                                    <svg class="h-3 w-3 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"/></svg>
+                                    {{ __('ติดต่อเจ้าหน้าที่') }}
+                                </a>
+                            @endif
                         @endif
                     </div>
                     <span class="shrink-0 text-xs font-medium text-amber-600 dark:text-amber-400">{{ __(':hours ชม.', ['hours' => $item->hours]) }}</span>
@@ -198,6 +215,11 @@
 
         <!-- Rejected -->
         <x-section-card icon="M9 9l6 6m0-6l-6 6M21 12a9 9 0 11-18 0 9 9 0 0118 0z" :title="__('กิจกรรมที่ถูกปฏิเสธ')">
+            @if ($hasMoreRejected)
+                <x-slot:action>
+                    <a href="{{ route('activity-history.index', ['status' => 'rejected']) }}" class="text-xs font-medium text-brand-purple-600 hover:underline dark:text-brand-purple-400">{{ __('ดูทั้งหมด') }} &rarr;</a>
+                </x-slot:action>
+            @endif
             @forelse ($rejectedActivities as $item)
                 @php
                     $rejectedRowClass = 'block w-full rounded-xl bg-red-50/50 px-3.5 py-2.5 text-left transition-colors hover:bg-red-100/60 dark:bg-red-500/5 dark:hover:bg-red-500/10';
@@ -229,6 +251,17 @@
                     </p>
                     @if ($item->reject_reason)
                         <p class="mt-1 truncate text-xs text-red-500 dark:text-red-400">{{ __('เหตุผล:') }} {{ $item->reject_reason }}</p>
+                        @if (config('support.email'))
+                            {{-- A plain <a> would be an invalid nested anchor when
+                                 $rejectedHref wraps this whole row in <a> already —
+                                 @click.stop keeps this tap from also triggering the
+                                 row's own resubmission-page link underneath it. --}}
+                            <span @click.stop="window.location.href = 'mailto:{{ config('support.email') }}?subject={{ urlencode(__('สอบถามเรื่องคำร้องที่ถูกปฏิเสธ: :title', ['title' => $item->title])) }}'"
+                                class="mt-1 inline-flex cursor-pointer items-center gap-1 text-xs font-medium text-brand-purple-600 hover:underline dark:text-brand-purple-400">
+                                <svg class="h-3 w-3 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"/></svg>
+                                {{ __('ติดต่อเจ้าหน้าที่') }}
+                            </span>
+                        @endif
                     @endif
                 </{{ $rejectedHref ? 'a' : 'div' }}>
             @empty

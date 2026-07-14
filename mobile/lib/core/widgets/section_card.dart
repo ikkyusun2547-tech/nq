@@ -13,11 +13,16 @@ class SectionCard extends StatelessWidget {
     required this.icon,
     required this.title,
     required this.children,
+    this.action,
   });
 
   final IconData icon;
   final String title;
   final List<Widget> children;
+
+  /// Optional trailing widget in the header row — e.g. a "ดูทั้งหมด" button,
+  /// mirroring the web x-section-card component's action slot.
+  final Widget? action;
 
   @override
   Widget build(BuildContext context) {
@@ -61,6 +66,7 @@ class SectionCard extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
+                ?action,
               ],
             ),
           ),

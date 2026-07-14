@@ -11,7 +11,9 @@ import '../../core/models/app_user.dart';
 import '../../core/models/dashboard.dart';
 import '../../core/providers.dart';
 import '../../core/theme.dart';
+import '../../core/widgets/feed_item.dart';
 import '../../core/widgets/section_card.dart';
+import '../activity_history/activity_history_screen.dart';
 import '../auth/auth_controller.dart';
 import '../checkin/checkin_flow_screen.dart';
 import '../hour_requests/hour_requests_screen.dart';
@@ -125,14 +127,29 @@ class DashboardScreen extends ConsumerWidget {
                       ),
                       const _TranscriptActionsCard(),
                       if (data.pending.isNotEmpty)
-                        _FeedSection(title: 'รอตรวจสอบ', items: data.pending),
+                        _FeedSection(
+                          title: 'รอตรวจสอบ',
+                          items: data.pending,
+                          onViewAll: data.hasMorePending
+                              ? () => _openHistory(context, 'pending')
+                              : null,
+                        ),
                       if (data.approved.isNotEmpty)
                         _FeedSection(
                           title: 'อนุมัติแล้ว',
                           items: data.approved,
+                          onViewAll: data.hasMoreApproved
+                              ? () => _openHistory(context, 'approved')
+                              : null,
                         ),
                       if (data.rejected.isNotEmpty)
-                        _FeedSection(title: 'ถูกปฏิเสธ', items: data.rejected),
+                        _FeedSection(
+                          title: 'ถูกปฏิเสธ',
+                          items: data.rejected,
+                          onViewAll: data.hasMoreRejected
+                              ? () => _openHistory(context, 'rejected')
+                              : null,
+                        ),
                     ],
                   ),
                 ),
@@ -143,6 +160,14 @@ class DashboardScreen extends ConsumerWidget {
       ),
     );
   }
+}
+
+void _openHistory(BuildContext context, String status) {
+  Navigator.of(context).push(
+    MaterialPageRoute(
+      builder: (_) => ActivityHistoryScreen(initialStatus: status),
+    ),
+  );
 }
 
 /// Identifies whose dashboard this is at a glance — one unified glass card:
@@ -532,57 +557,19 @@ class _ProgressRing extends StatelessWidget {
 }
 
 class _FeedSection extends StatelessWidget {
-  const _FeedSection({required this.title, required this.items});
+  const _FeedSection({
+    required this.title,
+    required this.items,
+    this.onViewAll,
+  });
 
   final String title;
   final List<DashboardFeedItem> items;
 
-  static const _typeIcons = {
-    'checkin': Icons.qr_code_scanner,
-    'external': Icons.groups_outlined,
-    'credit_transfer': Icons.swap_horiz,
-  };
-
-  // Matches dashboard.blade.php's "· <type>" annotation next to the date.
-  static String? _typeLabel(DashboardFeedItem item) => switch (item.type) {
-    'external' => 'กิจกรรมเทียบชั่วโมง',
-    'credit_transfer' => 'เทียบโอนตำแหน่ง',
-    _ => item.checkinMethod == 'late_request' ? 'เช็คชื่อย้อนหลัง' : null,
-  };
-
-  void _onTap(BuildContext context, DashboardFeedItem item) {
-    switch (item.type) {
-      case 'external':
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (_) =>
-                const HourRequestsScreen(initialTab: 0, standalone: true),
-          ),
-        );
-        return;
-      case 'credit_transfer':
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (_) =>
-                const HourRequestsScreen(initialTab: 1, standalone: true),
-          ),
-        );
-        return;
-    }
-
-    // Plain check-ins (realtime/self-report) carry a selfie + location to
-    // show, same as the web dashboard's detail popup. Late check-ins don't
-    // have a mobile equivalent of the web's edit-request page yet, so they
-    // stay non-interactive here.
-    if (item.checkinMethod != 'late_request' && item.photoUrl != null) {
-      showModalBottomSheet(
-        context: context,
-        showDragHandle: true,
-        isScrollControlled: true,
-        builder: (_) => _CheckinDetailSheet(item: item),
-      );
-    }
-  }
+  /// Set only when the API says this bucket has more than the 5 rows shown
+  /// here (see DashboardData.hasMoreApproved/Pending/Rejected) — pushes the
+  /// full "ดูทั้งหมด" history screen for this status.
+  final VoidCallback? onViewAll;
 
   @override
   Widget build(BuildContext context) {
@@ -595,14 +582,22 @@ class _FeedSection extends StatelessWidget {
     return SectionCard(
       icon: Icons.checklist_outlined,
       title: title,
+      action: onViewAll == null
+          ? null
+          : TextButton(
+              onPressed: onViewAll,
+              child: const Text('ดูทั้งหมด', style: TextStyle(fontSize: 12)),
+            ),
       children: items
           .map(
-            (item) => _FeedRow(
+            (item) => FeedRow(
               item: item,
               statusColor: statusColor,
-              icon: _typeIcons[item.type] ?? Icons.event_note,
-              typeLabel: _typeLabel(item),
-              onTap: title == 'รอตรวจสอบ' ? null : () => _onTap(context, item),
+              icon: feedTypeIcon(item.type),
+              typeLabel: feedTypeLabel(item),
+              onTap: title == 'รอตรวจสอบ'
+                  ? null
+                  : () => openFeedItemDetail(context, item),
             ),
           )
           .toList(),
@@ -610,190 +605,6 @@ class _FeedSection extends StatelessWidget {
   }
 }
 
-class _FeedRow extends StatelessWidget {
-  const _FeedRow({
-    required this.item,
-    required this.statusColor,
-    required this.icon,
-    required this.typeLabel,
-    required this.onTap,
-  });
-
-  final DashboardFeedItem item;
-  final Color statusColor;
-  final IconData icon;
-  final String? typeLabel;
-  final VoidCallback? onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final subtitle = [
-      item.rejectReason ?? item.date,
-      if (typeLabel != null) typeLabel,
-    ].whereType<String>().join(' · ');
-
-    // Matches dashboard.blade.php: a flagged check-in's reason (GPS out of
-    // bounds, device sharing suspected, ...) shows on its own line, not
-    // folded into the date/type subtitle above.
-    final flagReason = item.flagReason;
-
-    final row = Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Container(
-          width: 32,
-          height: 32,
-          decoration: BoxDecoration(
-            color: statusColor.withValues(alpha: 0.12),
-            shape: BoxShape.circle,
-          ),
-          child: Icon(icon, size: 16, color: statusColor),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                item.title ?? '',
-                style: const TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                ),
-                overflow: TextOverflow.ellipsis,
-              ),
-              if (subtitle.isNotEmpty)
-                Text(
-                  subtitle,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: context.surfaceColors.textSecondary,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              if (flagReason != null)
-                Padding(
-                  padding: const EdgeInsets.only(top: 2),
-                  child: Text(
-                    'เหตุผลที่ต้องตรวจสอบ: $flagReason',
-                    style: const TextStyle(
-                      fontSize: 11.5,
-                      color: AppColors.statusPending,
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-            ],
-          ),
-        ),
-        if (item.hours != null)
-          Text(
-            '${item.hours} ชม.',
-            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
-          ),
-      ],
-    );
-
-    if (onTap == null) return row;
-
-    return InkWell(
-      borderRadius: BorderRadius.circular(12),
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 2),
-        child: row,
-      ),
-    );
-  }
-}
-
-/// The mobile equivalent of the web dashboard's Alpine-driven detail popup —
-/// selfie, check-in time, location, and hours credited for a realtime/
-/// self-report check-in.
-class _CheckinDetailSheet extends StatelessWidget {
-  const _CheckinDetailSheet({required this.item});
-
-  final DashboardFeedItem item;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.fromLTRB(
-        20,
-        0,
-        20,
-        20 + MediaQuery.of(context).viewInsets.bottom,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            item.title ?? '',
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
-          ),
-          const SizedBox(height: 12),
-          if (item.photoUrl != null)
-            ClipRRect(
-              borderRadius: BorderRadius.circular(16),
-              child: Image.network(
-                item.photoUrl!,
-                width: double.infinity,
-                fit: BoxFit.contain,
-              ),
-            ),
-          const SizedBox(height: 12),
-          _DetailRow(label: 'เวลาเช็คชื่อ', value: item.date ?? '-'),
-          if (item.locationName != null)
-            _DetailRow(label: 'สถานที่', value: item.locationName!),
-          _DetailRow(
-            label: 'ชั่วโมงที่ได้รับ',
-            value: '${item.hours ?? 0} ชม.',
-            valueColor: AppColors.green600,
-          ),
-          SizedBox(height: MediaQuery.of(context).padding.bottom),
-        ],
-      ),
-    );
-  }
-}
-
-class _DetailRow extends StatelessWidget {
-  const _DetailRow({required this.label, required this.value, this.valueColor});
-
-  final String label;
-  final String value;
-  final Color? valueColor;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 3),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 13,
-              color: context.surfaceColors.textSecondary,
-            ),
-          ),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
-              color: valueColor,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
 
 /// Quick view/share/download access to the transcript PDF right from the
 /// dashboard, so students don't need a dedicated bottom-nav tab for it.

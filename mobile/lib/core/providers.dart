@@ -6,6 +6,7 @@ import 'push_notifications.dart';
 import '../features/auth/auth_repository.dart';
 import '../features/profile_setup/profile_setup_repository.dart';
 import '../features/dashboard/dashboard_repository.dart';
+import '../features/activity_history/activity_history_repository.dart';
 import '../features/activities/activities_repository.dart';
 import '../features/checkin/checkin_repository.dart';
 import '../features/self_checkin/self_checkin_repository.dart';
@@ -64,6 +65,10 @@ final dashboardRepositoryProvider = Provider<DashboardRepository>((ref) {
 
 final dashboardDataProvider = FutureProvider.autoDispose((ref) {
   return ref.watch(dashboardRepositoryProvider).fetch();
+});
+
+final activityHistoryRepositoryProvider = Provider<ActivityHistoryRepository>((ref) {
+  return ActivityHistoryRepository(apiClient: ref.watch(apiClientProvider));
 });
 
 final activitiesRepositoryProvider = Provider<ActivitiesRepository>((ref) {

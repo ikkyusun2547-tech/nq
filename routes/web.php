@@ -20,6 +20,7 @@ use App\Http\Controllers\Auth\GoogleAuthController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileSetupController;
 use App\Http\Controllers\Student\ActivityController as StudentActivityController;
+use App\Http\Controllers\Student\ActivityHistoryController;
 use App\Http\Controllers\Student\CheckInController;
 use App\Http\Controllers\Student\CreditTransferController;
 use App\Http\Controllers\Student\DashboardController;
@@ -113,10 +114,21 @@ Route::middleware(['auth', 'srru.email'])->group(function () {
     Route::middleware('profile.completed')->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'show'])->name('dashboard');
 
+        // "ดูทั้งหมด" behind the dashboard's three preview lists (each capped
+        // at 5 there) — ?status=approved|pending|rejected picks which one.
+        Route::get('/activity-history', [ActivityHistoryController::class, 'index'])->name('activity-history.index');
+
         Route::get('/activities', [StudentActivityController::class, 'index'])->name('activities.index');
 
         Route::get('/checkin', [CheckInController::class, 'show'])->name('checkin.show');
         Route::post('/checkin', [CheckInController::class, 'store'])->name('checkin.store');
+
+        // Looked up right after a QR scan (the activity id is the token's
+        // plain first segment) so the client knows whether to even ask for
+        // GPS before moving on to the selfie/location steps.
+        Route::get('/activities/{activity}/checkin-requirements', function (Activity $activity) {
+            return response()->json(['requires_gps' => $activity->requiresGpsCheck()]);
+        })->name('activities.checkin-requirements');
 
         Route::get('/activities/{activity}/self-checkin', [SelfCheckInController::class, 'show'])->name('self-checkin.show');
         Route::post('/activities/{activity}/self-checkin', [SelfCheckInController::class, 'store'])->name('self-checkin.store');
