@@ -63,14 +63,14 @@
                         'bg-slate-50/50 dark:bg-slate-800/40' => $loop->odd,
                     ])>
                         <td class="whitespace-nowrap px-4 py-3 text-slate-500 dark:text-slate-400">{{ $entry->reviewed_at?->translatedFormat('d M Y H:i') ?? '-' }}</td>
-                        <td class="whitespace-nowrap px-4 py-3 text-slate-700 dark:text-slate-300">{{ $entry->reviewer?->name_thai ?? $entry->reviewer?->name ?? '-' }}</td>
+                        <td class="whitespace-nowrap px-4 py-3 text-slate-700 dark:text-slate-300">{{ $entry->reviewer_name ?? '-' }}</td>
                         <td class="whitespace-nowrap px-4 py-3">
                             <span class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium {{ $actionBadge[$entry->action] ?? 'bg-slate-100 text-slate-500' }}">
                                 {{ $actionLabel[$entry->action] ?? $entry->action }}
                             </span>
                         </td>
                         <td class="whitespace-nowrap px-4 py-3 text-slate-500 dark:text-slate-400">{{ $entry->type_label }}</td>
-                        <td class="whitespace-nowrap px-4 py-3 text-slate-700 dark:text-slate-300">{{ $entry->student?->name_thai ?? $entry->student?->name ?? '-' }}</td>
+                        <td class="whitespace-nowrap px-4 py-3 text-slate-700 dark:text-slate-300">{{ $entry->student_name ?? '-' }}</td>
                         <td class="max-w-xs truncate px-4 py-3 text-slate-500 dark:text-slate-400">{{ $entry->title }}</td>
                     </tr>
                 @empty
