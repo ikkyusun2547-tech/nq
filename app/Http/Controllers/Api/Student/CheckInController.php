@@ -19,8 +19,8 @@ class CheckInController extends Controller
             $attendance = $service->checkIn(
                 user: $request->user(),
                 qrToken: $request->string('qr_token')->toString(),
-                lat: (float) $request->input('location_lat'),
-                lng: (float) $request->input('location_lng'),
+                lat: $request->filled('location_lat') ? (float) $request->input('location_lat') : null,
+                lng: $request->filled('location_lng') ? (float) $request->input('location_lng') : null,
                 deviceUuid: $request->string('device_uuid')->toString(),
                 photo: $request->file('photo'),
             );

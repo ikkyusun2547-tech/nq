@@ -23,8 +23,13 @@ class CheckInRequest extends FormRequest
     {
         return [
             'qr_token' => ['required', 'string'],
-            'location_lat' => ['required', 'numeric', 'between:-90,90'],
-            'location_lng' => ['required', 'numeric', 'between:-180,180'],
+            // Not always sent — the client skips asking for GPS at all when
+            // the scanned activity doesn't require it (see the
+            // checkin-requirements lookup before this step). Whether it's
+            // actually required for this specific activity is enforced in
+            // AttendanceAutomationService::checkIn(), not here.
+            'location_lat' => ['nullable', 'numeric', 'between:-90,90'],
+            'location_lng' => ['nullable', 'numeric', 'between:-180,180'],
             'device_uuid' => ['required', 'string', 'max:100'],
             // The client compresses the selfie before upload, so this is a
             // generous backstop rather than the expected size.

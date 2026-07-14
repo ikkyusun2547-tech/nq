@@ -169,4 +169,60 @@ class CheckInTest extends TestCase
 
         Notification::assertSentTo($admin, AttendanceFlagged::class);
     }
+
+    // 8. requires_gps = false -> check-in with no location at all still
+    // auto-approves (no GPS_OUT_OF_BOUNDS flag possible without a fix to check).
+    public function test_checkin_without_gps_requirement_does_not_need_location(): void
+    {
+        $activity = Activity::factory()->noGpsRequired()->create(['status' => 'open']);
+        $user = $this->studentUser();
+        Sanctum::actingAs($user);
+
+        $response = $this->postJson('/api/checkin', [
+            'qr_token' => $this->tokens->generate($activity),
+            'device_uuid' => 'device-8',
+            'photo' => UploadedFile::fake()->image('selfie.jpg'),
+        ]);
+
+        $response->assertOk()->assertJson(['status' => 'auto_approved']);
+        $this->assertDatabaseHas('attendances', [
+            'user_id' => $user->id,
+            'activity_id' => $activity->id,
+            'status' => 'auto_approved',
+            'student_lat' => null,
+            'distance_meters' => null,
+        ]);
+    }
+
+    // 9. requires_gps = true (default) -> omitting location is rejected, not silently allowed.
+    public function test_checkin_with_gps_requirement_rejects_missing_location(): void
+    {
+        $activity = $this->activityAt(14.0, 103.0);
+        $user = $this->studentUser();
+        Sanctum::actingAs($user);
+
+        $response = $this->postJson('/api/checkin', [
+            'qr_token' => $this->tokens->generate($activity),
+            'device_uuid' => 'device-9',
+            'photo' => UploadedFile::fake()->image('selfie.jpg'),
+        ]);
+
+        $response->assertStatus(422);
+        $this->assertDatabaseMissing('attendances', ['user_id' => $user->id, 'activity_id' => $activity->id]);
+    }
+
+    // 10. The checkin-requirements lookup reflects the flag the client checks before asking for GPS.
+    public function test_checkin_requirements_endpoint_reports_the_activitys_gps_flag(): void
+    {
+        $gpsActivity = $this->activityAt(14.0, 103.0);
+        $noGpsActivity = Activity::factory()->noGpsRequired()->create(['status' => 'open']);
+        $user = $this->studentUser();
+        Sanctum::actingAs($user);
+
+        $this->getJson("/api/activities/{$gpsActivity->id}/checkin-requirements")
+            ->assertOk()->assertJson(['requires_gps' => true]);
+
+        $this->getJson("/api/activities/{$noGpsActivity->id}/checkin-requirements")
+            ->assertOk()->assertJson(['requires_gps' => false]);
+    }
 }

@@ -100,6 +100,7 @@
             qrToken: null,
             photoBlob: null,
             scanner: null,
+            requiresGps: true,
 
             get stepIndex() {
                 if (this.step === 'scan') return 0;
@@ -141,7 +142,31 @@
                     await this.scanner.clear();
                 } catch (e) { /* already stopped */ }
 
+                await this.fetchGpsRequirement(decodedText);
                 this.step = 'selfie';
+            },
+
+            // The QR token's plain first segment is the activity id (see
+            // DynamicQrTokenGenerator) — used only to look up whether this
+            // activity even asks for GPS, never trusted for anything
+            // security-relevant (the real check-in still verifies the
+            // token's signature server-side).
+            async fetchGpsRequirement(token) {
+                const activityId = token.split('.')[0];
+
+                if (! /^\d+$/.test(activityId)) return; // malformed token; let submitCheckIn's own error handling catch it
+
+                try {
+                    const url = '{{ route('activities.checkin-requirements', ['activity' => '__ID__']) }}'.replace('__ID__', activityId);
+                    const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
+                    if (res.ok) {
+                        const data = await res.json();
+                        this.requiresGps = data.requires_gps !== false;
+                    }
+                } catch (e) {
+                    // Fails open to requiring GPS — the safer default, and
+                    // submitCheckIn already handles a GPS failure gracefully.
+                }
             },
 
             async handleFileCapture(event) {
@@ -188,6 +213,11 @@
             submitCheckIn() {
                 this.step = 'submitting';
 
+                if (! this.requiresGps) {
+                    this.sendPayload(null, null);
+                    return;
+                }
+
                 if (! navigator.geolocation) {
                     this.showError('{{ __('อุปกรณ์นี้ไม่รองรับการระบุตำแหน่ง GPS') }}');
                     return;
@@ -225,8 +255,10 @@
             async sendPayload(lat, lng) {
                 const formData = new FormData();
                 formData.append('qr_token', this.qrToken);
-                formData.append('location_lat', lat);
-                formData.append('location_lng', lng);
+                if (lat !== null && lng !== null) {
+                    formData.append('location_lat', lat);
+                    formData.append('location_lng', lng);
+                }
                 formData.append('device_uuid', this.deviceUuid());
                 formData.append('photo', this.photoBlob, 'selfie.jpg');
 
@@ -262,6 +294,7 @@
             resetToScan() {
                 this.qrToken = null;
                 this.photoBlob = null;
+                this.requiresGps = true;
                 this.scanError = '';
                 this.cameraError = '';
                 this.step = 'scan';

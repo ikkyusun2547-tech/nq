@@ -42,6 +42,11 @@ class _CheckInFlowScreenState extends ConsumerState<CheckInFlowScreen> {
   String? _errorMessage;
   CheckInResult? _result;
 
+  // Looked up right after the QR scan; defaults to true (the safer
+  // assumption) until the lookup resolves. When false, the location step is
+  // skipped entirely and check-in submits with no GPS fix at all.
+  bool _requiresGps = true;
+
   // "ลองอีกครั้ง" (retry) only makes sense for a location-step error that
   // actually came from fetching location (GPS off, permission denied,
   // timeout) — those are transient and re-fetching can succeed. A backend
@@ -56,6 +61,11 @@ class _CheckInFlowScreenState extends ConsumerState<CheckInFlowScreen> {
       _qrToken = token;
       _step = _Step.selfie;
     });
+
+    final requiresGps = await ref
+        .read(checkInRepositoryProvider)
+        .fetchRequiresGps(token);
+    if (mounted) setState(() => _requiresGps = requiresGps);
   }
 
   Future<void> _takeSelfie() async {
@@ -68,10 +78,14 @@ class _CheckInFlowScreenState extends ConsumerState<CheckInFlowScreen> {
 
     if (photo == null) return;
 
-    setState(() {
-      _photoPath = photo.path;
-      _step = _Step.location;
-    });
+    setState(() => _photoPath = photo.path);
+
+    if (!_requiresGps) {
+      await _submit();
+      return;
+    }
+
+    setState(() => _step = _Step.location);
     _fetchLocation();
   }
 
@@ -132,7 +146,8 @@ class _CheckInFlowScreenState extends ConsumerState<CheckInFlowScreen> {
   }
 
   Future<void> _submit() async {
-    if (_qrToken == null || _photoPath == null || _position == null) return;
+    if (_qrToken == null || _photoPath == null) return;
+    if (_requiresGps && _position == null) return;
 
     setState(() {
       _step = _Step.submitting;
@@ -147,8 +162,8 @@ class _CheckInFlowScreenState extends ConsumerState<CheckInFlowScreen> {
           .read(checkInRepositoryProvider)
           .submit(
             qrToken: _qrToken!,
-            lat: _position!.latitude,
-            lng: _position!.longitude,
+            lat: _position?.latitude,
+            lng: _position?.longitude,
             deviceUuid: deviceUuid,
             photoPath: _photoPath!,
           );
@@ -161,6 +176,8 @@ class _CheckInFlowScreenState extends ConsumerState<CheckInFlowScreen> {
       setState(() {
         _errorMessage = e.asApiException.message;
         _canRetryLocation = false;
+        // Reused as the generic result/error step regardless of whether
+        // this check-in ever needed a GPS fix — see _buildLocationStep.
         _step = _Step.location;
       });
     } catch (_) {

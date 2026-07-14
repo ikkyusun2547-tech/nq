@@ -35,6 +35,7 @@ class Activity extends Model
         'allowed_radius',
         'qr_secret',
         'checkin_method',
+        'requires_gps',
         'checkin_opens_at',
         'checkin_closes_at',
         'status',
@@ -49,6 +50,7 @@ class Activity extends Model
         return [
             'start_at' => 'datetime',
             'end_at' => 'datetime',
+            'requires_gps' => 'boolean',
             'checkin_opens_at' => 'datetime',
             'checkin_closes_at' => 'datetime',
             'important_updated_at' => 'datetime',
@@ -115,6 +117,16 @@ class Activity extends Model
     public function usesSelfReportCheckIn(): bool
     {
         return $this->checkin_method === 'self_report';
+    }
+
+    /**
+     * Whether a realtime check-in must pass the GPS-radius check. Only
+     * meaningful for checkin_method 'realtime' — self-report never checks
+     * GPS regardless of this flag.
+     */
+    public function requiresGpsCheck(): bool
+    {
+        return $this->checkin_method === 'realtime' && $this->requires_gps;
     }
 
     /**

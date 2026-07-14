@@ -284,6 +284,7 @@ class ActivityController extends Controller
             'location_lat' => $activity->location_lat,
             'location_lng' => $activity->location_lng,
             'checkin_method' => $activity->checkin_method,
+            'requires_gps' => $activity->requires_gps,
             'checkin_opens_at' => $activity->checkin_opens_at?->format('Y-m-d H:i'),
             'checkin_closes_at' => $activity->checkin_closes_at?->format('Y-m-d H:i'),
         ];

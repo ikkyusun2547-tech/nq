@@ -34,6 +34,7 @@ class ActivityFactory extends Factory
             'allowed_radius' => 100,
             'qr_secret' => Str::random(32),
             'checkin_method' => 'realtime',
+            'requires_gps' => true,
             'status' => 'open',
         ];
     }
@@ -44,6 +45,16 @@ class ActivityFactory extends Factory
             'checkin_method' => 'self_report',
             'checkin_opens_at' => now()->subHour(),
             'checkin_closes_at' => now()->addHour(),
+        ]);
+    }
+
+    public function noGpsRequired(): static
+    {
+        return $this->state(fn () => [
+            'requires_gps' => false,
+            'location_lat' => null,
+            'location_lng' => null,
+            'allowed_radius' => null,
         ]);
     }
 

@@ -18,16 +18,16 @@ class AttendanceAutomationService
     ) {}
 
     /**
-     * Process a student's three-factor check-in attempt (QR + GPS + selfie)
-     * and decide auto_approved vs flagged.
+     * Process a student's check-in attempt (QR + selfie, plus GPS when the
+     * activity requires it) and decide auto_approved vs flagged.
      *
      * @throws QrTokenException|ValidationException
      */
     public function checkIn(
         User $user,
         string $qrToken,
-        float $lat,
-        float $lng,
+        ?float $lat,
+        ?float $lng,
         string $deviceUuid,
         UploadedFile $photo,
     ): Attendance {
@@ -51,12 +51,20 @@ class AttendanceAutomationService
             ]);
         }
 
-        $distance = HaversineCalculator::distanceInMeters(
-            (float) $activity->location_lat,
-            (float) $activity->location_lng,
-            $lat,
-            $lng,
-        );
+        if ($activity->requiresGpsCheck() && ($lat === null || $lng === null)) {
+            throw ValidationException::withMessages([
+                'location_lat' => __('กิจกรรมนี้ต้องระบุตำแหน่ง GPS เพื่อเช็คชื่อ'),
+            ]);
+        }
+
+        $distance = $activity->requiresGpsCheck()
+            ? HaversineCalculator::distanceInMeters(
+                (float) $activity->location_lat,
+                (float) $activity->location_lng,
+                $lat,
+                $lng,
+            )
+            : null;
 
         $deviceReusedByOthers = Attendance::where('activity_id', $activity->id)
             ->where('device_uuid', $deviceUuid)
@@ -65,7 +73,7 @@ class AttendanceAutomationService
 
         $reasons = [];
 
-        if ($distance > $activity->allowed_radius) {
+        if ($distance !== null && $distance > $activity->allowed_radius) {
             $reasons[] = 'GPS_OUT_OF_BOUNDS';
         }
 
@@ -91,7 +99,7 @@ class AttendanceAutomationService
                 'checkin_time' => now(),
                 'student_lat' => $lat,
                 'student_lng' => $lng,
-                'distance_meters' => (int) round($distance),
+                'distance_meters' => $distance === null ? null : (int) round($distance),
                 'device_uuid' => $deviceUuid,
                 'photo_path' => $photoPath,
                 'status' => empty($reasons) ? 'auto_approved' : 'flagged',
