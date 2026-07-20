@@ -73,12 +73,21 @@ class StoreActivityRequest extends FormRequest
 
     /**
      * Institutional rule: core (บังคับแกน) activities are fixed at 5 credit
-     * hours regardless of what the client submits.
+     * hours regardless of what the client submits. Overridden here (rather
+     * than merged in passedValidation()) because the controller reads
+     * $request->validated(), which snapshots data at Validator-construction
+     * time — a later $this->merge() never reaches it.
+     *
+     * @return array<string, mixed>
      */
-    protected function passedValidation(): void
+    public function validated($key = null, $default = null)
     {
-        if ($this->input('activity_type') === 'core') {
-            $this->merge(['credit_hours' => 5]);
+        $validated = parent::validated($key, $default);
+
+        if ($key === null && ($validated['activity_type'] ?? null) === 'core') {
+            $validated['credit_hours'] = 5;
         }
+
+        return $validated;
     }
 }
