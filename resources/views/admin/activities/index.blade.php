@@ -38,7 +38,7 @@
     $totalActivityCount = $statusCounts->sum();
 @endphp
 
-<div class="mx-auto max-w-7xl">
+<div class="mx-auto max-w-[90rem]">
     <x-brand-header :title="__('รายการกิจกรรมทั้งหมด')" :eyebrow="__('กองพัฒนานักศึกษา')">
         <x-slot:actions>
             <a href="{{ route('admin.activities.create') }}"
