@@ -7,7 +7,7 @@ import '../../core/theme.dart';
 import '../../core/widgets/section_card.dart';
 import '../checkin/checkin_flow_screen.dart';
 import '../self_checkin/self_checkin_screen.dart';
-import '../late_checkin/late_checkin_screen.dart';
+import 'activity_detail_screen.dart';
 
 class ActivitiesScreen extends ConsumerStatefulWidget {
   const ActivitiesScreen({super.key});
@@ -479,6 +479,50 @@ class _ActivityCard extends StatelessWidget {
     'cancelled': AppColors.statusRejected,
   };
 
+  static const _checkinMethodLabels = {
+    'realtime': 'สแกน QR + GPS + เซลฟี',
+    'self_report': 'แนบรูปหลักฐาน (รายงานตนเอง)',
+  };
+
+  static const _levelLabels = {
+    'university': 'ระดับมหาวิทยาลัย',
+    'faculty': 'ระดับคณะ',
+  };
+
+  String _formatDate(String iso) {
+    final dt = DateTime.parse(iso).toLocal();
+    const months = [
+      'ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.',
+      'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.',
+    ];
+    final buddhistYear = dt.year + 543;
+    final hh = dt.hour.toString().padLeft(2, '0');
+    final mm = dt.minute.toString().padLeft(2, '0');
+    return '${dt.day} ${months[dt.month - 1]} $buddhistYear $hh:$mm';
+  }
+
+  void _openDetail(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => ActivityDetailScreen(
+          activity: activity,
+          checkedIn: checkedIn,
+          lateStatus: lateStatus,
+        ),
+      ),
+    );
+  }
+
+  void _openCheckin(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => activity.usesSelfReportCheckIn
+            ? SelfCheckInScreen(activity: activity)
+            : CheckInFlowScreen(activity: activity),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final categoryColor =
@@ -487,6 +531,7 @@ class _ActivityCard extends StatelessWidget {
     final statusLabel = _statusLabels[activity.status] ?? activity.status;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final tokens = context.surfaceColors;
+    final canCheckIn = ['open', 'ongoing'].contains(activity.status);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 14),
@@ -574,6 +619,33 @@ class _ActivityCard extends StatelessWidget {
                     ),
                   ),
                 ),
+                if (checkedIn)
+                  Positioned(
+                    top: 10,
+                    left: 10,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.92),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.check_circle_outline, size: 13, color: AppColors.green700),
+                          const SizedBox(width: 4),
+                          Text(
+                            'เช็คชื่อแล้ว',
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.green700,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
               ],
             ),
             IntrinsicHeight(
@@ -587,46 +659,6 @@ class _ActivityCard extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  activity.title,
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.w700,
-                                    fontSize: 15,
-                                  ),
-                                ),
-                              ),
-                              if (activity.wasRecentlyUpdatedSignificantly)
-                                Container(
-                                  margin: const EdgeInsets.only(left: 8),
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 8,
-                                    vertical: 3,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: isDark
-                                        ? Colors.orange.shade900.withValues(
-                                            alpha: 0.3,
-                                          )
-                                        : Colors.orange.shade50,
-                                    borderRadius: BorderRadius.circular(20),
-                                  ),
-                                  child: Text(
-                                    'อัปเดตแล้ว',
-                                    style: TextStyle(
-                                      fontSize: 10,
-                                      color: isDark
-                                          ? Colors.orange.shade300
-                                          : Colors.orange.shade700,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ),
-                            ],
-                          ),
-                          const SizedBox(height: 6),
                           Text(
                             _categoryLabels[activity.activityCategory] ??
                                 activity.activityCategory,
@@ -636,50 +668,150 @@ class _ActivityCard extends StatelessWidget {
                               fontWeight: FontWeight.w600,
                             ),
                           ),
-                          const SizedBox(height: 8),
-                          if (activity.locationName != null)
-                            Row(
-                              children: [
-                                Icon(
-                                  Icons.place_outlined,
-                                  size: 14,
-                                  color: tokens.textSecondary,
-                                ),
-                                const SizedBox(width: 4),
-                                Expanded(
-                                  child: Text(
-                                    activity.locationName!,
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: tokens.textSecondary,
-                                    ),
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                              ],
+                          if (activity.activityCode != null) ...[
+                            const SizedBox(height: 3),
+                            Text(
+                              activity.activityCode!,
+                              style: TextStyle(
+                                fontSize: 10.5,
+                                color: tokens.textSecondary,
+                                fontFamily: 'monospace',
+                              ),
                             ),
-                          if (activity.creditHours != null) ...[
-                            const SizedBox(height: 4),
-                            Row(
-                              children: [
-                                Icon(
-                                  Icons.schedule_outlined,
-                                  size: 14,
-                                  color: tokens.textSecondary,
-                                ),
-                                const SizedBox(width: 4),
-                                Text(
-                                  '${activity.creditHours} ชั่วโมง',
+                          ],
+                          const SizedBox(height: 4),
+                          Text(
+                            activity.title,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 15,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          if (activity.startAt != null)
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 4),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.event_outlined,
+                                    size: 14,
+                                    color: tokens.textSecondary,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Expanded(
+                                    child: Text(
+                                      _formatDate(activity.startAt!),
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: tokens.textSecondary,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          if (activity.locationName != null)
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 4),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.place_outlined,
+                                    size: 14,
+                                    color: tokens.textSecondary,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Expanded(
+                                    child: Text(
+                                      activity.locationName!,
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: tokens.textSecondary,
+                                      ),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          Row(
+                            children: [
+                              Icon(
+                                activity.usesSelfReportCheckIn
+                                    ? Icons.photo_camera_outlined
+                                    : Icons.qr_code_scanner,
+                                size: 14,
+                                color: tokens.textSecondary,
+                              ),
+                              const SizedBox(width: 4),
+                              Expanded(
+                                child: Text(
+                                  _checkinMethodLabels[activity.checkinMethod] ?? '',
                                   style: TextStyle(
                                     fontSize: 12,
                                     color: tokens.textSecondary,
                                   ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 14),
+                          Container(
+                            padding: const EdgeInsets.only(top: 12),
+                            decoration: BoxDecoration(
+                              border: Border(top: BorderSide(color: tokens.border)),
+                            ),
+                            child: Row(
+                              spacing: 8,
+                              children: [
+                                Expanded(
+                                  child: OutlinedButton(
+                                    onPressed: () => _openDetail(context),
+                                    style: OutlinedButton.styleFrom(
+                                      padding: const EdgeInsets.symmetric(vertical: 10),
+                                      textStyle: const TextStyle(
+                                        fontSize: 12.5,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                    child: const Text('รายละเอียด'),
+                                  ),
+                                ),
+                                Expanded(
+                                  child: canCheckIn
+                                      ? FilledButton(
+                                          onPressed: () => _openCheckin(context),
+                                          style: FilledButton.styleFrom(
+                                            padding: const EdgeInsets.symmetric(vertical: 10),
+                                            textStyle: const TextStyle(
+                                              fontSize: 12.5,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                          child: const Text('เช็คชื่อ'),
+                                        )
+                                      : Container(
+                                          alignment: Alignment.center,
+                                          padding: const EdgeInsets.symmetric(vertical: 10),
+                                          decoration: BoxDecoration(
+                                            color: tokens.scaffoldBg,
+                                            borderRadius: BorderRadius.circular(12),
+                                          ),
+                                          child: Text(
+                                            _levelLabels[activity.activityLevel] ?? '',
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              color: tokens.textSecondary,
+                                            ),
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
                                 ),
                               ],
                             ),
-                          ],
-                          const SizedBox(height: 12),
-                          _buildAction(context),
+                          ),
                         ],
                       ),
                     ),
@@ -689,100 +821,6 @@ class _ActivityCard extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildAction(BuildContext context) {
-    if (checkedIn) {
-      return _statusChip(
-        'เช็คชื่อแล้ว',
-        AppColors.statusApproved,
-        Icons.check_circle_outline,
-      );
-    }
-
-    if (lateStatus != null) {
-      return _statusChip(
-        'คำร้องย้อนหลัง: $lateStatus',
-        AppColors.statusPending,
-        Icons.history,
-      );
-    }
-
-    if (activity.status == 'closed') {
-      return SizedBox(
-        width: double.infinity,
-        child: OutlinedButton.icon(
-          onPressed: () => Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (_) => LateCheckInScreen(activity: activity),
-            ),
-          ),
-          icon: const Icon(Icons.history, size: 18),
-          label: const Text('ขอเช็คชื่อย้อนหลัง'),
-        ),
-      );
-    }
-
-    if (activity.status != 'open' &&
-        activity.status != 'ongoing' &&
-        activity.status != 'full') {
-      return const SizedBox.shrink();
-    }
-
-    if (activity.usesSelfReportCheckIn) {
-      return SizedBox(
-        width: double.infinity,
-        child: FilledButton.icon(
-          onPressed: () => Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (_) => SelfCheckInScreen(activity: activity),
-            ),
-          ),
-          icon: const Icon(Icons.camera_alt_outlined, size: 18),
-          label: const Text('รายงานตนเอง'),
-        ),
-      );
-    }
-
-    return SizedBox(
-      width: double.infinity,
-      child: FilledButton.icon(
-        onPressed: () => Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (_) => CheckInFlowScreen(activity: activity),
-          ),
-        ),
-        icon: const Icon(Icons.qr_code_scanner, size: 18),
-        label: const Text('สแกน QR เช็คชื่อ'),
-      ),
-    );
-  }
-
-  Widget _statusChip(String label, Color color, IconData icon) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 16, color: color),
-          const SizedBox(width: 6),
-          Flexible(
-            child: Text(
-              label,
-              style: TextStyle(
-                fontSize: 12,
-                color: color,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }

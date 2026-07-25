@@ -115,10 +115,24 @@ class ActivityController extends Controller
             ->whereIn('activity_id', $activities->pluck('id'))
             ->pluck('activity_id');
 
-        $lateCheckInStatuses = LateCheckInRequest::where('user_id', $user->id)
-            ->whereIn('activity_id', $activities->pluck('id'))
-            ->pluck('status', 'activity_id');
+        return view('student.activities.index', compact('activities', 'checkedInActivityIds', 'academicYears', 'academicYear', 'faculties', 'statusGroup'));
+    }
 
-        return view('student.activities.index', compact('activities', 'checkedInActivityIds', 'lateCheckInStatuses', 'academicYears', 'academicYear', 'faculties', 'statusGroup'));
+    /**
+     * Full detail page a card in the browsable feed links through to, since
+     * the card itself only surfaces a handful of at-a-glance fields.
+     */
+    public function show(Activity $activity, Request $request)
+    {
+        $user = $request->user();
+
+        abort_unless($activity->isEligibleFor($user), 404);
+
+        $checkedIn = $user->attendances()->where('activity_id', $activity->id)->exists();
+        $lateCheckInStatus = LateCheckInRequest::where('user_id', $user->id)
+            ->where('activity_id', $activity->id)
+            ->value('status');
+
+        return view('student.activities.show', compact('activity', 'checkedIn', 'lateCheckInStatus'));
     }
 }

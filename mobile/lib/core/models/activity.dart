@@ -1,10 +1,12 @@
 class Activity {
   Activity({
     required this.id,
+    this.activityCode,
     required this.title,
     this.description,
     this.bannerUrl,
     this.organizerName,
+    this.dressCode,
     this.activityLevel,
     required this.activityCategory,
     this.activityType,
@@ -20,10 +22,12 @@ class Activity {
   });
 
   final int id;
+  final String? activityCode;
   final String title;
   final String? description;
   final String? bannerUrl;
   final String? organizerName;
+  final String? dressCode;
   final String? activityLevel;
   final String activityCategory;
   final String? activityType;
@@ -42,10 +46,12 @@ class Activity {
   factory Activity.fromJson(Map<String, dynamic> json) {
     return Activity(
       id: json['id'] as int,
+      activityCode: json['activity_code'] as String?,
       title: json['title'] as String,
       description: json['description'] as String?,
       bannerUrl: json['banner_url'] as String?,
       organizerName: json['organizer_name'] as String?,
+      dressCode: json['dress_code'] as String?,
       activityLevel: json['activity_level'] as String?,
       activityCategory: json['activity_category'] as String,
       activityType: json['activity_type'] as String?,

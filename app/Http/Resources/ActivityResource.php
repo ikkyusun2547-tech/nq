@@ -11,6 +11,7 @@ class ActivityResource extends JsonResource
     {
         return [
             'id' => $this->id,
+            'activity_code' => $this->activity_code,
             'title' => $this->title,
             'description' => $this->description,
             'banner_url' => $this->banner_url ? asset('storage/'.$this->banner_url) : null,

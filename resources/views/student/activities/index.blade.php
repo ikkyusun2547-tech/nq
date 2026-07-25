@@ -17,11 +17,6 @@
         'closed' => ['label' => __('จบไปแล้ว'), 'class' => 'bg-slate-500/90 text-white'],
     ];
     $levelLabel = ['university' => __('ระดับมหาวิทยาลัย'), 'faculty' => __('ระดับคณะ')];
-    $typeMeta = [
-        'core' => ['label' => __('บังคับแกน'), 'class' => 'bg-brand-purple-50 text-brand-purple-700 dark:bg-brand-purple-500/10 dark:text-brand-purple-400'],
-        'elective' => ['label' => __('บังคับเลือก'), 'class' => 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400'],
-        'practice' => ['label' => __('ซ้อม/เตรียมงาน'), 'class' => 'bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400'],
-    ];
     $checkinMethodMeta = [
         'realtime' => ['label' => __('สแกน QR + GPS + เซลฟี')],
         'self_report' => ['label' => __('แนบรูปหลักฐาน (รายงานตนเอง)')],
@@ -138,21 +133,10 @@
                     <div class="flex flex-1">
                         <div class="w-[5px] shrink-0 {{ $categoryMeta[$activity->activity_category]['dot'] ?? 'bg-slate-400' }}"></div>
                     <div class="flex flex-1 flex-col p-4">
-                        <div class="mb-2 flex flex-wrap items-center gap-x-3 gap-y-1.5">
-                            <span class="inline-flex items-center gap-1.5 text-xs font-medium text-slate-500 dark:text-slate-400">
-                                <span class="h-1.5 w-1.5 rounded-full {{ $categoryMeta[$activity->activity_category]['dot'] ?? 'bg-slate-400' }}"></span>
-                                {{ $categoryMeta[$activity->activity_category]['label'] ?? $activity->activity_category }}
-                            </span>
-                            <span class="inline-flex items-center rounded-full px-2 py-0.5 text-[0.68rem] font-medium {{ $typeMeta[$activity->activity_type]['class'] ?? 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400' }}">
-                                {{ $typeMeta[$activity->activity_type]['label'] ?? $activity->activity_type }}
-                            </span>
-                            @if ($activity->wasRecentlyUpdatedSignificantly())
-                                <span class="inline-flex items-center gap-1 rounded-full bg-sky-50 px-2 py-0.5 text-[0.68rem] font-medium text-sky-700 dark:bg-sky-500/10 dark:text-sky-400">
-                                    <svg class="h-2.5 w-2.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"/></svg>
-                                    {{ __('อัปเดตแล้ว') }}
-                                </span>
-                            @endif
-                        </div>
+                        <span class="mb-2 inline-flex items-center gap-1.5 text-xs font-medium text-slate-500 dark:text-slate-400">
+                            <span class="h-1.5 w-1.5 rounded-full {{ $categoryMeta[$activity->activity_category]['dot'] ?? 'bg-slate-400' }}"></span>
+                            {{ $categoryMeta[$activity->activity_category]['label'] ?? $activity->activity_category }}
+                        </span>
 
                         @if ($activity->activity_code)
                             <p class="mb-0.5 font-mono text-[0.68rem] text-slate-400 dark:text-slate-500">{{ $activity->activity_code }}</p>
@@ -170,12 +154,6 @@
                                     <span class="truncate">{{ $activity->location_name }}</span>
                                 </p>
                             @endif
-                            @if ($activity->organizer_name)
-                                <p class="flex items-center gap-1.5">
-                                    <svg class="h-3.5 w-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21"/></svg>
-                                    {{ $activity->organizer_name }}
-                                </p>
-                            @endif
                             <p class="flex items-center gap-1.5">
                                 @if ($activity->usesSelfReportCheckIn())
                                     <svg class="h-3.5 w-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z"/><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z"/></svg>
@@ -186,31 +164,18 @@
                             </p>
                         </div>
 
-                        <div class="mt-3.5 flex items-center justify-between border-t border-slate-100 pt-3 dark:border-slate-800">
-                            <span class="text-xs font-medium text-brand-purple-600 dark:text-brand-purple-400">{{ __(':hours ชม.', ['hours' => $activity->credit_hours]) }}</span>
+                        <div class="mt-3.5 flex items-center gap-2 border-t border-slate-100 pt-3 dark:border-slate-800">
+                            <a href="{{ route('activities.show', $activity) }}" class="flex-1 rounded-lg border border-slate-200 px-3 py-2 text-center text-xs font-medium text-slate-600 transition-colors hover:border-brand-purple-300 hover:text-brand-purple-700 dark:border-slate-700 dark:text-slate-300 dark:hover:border-brand-purple-500/40 dark:hover:text-brand-purple-400">
+                                {{ __('รายละเอียด') }}
+                            </a>
                             @if (in_array($activity->status, ['open', 'ongoing'], true))
-                                @if ($activity->usesSelfReportCheckIn())
-                                    <a href="{{ route('self-checkin.show', $activity) }}" class="text-sm font-medium text-brand-purple-600 transition-colors hover:text-brand-purple-800 dark:text-brand-purple-400 dark:hover:text-brand-purple-300">{{ __('ไปเช็คชื่อ') }} &rarr;</a>
-                                @else
-                                    <a href="{{ route('checkin.show') }}" class="text-sm font-medium text-brand-purple-600 transition-colors hover:text-brand-purple-800 dark:text-brand-purple-400 dark:hover:text-brand-purple-300">{{ __('ไปเช็คชื่อ') }} &rarr;</a>
-                                @endif
-                            @elseif ($activity->status === 'closed' && ! $checkedInActivityIds->contains($activity->id))
-                                @php $lateStatus = $lateCheckInStatuses[$activity->id] ?? null; @endphp
-                                <a href="{{ route('late-checkin.show', $activity) }}" class="text-sm font-medium text-brand-purple-600 transition-colors hover:text-brand-purple-800 dark:text-brand-purple-400 dark:hover:text-brand-purple-300">
-                                    @if ($lateStatus === 'pending')
-                                        {{ __('รอตรวจสอบคำร้องย้อนหลัง') }} &rarr;
-                                    @elseif ($lateStatus === 'rejected')
-                                        {{ __('ยื่นคำร้องใหม่') }} &rarr;
-                                    @else
-                                        {{ __('ขอเช็คชื่อย้อนหลัง') }} &rarr;
-                                    @endif
-                                </a>
-                            @elseif ($activity->status === 'closed' && ($lateCheckInStatuses[$activity->id] ?? null) === 'approved')
-                                <a href="{{ route('late-checkin.show', $activity) }}" class="text-sm font-medium text-brand-purple-600 transition-colors hover:text-brand-purple-800 dark:text-brand-purple-400 dark:hover:text-brand-purple-300">
-                                    {{ __('ดูรายละเอียดคำร้อง') }} &rarr;
+                                <a href="{{ $activity->usesSelfReportCheckIn() ? route('self-checkin.show', $activity) : route('checkin.show') }}" class="flex-1 rounded-lg bg-brand-purple-600 px-3 py-2 text-center text-xs font-semibold text-white shadow-soft transition-colors hover:bg-brand-purple-700">
+                                    {{ __('เช็คชื่อ') }}
                                 </a>
                             @else
-                                <span class="text-xs text-slate-400 dark:text-slate-500">{{ $levelLabel[$activity->activity_level] ?? '' }}</span>
+                                <span class="flex flex-1 items-center justify-center rounded-lg bg-slate-50 px-3 py-2 text-center text-xs text-slate-400 dark:bg-slate-800/60 dark:text-slate-500">
+                                    {{ $levelLabel[$activity->activity_level] ?? '' }}
+                                </span>
                             @endif
                         </div>
                     </div>

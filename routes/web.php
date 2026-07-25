@@ -119,6 +119,7 @@ Route::middleware(['auth', 'srru.email'])->group(function () {
         Route::get('/activity-history', [ActivityHistoryController::class, 'index'])->name('activity-history.index');
 
         Route::get('/activities', [StudentActivityController::class, 'index'])->name('activities.index');
+        Route::get('/activities/{activity}', [StudentActivityController::class, 'show'])->name('activities.show');
 
         Route::get('/checkin', [CheckInController::class, 'show'])->name('checkin.show');
         Route::post('/checkin', [CheckInController::class, 'store'])->name('checkin.store');
