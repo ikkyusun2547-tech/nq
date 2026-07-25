@@ -190,9 +190,12 @@
         <nav class="sticky top-0 z-40 bg-brand-purple-950 shadow-soft-lg" x-data="{ mobileOpen: false }">
             <div class="mx-auto max-w-[90rem] px-4 sm:px-6">
                 <div class="flex h-16 items-center justify-between gap-4">
-                    <a href="{{ route('dashboard') }}" class="flex shrink-0 items-center gap-2.5">
+                    <a href="{{ route('dashboard') }}" class="flex min-w-0 shrink-0 items-center gap-2.5">
                         <img src="{{ asset('images/logo.png') }}" alt="SRRU" class="h-11 w-11 shrink-0 object-contain drop-shadow">
-                        <span class="whitespace-nowrap text-sm font-semibold leading-tight text-white">SRRU Check</span>
+                        <span class="min-w-0">
+                            <span class="block whitespace-nowrap text-sm font-semibold leading-tight text-white">SRRU Check</span>
+                            <span class="hidden whitespace-nowrap text-[0.65rem] leading-snug text-violet-300/60 lg:block">{{ __('ระบบเช็คกิจกรรมนักศึกษา มหาวิทยาลัยราชภัฏสุรินทร์') }}</span>
+                        </span>
                     </a>
 
                     <div class="hidden flex-1 items-center justify-center gap-1 md:flex">
