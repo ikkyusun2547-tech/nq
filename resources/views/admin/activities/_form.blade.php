@@ -25,8 +25,10 @@
         creditHours: {{ old('credit_hours', $activity->credit_hours ?? 1) }},
         checkinMethod: '{{ old('checkin_method', $activity->checkin_method ?? 'realtime') }}',
         requiresGps: {{ old('requires_gps', $activity->requires_gps ?? true) ? 'true' : 'false' }},
+        eligibilityMode: '{{ (empty($selectedFaculties) && empty($selectedMajors) && empty($selectedYears)) ? 'open' : 'restricted' }}',
         lockCredit() { if (this.activityType === 'core') { this.creditHours = 5; } },
         refreshMap() { this.$nextTick(() => window.__activityMap && window.__activityMap.invalidateSize()); },
+        clearEligibilityRestrictions() { this.$refs.eligibilityPanel.querySelectorAll('input[type=checkbox]').forEach(cb => cb.checked = false); },
     }"
     x-init="lockCredit()"
 >
@@ -242,46 +244,114 @@
     </div>
 
     <div class="mt-6 rounded-2xl glass-card p-5 shadow-soft">
-        <h3 class="mb-3 text-sm font-medium text-slate-600 dark:text-slate-400">{{ __('กำหนดเป้าหมายผู้มีสิทธิ์เข้าร่วม (ไม่เลือกเลย = เปิดสิทธิ์ทั้งมหาวิทยาลัย)') }}</h3>
-        <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
-            <div>
-                <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-brand-purple-500 dark:text-brand-purple-400">{{ __('คณะ') }}</p>
-                <div class="space-y-1.5 max-h-48 overflow-y-auto pr-1">
-                    @foreach ($faculties as $faculty)
-                        <label class="flex items-center gap-2 text-sm">
-                            <input type="checkbox" name="faculty_ids[]" value="{{ $faculty->id }}"
-                                @checked(in_array($faculty->id, $selectedFaculties))
-                                class="rounded text-brand-purple-600 focus:ring-brand-purple-500">
-                            {{ $faculty->name_th }}
-                        </label>
-                    @endforeach
-                </div>
-            </div>
-            <div>
-                <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-brand-purple-500 dark:text-brand-purple-400">{{ __('สาขาวิชา') }}</p>
-                <div class="space-y-1.5 max-h-48 overflow-y-auto pr-1">
-                    @foreach ($faculties as $faculty)
-                        @foreach ($faculty->majors as $major)
-                            <label class="flex items-center gap-2 text-sm">
-                                <input type="checkbox" name="major_ids[]" value="{{ $major->id }}"
-                                    @checked(in_array($major->id, $selectedMajors))
-                                    class="rounded text-brand-purple-600 focus:ring-brand-purple-500">
-                                {{ $major->name_th }}
+        <h3 class="mb-1 text-sm font-medium text-slate-600 dark:text-slate-400">{{ __('ผู้มีสิทธิ์เข้าร่วม') }}</h3>
+        <p class="mb-3 text-xs text-slate-400 dark:text-slate-500">{{ __('เลือกได้ว่าจะเปิดให้นักศึกษาทุกคนเข้าร่วม หรือจำกัดเฉพาะคณะ/สาขา/ชั้นปีที่ต้องการ') }}</p>
+
+        <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <label class="flex cursor-pointer items-start gap-2 rounded-xl border border-slate-200 bg-slate-50/50 px-3 py-2.5 text-sm shadow-soft transition-all duration-200 has-[:checked]:border-brand-purple-500 has-[:checked]:bg-brand-purple-50 has-[:checked]:text-brand-purple-700 dark:border-slate-700 dark:bg-slate-800/40 dark:has-[:checked]:bg-brand-purple-500/10 dark:has-[:checked]:text-brand-purple-400">
+                <input type="radio" x-model="eligibilityMode" value="open" @change="clearEligibilityRestrictions()" class="mt-0.5 text-brand-purple-600 focus:ring-brand-purple-500">
+                <span>
+                    <span class="block font-medium">{{ __('เปิดให้นักศึกษาทุกคน') }}</span>
+                    <span class="block text-xs text-slate-400 dark:text-slate-500">{{ __('ทั้งมหาวิทยาลัย ไม่จำกัดคณะ/สาขา/ชั้นปี (ค่าเริ่มต้น)') }}</span>
+                </span>
+            </label>
+            <label class="flex cursor-pointer items-start gap-2 rounded-xl border border-slate-200 bg-slate-50/50 px-3 py-2.5 text-sm shadow-soft transition-all duration-200 has-[:checked]:border-brand-purple-500 has-[:checked]:bg-brand-purple-50 has-[:checked]:text-brand-purple-700 dark:border-slate-700 dark:bg-slate-800/40 dark:has-[:checked]:bg-brand-purple-500/10 dark:has-[:checked]:text-brand-purple-400">
+                <input type="radio" x-model="eligibilityMode" value="restricted" class="mt-0.5 text-brand-purple-600 focus:ring-brand-purple-500">
+                <span>
+                    <span class="block font-medium">{{ __('จำกัดเฉพาะกลุ่มเป้าหมาย') }}</span>
+                    <span class="block text-xs text-slate-400 dark:text-slate-500">{{ __('เลือกคณะ/สาขา/ชั้นปีที่ต้องการด้านล่าง') }}</span>
+                </span>
+            </label>
+        </div>
+
+        <div x-ref="eligibilityPanel" x-show="eligibilityMode === 'restricted'" x-cloak class="mt-4 border-t border-slate-100 pt-4 dark:border-slate-800">
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div>
+                    <div class="mb-2 flex items-center justify-between">
+                        <p class="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-brand-purple-500 dark:text-brand-purple-400">
+                            <svg class="h-3.5 w-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21"/></svg>
+                            {{ __('คณะ') }}
+                        </p>
+                        <div class="flex gap-2 text-[0.68rem]">
+                            <button type="button" class="text-brand-purple-600 hover:underline dark:text-brand-purple-400" @click="$refs.facultyList.querySelectorAll('input').forEach(cb => cb.checked = true)">{{ __('เลือกทั้งหมด') }}</button>
+                            <button type="button" class="text-slate-400 hover:underline dark:text-slate-500" @click="$refs.facultyList.querySelectorAll('input').forEach(cb => cb.checked = false)">{{ __('ล้าง') }}</button>
+                        </div>
+                    </div>
+                    <div x-ref="facultyList" class="divide-y divide-slate-100 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-soft dark:divide-slate-700 dark:border-slate-700 dark:bg-slate-800">
+                        @foreach ($faculties as $faculty)
+                            <label class="flex cursor-pointer items-center gap-2.5 px-3 py-2 text-sm text-slate-600 transition-colors duration-150 has-[:checked]:bg-brand-purple-50 has-[:checked]:font-medium has-[:checked]:text-brand-purple-700 hover:bg-slate-50 dark:text-slate-300 dark:has-[:checked]:bg-brand-purple-500/10 dark:has-[:checked]:text-brand-purple-400 dark:hover:bg-slate-700/50">
+                                <input type="checkbox" name="faculty_ids[]" value="{{ $faculty->id }}"
+                                    @checked(in_array($faculty->id, $selectedFaculties))
+                                    class="peer h-4 w-4 shrink-0 rounded border-slate-300 text-brand-purple-600 focus:ring-brand-purple-500 dark:border-slate-600">
+                                <span class="flex-1">{{ $faculty->name_th }}</span>
+                                <svg class="hidden h-4 w-4 shrink-0 text-brand-purple-600 peer-checked:block dark:text-brand-purple-400" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
                             </label>
                         @endforeach
-                    @endforeach
+                    </div>
+                </div>
+                <div>
+                    <div class="mb-2 flex items-center justify-between">
+                        <p class="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-brand-purple-500 dark:text-brand-purple-400">
+                            <svg class="h-3.5 w-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z"/></svg>
+                            {{ __('ชั้นปี') }}
+                        </p>
+                        <div class="flex gap-2 text-[0.68rem]">
+                            <button type="button" class="text-brand-purple-600 hover:underline dark:text-brand-purple-400" @click="$refs.yearList.querySelectorAll('input').forEach(cb => cb.checked = true)">{{ __('เลือกทั้งหมด') }}</button>
+                            <button type="button" class="text-slate-400 hover:underline dark:text-slate-500" @click="$refs.yearList.querySelectorAll('input').forEach(cb => cb.checked = false)">{{ __('ล้าง') }}</button>
+                        </div>
+                    </div>
+                    <div x-ref="yearList" class="divide-y divide-slate-100 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-soft dark:divide-slate-700 dark:border-slate-700 dark:bg-slate-800">
+                        @foreach ([1, 2, 3, 4] as $year)
+                            <label class="flex cursor-pointer items-center gap-2.5 px-3 py-2 text-sm text-slate-600 transition-colors duration-150 has-[:checked]:bg-brand-purple-50 has-[:checked]:font-medium has-[:checked]:text-brand-purple-700 hover:bg-slate-50 dark:text-slate-300 dark:has-[:checked]:bg-brand-purple-500/10 dark:has-[:checked]:text-brand-purple-400 dark:hover:bg-slate-700/50">
+                                <input type="checkbox" name="target_years[]" value="{{ $year }}"
+                                    @checked(in_array($year, $selectedYears))
+                                    class="peer h-4 w-4 shrink-0 rounded border-slate-300 text-brand-purple-600 focus:ring-brand-purple-500 dark:border-slate-600">
+                                <span class="flex-1">{{ __('ชั้นปีที่ :year', ['year' => $year]) }}</span>
+                                <svg class="hidden h-4 w-4 shrink-0 text-brand-purple-600 peer-checked:block dark:text-brand-purple-400" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+                            </label>
+                        @endforeach
+                    </div>
                 </div>
             </div>
-            <div>
-                <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-brand-purple-500 dark:text-brand-purple-400">{{ __('ชั้นปี') }}</p>
-                <div class="space-y-1.5">
-                    @foreach ([1, 2, 3, 4] as $year)
-                        <label class="flex items-center gap-2 text-sm">
-                            <input type="checkbox" name="target_years[]" value="{{ $year }}"
-                                @checked(in_array($year, $selectedYears))
-                                class="rounded text-brand-purple-600 focus:ring-brand-purple-500">
-                            {{ __('ชั้นปีที่ :year', ['year' => $year]) }}
-                        </label>
+
+            {{-- Full width and grouped into one card per faculty (instead of
+                 one tall scrolling list) so every major is visible at once —
+                 a single column would run to 48 rows for this dataset. --}}
+            <div class="mt-4">
+                <div class="mb-2 flex items-center justify-between">
+                    <p class="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-brand-purple-500 dark:text-brand-purple-400">
+                        <svg class="h-3.5 w-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.26 10.147a60.436 60.436 0 00-.491 6.347A48.627 48.627 0 0112 20.904a48.627 48.627 0 018.232-4.41 60.46 60.46 0 00-.491-6.347M4.26 10.147a50.57 50.57 0 00-2.658-.813A59.905 59.905 0 0112 3.493a59.902 59.902 0 0110.399 5.84c-.896.248-1.783.52-2.658.814M4.26 10.147A50.697 50.697 0 0112 13.489a50.702 50.702 0 017.74-3.342M6.75 15a.75.75 0 100-1.5.75.75 0 000 1.5zm0 0v-3.675A55.378 55.378 0 0112 8.443"/></svg>
+                        {{ __('สาขาวิชา') }}
+                    </p>
+                    <div class="flex gap-2 text-[0.68rem]">
+                        <button type="button" class="text-brand-purple-600 hover:underline dark:text-brand-purple-400" @click="$refs.majorGrid.querySelectorAll('input').forEach(cb => cb.checked = true)">{{ __('เลือกทั้งหมด') }}</button>
+                        <button type="button" class="text-slate-400 hover:underline dark:text-slate-500" @click="$refs.majorGrid.querySelectorAll('input').forEach(cb => cb.checked = false)">{{ __('ล้าง') }}</button>
+                    </div>
+                </div>
+                <div x-ref="majorGrid" class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                    @foreach ($faculties as $faculty)
+                        @if ($faculty->majors->isNotEmpty())
+                            <div x-ref="majorCard{{ $faculty->id }}" class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-soft dark:border-slate-700 dark:bg-slate-800">
+                                <div class="flex items-center justify-between bg-slate-50 px-3 py-1.5 dark:bg-slate-900/40">
+                                    <p class="text-[0.68rem] font-medium text-slate-500 dark:text-slate-400">{{ $faculty->name_th }}</p>
+                                    <div class="flex gap-1.5 text-[0.65rem]">
+                                        <button type="button" class="text-brand-purple-600 hover:underline dark:text-brand-purple-400" @click="$refs.majorCard{{ $faculty->id }}.querySelectorAll('input').forEach(cb => cb.checked = true)">{{ __('เลือกทั้งหมด') }}</button>
+                                        <button type="button" class="text-slate-400 hover:underline dark:text-slate-500" @click="$refs.majorCard{{ $faculty->id }}.querySelectorAll('input').forEach(cb => cb.checked = false)">{{ __('ล้าง') }}</button>
+                                    </div>
+                                </div>
+                                <div class="divide-y divide-slate-100 dark:divide-slate-700">
+                                    @foreach ($faculty->majors as $major)
+                                        <label class="flex cursor-pointer items-center gap-2.5 px-3 py-2 text-sm text-slate-600 transition-colors duration-150 has-[:checked]:bg-brand-purple-50 has-[:checked]:font-medium has-[:checked]:text-brand-purple-700 hover:bg-slate-50 dark:text-slate-300 dark:has-[:checked]:bg-brand-purple-500/10 dark:has-[:checked]:text-brand-purple-400 dark:hover:bg-slate-700/50">
+                                            <input type="checkbox" name="major_ids[]" value="{{ $major->id }}"
+                                                @checked(in_array($major->id, $selectedMajors))
+                                                class="peer h-4 w-4 shrink-0 rounded border-slate-300 text-brand-purple-600 focus:ring-brand-purple-500 dark:border-slate-600">
+                                            <span class="flex-1">{{ $major->name_th }}</span>
+                                            <svg class="hidden h-4 w-4 shrink-0 text-brand-purple-600 peer-checked:block dark:text-brand-purple-400" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+                                        </label>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endif
                     @endforeach
                 </div>
             </div>
