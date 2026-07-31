@@ -145,12 +145,22 @@
                                 -
                             @endif
                         </td>
-                        <td class="whitespace-nowrap px-4 py-3 text-slate-500 dark:text-slate-400">
-                            <div class="flex items-center gap-2">
-                                <span>{{ $activity->attendances_count }}</span>
+                        <td class="px-4 py-3 text-slate-500 dark:text-slate-400">
+                            @php
+                                $checkinRatio = $activity->eligible_count > 0
+                                    ? min(100, round($activity->attendances_count / $activity->eligible_count * 100))
+                                    : 0;
+                            @endphp
+                            <div class="flex min-w-[7rem] items-center gap-2">
+                                <div class="min-w-[3.5rem]">
+                                    <span class="whitespace-nowrap text-sm font-medium text-slate-700 dark:text-slate-200">{{ $activity->attendances_count }}</span><span class="text-slate-400 dark:text-slate-500">/{{ $activity->eligible_count }}</span>
+                                    <div class="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-700">
+                                        <div class="h-full rounded-full bg-brand-purple-500" style="width: {{ $checkinRatio }}%"></div>
+                                    </div>
+                                </div>
                                 @if ($activity->flagged_count > 0)
                                     <a href="{{ route('admin.attendance.index', $activity) }}"
-                                        class="inline-flex items-center gap-1 rounded-full bg-red-50 px-2 py-0.5 text-xs font-medium text-red-600 ring-1 ring-red-100 transition-colors hover:bg-red-100 dark:bg-red-500/10 dark:text-red-400 dark:ring-red-500/20 dark:hover:bg-red-500/20"
+                                        class="inline-flex shrink-0 items-center gap-1 rounded-full bg-red-50 px-2 py-0.5 text-xs font-medium text-red-600 ring-1 ring-red-100 transition-colors hover:bg-red-100 dark:bg-red-500/10 dark:text-red-400 dark:ring-red-500/20 dark:hover:bg-red-500/20"
                                         title="{{ __('มีรายการรอตรวจสอบ') }}">
                                         <svg class="h-3 w-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/></svg>
                                         {{ $activity->flagged_count }} {{ __('รอตรวจสอบ') }}

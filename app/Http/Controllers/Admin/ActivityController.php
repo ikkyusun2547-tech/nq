@@ -53,6 +53,14 @@ class ActivityController extends Controller
             ->paginate(20)
             ->withQueryString();
 
+        // Not eager-loadable via withCount() since eligibility depends on
+        // per-activity restriction rows rather than a simple relationship,
+        // but the page list is capped at 20 rows so the extra query per row
+        // is cheap.
+        $activities->getCollection()->each(
+            fn (Activity $activity) => $activity->eligible_count = $activity->eligibleStudentsCount()
+        );
+
         $academicYears = Activity::query()
             ->whereNotNull('academic_year')
             ->distinct()
