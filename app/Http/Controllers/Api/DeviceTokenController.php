@@ -12,7 +12,7 @@ class DeviceTokenController extends Controller
     {
         $validated = $request->validate([
             'token' => ['required', 'string'],
-            'platform' => ['sometimes', 'string', 'in:android,ios'],
+            'platform' => ['sometimes', 'string', 'in:android,ios,web'],
         ]);
 
         // Looked up globally by token (not scoped to the current user) so a

@@ -1,4 +1,9 @@
 @php
+    // 'right' (default) matches the student topnav, where this bell sits
+    // near the top-right. The admin sidebar include passes 'left': that
+    // bell sits near the bottom-left of the viewport instead (last item in
+    // the sidebar's flex-col footer).
+    $align = $align ?? 'right';
     $iconMeta = [
         'external' => ['tint' => 'bg-brand-purple-500/15 text-brand-purple-300', 'path' => 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z'],
         'check' => ['tint' => 'bg-brand-green-500/15 text-brand-green-300', 'path' => 'M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z'],
@@ -34,6 +39,13 @@
         init() {
             this.poll();
             setInterval(() => this.poll(), 20000);
+
+            // Web push arriving while this tab is focused doesn't show an OS
+            // toast (push-notifications.js suppresses that on purpose — the
+            // student's already looking at the app) and dispatches this
+            // instead, so the bell updates immediately rather than waiting
+            // up to 20s for the next poll.
+            window.addEventListener('push-notification-received', () => this.poll());
         },
     }"
     @click.outside="open = false"
@@ -48,63 +60,83 @@
             class="absolute -right-1 -top-1 flex h-4 min-w-[1rem] items-center justify-center rounded-full bg-red-500 px-1 text-[0.6rem] font-bold leading-none text-white ring-2 ring-brand-purple-950"></span>
     </button>
 
-    <div x-show="open" x-cloak x-transition:enter="transition ease-out duration-150" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"
-        class="fixed inset-x-4 top-16 z-50 origin-top overflow-hidden rounded-2xl bg-white shadow-soft-lg ring-1 ring-black/5 dark:bg-slate-900 dark:ring-white/10 sm:absolute sm:inset-x-auto sm:right-0 sm:top-auto sm:mt-2 sm:w-96 sm:origin-top-right"
-    >
-        <div class="flex items-center justify-between border-b border-slate-100 px-4 py-3 dark:border-slate-800">
-            <p class="text-sm font-semibold text-slate-800 dark:text-slate-100">{{ __('การแจ้งเตือน') }}</p>
-            <div class="flex items-center gap-3">
-                <form method="POST" action="{{ route('notifications.read-all') }}" x-show="unread > 0">
-                    @csrf
-                    <button type="submit" class="text-xs font-medium text-brand-purple-600 hover:underline dark:text-brand-purple-400">{{ __('อ่านทั้งหมด') }}</button>
-                </form>
-                <form method="POST" action="{{ route('notifications.destroy-all') }}" x-show="items.length > 0"
-                    onsubmit="return confirm('{{ __('ลบการแจ้งเตือนทั้งหมด? การลบไม่สามารถย้อนกลับได้') }}')">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="text-xs font-medium text-red-500 hover:underline dark:text-red-400">{{ __('ลบทั้งหมด') }}</button>
-                </form>
-                <button type="button" @click="open = false"
-                    class="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 dark:text-slate-500 dark:hover:bg-slate-800 dark:hover:text-slate-300"
-                    aria-label="{{ __('ปิด') }}"
-                >
-                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
-                </button>
-            </div>
-        </div>
-
-        <div class="max-h-96 overflow-y-auto">
-            <template x-if="items.length === 0">
-                <p class="px-4 py-8 text-center text-xs text-slate-400 dark:text-slate-500">{{ __('ไม่มีการแจ้งเตือน') }}</p>
-            </template>
-            <template x-for="item in items" :key="item.id">
-                <div class="group flex items-start transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/60" :class="! item.read ? 'bg-brand-purple-50/60 dark:bg-brand-purple-500/[0.06]' : ''">
-                    <form method="POST" :action="'{{ url('notifications') }}/' + item.id + '/read'" class="min-w-0 flex-1">
+    {{--
+        Teleported to <body> rather than left as a normal descendant here.
+        The admin sidebar <aside> that align=left renders inside always has
+        an active CSS `transform` (Tailwind's translate-x utilities drive
+        its open/close slide animation), and ANY element with a transform
+        becomes the containing block for its position:fixed descendants too
+        — not just absolute ones. So a plain sm:fixed panel nested in there
+        still resolved relative to the sidebar, not the viewport, and still
+        got clipped by the sidebar's own overflow-hidden + 256px width.
+        x-teleport physically moves this DOM node to be a child of <body>
+        (no transform there) while keeping it fully wired to the same
+        Alpine component above — including @click.outside on the wrapper,
+        which Alpine's teleport support accounts for.
+    --}}
+    <template x-teleport="body">
+        <div x-show="open" x-cloak x-transition:enter="transition ease-out duration-150" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"
+            @class([
+                'fixed inset-x-4 z-50 w-auto overflow-hidden rounded-2xl bg-white shadow-soft-lg ring-1 ring-black/5 dark:bg-slate-900 dark:ring-white/10 sm:inset-x-auto sm:w-96',
+                'top-16 origin-top sm:top-16 sm:right-4 sm:origin-top-right' => $align === 'right',
+                'bottom-20 origin-bottom sm:bottom-4 sm:left-4 sm:origin-bottom-left' => $align === 'left',
+            ])
+        >
+            <div class="flex items-center justify-between border-b border-slate-100 px-4 py-3 dark:border-slate-800">
+                <p class="text-sm font-semibold text-slate-800 dark:text-slate-100">{{ __('การแจ้งเตือน') }}</p>
+                <div class="flex items-center gap-3">
+                    <form method="POST" action="{{ route('notifications.read-all') }}" x-show="unread > 0">
                         @csrf
-                        <button type="submit" class="flex w-full min-w-0 items-start gap-3 py-3 pl-4 pr-1 text-left">
-                            <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full" :class="(icons[item.icon] || icons.check).tint">
-                                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" :d="(icons[item.icon] || icons.check).path"/></svg>
-                            </span>
-                            <span class="min-w-0 flex-1">
-                                <span class="block truncate text-sm font-medium text-slate-800 dark:text-slate-100" x-text="item.title"></span>
-                                <span class="mt-0.5 block text-xs text-slate-500 dark:text-slate-400" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;" x-text="item.body"></span>
-                                <span class="mt-1 block text-[0.65rem] text-slate-400 dark:text-slate-500" x-text="item.created_at"></span>
-                            </span>
-                            <span x-show="! item.read" class="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-brand-purple-500"></span>
-                        </button>
+                        <button type="submit" class="text-xs font-medium text-brand-purple-600 hover:underline dark:text-brand-purple-400">{{ __('อ่านทั้งหมด') }}</button>
                     </form>
-                    <button type="button" @click="remove(item)"
-                        class="mr-2 mt-3 shrink-0 rounded-lg p-1.5 text-slate-300 opacity-0 transition-all hover:bg-red-50 hover:text-red-500 group-hover:opacity-100 dark:text-slate-600 dark:hover:bg-red-500/10 dark:hover:text-red-400"
-                        aria-label="{{ __('ลบการแจ้งเตือน') }}"
+                    <form method="POST" action="{{ route('notifications.destroy-all') }}" x-show="items.length > 0"
+                        onsubmit="return confirm('{{ __('ลบการแจ้งเตือนทั้งหมด? การลบไม่สามารถย้อนกลับได้') }}')">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="text-xs font-medium text-red-500 hover:underline dark:text-red-400">{{ __('ลบทั้งหมด') }}</button>
+                    </form>
+                    <button type="button" @click="open = false"
+                        class="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 dark:text-slate-500 dark:hover:bg-slate-800 dark:hover:text-slate-300"
+                        aria-label="{{ __('ปิด') }}"
                     >
-                        <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
                     </button>
                 </div>
-            </template>
-        </div>
+            </div>
 
-        <a href="{{ route('notifications.index') }}" class="block border-t border-slate-100 px-4 py-2.5 text-center text-xs font-medium text-brand-purple-600 hover:bg-slate-50 dark:border-slate-800 dark:text-brand-purple-400 dark:hover:bg-slate-800/60">
-            {{ __('ดูการแจ้งเตือนทั้งหมด') }}
-        </a>
-    </div>
+            <div class="max-h-96 overflow-y-auto">
+                <template x-if="items.length === 0">
+                    <p class="px-4 py-8 text-center text-xs text-slate-400 dark:text-slate-500">{{ __('ไม่มีการแจ้งเตือน') }}</p>
+                </template>
+                <template x-for="item in items" :key="item.id">
+                    <div class="group flex items-start transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/60" :class="! item.read ? 'bg-brand-purple-50/60 dark:bg-brand-purple-500/[0.06]' : ''">
+                        <form method="POST" :action="'{{ url('notifications') }}/' + item.id + '/read'" class="min-w-0 flex-1">
+                            @csrf
+                            <button type="submit" class="flex w-full min-w-0 items-start gap-3 py-3 pl-4 pr-1 text-left">
+                                <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full" :class="(icons[item.icon] || icons.check).tint">
+                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" :d="(icons[item.icon] || icons.check).path"/></svg>
+                                </span>
+                                <span class="min-w-0 flex-1">
+                                    <span class="block truncate text-sm font-medium text-slate-800 dark:text-slate-100" x-text="item.title"></span>
+                                    <span class="mt-0.5 block text-xs text-slate-500 dark:text-slate-400" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;" x-text="item.body"></span>
+                                    <span class="mt-1 block text-[0.65rem] text-slate-400 dark:text-slate-500" x-text="item.created_at"></span>
+                                </span>
+                                <span x-show="! item.read" class="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-brand-purple-500"></span>
+                            </button>
+                        </form>
+                        <button type="button" @click="remove(item)"
+                            class="mr-2 mt-3 shrink-0 rounded-lg p-1.5 text-slate-300 opacity-0 transition-all hover:bg-red-50 hover:text-red-500 group-hover:opacity-100 dark:text-slate-600 dark:hover:bg-red-500/10 dark:hover:text-red-400"
+                            aria-label="{{ __('ลบการแจ้งเตือน') }}"
+                        >
+                            <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                        </button>
+                    </div>
+                </template>
+            </div>
+
+            <a href="{{ route('notifications.index') }}" class="block border-t border-slate-100 px-4 py-2.5 text-center text-xs font-medium text-brand-purple-600 hover:bg-slate-50 dark:border-slate-800 dark:text-brand-purple-400 dark:hover:bg-slate-800/60">
+                {{ __('ดูการแจ้งเตือนทั้งหมด') }}
+            </a>
+        </div>
+    </template>
 </div>

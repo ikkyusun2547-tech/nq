@@ -16,6 +16,7 @@ use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Admin\StudentController;
 use App\Http\Controllers\Admin\StudentImportController;
 use App\Http\Controllers\Admin\UserManagementController;
+use App\Http\Controllers\Api\DeviceTokenController;
 use App\Http\Controllers\Auth\GoogleAuthController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileSetupController;
@@ -158,6 +159,15 @@ Route::middleware(['auth', 'srru.email'])->group(function () {
         Route::post('/notifications/read-all', [NotificationController::class, 'readAll'])->name('notifications.read-all');
         Route::delete('/notifications/destroy-all', [NotificationController::class, 'destroyAll'])->name('notifications.destroy-all');
         Route::delete('/notifications/{notification}', [NotificationController::class, 'destroy'])->name('notifications.destroy');
+
+        // Session-authenticated twin of Api\DeviceTokenController's routes
+        // (routes/api.php, guarded by auth:sanctum) — the browser has a
+        // Laravel session cookie, not a Sanctum bearer token, and
+        // bootstrap/app.php doesn't enable statefulApi() for api.php, so
+        // the mobile app's endpoint isn't reachable from here. Same
+        // controller, same logic either way.
+        Route::post('/device-token', [DeviceTokenController::class, 'store'])->name('device-token.store');
+        Route::delete('/device-token', [DeviceTokenController::class, 'destroy'])->name('device-token.destroy');
     });
 
     Route::middleware('admin')->prefix('admin')->name('admin.')->group(function () {

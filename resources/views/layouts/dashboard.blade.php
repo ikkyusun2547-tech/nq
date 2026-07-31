@@ -146,7 +146,7 @@
 
                 <div class="relative shrink-0 border-t border-white/10 p-3">
                     <div class="flex items-center gap-2 px-1 pb-2">
-                        @include('partials.notification-bell')
+                        @include('partials.notification-bell', ['align' => 'left'])
                         @include('partials.theme-toggle')
                         @include('partials.locale-switch')
                     </div>
@@ -271,6 +271,8 @@
         @include('partials.mobile-tab-bar')
         @include('partials.pwa-install-banner')
     @endif
+
+    @include('partials.push-notification-banner')
 
     @stack('scripts')
 </body>
