@@ -22,9 +22,19 @@ class GoogleAuthController extends Controller
         // even with a matching redirect URI). Access is still gated to
         // @srru.ac.th emails below, so the practical risk is low for this
         // internal tool.
+        // Force the account chooser and a fresh consent screen on every
+        // attempt — otherwise logging out of just this app while still
+        // signed into Google in the browser silently re-authenticates as
+        // whichever Google account was last used here, with no picker at
+        // all. Note this can't force Google to re-ask for a *password*
+        // specifically — that call is Google's alone, based on how trusted
+        // it considers the existing browser session (same limitation every
+        // "Sign in with Google" integration has, not something a relying
+        // party can override).
         return Socialite::driver('google')
             ->stateless()
             ->redirectUrl(url('/auth/google/callback'))
+            ->with(['prompt' => 'select_account consent'])
             ->redirect();
     }
 
