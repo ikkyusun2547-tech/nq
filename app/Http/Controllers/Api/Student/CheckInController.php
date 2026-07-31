@@ -5,10 +5,7 @@ namespace App\Http\Controllers\Api\Student;
 use App\Exceptions\QrTokenException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CheckInRequest;
-use App\Models\User;
-use App\Notifications\AttendanceFlagged;
 use App\Services\AttendanceAutomationService;
-use App\Services\SafeNotifier;
 use Illuminate\Validation\ValidationException;
 
 class CheckInController extends Controller
@@ -30,11 +27,11 @@ class CheckInController extends Controller
             return response()->json(['message' => collect($e->errors())->flatten()->first()], 422);
         }
 
-        if ($attendance->status === 'flagged') {
-            $admins = User::whereIn('role', ['admin', 'super_admin'])->get();
-            SafeNotifier::send($admins, new AttendanceFlagged($attendance->load(['user', 'activity'])));
-        }
-
+        // Flagged (anomaly-detected) attendance used to notify admins here —
+        // removed in favor of a passive count badge on admin/activities
+        // (see Admin\ActivityController::index()'s flagged_count) so a busy
+        // admin isn't pinged for every single flag, just shown there's a
+        // queue to work through whenever they check.
         return response()->json([
             'status' => $attendance->status,
             'distance_meters' => $attendance->distance_meters,

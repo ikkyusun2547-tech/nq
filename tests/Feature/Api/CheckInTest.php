@@ -5,7 +5,6 @@ namespace Tests\Feature\Api;
 use App\Models\Activity;
 use App\Models\Attendance;
 use App\Models\User;
-use App\Notifications\AttendanceFlagged;
 use App\Services\DynamicQrTokenGenerator;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -155,8 +154,11 @@ class CheckInTest extends TestCase
         $this->assertSame(1, Attendance::where('user_id', $user->id)->where('activity_id', $activity->id)->count());
     }
 
-    // 7. Admin gets notified when a check-in is flagged
-    public function test_admin_is_notified_when_a_checkin_is_flagged(): void
+    // 7. A flagged check-in no longer actively notifies admins — they see
+    // it via the pending-review count badge on admin/activities instead
+    // (Admin\ActivityController::index()'s flagged_count) rather than a
+    // notification per flag.
+    public function test_a_flagged_checkin_does_not_notify_admins(): void
     {
         Notification::fake();
 
@@ -167,7 +169,7 @@ class CheckInTest extends TestCase
         $this->submit($user, $activity, $this->tokens->generateStatic($activity), 14.0, 103.0, 'device-7')
             ->assertOk()->assertJson(['status' => 'flagged']);
 
-        Notification::assertSentTo($admin, AttendanceFlagged::class);
+        Notification::assertNothingSentTo($admin);
     }
 
     // 8. requires_gps = false -> check-in with no location at all still

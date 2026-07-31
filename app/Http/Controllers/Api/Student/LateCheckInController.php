@@ -10,8 +10,6 @@ use App\Models\Activity;
 use App\Models\Attendance;
 use App\Models\LateCheckInRequest;
 use App\Models\User;
-use App\Notifications\LateCheckInRequestSubmitted;
-use App\Services\SafeNotifier;
 use Illuminate\Http\Request;
 
 class LateCheckInController extends Controller
@@ -46,9 +44,11 @@ class LateCheckInController extends Controller
             'status' => 'pending',
         ]);
 
-        $admins = User::whereIn('role', ['admin', 'super_admin'])->get();
-        SafeNotifier::send($admins, new LateCheckInRequestSubmitted($lateCheckInRequest->load(['user', 'activity'])));
-
+        // Used to notify admins here — removed in favor of a passive count
+        // badge on admin/activities (see
+        // Admin\ActivityController::index()'s pending_late_checkin_count)
+        // so a busy admin isn't pinged for every single submission, just
+        // shown there's a queue to work through whenever they check.
         return response()->json([
             'message' => __('ส่งคำร้องขอเช็คชื่อย้อนหลังสำเร็จ รอเจ้าหน้าที่ตรวจสอบ'),
             'request' => new LateCheckInRequestResource($lateCheckInRequest),

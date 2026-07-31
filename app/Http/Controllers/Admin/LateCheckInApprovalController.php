@@ -19,6 +19,7 @@ class LateCheckInApprovalController extends Controller
 
         $requests = LateCheckInRequest::with(['user.faculty', 'user.major', 'activity'])
             ->when($status !== 'all', fn ($query) => $query->where('status', $status))
+            ->when($request->filled('activity_id'), fn ($query) => $query->where('activity_id', $request->input('activity_id')))
             ->when($request->filled('search'), function ($query) use ($request) {
                 $search = $request->string('search');
 

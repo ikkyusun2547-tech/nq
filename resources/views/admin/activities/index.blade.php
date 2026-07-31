@@ -161,9 +161,17 @@
                                 @if ($activity->flagged_count > 0)
                                     <a href="{{ route('admin.attendance.index', $activity) }}"
                                         class="inline-flex shrink-0 items-center gap-1 rounded-full bg-red-50 px-2 py-0.5 text-xs font-medium text-red-600 ring-1 ring-red-100 transition-colors hover:bg-red-100 dark:bg-red-500/10 dark:text-red-400 dark:ring-red-500/20 dark:hover:bg-red-500/20"
-                                        title="{{ __('มีรายการรอตรวจสอบ') }}">
+                                        title="{{ __('มีการเช็คชื่อรอตรวจสอบ') }}">
                                         <svg class="h-3 w-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/></svg>
                                         {{ $activity->flagged_count }} {{ __('รอตรวจสอบ') }}
+                                    </a>
+                                @endif
+                                @if ($activity->pending_late_checkin_count > 0)
+                                    <a href="{{ route('admin.late-checkins.index', ['activity_id' => $activity->id]) }}"
+                                        class="inline-flex shrink-0 items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-600 ring-1 ring-amber-100 transition-colors hover:bg-amber-100 dark:bg-amber-500/10 dark:text-amber-400 dark:ring-amber-500/20 dark:hover:bg-amber-500/20"
+                                        title="{{ __('มีคำร้องเช็คชื่อย้อนหลังรอตรวจสอบ') }}">
+                                        <svg class="h-3 w-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                        {{ $activity->pending_late_checkin_count }} {{ __('ย้อนหลัง') }}
                                     </a>
                                 @endif
                             </div>

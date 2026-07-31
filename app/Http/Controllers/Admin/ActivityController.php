@@ -42,6 +42,12 @@ class ActivityController extends Controller
         $activities = Activity::withCount([
             'attendances',
             'attendances as flagged_count' => fn ($query) => $query->where('status', 'flagged'),
+            // Flagged attendance and late check-in requests used to notify
+            // admins the moment a student submitted one — now they're only
+            // surfaced as these passive counts (see resources/views/admin/
+            // activities/index.blade.php), so an admin sees there's a queue
+            // to work through without being pinged for every submission.
+            'lateCheckInRequests as pending_late_checkin_count' => fn ($query) => $query->where('status', 'pending'),
         ])
             ->when($request->filled('search'), function ($query) use ($request) {
                 $query->where('title', 'like', '%'.$request->string('search').'%');
