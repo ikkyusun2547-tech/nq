@@ -13,3 +13,17 @@ Artisan::command('inspire', function () {
 // fires on its own. Hourly is frequent enough that a missed check-in never
 // waits much more than an hour to see it was flagged as missed.
 Schedule::command('app:close-ended-activities')->hourly();
+
+// Same cron dependency as above. Once a day is enough for a "starts
+// tomorrow" reminder — see NotifyUpcomingActivities' class comment for why
+// this can't double-notify the same activity even on a daily cadence.
+Schedule::command('app:notify-upcoming-activities')->dailyAt('09:00');
+
+// Drains the notification queue (see BaseNotification's ShouldQueue) every
+// minute. --stop-when-empty exits as soon as the queue is empty instead of
+// running forever, which is what lets this piggyback on the scheduler's
+// cron entry above instead of needing a separate long-running `queue:work`
+// daemon under Supervisor — the right call at this app's traffic volume,
+// worth revisiting if notification volume ever grows enough that a minute's
+// delivery lag becomes a problem.
+Schedule::command('queue:work --stop-when-empty --max-time=50')->everyMinute()->withoutOverlapping();

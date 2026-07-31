@@ -42,6 +42,8 @@
     "อัปเดตแล้ว": "Updated",
     "มีกิจกรรมใหม่ที่คุณมีสิทธิ์เข้าร่วม": "A new activity you're eligible for was posted",
     "กิจกรรมใหม่ \":title\" เปิดรับสมัครแล้ว": "\":title\" is now open for registration",
+    "กิจกรรมที่คุณมีสิทธิ์เข้าร่วมจะเริ่มพรุ่งนี้": "An activity you're eligible for starts tomorrow",
+    "กิจกรรม \":title\" จะเริ่มวันพรุ่งนี้ เวลา :time ที่ :location": "\":title\" starts tomorrow at :time, :location",
     ":name เช็คชื่อกิจกรรม \":title\" แต่ระบบตรวจพบความผิดปกติ": ":name checked in to \":title\" but the system flagged an anomaly",
     "การเช็คชื่อของคุณได้รับการอนุมัติแล้ว": "Your check-in was approved",
     "เจ้าหน้าที่ตรวจสอบและอนุมัติการเช็คชื่อกิจกรรม \":title\" ให้คุณแล้ว": "Staff reviewed and approved your check-in for \":title\"",

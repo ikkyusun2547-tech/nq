@@ -3,6 +3,8 @@
 namespace App\Notifications;
 
 use App\Notifications\Channels\FcmChannel;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
@@ -13,9 +15,19 @@ use Illuminate\Notifications\Notification;
  * every notification gets an email and a push notification for free, with
  * identical wording, instead of duplicating a toMail()/toFcm() in every
  * concrete class.
+ *
+ * ShouldQueue: dispatches to the `jobs` table (QUEUE_CONNECTION=database)
+ * instead of sending inline within the request — required so a bulk
+ * fan-out (see ActivityCreated/ActivityUpdated/ActivityMissed/Announcement,
+ * which can each target hundreds of students from one admin action) can't
+ * block that request on synchronous SMTP. Draining the queue is handled by
+ * a scheduled `queue:work --stop-when-empty` in routes/console.php, piggybacking
+ * on the same cron entry the scheduler already needs.
  */
-abstract class BaseNotification extends Notification
+abstract class BaseNotification extends Notification implements ShouldQueue
 {
+    use Queueable;
+
     public function via(object $notifiable): array
     {
         return ['database', 'mail', FcmChannel::class];
