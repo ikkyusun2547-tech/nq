@@ -177,7 +177,7 @@
                 <input type="radio" name="checkin_method" value="self_report" x-model="checkinMethod" class="mt-0.5 text-brand-purple-600 focus:ring-brand-purple-500">
                 <span>
                     <span class="block font-medium">{{ __('รายงานตนเอง + แนบรูปหลักฐาน') }}</span>
-                    <span class="block text-xs text-slate-400 dark:text-slate-500">{{ __('ไม่ใช้ QR/GPS — สำหรับสถานที่ที่ฉาย QR ไม่ได้ ต้องรอแอดมินตรวจสอบก่อนอนุมัติเสมอ') }}</span>
+                    <span class="block text-xs text-slate-400 dark:text-slate-500">{{ __('ไม่ใช้ QR/GPS — สำหรับสถานที่ที่ฉาย QR ไม่ได้ ค่าเริ่มต้นต้องรอแอดมินตรวจสอบก่อนอนุมัติ (ปรับได้ด้านล่าง)') }}</span>
                 </span>
             </label>
         </div>
@@ -189,6 +189,19 @@
                 <span>
                     <span class="block font-medium">{{ __('ต้องตรวจสอบตำแหน่ง GPS') }}</span>
                     <span class="block text-xs text-slate-400 dark:text-slate-500">{{ __('ปิดไว้สำหรับสถานที่ที่ GPS ไม่เสถียร (ในตึก/ใต้ดิน) — ยังคงสแกน QR และถ่ายเซลฟีตามปกติ') }}</span>
+                </span>
+            </label>
+        </div>
+
+        <div x-show="checkinMethod === 'self_report'" x-cloak class="mt-3">
+            <label class="flex cursor-pointer items-start gap-2 rounded-xl border border-slate-200 bg-slate-50/50 px-3 py-2.5 text-sm shadow-soft transition-all duration-200 has-[:checked]:border-brand-purple-500 has-[:checked]:bg-brand-purple-50 dark:border-slate-700 dark:bg-slate-800/40 dark:has-[:checked]:bg-brand-purple-500/10">
+                <input type="hidden" name="self_report_auto_approve" value="0">
+                <input type="checkbox" name="self_report_auto_approve" value="1"
+                    @checked(old('self_report_auto_approve', $activity->self_report_auto_approve ?? false))
+                    class="mt-0.5 rounded text-brand-purple-600 focus:ring-brand-purple-500">
+                <span>
+                    <span class="block font-medium">{{ __('อนุมัติอัตโนมัติ ไม่ต้องรอตรวจสอบ') }}</span>
+                    <span class="block text-xs text-slate-400 dark:text-slate-500">{{ __('ปกติทุกรายการที่รายงานตนเองต้องรอแอดมินตรวจสอบก่อนเสมอ — เปิดตัวเลือกนี้เพื่อบันทึกชั่วโมงให้ทันทีที่ส่งหลักฐานแทน เหมาะกับกิจกรรมความเสี่ยงต่ำที่ไม่จำเป็นต้องตรวจสอบราย ๆ') }}</span>
                 </span>
             </label>
         </div>

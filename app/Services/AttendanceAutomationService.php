@@ -160,8 +160,8 @@ class AttendanceAutomationService
                 'checkin_method' => 'self_report',
                 'checkin_time' => now(),
                 'photo_path' => $photoPath,
-                'status' => 'flagged',
-                'flag_reason' => 'SELF_REPORTED',
+                'status' => $activity->self_report_auto_approve ? 'auto_approved' : 'flagged',
+                'flag_reason' => $activity->self_report_auto_approve ? null : 'SELF_REPORTED',
             ]);
         } catch (QueryException $e) {
             Storage::disk('public')->delete($photoPath);

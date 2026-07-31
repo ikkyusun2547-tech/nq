@@ -5,10 +5,7 @@ namespace App\Http\Controllers\Student;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\SelfReportCheckInRequest;
 use App\Models\Activity;
-use App\Models\User;
-use App\Notifications\AttendanceFlagged;
 use App\Services\AttendanceAutomationService;
-use App\Services\SafeNotifier;
 use Illuminate\Validation\ValidationException;
 
 class SelfCheckInController extends Controller
@@ -30,11 +27,15 @@ class SelfCheckInController extends Controller
             return back()->withErrors($e->errors());
         }
 
-        $admins = User::whereIn('role', ['admin', 'super_admin'])->get();
-        SafeNotifier::send($admins, new AttendanceFlagged($attendance->load(['user', 'activity'])));
-
+        // Flagged (pending-review) self-reports used to notify admins here
+        // — removed in favor of a passive count badge on admin/activities
+        // (see Admin\ActivityController::index()'s flagged_count) so a busy
+        // admin isn't pinged for every single submission, just shown
+        // there's a queue to work through whenever they check.
         return redirect()
             ->route('activities.index')
-            ->with('status', __('ส่งหลักฐานการเข้าร่วมสำเร็จ รอเจ้าหน้าที่ตรวจสอบ'));
+            ->with('status', $attendance->status === 'auto_approved'
+                ? __('เช็คชื่อสำเร็จ! บันทึกชั่วโมงกิจกรรมเรียบร้อยแล้ว')
+                : __('ส่งหลักฐานการเข้าร่วมสำเร็จ รอเจ้าหน้าที่ตรวจสอบ'));
     }
 }

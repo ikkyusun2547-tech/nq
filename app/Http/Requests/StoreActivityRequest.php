@@ -39,6 +39,7 @@ class StoreActivityRequest extends FormRequest
             'end_at' => ['required', 'date', 'after:start_at'],
             'location_name' => ['required', 'string', 'max:255'],
             'checkin_method' => ['required', Rule::in(['realtime', 'self_report'])],
+            'self_report_auto_approve' => ['boolean'],
             'requires_gps' => ['boolean'],
             // Thailand's bounding box, roughly: lat 5.6-20.5N, lng 97.3-105.7E
             // Only actually required when the GPS-radius check is in effect
@@ -68,7 +69,10 @@ class StoreActivityRequest extends FormRequest
      */
     protected function prepareForValidation(): void
     {
-        $this->merge(['requires_gps' => $this->boolean('requires_gps')]);
+        $this->merge([
+            'requires_gps' => $this->boolean('requires_gps'),
+            'self_report_auto_approve' => $this->boolean('self_report_auto_approve'),
+        ]);
     }
 
     /**
