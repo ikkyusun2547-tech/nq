@@ -193,14 +193,11 @@
                                 @csrf
                                 <button type="submit" class="font-medium text-slate-500 transition-colors hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200">{{ __('คัดลอก') }}</button>
                             </form>
-                            <form
-                                method="POST" action="{{ route('admin.activities.destroy', $activity) }}"
-                                class="inline"
-                                onsubmit="return confirm('{{ __('ยืนยันลบกิจกรรม \":title\"? การลบไม่สามารถย้อนกลับได้', ['title' => addslashes($activity->title)]) }}')"
-                            >
+                            <form method="POST" action="{{ route('admin.activities.destroy', $activity) }}" class="inline">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="font-medium text-red-500 transition-colors hover:text-red-700 dark:text-red-400 dark:hover:text-red-300">{{ __('ลบ') }}</button>
+                                <x-confirm-submit tone="red" :message="__('ยืนยันลบกิจกรรม \':title\'? การลบไม่สามารถย้อนกลับได้', ['title' => $activity->title])" :label="__('ลบ')"
+                                    class="font-medium text-red-500 transition-colors hover:text-red-700 dark:text-red-400 dark:hover:text-red-300">{{ __('ลบ') }}</x-confirm-submit>
                             </form>
                         </td>
                     </tr>

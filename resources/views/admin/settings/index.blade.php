@@ -34,11 +34,13 @@
                         <h2 class="text-sm font-semibold text-slate-900 dark:text-slate-100">{{ __('รหัสนักศึกษาปี :year', ['year' => $year]) }}</h2>
                         <div class="flex items-center gap-3">
                             <a href="{{ route('admin.settings.edit', $year) }}" class="text-xs font-medium text-brand-purple-600 hover:underline dark:text-brand-purple-400">{{ __('แก้ไข') }}</a>
-                            <form method="POST" action="{{ route('admin.settings.destroy', $year) }}"
-                                onsubmit="return confirm('{{ __('ลบเกณฑ์ปี :year? นักศึกษารหัสปีนี้จะกลับไปใช้เกณฑ์ปีก่อนหน้าหรือค่าเริ่มต้นแทน', ['year' => $year]) }}')">
+                            <form method="POST" action="{{ route('admin.settings.destroy', $year) }}">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="text-xs font-medium text-red-500 hover:underline dark:text-red-400">{{ __('ลบ') }}</button>
+                                <x-confirm-submit tone="red"
+                                    :message="__('ลบเกณฑ์ปี :year? นักศึกษารหัสปีนี้จะกลับไปใช้เกณฑ์ปีก่อนหน้าหรือค่าเริ่มต้นแทน', ['year' => $year])"
+                                    :label="__('ลบ')"
+                                    class="text-xs font-medium text-red-500 hover:underline dark:text-red-400">{{ __('ลบ') }}</x-confirm-submit>
                             </form>
                         </div>
                     </div>

@@ -115,11 +115,11 @@
                         @csrf
                         <button type="submit" class="text-xs font-medium text-brand-purple-600 hover:underline dark:text-brand-purple-400">{{ __('อ่านทั้งหมด') }}</button>
                     </form>
-                    <form method="POST" action="{{ route('notifications.destroy-all') }}" x-show="items.length > 0"
-                        onsubmit="return confirm('{{ __('ลบการแจ้งเตือนทั้งหมด? การลบไม่สามารถย้อนกลับได้') }}')">
+                    <form method="POST" action="{{ route('notifications.destroy-all') }}" x-show="items.length > 0">
                         @csrf
                         @method('DELETE')
-                        <button type="submit" class="text-xs font-medium text-red-500 hover:underline dark:text-red-400">{{ __('ลบทั้งหมด') }}</button>
+                        <x-confirm-submit tone="red" :message="__('ลบการแจ้งเตือนทั้งหมด? การลบไม่สามารถย้อนกลับได้')" :label="__('ลบทั้งหมด')"
+                            class="text-xs font-medium text-red-500 hover:underline dark:text-red-400">{{ __('ลบทั้งหมด') }}</x-confirm-submit>
                     </form>
                     <button type="button" @click="open = false"
                         class="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 dark:text-slate-500 dark:hover:bg-slate-800 dark:hover:text-slate-300"

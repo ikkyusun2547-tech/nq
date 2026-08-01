@@ -25,10 +25,11 @@
                 @csrf
                 <button type="submit" class="text-xs font-medium text-brand-purple-600 hover:underline dark:text-brand-purple-400">{{ __('อ่านทั้งหมด') }}</button>
             </form>
-            <form method="POST" action="{{ route('notifications.destroy-all') }}" onsubmit="return confirm('{{ __('ลบการแจ้งเตือนทั้งหมด? การลบไม่สามารถย้อนกลับได้') }}')">
+            <form method="POST" action="{{ route('notifications.destroy-all') }}">
                 @csrf
                 @method('DELETE')
-                <button type="submit" class="text-xs font-medium text-red-500 hover:underline dark:text-red-400">{{ __('ลบทั้งหมด') }}</button>
+                <x-confirm-submit tone="red" :message="__('ลบการแจ้งเตือนทั้งหมด? การลบไม่สามารถย้อนกลับได้')" :label="__('ลบทั้งหมด')"
+                    class="text-xs font-medium text-red-500 hover:underline dark:text-red-400">{{ __('ลบทั้งหมด') }}</x-confirm-submit>
             </form>
         </div>
 
@@ -52,15 +53,14 @@
                             @endunless
                         </button>
                     </form>
-                    <form method="POST" action="{{ route('notifications.destroy', $notification->id) }}" class="shrink-0 pr-3 pt-4"
-                        onsubmit="return confirm('{{ __('ลบการแจ้งเตือนนี้?') }}')">
+                    <form method="POST" action="{{ route('notifications.destroy', $notification->id) }}" class="shrink-0 pr-3 pt-4">
                         @csrf
                         @method('DELETE')
-                        <button type="submit"
+                        <x-confirm-submit tone="red" :message="__('ลบการแจ้งเตือนนี้?')" :label="__('ลบ')"
                             class="rounded-lg p-1.5 text-slate-300 opacity-0 transition-all hover:bg-red-50 hover:text-red-500 group-hover:opacity-100 dark:text-slate-600 dark:hover:bg-red-500/10 dark:hover:text-red-400"
                             aria-label="{{ __('ลบการแจ้งเตือน') }}">
                             <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
-                        </button>
+                        </x-confirm-submit>
                     </form>
                 </div>
             @endforeach

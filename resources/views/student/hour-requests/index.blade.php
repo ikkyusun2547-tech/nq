@@ -185,13 +185,11 @@
                         <p class="mt-2 rounded-xl bg-brand-purple-50 px-3 py-2 text-xs text-brand-purple-700 dark:bg-brand-purple-500/10 dark:text-brand-purple-400">{{ __('ความเห็นกองพัฒนานักศึกษา:') }} {{ $req->admin_comment }}</p>
                     @endif
                     @if ($req->status === 'pending')
-                        <form
-                            method="POST" action="{{ route('external-activities.destroy', $req) }}" class="mt-2.5"
-                            onsubmit="return confirm('{{ __('ยืนยันยกเลิกคำร้องนี้?') }}')"
-                        >
+                        <form method="POST" action="{{ route('external-activities.destroy', $req) }}" class="mt-2.5">
                             @csrf
                             @method('DELETE')
-                            <button type="submit" class="text-xs font-medium text-red-500 transition-colors hover:text-red-700 dark:text-red-400 dark:hover:text-red-300">{{ __('ยกเลิกคำร้อง') }}</button>
+                            <x-confirm-submit tone="red" :message="__('ยืนยันยกเลิกคำร้องนี้?')" :label="__('ยกเลิกคำร้อง')"
+                                class="text-xs font-medium text-red-500 transition-colors hover:text-red-700 dark:text-red-400 dark:hover:text-red-300">{{ __('ยกเลิกคำร้อง') }}</x-confirm-submit>
                         </form>
                     @endif
                 </div>
@@ -313,13 +311,11 @@
                         <p class="mt-2 rounded-xl bg-brand-purple-50 px-3 py-2 text-xs text-brand-purple-700 dark:bg-brand-purple-500/10 dark:text-brand-purple-400">{{ __('ความเห็นกองพัฒนานักศึกษา:') }} {{ $req->admin_comment }}</p>
                     @endif
                     @if ($req->status === 'pending')
-                        <form
-                            method="POST" action="{{ route('credit-transfers.destroy', $req) }}" class="mt-2.5"
-                            onsubmit="return confirm('{{ __('ยืนยันยกเลิกคำร้องนี้?') }}')"
-                        >
+                        <form method="POST" action="{{ route('credit-transfers.destroy', $req) }}" class="mt-2.5">
                             @csrf
                             @method('DELETE')
-                            <button type="submit" class="text-xs font-medium text-red-500 transition-colors hover:text-red-700 dark:text-red-400 dark:hover:text-red-300">{{ __('ยกเลิกคำร้อง') }}</button>
+                            <x-confirm-submit tone="red" :message="__('ยืนยันยกเลิกคำร้องนี้?')" :label="__('ยกเลิกคำร้อง')"
+                                class="text-xs font-medium text-red-500 transition-colors hover:text-red-700 dark:text-red-400 dark:hover:text-red-300">{{ __('ยกเลิกคำร้อง') }}</x-confirm-submit>
                         </form>
                     @endif
                 </div>

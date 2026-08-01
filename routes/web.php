@@ -242,8 +242,8 @@ Route::middleware(['auth', 'srru.email'])->group(function () {
             Route::post('/users/{user}/demote', [UserManagementController::class, 'demote'])->name('users.demote');
             Route::post('/users/{user}/ban', [UserManagementController::class, 'ban'])->name('users.ban');
             Route::post('/users/{user}/unban', [UserManagementController::class, 'unban'])->name('users.unban');
-            Route::post('/users/{user}/graduate', [UserManagementController::class, 'graduate'])->name('users.graduate');
             Route::post('/users/{user}/ungraduate', [UserManagementController::class, 'ungraduate'])->name('users.ungraduate');
+            Route::post('/users/bulk-action', [UserManagementController::class, 'bulkAction'])->name('users.bulk-action');
 
             Route::resource('faculties', FacultyController::class)->except(['show']);
             Route::post('/faculties/{faculty}/majors', [MajorController::class, 'store'])->name('majors.store');

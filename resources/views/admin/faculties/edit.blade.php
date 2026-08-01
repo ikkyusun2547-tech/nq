@@ -41,10 +41,11 @@
             </button>
         </form>
 
-        <form method="POST" action="{{ route('admin.faculties.destroy', $faculty) }}" class="mt-3" onsubmit="return confirm('{{ __('ยืนยันลบคณะนี้?') }}')">
+        <form method="POST" action="{{ route('admin.faculties.destroy', $faculty) }}" class="mt-3">
             @csrf
             @method('DELETE')
-            <button type="submit" class="text-xs font-medium text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300">{{ __('ลบคณะนี้') }}</button>
+            <x-confirm-submit tone="red" :message="__('ยืนยันลบคณะนี้?')" :label="__('ลบคณะนี้')"
+                class="text-xs font-medium text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300">{{ __('ลบคณะนี้') }}</x-confirm-submit>
         </form>
     </div>
 
@@ -81,10 +82,11 @@
                         </div>
                         <div class="flex shrink-0 items-center gap-3">
                             <button type="button" @click="editingMajorId = {{ $major->id }}" class="text-xs font-medium text-brand-purple-600 hover:text-brand-purple-800 dark:text-brand-purple-400">{{ __('แก้ไข') }}</button>
-                            <form method="POST" action="{{ route('admin.majors.destroy', $major) }}" onsubmit="return confirm('{{ __('ยืนยันลบสาขานี้?') }}')">
+                            <form method="POST" action="{{ route('admin.majors.destroy', $major) }}">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="text-xs font-medium text-red-500 hover:text-red-700 dark:text-red-400">{{ __('ลบ') }}</button>
+                                <x-confirm-submit tone="red" :message="__('ยืนยันลบสาขานี้?')" :label="__('ลบ')"
+                                    class="text-xs font-medium text-red-500 hover:text-red-700 dark:text-red-400">{{ __('ลบ') }}</x-confirm-submit>
                             </form>
                         </div>
                     </div>

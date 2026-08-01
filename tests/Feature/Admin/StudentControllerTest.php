@@ -15,6 +15,11 @@ class StudentControllerTest extends TestCase
         return User::factory()->create(['role' => 'admin', 'email' => 'admin@srru.ac.th']);
     }
 
+    private function superAdmin(): User
+    {
+        return User::factory()->create(['role' => 'super_admin', 'email' => 'super@srru.ac.th']);
+    }
+
     public function test_a_student_cannot_view_the_student_list(): void
     {
         $student = User::factory()->create(['role' => 'student', 'email' => 'stu@srru.ac.th']);
@@ -115,5 +120,56 @@ class StudentControllerTest extends TestCase
         $graduated = User::factory()->create(['role' => 'student', 'email' => 'g@srru.ac.th', 'graduated_at' => now()]);
 
         $this->actingAs($this->admin())->get(route('admin.students.show', $graduated))->assertOk();
+    }
+
+    public function test_a_super_admin_sees_the_bulk_action_checkboxes(): void
+    {
+        User::factory()->create(['role' => 'student', 'email' => 'stu@srru.ac.th', 'student_id' => '60000000001']);
+
+        $response = $this->actingAs($this->superAdmin())->get(route('admin.students.index'));
+
+        $response->assertOk();
+        $response->assertSee('name="user_ids[]"', false);
+        $response->assertSee(route('admin.users.bulk-action'), false);
+    }
+
+    public function test_a_plain_admin_does_not_see_the_bulk_action_checkboxes(): void
+    {
+        User::factory()->create(['role' => 'student', 'email' => 'stu@srru.ac.th', 'student_id' => '60000000002']);
+
+        $response = $this->actingAs($this->admin())->get(route('admin.students.index'));
+
+        $response->assertOk();
+        $response->assertDontSee('name="user_ids[]"', false);
+    }
+
+    public function test_a_super_admin_sees_the_ungraduate_button_on_a_graduated_students_profile(): void
+    {
+        $graduated = User::factory()->create(['role' => 'student', 'email' => 'g@srru.ac.th', 'graduated_at' => now()]);
+
+        $response = $this->actingAs($this->superAdmin())->get(route('admin.students.show', $graduated));
+
+        $response->assertOk();
+        $response->assertSee(route('admin.users.ungraduate', $graduated), false);
+    }
+
+    public function test_a_plain_admin_does_not_see_the_ungraduate_button(): void
+    {
+        $graduated = User::factory()->create(['role' => 'student', 'email' => 'g@srru.ac.th', 'graduated_at' => now()]);
+
+        $response = $this->actingAs($this->admin())->get(route('admin.students.show', $graduated));
+
+        $response->assertOk();
+        $response->assertDontSee(route('admin.users.ungraduate', $graduated), false);
+    }
+
+    public function test_the_ungraduate_button_does_not_appear_for_a_currently_enrolled_student(): void
+    {
+        $enrolled = User::factory()->create(['role' => 'student', 'email' => 'e@srru.ac.th']);
+
+        $response = $this->actingAs($this->superAdmin())->get(route('admin.students.show', $enrolled));
+
+        $response->assertOk();
+        $response->assertDontSee(route('admin.users.ungraduate', $enrolled), false);
     }
 }

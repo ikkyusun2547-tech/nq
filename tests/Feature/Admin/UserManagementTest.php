@@ -135,42 +135,149 @@ class UserManagementTest extends TestCase
         $this->assertSame('active', $superAdmin->fresh()->account_status);
     }
 
-    public function test_it_graduates_and_ungraduates_a_student(): void
+    public function test_it_ungraduates_a_student(): void
     {
         $superAdmin = $this->superAdmin();
-        $student = User::factory()->create(['role' => 'student', 'email' => 'stu@srru.ac.th']);
-
-        $this->actingAs($superAdmin)->post(route('admin.users.graduate', $student))->assertRedirect();
-        $this->assertNotNull($student->fresh()->graduated_at);
-        $this->assertDatabaseHas('audit_logs', ['actor_id' => $superAdmin->id, 'action' => 'graduated', 'subject_user_id' => $student->id]);
+        $student = User::factory()->create(['role' => 'student', 'email' => 'stu@srru.ac.th', 'graduated_at' => now()]);
 
         $this->actingAs($superAdmin)->post(route('admin.users.ungraduate', $student))->assertRedirect();
         $this->assertNull($student->fresh()->graduated_at);
         $this->assertDatabaseHas('audit_logs', ['actor_id' => $superAdmin->id, 'action' => 'ungraduated', 'subject_user_id' => $student->id]);
     }
 
-    public function test_it_refuses_to_graduate_a_non_student(): void
+    public function test_it_refuses_to_ungraduate_a_student_who_is_not_graduated(): void
     {
         $superAdmin = $this->superAdmin();
-        $admin = User::factory()->create(['role' => 'admin', 'email' => 'a2@srru.ac.th']);
+        $student = User::factory()->create(['role' => 'student', 'email' => 'stu@srru.ac.th']);
 
         $this->actingAs($superAdmin)
-            ->post(route('admin.users.graduate', $admin))
+            ->post(route('admin.users.ungraduate', $student))
             ->assertRedirect()
             ->assertSessionHas('error');
-
-        $this->assertNull($admin->fresh()->graduated_at);
     }
 
-    public function test_it_refuses_to_graduate_a_student_twice(): void
+    public function test_bulk_action_graduate_skips_an_already_graduated_student(): void
     {
         $superAdmin = $this->superAdmin();
-        $student = User::factory()->create(['role' => 'student', 'email' => 'stu@srru.ac.th', 'graduated_at' => now()]);
+        $fresh = User::factory()->create(['role' => 'student', 'email' => 'a@srru.ac.th']);
+        $alreadyGraduated = User::factory()->create(['role' => 'student', 'email' => 'b@srru.ac.th', 'graduated_at' => now()->subDay()]);
+
+        $response = $this->actingAs($superAdmin)
+            ->post(route('admin.users.bulk-action'), ['bulk_action' => 'graduate', 'user_ids' => [$fresh->id, $alreadyGraduated->id]]);
+
+        $response->assertRedirect();
+        $this->assertStringContainsString('1', session('status'));
+    }
+
+    public function test_bulk_action_ungraduates_several_students_at_once(): void
+    {
+        $superAdmin = $this->superAdmin();
+        $a = User::factory()->create(['role' => 'student', 'email' => 'a@srru.ac.th', 'graduated_at' => now()]);
+        $b = User::factory()->create(['role' => 'student', 'email' => 'b@srru.ac.th', 'graduated_at' => now()]);
 
         $this->actingAs($superAdmin)
-            ->post(route('admin.users.graduate', $student))
-            ->assertRedirect()
-            ->assertSessionHas('error');
+            ->post(route('admin.users.bulk-action'), ['bulk_action' => 'ungraduate', 'user_ids' => [$a->id, $b->id]])
+            ->assertRedirect();
+
+        $this->assertNull($a->fresh()->graduated_at);
+        $this->assertNull($b->fresh()->graduated_at);
+        $this->assertDatabaseHas('audit_logs', ['actor_id' => $superAdmin->id, 'action' => 'ungraduated', 'subject_user_id' => $a->id]);
+    }
+
+    public function test_bulk_action_ungraduate_skips_a_student_who_is_not_graduated(): void
+    {
+        $superAdmin = $this->superAdmin();
+        $graduated = User::factory()->create(['role' => 'student', 'email' => 'a@srru.ac.th', 'graduated_at' => now()]);
+        $notGraduated = User::factory()->create(['role' => 'student', 'email' => 'b@srru.ac.th']);
+
+        $response = $this->actingAs($superAdmin)
+            ->post(route('admin.users.bulk-action'), ['bulk_action' => 'ungraduate', 'user_ids' => [$graduated->id, $notGraduated->id]]);
+
+        $response->assertRedirect();
+        $this->assertStringContainsString('1', session('status'));
+    }
+
+    public function test_bulk_action_promotes_several_students_at_once(): void
+    {
+        $superAdmin = $this->superAdmin();
+        $a = User::factory()->create(['role' => 'student', 'email' => 'a@srru.ac.th']);
+        $b = User::factory()->create(['role' => 'student', 'email' => 'b@srru.ac.th']);
+
+        $this->actingAs($superAdmin)
+            ->post(route('admin.users.bulk-action'), ['bulk_action' => 'promote', 'user_ids' => [$a->id, $b->id]])
+            ->assertRedirect();
+
+        $this->assertSame('admin', $a->fresh()->role);
+        $this->assertSame('admin', $b->fresh()->role);
+        $this->assertDatabaseHas('audit_logs', ['actor_id' => $superAdmin->id, 'action' => 'promoted', 'subject_user_id' => $a->id]);
+        $this->assertDatabaseHas('audit_logs', ['actor_id' => $superAdmin->id, 'action' => 'promoted', 'subject_user_id' => $b->id]);
+    }
+
+    public function test_bulk_action_bans_several_students_at_once(): void
+    {
+        $superAdmin = $this->superAdmin();
+        $a = User::factory()->create(['role' => 'student', 'email' => 'a@srru.ac.th']);
+        $b = User::factory()->create(['role' => 'student', 'email' => 'b@srru.ac.th']);
+
+        $this->actingAs($superAdmin)
+            ->post(route('admin.users.bulk-action'), ['bulk_action' => 'ban', 'user_ids' => [$a->id, $b->id]])
+            ->assertRedirect();
+
+        $this->assertSame('banned', $a->fresh()->account_status);
+        $this->assertSame('banned', $b->fresh()->account_status);
+    }
+
+    public function test_bulk_action_graduates_several_students_at_once(): void
+    {
+        $superAdmin = $this->superAdmin();
+        $a = User::factory()->create(['role' => 'student', 'email' => 'a@srru.ac.th']);
+        $b = User::factory()->create(['role' => 'student', 'email' => 'b@srru.ac.th']);
+
+        $this->actingAs($superAdmin)
+            ->post(route('admin.users.bulk-action'), ['bulk_action' => 'graduate', 'user_ids' => [$a->id, $b->id]])
+            ->assertRedirect();
+
+        $this->assertNotNull($a->fresh()->graduated_at);
+        $this->assertNotNull($b->fresh()->graduated_at);
+    }
+
+    public function test_bulk_action_skips_rows_that_do_not_qualify_and_reports_the_skip_count(): void
+    {
+        $superAdmin = $this->superAdmin();
+        $student = User::factory()->create(['role' => 'student', 'email' => 'a@srru.ac.th']);
+        $alreadyAdmin = User::factory()->create(['role' => 'admin', 'email' => 'b@srru.ac.th']);
+
+        $response = $this->actingAs($superAdmin)
+            ->post(route('admin.users.bulk-action'), ['bulk_action' => 'promote', 'user_ids' => [$student->id, $alreadyAdmin->id]]);
+
+        $response->assertRedirect();
+        $this->assertSame('admin', $student->fresh()->role);
+        $this->assertStringContainsString('1', session('status'));
+    }
+
+    public function test_bulk_action_excludes_yourself_from_a_ban(): void
+    {
+        $superAdmin = $this->superAdmin();
+        $student = User::factory()->create(['role' => 'student', 'email' => 'a@srru.ac.th']);
+
+        $this->actingAs($superAdmin)
+            ->post(route('admin.users.bulk-action'), ['bulk_action' => 'ban', 'user_ids' => [$student->id, $superAdmin->id]])
+            ->assertRedirect();
+
+        $this->assertSame('banned', $student->fresh()->account_status);
+        $this->assertSame('active', $superAdmin->fresh()->account_status);
+    }
+
+    public function test_a_plain_admin_cannot_use_the_bulk_action_endpoint(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin', 'email' => 'admin@srru.ac.th']);
+        $student = User::factory()->create(['role' => 'student', 'email' => 'a@srru.ac.th']);
+
+        $this->actingAs($admin)
+            ->post(route('admin.users.bulk-action'), ['bulk_action' => 'ban', 'user_ids' => [$student->id]])
+            ->assertForbidden();
+
+        $this->assertSame('active', $student->fresh()->account_status);
     }
 
     public function test_it_sorts_by_email_ascending_overriding_the_role_grouping(): void

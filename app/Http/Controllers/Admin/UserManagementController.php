@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Services\AuditLogger;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 /**
  * The one place an admin's access level and account standing can actually
@@ -68,12 +69,9 @@ class UserManagementController extends Controller
         // on a normal form submit (not fetch/XHR) — these forms are simple
         // <form method="POST"> submits, so a stale page (two admins acting
         // on the same row) needs a graceful redirect, not a crash screen.
-        if ($user->role !== 'student') {
+        if (! $this->applyPromote($user)) {
             return back()->with('error', __('ผู้ใช้นี้เป็นแอดมินอยู่แล้ว'));
         }
-
-        $user->update(['role' => 'admin']);
-        AuditLogger::log('promoted', __('ผู้ใช้งาน'), __(':name เป็นแอดมิน', ['name' => $user->name_thai ?? $user->name]), $user);
 
         return back()->with('status', __('เลื่อนสิทธิ์ :name เป็นแอดมินแล้ว', ['name' => $user->name_thai ?? $user->name]));
     }
@@ -106,12 +104,9 @@ class UserManagementController extends Controller
 
     public function ban(Request $request, User $user)
     {
-        if ($user->id === $request->user()->id) {
+        if (! $this->applyBan($user, $request->user())) {
             return back()->with('error', __('ไม่สามารถระงับบัญชีตัวเองได้'));
         }
-
-        $user->update(['account_status' => 'banned']);
-        AuditLogger::log('banned', __('ผู้ใช้งาน'), __('บัญชี :name', ['name' => $user->name_thai ?? $user->name]), $user);
 
         return back()->with('status', __('ระงับการใช้งานบัญชี :name แล้ว', ['name' => $user->name_thai ?? $user->name]));
     }
@@ -124,27 +119,107 @@ class UserManagementController extends Controller
         return back()->with('status', __('ปลดระงับบัญชี :name แล้ว', ['name' => $user->name_thai ?? $user->name]));
     }
 
-    public function graduate(Request $request, User $user)
+    public function ungraduate(Request $request, User $user)
     {
-        if ($user->role !== 'student') {
-            return back()->with('error', __('ทำเครื่องหมายจบการศึกษาได้เฉพาะนักศึกษาเท่านั้น'));
+        if (! $this->applyUngraduate($user)) {
+            return back()->with('error', __('ผู้ใช้นี้ยังไม่ได้อยู่ในสถานะจบการศึกษา'));
         }
 
-        if ($user->isGraduated()) {
-            return back()->with('error', __('ผู้ใช้นี้จบการศึกษาแล้ว'));
+        return back()->with('status', __('ยกเลิกสถานะจบการศึกษาของ :name แล้ว', ['name' => $user->name_thai ?? $user->name]));
+    }
+
+    /**
+     * Apply one of the three "student -> something" actions to a batch of
+     * users selected via checkboxes on the list. Deliberately silent about
+     * rows an action doesn't apply to (e.g. an already-admin row selected
+     * along with students for a "promote" bulk action) rather than failing
+     * the whole batch — the summary message reports how many actually
+     * changed vs. were skipped so the admin can tell what happened.
+     */
+    public function bulkAction(Request $request)
+    {
+        $validated = $request->validate([
+            'bulk_action' => ['required', Rule::in(['promote', 'ban', 'graduate', 'ungraduate'])],
+            'user_ids' => ['required', 'array', 'min:1'],
+            'user_ids.*' => ['integer', 'exists:users,id'],
+        ]);
+
+        $users = User::whereIn('id', $validated['user_ids'])->get();
+        $actor = $request->user();
+        $applied = 0;
+
+        foreach ($users as $user) {
+            $ok = match ($validated['bulk_action']) {
+                'promote' => $this->applyPromote($user),
+                'ban' => $this->applyBan($user, $actor),
+                'graduate' => $this->applyGraduate($user),
+                'ungraduate' => $this->applyUngraduate($user),
+            };
+
+            $applied += $ok ? 1 : 0;
+        }
+
+        $skipped = $users->count() - $applied;
+
+        $message = match ($validated['bulk_action']) {
+            'promote' => __('เลื่อนสิทธิ์เป็นแอดมินสำเร็จ :count คน', ['count' => $applied]),
+            'ban' => __('ระงับการใช้งานบัญชีสำเร็จ :count คน', ['count' => $applied]),
+            'graduate' => __('ทำเครื่องหมายจบการศึกษาสำเร็จ :count คน', ['count' => $applied]),
+            'ungraduate' => __('ยกเลิกสถานะจบการศึกษาสำเร็จ :count คน', ['count' => $applied]),
+        };
+
+        if ($skipped > 0) {
+            $message .= ' '.__('(ข้าม :count คนที่ไม่เข้าเงื่อนไข)', ['count' => $skipped]);
+        }
+
+        return back()->with('status', $message);
+    }
+
+    private function applyPromote(User $user): bool
+    {
+        if ($user->role !== 'student') {
+            return false;
+        }
+
+        $user->update(['role' => 'admin']);
+        AuditLogger::log('promoted', __('ผู้ใช้งาน'), __(':name เป็นแอดมิน', ['name' => $user->name_thai ?? $user->name]), $user);
+
+        return true;
+    }
+
+    private function applyBan(User $user, User $actor): bool
+    {
+        if ($user->id === $actor->id) {
+            return false;
+        }
+
+        $user->update(['account_status' => 'banned']);
+        AuditLogger::log('banned', __('ผู้ใช้งาน'), __('บัญชี :name', ['name' => $user->name_thai ?? $user->name]), $user);
+
+        return true;
+    }
+
+    private function applyGraduate(User $user): bool
+    {
+        if ($user->role !== 'student' || $user->isGraduated()) {
+            return false;
         }
 
         $user->update(['graduated_at' => now()]);
         AuditLogger::log('graduated', __('ผู้ใช้งาน'), __(':name เป็นผู้จบการศึกษา', ['name' => $user->name_thai ?? $user->name]), $user);
 
-        return back()->with('status', __('ทำเครื่องหมาย :name เป็นจบการศึกษาแล้ว', ['name' => $user->name_thai ?? $user->name]));
+        return true;
     }
 
-    public function ungraduate(Request $request, User $user)
+    private function applyUngraduate(User $user): bool
     {
+        if (! $user->isGraduated()) {
+            return false;
+        }
+
         $user->update(['graduated_at' => null]);
         AuditLogger::log('ungraduated', __('ผู้ใช้งาน'), __(':name กลับเป็นนักศึกษาปัจจุบัน', ['name' => $user->name_thai ?? $user->name]), $user);
 
-        return back()->with('status', __('ยกเลิกสถานะจบการศึกษาของ :name แล้ว', ['name' => $user->name_thai ?? $user->name]));
+        return true;
     }
 }

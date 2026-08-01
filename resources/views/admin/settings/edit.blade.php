@@ -28,13 +28,15 @@
         </div>
     </form>
 
-    <form method="POST" action="{{ route('admin.settings.destroy', $year) }}" class="mt-3"
-        onsubmit="return confirm('{{ __('ลบเกณฑ์ปี :year? นักศึกษารหัสปีนี้จะกลับไปใช้เกณฑ์ปีก่อนหน้าหรือค่าเริ่มต้นแทน', ['year' => $year]) }}')">
+    <form method="POST" action="{{ route('admin.settings.destroy', $year) }}" class="mt-3">
         @csrf
         @method('DELETE')
-        <button type="submit" class="w-full rounded-xl bg-red-50 px-4 py-2.5 text-sm font-semibold text-red-600 shadow-soft transition-colors hover:bg-red-100 dark:bg-red-500/10 dark:text-red-400 dark:hover:bg-red-500/20">
+        <x-confirm-submit tone="red"
+            :message="__('ลบเกณฑ์ปี :year? นักศึกษารหัสปีนี้จะกลับไปใช้เกณฑ์ปีก่อนหน้าหรือค่าเริ่มต้นแทน', ['year' => $year])"
+            :label="__('ลบเกณฑ์ปี :year', ['year' => $year])"
+            class="w-full rounded-xl bg-red-50 px-4 py-2.5 text-sm font-semibold text-red-600 shadow-soft transition-colors hover:bg-red-100 dark:bg-red-500/10 dark:text-red-400 dark:hover:bg-red-500/20">
             {{ __('ลบเกณฑ์ปี :year', ['year' => $year]) }}
-        </button>
+        </x-confirm-submit>
     </form>
 </div>
 @endsection

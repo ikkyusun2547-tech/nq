@@ -22,7 +22,7 @@
         </div>
     @endif
 
-    <form method="POST" action="{{ route('admin.announcements.store') }}" class="space-y-4 rounded-2xl glass-card p-5 shadow-soft" onsubmit="return confirm('{{ __('ยืนยันส่งประกาศนี้?') }}')">
+    <form method="POST" action="{{ route('admin.announcements.store') }}" class="space-y-4 rounded-2xl glass-card p-5 shadow-soft">
         @csrf
 
         <div>
@@ -52,9 +52,10 @@
             </div>
         </div>
 
-        <button type="submit" class="w-full rounded-xl bg-gradient-to-r from-brand-purple-600 to-brand-purple-500 px-4 py-2.5 text-sm font-semibold text-white shadow-soft transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg">
+        <x-confirm-submit tone="purple" :message="__('ยืนยันส่งประกาศนี้?')" :label="__('ส่งประกาศ')"
+            class="w-full rounded-xl bg-gradient-to-r from-brand-purple-600 to-brand-purple-500 px-4 py-2.5 text-sm font-semibold text-white shadow-soft transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg">
             {{ __('ส่งประกาศ') }}
-        </button>
+        </x-confirm-submit>
     </form>
 </div>
 @endsection

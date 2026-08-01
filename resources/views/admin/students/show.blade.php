@@ -61,6 +61,21 @@
         </div>
     </div>
 
+    @if ($student->isGraduated())
+        <div class="mt-4 flex flex-wrap items-center gap-3 rounded-2xl bg-brand-purple-50 p-4 text-sm shadow-soft ring-1 ring-brand-purple-100 dark:bg-brand-purple-500/10 dark:ring-brand-purple-500/20">
+            <span class="font-medium text-brand-purple-700 dark:text-brand-purple-400">
+                {{ __('นักศึกษาจบการศึกษาแล้วเมื่อ :date', ['date' => $student->graduated_at->format('d/m/Y')]) }}
+            </span>
+            @if (auth()->user()->role === 'super_admin')
+                <form method="POST" action="{{ route('admin.users.ungraduate', $student) }}" class="ml-auto">
+                    @csrf
+                    <x-confirm-submit tone="slate" :message="__('ยืนยันยกเลิกสถานะจบการศึกษา?')" :label="__('ยกเลิกสถานะจบ')"
+                        class="rounded-lg bg-white px-3 py-1.5 text-xs font-medium text-slate-600 shadow-soft ring-1 ring-slate-200 transition-colors hover:bg-slate-50 dark:bg-slate-800 dark:text-slate-300 dark:ring-slate-600">{{ __('ยกเลิกสถานะจบ') }}</x-confirm-submit>
+                </form>
+            @endif
+        </div>
+    @endif
+
     <!-- Clearance status tile -->
     <div class="mt-4 flex items-center gap-3 rounded-2xl p-5 shadow-soft ring-1
         {{ $summary['is_cleared'] ? 'bg-brand-green-50 ring-brand-green-100 dark:bg-brand-green-500/10 dark:ring-brand-green-500/20' : 'bg-amber-50 ring-amber-200 dark:bg-amber-500/10 dark:ring-amber-500/20' }}">
