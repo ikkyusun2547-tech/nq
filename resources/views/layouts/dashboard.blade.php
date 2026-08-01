@@ -111,10 +111,10 @@
 
                 <div class="relative flex shrink-0 items-center justify-between gap-2 border-b border-white/10 px-4 py-5">
                     <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3 overflow-hidden">
-                        <img src="{{ asset('images/logo.png') }}" alt="SRRU" class="h-12 w-12 shrink-0 object-contain drop-shadow">
+                        <img src="{{ asset('images/logo.png') }}" alt="SRRU" class="h-14 w-14 shrink-0 object-contain drop-shadow">
                         <span class="min-w-0">
                             <span class="block text-xl font-bold leading-tight text-white">SRRU Check</span>
-                            <span class="mt-1 block text-xs leading-snug text-violet-300/60">{{ __('ระบบเช็คกิจกรรมนักศึกษา มหาวิทยาลัยราชภัฏสุรินทร์') }}</span>
+                            <span class="mt-1 block text-xs leading-snug text-white/70">{{ __('ระบบเช็คกิจกรรมนักศึกษา มหาวิทยาลัยราชภัฏสุรินทร์') }}</span>
                         </span>
                     </a>
                     <button @click="sidebarOpen = false" class="shrink-0 rounded-lg p-1.5 text-violet-200/70 hover:bg-white/5 hover:text-white lg:hidden" aria-label="{{ __('ปิดเมนู') }}">
@@ -194,7 +194,7 @@
                         <img src="{{ asset('images/logo.png') }}" alt="SRRU" class="h-11 w-11 shrink-0 object-contain drop-shadow">
                         <span class="min-w-0">
                             <span class="block whitespace-nowrap text-sm font-semibold leading-tight text-white">SRRU Check</span>
-                            <span class="hidden whitespace-nowrap text-[0.65rem] leading-snug text-violet-300/60 lg:block">{{ __('ระบบเช็คกิจกรรมนักศึกษา มหาวิทยาลัยราชภัฏสุรินทร์') }}</span>
+                            <span class="hidden whitespace-nowrap text-xs leading-snug text-white/70 lg:block">{{ __('ระบบเช็คกิจกรรมนักศึกษา มหาวิทยาลัยราชภัฏสุรินทร์') }}</span>
                         </span>
                     </a>
 
@@ -269,7 +269,9 @@
         </main>
 
         @include('partials.mobile-tab-bar')
-        @include('partials.pwa-install-banner')
+        @if (config('services.srru.pwa_install_prompt_enabled'))
+            @include('partials.pwa-install-banner')
+        @endif
     @endif
 
     @include('partials.push-notification-banner')

@@ -18,6 +18,28 @@
         unread: 0,
         items: [],
         icons: @js($iconMeta),
+        panelStyle: {},
+        // The bell isn't always at the true edge of the viewport (the
+        // student topnav centers its content in a max-w container, so on a
+        // wide screen the bell sits well inboard of sm:right-4) — anchoring
+        // the panel to the bell's own on-screen position instead of a fixed
+        // screen offset keeps it correct at any container width. Below the
+        // sm breakpoint the panel goes back to Tailwind's inset-x-4 (a
+        // near-full-width sheet reads better on a narrow screen than a
+        // pixel-precise anchor), so panelStyle is left empty there.
+        position() {
+            if (window.innerWidth < 640) {
+                this.panelStyle = {};
+
+                return;
+            }
+
+            const rect = this.$refs.button.getBoundingClientRect();
+
+            this.panelStyle = @js($align) === 'left'
+                ? { left: rect.left + 'px', bottom: (window.innerHeight - rect.top + 8) + 'px' }
+                : { top: (rect.bottom + 8) + 'px', right: (window.innerWidth - rect.right) + 'px' };
+        },
         async poll() {
             try {
                 const res = await fetch('{{ route('notifications.poll') }}', { headers: { 'Accept': 'application/json' } });
@@ -51,7 +73,7 @@
     @click.outside="open = false"
     class="relative"
 >
-    <button @click="open = ! open; if (open) poll();" type="button"
+    <button x-ref="button" @click="open = ! open; if (open) { poll(); position(); }" type="button"
         class="relative flex h-8 w-8 items-center justify-center rounded-lg text-violet-200/70 transition-colors hover:bg-white/5 hover:text-white"
         :aria-label="unread > 0 ? '{{ __('การแจ้งเตือน') }} (' + unread + ')' : '{{ __('การแจ้งเตือน') }}'"
     >
@@ -75,11 +97,15 @@
         which Alpine's teleport support accounts for.
     --}}
     <template x-teleport="body">
-        <div x-show="open" x-cloak x-transition:enter="transition ease-out duration-150" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"
+        <div x-show="open" x-cloak :style="panelStyle" @resize.window="position()"
+            x-transition:enter="transition ease-out duration-150" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"
             @class([
+                // sm and up: overridden by the :style binding above, computed
+                // from the bell's actual position (see position() in x-data).
+                // These classes are just the sane pre-JS/mobile fallback.
                 'fixed inset-x-4 z-50 w-auto overflow-hidden rounded-2xl bg-white shadow-soft-lg ring-1 ring-black/5 dark:bg-slate-900 dark:ring-white/10 sm:inset-x-auto sm:w-96',
-                'top-16 origin-top sm:top-16 sm:right-4 sm:origin-top-right' => $align === 'right',
-                'bottom-20 origin-bottom sm:bottom-4 sm:left-4 sm:origin-bottom-left' => $align === 'left',
+                'top-16 origin-top sm:origin-top-right' => $align === 'right',
+                'bottom-20 origin-bottom sm:origin-bottom-left' => $align === 'left',
             ])
         >
             <div class="flex items-center justify-between border-b border-slate-100 px-4 py-3 dark:border-slate-800">

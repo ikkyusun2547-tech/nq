@@ -54,6 +54,22 @@
             init() {
                 if (localStorage.getItem('srru_push_dismissed') === '1') return;
 
+                @if (config('services.srru.pwa_install_prompt_enabled'))
+                    // Let pwa-install-banner go first — showing both at once on a
+                    // first visit reads as a wall of popups. If it hasn't been
+                    // resolved yet this page load, wait for its "resolved" event
+                    // instead of checking right away.
+                    if (localStorage.getItem('srru_pwa_install_dismissed') !== '1') {
+                        window.addEventListener('pwa-install-banner-resolved', () => this.check(), { once: true });
+
+                        return;
+                    }
+                @endif
+
+                this.check();
+            },
+
+            check() {
                 // Only offer the banner when there's actually a decision left to
                 // make — 'unsupported'/'unconfigured' can't succeed no matter
                 // what's clicked, and 'granted'/'denied' means the browser

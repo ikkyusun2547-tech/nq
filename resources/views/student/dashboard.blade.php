@@ -9,9 +9,17 @@
         'volunteer' => ['label' => __('จิตอาสา/บำเพ็ญประโยชน์'), 'dot' => 'bg-brand-purple-500'],
         'ethics' => ['label' => __('คุณธรรมจริยธรรม'), 'dot' => 'bg-fuchsia-400'],
     ];
+    $sourceMeta = [
+        'realtime' => ['label' => __('สแกน QR เช็คชื่อ'), 'dot' => 'bg-brand-purple-500'],
+        'self_report' => ['label' => __('รายงานตนเอง'), 'dot' => 'bg-fuchsia-400'],
+        'late_request' => ['label' => __('เช็คชื่อย้อนหลัง'), 'dot' => 'bg-sky-400'],
+        'external' => ['label' => __('กิจกรรมภายนอก'), 'dot' => 'bg-brand-green-500'],
+        'credit_transfer' => ['label' => __('เทียบโอนตำแหน่ง'), 'dot' => 'bg-amber-400'],
+    ];
+    $sourceTotal = array_sum($summary['hours_by_source']);
 @endphp
 
-<div class="mx-auto max-w-4xl" x-data="{ showDetail: false, detail: null }">
+<div class="mx-auto max-w-6xl" x-data="{ showDetail: false, detail: null }">
     <x-brand-header
         eyebrow="Activity Passport · SRRU"
         :title="auth()->user()->name_thai"
@@ -87,25 +95,48 @@
         </a>
     </div>
 
+    <!-- Overall hours / activities meters -->
+    <div class="mt-4 flex flex-col gap-3">
+        <x-progress-card
+            :activities="$summary['total_activities']"
+            :required-activities="$summary['required_activities']"
+            :hours="$summary['total_hours']"
+            :required-hours="$summary['required_hours']"
+        />
+        @if ($summary['yearly_target_hours'])
+            <p class="px-1 text-xs text-slate-400 dark:text-slate-500">{{ __('เป้าหมายชั่วโมงกิจกรรมของชั้นปีที่ :year คือ :hours ชั่วโมง/ปี', [
+                'year' => $summary['current_year'],
+                'hours' => $summary['yearly_target_hours'],
+            ]) }}</p>
+        @endif
+    </div>
+
+    <!-- Two breakdown cards, same bar-list shape — fill so the shorter one
+         (3 rows vs 5) stretches to match the row height instead of leaving
+         the taller card's grid cell looking lopsided next to it. -->
     <div class="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <!-- Overall hours / activities meters -->
-        <div class="flex flex-col gap-3">
-            <x-progress-card
-                :activities="$summary['total_activities']"
-                :required-activities="$summary['required_activities']"
-                :hours="$summary['total_hours']"
-                :required-hours="$summary['required_hours']"
-            />
-            @if ($summary['yearly_target_hours'])
-                <p class="px-1 text-xs text-slate-400 dark:text-slate-500">{{ __('เป้าหมายชั่วโมงกิจกรรมของชั้นปีที่ :year คือ :hours ชั่วโมง/ปี', [
-                    'year' => $summary['current_year'],
-                    'hours' => $summary['yearly_target_hours'],
-                ]) }}</p>
-            @endif
-        </div>
+        <!-- Where the total_hours figure above actually came from -->
+        <x-section-card :fill="true" icon="M2.25 18L9 11.25l4.306 4.306a11.95 11.95 0 015.814-5.518l2.74-1.22m0 0l-5.94-2.281m5.94 2.28l-2.28 5.941" :title="__('ที่มาของชั่วโมงสะสม')">
+            @foreach ($sourceMeta as $key => $meta)
+                @php $hours = $summary['hours_by_source'][$key] ?? 0; @endphp
+                <div>
+                    <div class="mb-1 flex items-baseline justify-between text-xs">
+                        <span class="flex items-center gap-1.5 font-medium text-slate-600 dark:text-slate-400">
+                            <span class="h-2 w-2 rounded-full {{ $meta['dot'] }}"></span>
+                            {{ $meta['label'] }}
+                        </span>
+                        <span class="text-slate-400 dark:text-slate-500">{{ $hours }} {{ __('ชม.') }}</span>
+                    </div>
+                    <div class="h-1.5 w-full overflow-hidden rounded-full bg-brand-purple-50 dark:bg-brand-purple-500/10">
+                        @php $pct = $sourceTotal > 0 ? min(100, round($hours / $sourceTotal * 100)) : 0; @endphp
+                        <div class="h-full rounded-full bg-brand-purple-500" style="width: {{ $pct }}%"></div>
+                    </div>
+                </div>
+            @endforeach
+        </x-section-card>
 
         <!-- Category breakdown (5 ด้าน) -->
-        <x-section-card icon="M4 20V10M12 20V4M20 20V14" :title="__('ชั่วโมงสะสมแยกตามหมวดหมู่ (5 ด้าน)')">
+        <x-section-card :fill="true" icon="M4 20V10M12 20V4M20 20V14" :title="__('ชั่วโมงสะสมแยกตามหมวดหมู่ (5 ด้าน)')">
             @foreach ($categoryMeta as $key => $meta)
                 @php $hours = $summary['category_hours'][$key] ?? 0; @endphp
                 <div>
@@ -125,7 +156,11 @@
         </x-section-card>
     </div>
 
-    <div class="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-3">
+    {{-- The "pending" middle card is only worth its own column when there's
+         actually something in it — most check-ins auto-approve instantly, so
+         it's empty for most students most of the time, and an always-there
+         empty third column just makes the other two narrower for nothing. --}}
+    <div class="mt-4 grid grid-cols-1 gap-4 {{ $pendingActivities->isNotEmpty() ? 'lg:grid-cols-3' : 'lg:grid-cols-2' }}">
         <!-- Approved check-ins -->
         <x-section-card icon="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" :title="__('กิจกรรมที่อนุมัติแล้ว')">
             @if ($hasMoreApproved)
@@ -176,14 +211,15 @@
             @endforelse
         </x-section-card>
 
-        <!-- Pending review -->
+        <!-- Pending review — hidden entirely when empty, see the grid-cols comment above -->
+        @if ($pendingActivities->isNotEmpty())
         <x-section-card icon="M12 6.75V12l3.75 1.875M21 12a9 9 0 11-18 0 9 9 0 0118 0z" :title="__('กิจกรรมที่ลงแล้วรออนุมัติ')">
             @if ($hasMorePending)
                 <x-slot:action>
                     <a href="{{ route('activity-history.index', ['status' => 'pending']) }}" class="text-xs font-medium text-brand-purple-600 hover:underline dark:text-brand-purple-400">{{ __('ดูทั้งหมด') }} &rarr;</a>
                 </x-slot:action>
             @endif
-            @forelse ($pendingActivities as $item)
+            @foreach ($pendingActivities as $item)
                 <div class="flex items-center justify-between gap-3 rounded-xl bg-amber-50/50 px-3.5 py-2.5 dark:bg-amber-500/5">
                     <div class="min-w-0">
                         <p class="truncate text-sm font-medium text-slate-800 dark:text-slate-200">{{ $item->title }}</p>
@@ -208,10 +244,9 @@
                     </div>
                     <span class="shrink-0 text-xs font-medium text-amber-600 dark:text-amber-400">{{ __(':hours ชม.', ['hours' => $item->hours]) }}</span>
                 </div>
-            @empty
-                <p class="py-4 text-center text-xs text-slate-400 dark:text-slate-500">{{ __('ไม่มีกิจกรรมที่รอตรวจสอบ') }}</p>
-            @endforelse
+            @endforeach
         </x-section-card>
+        @endif
 
         <!-- Rejected -->
         <x-section-card icon="M9 9l6 6m0-6l-6 6M21 12a9 9 0 11-18 0 9 9 0 0118 0z" :title="__('กิจกรรมที่ถูกปฏิเสธ')">

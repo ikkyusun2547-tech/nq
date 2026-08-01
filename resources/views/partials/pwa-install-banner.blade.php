@@ -87,6 +87,7 @@
                 window.addEventListener('appinstalled', () => {
                     this.visible = false;
                     localStorage.setItem('srru_pwa_install_dismissed', '1');
+                    window.dispatchEvent(new CustomEvent('pwa-install-banner-resolved'));
                 });
             },
 
@@ -108,11 +109,17 @@
                 if (outcome === 'accepted') {
                     localStorage.setItem('srru_pwa_install_dismissed', '1');
                 }
+
+                window.dispatchEvent(new CustomEvent('pwa-install-banner-resolved'));
             },
 
             dismiss() {
                 this.visible = false;
                 localStorage.setItem('srru_pwa_install_dismissed', '1');
+                // Lets push-notification-banner (which defers to this one
+                // going first, see its own init()) know it's clear to run
+                // its own check now instead of waiting for the next page load.
+                window.dispatchEvent(new CustomEvent('pwa-install-banner-resolved'));
             },
         };
     }

@@ -43,6 +43,12 @@ return [
 
     'srru' => [
         'email_domain' => env('SRRU_EMAIL_DOMAIN', 'srru.ac.th'),
+        // Off by default — the install shortcut binds to whatever URL is
+        // open when the user taps "install" (see pwa-install-banner.blade.php),
+        // so it's only safe to offer once the app is sitting on its final,
+        // stable domain. Flip to true once deployed there (no redeploy
+        // needed, just set the env var and the change takes effect).
+        'pwa_install_prompt_enabled' => env('PWA_INSTALL_PROMPT_ENABLED', false),
     ],
 
 ];

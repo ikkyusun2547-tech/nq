@@ -9,7 +9,7 @@ use Illuminate\Http\Request;
 
 class DashboardController extends Controller
 {
-    private const PREVIEW_LIMIT = 5;
+    private const PREVIEW_LIMIT = 3;
 
     public function show(Request $request, ActivityEvaluationService $evaluator, StudentActivityFeed $feed)
     {
@@ -31,7 +31,7 @@ class DashboardController extends Controller
         $rejectedActivities = $rejected->take(self::PREVIEW_LIMIT);
 
         // "ดูทั้งหมด" only makes sense once the preview is actually hiding
-        // something — otherwise it's a link to a page showing the same 5
+        // something — otherwise it's a link to a page showing the same
         // rows the student is already looking at.
         $hasMoreApproved = $approved->count() > self::PREVIEW_LIMIT;
         $hasMorePending = $pending->count() > self::PREVIEW_LIMIT;
