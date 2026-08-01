@@ -15,6 +15,7 @@
         'banned' => 'bg-red-50 text-red-700 dark:bg-red-500/10 dark:text-red-400',
     ];
     $statusLabel = ['active' => __('ใช้งานปกติ'), 'banned' => __('ระงับการใช้งาน')];
+    $graduatedBadge = 'inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium bg-brand-purple-50 text-brand-purple-700 dark:bg-brand-purple-500/10 dark:text-brand-purple-400';
 @endphp
 
 <div class="mx-auto max-w-7xl">
@@ -101,6 +102,9 @@
                                 </span>
                                 {{ $statusLabel[$user->account_status] ?? $user->account_status }}
                             </span>
+                            @if ($user->isGraduated())
+                                <span class="{{ $graduatedBadge }}">{{ __('จบการศึกษา') }}</span>
+                            @endif
                         </td>
                         <td class="whitespace-nowrap px-4 py-3 text-right">
                             <div class="flex items-center justify-end gap-1.5">
@@ -126,6 +130,20 @@
                                         <form method="POST" action="{{ route('admin.users.unban', $user) }}">
                                             @csrf
                                             <button type="submit" class="rounded-lg px-2.5 py-1.5 text-xs font-medium text-brand-green-600 transition-colors hover:bg-brand-green-50 dark:text-brand-green-400 dark:hover:bg-brand-green-500/10">{{ __('ปลดระงับ') }}</button>
+                                        </form>
+                                    @endif
+                                @endif
+
+                                @if ($user->role === 'student')
+                                    @if (! $user->isGraduated())
+                                        <form method="POST" action="{{ route('admin.users.graduate', $user) }}" onsubmit="return confirm('{{ __('ยืนยันทำเครื่องหมายว่านักศึกษาคนนี้จบการศึกษาแล้ว?') }}')">
+                                            @csrf
+                                            <button type="submit" class="rounded-lg px-2.5 py-1.5 text-xs font-medium text-brand-purple-600 transition-colors hover:bg-brand-purple-50 dark:text-brand-purple-400 dark:hover:bg-brand-purple-500/10">{{ __('ทำเครื่องหมายจบการศึกษา') }}</button>
+                                        </form>
+                                    @else
+                                        <form method="POST" action="{{ route('admin.users.ungraduate', $user) }}" onsubmit="return confirm('{{ __('ยืนยันยกเลิกสถานะจบการศึกษา?') }}')">
+                                            @csrf
+                                            <button type="submit" class="rounded-lg px-2.5 py-1.5 text-xs font-medium text-slate-500 transition-colors hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800">{{ __('ยกเลิกสถานะจบ') }}</button>
                                         </form>
                                     @endif
                                 @endif

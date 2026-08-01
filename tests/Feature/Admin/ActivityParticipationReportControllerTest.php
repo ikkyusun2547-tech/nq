@@ -31,6 +31,22 @@ class ActivityParticipationReportControllerTest extends TestCase
         $response->assertSee('50%', false);
     }
 
+    public function test_a_graduated_student_does_not_count_as_eligible(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin', 'email' => 'admin@srru.ac.th']);
+        $activity = Activity::factory()->create(['title' => 'กิจกรรมทดสอบสอง', 'created_by' => $admin->id]);
+        $checkedIn = User::factory()->create(['role' => 'student', 'email' => 'a@srru.ac.th']);
+        Attendance::factory()->for($activity)->for($checkedIn)->create();
+        User::factory()->create(['role' => 'student', 'email' => 'b@srru.ac.th', 'graduated_at' => now()]);
+
+        $response = $this->actingAs($admin)->get(route('admin.reports.activity-participation'));
+
+        $response->assertOk();
+        $response->assertSee('กิจกรรมทดสอบสอง');
+        // Only the one checked-in (non-graduated) student is eligible, so participation is 100%.
+        $response->assertSee('100%', false);
+    }
+
     public function test_a_student_cannot_view_the_report(): void
     {
         $student = User::factory()->create(['role' => 'student', 'email' => 'stu@srru.ac.th']);

@@ -135,6 +135,44 @@ class UserManagementTest extends TestCase
         $this->assertSame('active', $superAdmin->fresh()->account_status);
     }
 
+    public function test_it_graduates_and_ungraduates_a_student(): void
+    {
+        $superAdmin = $this->superAdmin();
+        $student = User::factory()->create(['role' => 'student', 'email' => 'stu@srru.ac.th']);
+
+        $this->actingAs($superAdmin)->post(route('admin.users.graduate', $student))->assertRedirect();
+        $this->assertNotNull($student->fresh()->graduated_at);
+        $this->assertDatabaseHas('audit_logs', ['actor_id' => $superAdmin->id, 'action' => 'graduated', 'subject_user_id' => $student->id]);
+
+        $this->actingAs($superAdmin)->post(route('admin.users.ungraduate', $student))->assertRedirect();
+        $this->assertNull($student->fresh()->graduated_at);
+        $this->assertDatabaseHas('audit_logs', ['actor_id' => $superAdmin->id, 'action' => 'ungraduated', 'subject_user_id' => $student->id]);
+    }
+
+    public function test_it_refuses_to_graduate_a_non_student(): void
+    {
+        $superAdmin = $this->superAdmin();
+        $admin = User::factory()->create(['role' => 'admin', 'email' => 'a2@srru.ac.th']);
+
+        $this->actingAs($superAdmin)
+            ->post(route('admin.users.graduate', $admin))
+            ->assertRedirect()
+            ->assertSessionHas('error');
+
+        $this->assertNull($admin->fresh()->graduated_at);
+    }
+
+    public function test_it_refuses_to_graduate_a_student_twice(): void
+    {
+        $superAdmin = $this->superAdmin();
+        $student = User::factory()->create(['role' => 'student', 'email' => 'stu@srru.ac.th', 'graduated_at' => now()]);
+
+        $this->actingAs($superAdmin)
+            ->post(route('admin.users.graduate', $student))
+            ->assertRedirect()
+            ->assertSessionHas('error');
+    }
+
     public function test_it_sorts_by_email_ascending_overriding_the_role_grouping(): void
     {
         User::factory()->create(['role' => 'student', 'email' => 'zzz@srru.ac.th', 'name_thai' => 'Z']);

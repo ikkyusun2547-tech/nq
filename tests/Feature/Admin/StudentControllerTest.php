@@ -85,4 +85,35 @@ class StudentControllerTest extends TestCase
 
         $response->assertOk();
     }
+
+    public function test_the_default_list_excludes_graduated_students(): void
+    {
+        $enrolled = User::factory()->create(['role' => 'student', 'email' => 'e@srru.ac.th', 'student_id' => '50000000001']);
+        $graduated = User::factory()->create(['role' => 'student', 'email' => 'g@srru.ac.th', 'student_id' => '50000000002', 'graduated_at' => now()]);
+
+        $response = $this->actingAs($this->admin())->get(route('admin.students.index'));
+
+        $response->assertOk();
+        $response->assertSee($enrolled->student_id);
+        $response->assertDontSee($graduated->student_id);
+    }
+
+    public function test_the_enrollment_status_filter_can_show_only_graduated_students(): void
+    {
+        $enrolled = User::factory()->create(['role' => 'student', 'email' => 'e@srru.ac.th', 'student_id' => '50000000003']);
+        $graduated = User::factory()->create(['role' => 'student', 'email' => 'g@srru.ac.th', 'student_id' => '50000000004', 'graduated_at' => now()]);
+
+        $response = $this->actingAs($this->admin())->get(route('admin.students.index', ['enrollment_status' => 'graduated']));
+
+        $response->assertOk();
+        $response->assertSee($graduated->student_id);
+        $response->assertDontSee($enrolled->student_id);
+    }
+
+    public function test_a_graduated_students_profile_can_still_be_viewed(): void
+    {
+        $graduated = User::factory()->create(['role' => 'student', 'email' => 'g@srru.ac.th', 'graduated_at' => now()]);
+
+        $this->actingAs($this->admin())->get(route('admin.students.show', $graduated))->assertOk();
+    }
 }

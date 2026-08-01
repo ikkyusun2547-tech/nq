@@ -47,6 +47,23 @@ class AnnouncementTest extends TestCase
         Notification::assertNotSentTo($admin, Announcement::class);
     }
 
+    public function test_it_does_not_notify_graduated_students(): void
+    {
+        Notification::fake();
+
+        $admin = User::factory()->create(['role' => 'admin', 'email' => 'admin@srru.ac.th']);
+        $enrolled = User::factory()->create(['role' => 'student', 'email' => 'a@srru.ac.th']);
+        $graduated = User::factory()->create(['role' => 'student', 'email' => 'c@srru.ac.th', 'graduated_at' => now()]);
+
+        $this->actingAs($admin)->post(route('admin.announcements.store'), [
+            'subject' => 'ประกาศทดสอบ',
+            'body' => 'เนื้อหาประกาศทดสอบ',
+        ])->assertRedirect(route('admin.announcements.create'));
+
+        Notification::assertSentTo($enrolled, Announcement::class);
+        Notification::assertNotSentTo($graduated, Announcement::class);
+    }
+
     public function test_it_filters_recipients_by_faculty(): void
     {
         Notification::fake();

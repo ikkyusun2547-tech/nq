@@ -182,7 +182,9 @@ class Activity extends Model
      */
     public function eligibleStudentsQuery()
     {
-        $query = User::where('role', 'student');
+        // Graduated students aren't part of the current student body an
+        // activity's headcount/reminders/missing-list are meant for.
+        $query = User::where('role', 'student')->whereNull('graduated_at');
 
         if ($this->isOpenToEveryone()) {
             return $query;

@@ -39,11 +39,11 @@ class DashboardController extends Controller
             ->orderByDesc('academic_year')
             ->pluck('academic_year');
 
-        $totalYear4Students = User::where('role', 'student')->where('year_level', 4)->count();
+        $totalYear4Students = User::where('role', 'student')->whereNull('graduated_at')->where('year_level', 4)->count();
         $graduatingCleared = $this->evaluations->clearedGraduatingStudents(4)->count();
 
         $stats = [
-            'total_students' => User::where('role', 'student')->count(),
+            'total_students' => User::where('role', 'student')->whereNull('graduated_at')->count(),
             'open_activities' => Activity::whereIn('status', ['open', 'ongoing'])
                 ->when($academicYear !== '', fn ($query) => $query->where('academic_year', $academicYear))
                 ->count(),

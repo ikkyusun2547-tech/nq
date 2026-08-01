@@ -71,6 +71,16 @@ class ClearanceReportControllerTest extends TestCase
         $this->assertFalse($cleared->pluck('user.id')->contains($student->id));
     }
 
+    public function test_a_graduated_student_is_excluded_from_the_year_4_report_even_if_otherwise_cleared(): void
+    {
+        $student = $this->studentWithHours(yearLevel: 4, activityCount: 4, hoursEach: 15); // 60 hours >= 50, 4 >= 4
+        $student->update(['graduated_at' => now()]);
+
+        $cleared = app(ActivityEvaluationService::class)->clearedGraduatingStudents(4);
+
+        $this->assertFalse($cleared->pluck('user.id')->contains($student->id));
+    }
+
     // --- controller: authorization + response wiring ---
 
     public function test_a_student_cannot_view_the_clearance_report(): void

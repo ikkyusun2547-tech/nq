@@ -242,14 +242,20 @@ Route::middleware(['auth', 'srru.email'])->group(function () {
             Route::post('/users/{user}/demote', [UserManagementController::class, 'demote'])->name('users.demote');
             Route::post('/users/{user}/ban', [UserManagementController::class, 'ban'])->name('users.ban');
             Route::post('/users/{user}/unban', [UserManagementController::class, 'unban'])->name('users.unban');
+            Route::post('/users/{user}/graduate', [UserManagementController::class, 'graduate'])->name('users.graduate');
+            Route::post('/users/{user}/ungraduate', [UserManagementController::class, 'ungraduate'])->name('users.ungraduate');
 
             Route::resource('faculties', FacultyController::class)->except(['show']);
             Route::post('/faculties/{faculty}/majors', [MajorController::class, 'store'])->name('majors.store');
             Route::put('/majors/{major}', [MajorController::class, 'update'])->name('majors.update');
             Route::delete('/majors/{major}', [MajorController::class, 'destroy'])->name('majors.destroy');
 
-            Route::get('/settings', [SettingsController::class, 'edit'])->name('settings.edit');
-            Route::put('/settings', [SettingsController::class, 'update'])->name('settings.update');
+            Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
+            Route::get('/settings/create', [SettingsController::class, 'create'])->name('settings.create');
+            Route::post('/settings', [SettingsController::class, 'store'])->name('settings.store');
+            Route::get('/settings/{year}/edit', [SettingsController::class, 'edit'])->name('settings.edit');
+            Route::put('/settings/{year}', [SettingsController::class, 'update'])->name('settings.update');
+            Route::delete('/settings/{year}', [SettingsController::class, 'destroy'])->name('settings.destroy');
         });
     });
 });

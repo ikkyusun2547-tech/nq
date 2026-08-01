@@ -123,4 +123,28 @@ class UserManagementController extends Controller
 
         return back()->with('status', __('ปลดระงับบัญชี :name แล้ว', ['name' => $user->name_thai ?? $user->name]));
     }
+
+    public function graduate(Request $request, User $user)
+    {
+        if ($user->role !== 'student') {
+            return back()->with('error', __('ทำเครื่องหมายจบการศึกษาได้เฉพาะนักศึกษาเท่านั้น'));
+        }
+
+        if ($user->isGraduated()) {
+            return back()->with('error', __('ผู้ใช้นี้จบการศึกษาแล้ว'));
+        }
+
+        $user->update(['graduated_at' => now()]);
+        AuditLogger::log('graduated', __('ผู้ใช้งาน'), __(':name เป็นผู้จบการศึกษา', ['name' => $user->name_thai ?? $user->name]), $user);
+
+        return back()->with('status', __('ทำเครื่องหมาย :name เป็นจบการศึกษาแล้ว', ['name' => $user->name_thai ?? $user->name]));
+    }
+
+    public function ungraduate(Request $request, User $user)
+    {
+        $user->update(['graduated_at' => null]);
+        AuditLogger::log('ungraduated', __('ผู้ใช้งาน'), __(':name กลับเป็นนักศึกษาปัจจุบัน', ['name' => $user->name_thai ?? $user->name]), $user);
+
+        return back()->with('status', __('ยกเลิกสถานะจบการศึกษาของ :name แล้ว', ['name' => $user->name_thai ?? $user->name]));
+    }
 }

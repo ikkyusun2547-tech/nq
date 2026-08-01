@@ -34,6 +34,7 @@ class User extends Authenticatable
         'year_level',
         'program_type',
         'account_status',
+        'graduated_at',
     ];
 
     /**
@@ -58,7 +59,19 @@ class User extends Authenticatable
             'password' => 'hashed',
             'enrollment_year' => 'integer',
             'year_level' => 'integer',
+            'graduated_at' => 'datetime',
         ];
+    }
+
+    /**
+     * Students still enrolled — excludes those marked graduated. Used
+     * wherever a query means "current student body" rather than "every
+     * student who ever existed" (e.g. rosters, headcounts, notification
+     * targeting). Graduated students keep full account/history access.
+     */
+    public function scopeCurrentlyEnrolled(\Illuminate\Database\Eloquent\Builder $query): \Illuminate\Database\Eloquent\Builder
+    {
+        return $query->whereNull('graduated_at');
     }
 
     public function faculty(): BelongsTo
@@ -114,6 +127,11 @@ class User extends Authenticatable
     public function isAdmin(): bool
     {
         return in_array($this->role, ['admin', 'super_admin'], true);
+    }
+
+    public function isGraduated(): bool
+    {
+        return ! is_null($this->graduated_at);
     }
 
     public function hasCompletedProfile(): bool

@@ -24,9 +24,18 @@ class StudentController extends Controller
         $sortColumn = self::SORTABLE[$request->input('sort')] ?? null;
         $sortDir = $request->input('dir') === 'desc' ? 'desc' : 'asc';
 
+        // Default view is the current student body — graduated students are
+        // kept for historical records but shouldn't clutter the day-to-day
+        // roster unless an admin explicitly asks to see them.
+        $enrollmentStatus = in_array($request->input('enrollment_status'), ['graduated', 'all'], true)
+            ? $request->input('enrollment_status')
+            : 'enrolled';
+
         $students = User::query()
             ->where('role', 'student')
             ->with(['faculty', 'major'])
+            ->when($enrollmentStatus === 'enrolled', fn ($query) => $query->whereNull('graduated_at'))
+            ->when($enrollmentStatus === 'graduated', fn ($query) => $query->whereNotNull('graduated_at'))
             ->when($request->filled('search'), function ($query) use ($request) {
                 $search = $request->string('search');
 
@@ -49,9 +58,9 @@ class StudentController extends Controller
 
         $faculties = Faculty::with(['majors' => fn ($query) => $query->orderBy('name_th')])->orderBy('name_th')->get();
 
-        $bannedCount = User::where('role', 'student')->where('account_status', 'banned')->count();
+        $bannedCount = User::where('role', 'student')->whereNull('graduated_at')->where('account_status', 'banned')->count();
 
-        return view('admin.students.index', compact('students', 'faculties', 'bannedCount'));
+        return view('admin.students.index', compact('students', 'faculties', 'bannedCount', 'enrollmentStatus'));
     }
 
     public function show(User $student, ActivityEvaluationService $evaluationService)

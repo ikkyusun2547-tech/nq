@@ -6,21 +6,19 @@ use App\Models\Attendance;
 use App\Models\CreditTransferRequest;
 use App\Models\ExternalActivityRequest;
 use App\Models\Faculty;
+use App\Models\GraduationCriteria;
 use App\Models\LateCheckInRequest;
-use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Support\Collection;
 
 class ActivityEvaluationService
 {
-    public const SETTINGS_KEY = 'graduation_criteria';
-
     /**
-     * Institutional graduation criteria: [required activity count, required
-     * hours, yearly hour targets by year 1-4]. Used as-is until an admin
-     * overrides it via Admin\SettingsController — see criteria() below —
-     * so the university's current published requirement always works even
-     * if a setting was never explicitly saved.
+     * The ultimate fallback when no admin has ever configured a
+     * GraduationCriteria row that applies to a student's cohort — so the
+     * app has a sane requirement to evaluate against from a fresh install,
+     * with nothing to seed. See criteria() below for how a real row (if
+     * any exists) takes precedence over this.
      */
     public const DEFAULT_CRITERIA = [
         'normal' => [
@@ -38,12 +36,64 @@ class ActivityEvaluationService
     private const CATEGORIES = ['culture', 'academic', 'sports', 'volunteer', 'ethics'];
 
     /**
-     * The criteria actually in effect — an admin-saved override if one
-     * exists, otherwise DEFAULT_CRITERIA untouched.
+     * The criteria actually in effect for one student's cohort + program.
+     * Resolution order:
+     *   1. A GraduationCriteria row for this exact (enrollment_year, program_type).
+     *   2. The nearest *earlier* configured enrollment_year for the same
+     *      program_type — a student's requirement is whatever was published
+     *      by the time they enrolled, not something set later for a newer
+     *      cohort.
+     *   3. DEFAULT_CRITERIA, if nothing has ever been configured for this
+     *      program_type at all.
+     *
+     * @return array{required_activities: int, required_hours: int, yearly_targets: array<int,int>}
      */
-    public function criteria(): array
+    public function criteria(?int $enrollmentYear, string $programType): array
     {
-        return Setting::getJson(self::SETTINGS_KEY, self::DEFAULT_CRITERIA);
+        return $this->resolveCriteria($this->allCriteriaRows(), $enrollmentYear, $programType);
+    }
+
+    /**
+     * Every configured cohort's criteria, fetched once — the table is
+     * bounded by (number of cohorts admins have configured) × 2 program
+     * types, nowhere near large enough to need per-lookup queries even
+     * across a bulk operation like bulkProgress() below.
+     *
+     * @return Collection<int, GraduationCriteria>
+     */
+    private function allCriteriaRows(): Collection
+    {
+        return GraduationCriteria::all();
+    }
+
+    /**
+     * @param  Collection<int, GraduationCriteria>  $rows
+     * @return array{required_activities: int, required_hours: int, yearly_targets: array<int,int>}
+     */
+    private function resolveCriteria(Collection $rows, ?int $enrollmentYear, string $programType): array
+    {
+        $forProgram = $rows->where('program_type', $programType);
+
+        $match = $enrollmentYear !== null
+            ? $forProgram->firstWhere('enrollment_year', $enrollmentYear)
+            : null;
+
+        if (! $match && $enrollmentYear !== null) {
+            $match = $forProgram
+                ->where('enrollment_year', '<=', $enrollmentYear)
+                ->sortByDesc('enrollment_year')
+                ->first();
+        }
+
+        if ($match) {
+            return [
+                'required_activities' => $match->required_activities,
+                'required_hours' => $match->required_hours,
+                'yearly_targets' => $match->yearly_targets,
+            ];
+        }
+
+        return self::DEFAULT_CRITERIA[$programType] ?? self::DEFAULT_CRITERIA['normal'];
     }
 
     /**
@@ -60,8 +110,10 @@ class ActivityEvaluationService
      */
     public function summarize(User $user): array
     {
-        $allCriteria = $this->criteria();
-        $criteria = $allCriteria[$user->program_type] ?? $allCriteria['normal'];
+        // program_type is nullable on the User model (unset until profile
+        // setup completes) — 'normal' is the same assumed default the old
+        // single-blob criteria() lookup fell back to.
+        $criteria = $this->criteria($user->enrollment_year, $user->program_type ?? 'normal');
 
         // 'practice' (กิจกรรมซ้อม/เตรียมงาน) credits hours but isn't a real
         // university activity yet, so it's excluded from the 25-activity
@@ -173,10 +225,10 @@ class ActivityEvaluationService
             ->groupBy('user_id')
             ->pluck('hours', 'user_id');
 
-        $allCriteria = $this->criteria();
+        $criteriaRows = $this->allCriteriaRows();
 
-        return $students->map(function (User $user) use ($activityStats, $externalHours, $creditTransferHours, $allCriteria) {
-            $criteria = $allCriteria[$user->program_type] ?? $allCriteria['normal'];
+        return $students->map(function (User $user) use ($activityStats, $externalHours, $creditTransferHours, $criteriaRows) {
+            $criteria = $this->resolveCriteria($criteriaRows, $user->enrollment_year, $user->program_type ?? 'normal');
             $stat = $activityStats->get($user->id);
 
             $totalActivities = (int) ($stat->activity_count ?? 0);
@@ -212,6 +264,7 @@ class ActivityEvaluationService
     {
         $students = User::with(['faculty', 'major'])
             ->where('role', 'student')
+            ->whereNull('graduated_at')
             ->whereNotNull('enrollment_year')
             ->get()
             ->filter(fn (User $u) => $u->current_year === $year)
@@ -323,6 +376,10 @@ class ActivityEvaluationService
      * (7-8 × total student count) queries. That's fine at a few dozen
      * students and genuinely bad at a few thousand.
      *
+     * Excludes graduated students, same as studentsProgress() — this reads
+     * as "how is each faculty's current student body doing", not a
+     * historical all-time clearance rate.
+     *
      * @return Collection<int, array{
      *     faculty: Faculty, student_count: int, cleared_count: int,
      *     cleared_pct: float, avg_hours: float, avg_activities: float,
@@ -330,7 +387,9 @@ class ActivityEvaluationService
      */
     public function facultyParticipationSummary(): Collection
     {
-        $students = User::where('role', 'student')->get(['id', 'faculty_id', 'program_type']);
+        $students = User::where('role', 'student')
+            ->whereNull('graduated_at')
+            ->get(['id', 'faculty_id', 'program_type', 'enrollment_year']);
         $progressByFaculty = $this->bulkProgress($students)->groupBy(fn (array $row) => $row['user']->faculty_id);
 
         return Faculty::orderBy('name_th')->get()->map(function (Faculty $faculty) use ($progressByFaculty) {

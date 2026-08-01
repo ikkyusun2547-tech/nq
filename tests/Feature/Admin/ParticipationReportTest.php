@@ -65,6 +65,18 @@ class ParticipationReportTest extends TestCase
         $this->assertLessThanOrEqual($queriesForThree + 2, $queriesForTwentyThree);
     }
 
+    public function test_a_graduated_student_does_not_count_toward_faculty_participation(): void
+    {
+        $faculty = Faculty::factory()->create();
+        User::factory()->create(['role' => 'student', 'faculty_id' => $faculty->id]);
+        User::factory()->create(['role' => 'student', 'faculty_id' => $faculty->id, 'graduated_at' => now()]);
+
+        $summary = app(ActivityEvaluationService::class)->facultyParticipationSummary();
+
+        $row = $summary->firstWhere('faculty.id', $faculty->id);
+        $this->assertSame(1, $row['student_count']);
+    }
+
     public function test_it_downloads_the_faculty_participation_excel_export(): void
     {
         $admin = User::factory()->create(['role' => 'admin', 'email' => 'admin@srru.ac.th']);

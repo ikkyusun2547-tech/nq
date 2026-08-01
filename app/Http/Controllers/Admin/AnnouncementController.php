@@ -63,6 +63,7 @@ class AnnouncementController extends Controller
 
         $recipients = User::query()
             ->where('role', 'student')
+            ->whereNull('graduated_at')
             ->where('account_status', 'active')
             ->when($validated['faculty_id'] ?? null, fn ($q) => $q->where('faculty_id', $validated['faculty_id']))
             ->when($validated['year_level'] ?? null, fn ($q) => $q->where('year_level', $validated['year_level']))

@@ -9,6 +9,8 @@
         'banned' => 'bg-red-50 text-red-700 dark:bg-red-500/10 dark:text-red-400',
     ];
     $statusLabel = ['active' => __('ใช้งานปกติ'), 'banned' => __('ระงับการใช้งาน')];
+    $graduatedBadge = 'inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium bg-brand-purple-50 text-brand-purple-700 dark:bg-brand-purple-500/10 dark:text-brand-purple-400';
+    $enrollmentOptions = ['enrolled' => __('กำลังศึกษา'), 'graduated' => __('จบการศึกษาแล้ว'), 'all' => __('ทั้งหมด')];
 @endphp
 
 <div class="mx-auto max-w-7xl">
@@ -66,7 +68,7 @@
             $yearOptions = collect([1, 2, 3, 4])->mapWithKeys(fn ($y) => [$y => __('ชั้นปีที่ :year', ['year' => $y])])->all();
         @endphp
 
-        <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
+        <div class="grid grid-cols-1 gap-3 sm:grid-cols-4">
             <x-premium-select
                 name="faculty_id" :options="$facultyOptions" :selected="request('faculty_id')"
                 placeholder="{{ __('-- ทุกคณะ --') }}" autosubmit resets="major_id"
@@ -80,6 +82,11 @@
             <x-premium-select
                 name="year_level" :options="$yearOptions" :selected="request('year_level')"
                 placeholder="{{ __('-- ทุกชั้นปี --') }}" autosubmit
+            />
+
+            <x-premium-select
+                name="enrollment_status" :options="$enrollmentOptions" :selected="$enrollmentStatus"
+                autosubmit :nullable="false"
             />
         </div>
     </form>
@@ -122,6 +129,9 @@
                                 </span>
                                 {{ $statusLabel[$student->account_status] ?? $student->account_status }}
                             </span>
+                            @if ($student->isGraduated())
+                                <span class="{{ $graduatedBadge }}">{{ __('จบการศึกษา') }}</span>
+                            @endif
                         </td>
                         <td class="whitespace-nowrap px-4 py-3 text-right">
                             <a href="{{ route('admin.students.show', $student) }}" class="font-medium text-brand-purple-600 transition-colors hover:text-brand-purple-800 dark:text-brand-purple-400 dark:hover:text-brand-purple-300">{{ __('ดูข้อมูล') }}</a>

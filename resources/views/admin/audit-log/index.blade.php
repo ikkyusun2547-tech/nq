@@ -12,12 +12,15 @@
         'demoted' => 'bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400',
         'banned' => 'bg-red-50 text-red-700 dark:bg-red-500/10 dark:text-red-400',
         'unbanned' => 'bg-brand-green-50 text-brand-green-700 dark:bg-brand-green-500/10 dark:text-brand-green-400',
+        'graduated' => 'bg-brand-purple-50 text-brand-purple-700 dark:bg-brand-purple-500/10 dark:text-brand-purple-400',
+        'ungraduated' => 'bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400',
     ];
     $actionLabel = [
         'approved' => __('อนุมัติ'), 'rejected' => __('ปฏิเสธ'),
         'created' => __('เพิ่มใหม่'), 'updated' => __('แก้ไข'), 'deleted' => __('ลบ'),
         'promoted' => __('เลื่อนสิทธิ์'), 'demoted' => __('ลดสิทธิ์'),
         'banned' => __('ระงับบัญชี'), 'unbanned' => __('ปลดระงับ'),
+        'graduated' => __('จบการศึกษา'), 'ungraduated' => __('ยกเลิกสถานะจบ'),
     ];
 @endphp
 
