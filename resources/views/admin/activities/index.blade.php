@@ -115,10 +115,130 @@
         </div>
     </form>
 
+    <div
+        x-data="{
+            selected: [],
+            allIds: @js($activities->pluck('id')->all()),
+            statusMap: @js($activities->mapWithKeys(fn ($a) => [$a->id => $a->status])),
+            get allSelected() { return this.allIds.length > 0 && this.selected.length === this.allIds.length },
+            get hasCloseable() { return this.selected.some(id => ! ['closed', 'cancelled'].includes(this.statusMap[id])); },
+            get hasCancellable() { return this.selected.some(id => this.statusMap[id] !== 'cancelled'); },
+            get hasReopenable() { return this.selected.some(id => ['closed', 'cancelled'].includes(this.statusMap[id])); },
+            get confirmPalette() {
+                const palette = {
+                    red: { border: 'to-red-200/40 dark:to-red-500/20', iconBg: 'bg-red-50 ring-red-50/50 dark:bg-red-500/10 dark:ring-red-500/5', iconText: 'text-red-600 dark:text-red-400', button: 'bg-gradient-to-r from-red-600 to-red-500' },
+                    green: { border: 'to-brand-green-100/40 dark:to-brand-green-500/20', iconBg: 'bg-brand-green-50 ring-brand-green-50/50 dark:bg-brand-green-500/10 dark:ring-brand-green-500/5', iconText: 'text-brand-green-600 dark:text-brand-green-400', button: 'bg-gradient-to-r from-brand-green-600 to-brand-green-500' },
+                    slate: { border: 'to-slate-200/60 dark:to-slate-500/20', iconBg: 'bg-slate-100 ring-slate-100/50 dark:bg-slate-800 dark:ring-slate-800/50', iconText: 'text-slate-500 dark:text-slate-400', button: 'bg-gradient-to-r from-slate-600 to-slate-500' },
+                };
+                return palette[this.confirmTone] ?? palette.slate;
+            },
+            toggleAll(checked) { this.selected = checked ? [...this.allIds] : []; },
+            confirmOpen: false,
+            confirmAction: null,
+            confirmMessage: '',
+            confirmLabel: '',
+            confirmTone: 'slate',
+            ask(action, message, label, tone) {
+                if (this.selected.length === 0) return;
+                this.confirmAction = action;
+                this.confirmMessage = `${message} ({{ __(':count กิจกรรม') }})`.replace(':count', this.selected.length);
+                this.confirmLabel = label;
+                this.confirmTone = tone;
+                this.confirmOpen = true;
+            },
+            proceed() {
+                this.$refs.bulkAction.value = this.confirmAction;
+                this.confirmOpen = false;
+                this.$refs.bulkForm.submit();
+            },
+        }"
+    >
+        <div x-show="selected.length > 0" x-cloak x-transition
+            class="mt-4 flex flex-wrap items-center gap-3 rounded-2xl bg-gradient-to-r from-slate-100 to-slate-100/60 px-4 py-3 shadow-soft ring-1 ring-slate-200 dark:from-slate-800/60 dark:to-slate-800/30 dark:ring-slate-700">
+            <span class="inline-flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-300">
+                <span class="flex h-6 min-w-6 items-center justify-center rounded-full bg-slate-600 px-1.5 text-xs font-bold text-white dark:bg-slate-500" x-text="selected.length"></span>
+                {{ __('รายการที่เลือก') }}
+            </span>
+
+            <span class="h-6 w-px bg-slate-200 dark:bg-slate-600"></span>
+
+            <div class="ml-auto flex flex-wrap items-center gap-2">
+                <button type="button" x-show="hasCloseable" x-cloak
+                    @click="ask('close', {{ Js::from(__('ยืนยันปิดกิจกรรมที่เลือก')) }}, {{ Js::from(__('ปิดกิจกรรม')) }}, 'slate')"
+                    class="inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-slate-600 to-slate-500 px-3.5 py-2 text-xs font-semibold text-white shadow-soft transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg active:scale-[0.98]">
+                    <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5"/></svg>
+                    {{ __('ปิดกิจกรรม') }}
+                </button>
+                <button type="button" x-show="hasCancellable" x-cloak
+                    @click="ask('cancel', {{ Js::from(__('ยืนยันยกเลิกกิจกรรมที่เลือก')) }}, {{ Js::from(__('ยกเลิกกิจกรรม')) }}, 'red')"
+                    class="inline-flex items-center gap-1.5 rounded-lg bg-white px-3.5 py-2 text-xs font-semibold text-red-600 shadow-soft ring-1 ring-red-200 transition-all duration-200 hover:-translate-y-0.5 hover:bg-red-50 hover:shadow-lg active:scale-[0.98] dark:bg-slate-800 dark:text-red-400 dark:ring-red-500/30">
+                    <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>
+                    {{ __('ยกเลิกกิจกรรม') }}
+                </button>
+                <button type="button" x-show="hasReopenable" x-cloak
+                    @click="ask('reopen', {{ Js::from(__('ยืนยันเปิดกิจกรรมที่เลือกกลับ')) }}, {{ Js::from(__('เปิดกลับ')) }}, 'green')"
+                    class="inline-flex items-center gap-1.5 rounded-lg bg-white px-3.5 py-2 text-xs font-semibold text-brand-green-600 shadow-soft ring-1 ring-brand-green-100 transition-all duration-200 hover:-translate-y-0.5 hover:bg-brand-green-50 hover:shadow-lg active:scale-[0.98] dark:bg-slate-800 dark:text-brand-green-400 dark:ring-brand-green-500/30">
+                    <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12a7.5 7.5 0 0113.5-4.5M19.5 12a7.5 7.5 0 01-13.5 4.5M4.5 4.5v4.5h4.5M19.5 19.5V15h-4.5"/></svg>
+                    {{ __('เปิดกลับ') }}
+                </button>
+            </div>
+        </div>
+
+        <div x-show="confirmOpen" x-cloak x-transition.opacity
+            class="fixed inset-0 z-50 flex items-center justify-center bg-brand-purple-950/70 p-4 backdrop-blur-sm"
+            @keydown.escape.window="confirmOpen = false">
+            <div
+                @click.outside="confirmOpen = false"
+                x-show="confirmOpen"
+                x-transition:enter="transition ease-out duration-200"
+                x-transition:enter-start="opacity-0 scale-95"
+                x-transition:enter-end="opacity-100 scale-100"
+                x-transition:leave="transition ease-in duration-150"
+                x-transition:leave-start="opacity-100 scale-100"
+                x-transition:leave-end="opacity-0 scale-95"
+                class="w-full max-w-sm rounded-[2rem] bg-gradient-to-br from-white/60 via-white/10 p-[1.5px] shadow-soft-lg dark:from-white/10 dark:via-white/5"
+                :class="confirmPalette.border"
+            >
+                <div class="rounded-[calc(2rem-1.5px)] bg-white p-7 text-center dark:bg-slate-900">
+                    <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full ring-8" :class="confirmPalette.iconBg">
+                        <svg class="h-8 w-8 shrink-0" :class="confirmPalette.iconText"
+                            fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.362-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z"/>
+                        </svg>
+                    </div>
+                    <h3 class="mt-4 text-base font-semibold text-slate-900 dark:text-slate-100">{{ __('ยืนยันการดำเนินการ') }}</h3>
+                    <p class="mx-auto mt-2 max-w-[15rem] text-sm leading-relaxed text-slate-500 dark:text-slate-400" x-text="confirmMessage"></p>
+                    <div class="mt-6 grid grid-cols-2 gap-3">
+                        <button type="button" @click="confirmOpen = false"
+                            class="rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-600 ring-1 ring-slate-200 transition-colors hover:bg-slate-50 dark:text-slate-300 dark:ring-slate-600 dark:hover:bg-slate-800">
+                            {{ __('ยกเลิก') }}
+                        </button>
+                        <button type="button" @click="proceed()"
+                            class="rounded-xl px-4 py-2.5 text-sm font-semibold text-white shadow-soft transition-all duration-200 hover:shadow-lg active:scale-[0.98]"
+                            :class="confirmPalette.button">
+                            <span x-text="confirmLabel"></span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <form method="POST" action="{{ route('admin.activities.bulk-action') }}" x-ref="bulkForm" class="hidden">
+            @csrf
+            <input type="hidden" name="bulk_action" x-ref="bulkAction">
+            <template x-for="id in selected" :key="id">
+                <input type="hidden" name="activity_ids[]" :value="id">
+            </template>
+        </form>
+
     <div class="mt-4 overflow-x-auto rounded-2xl glass-card shadow-soft">
         <table class="min-w-full text-sm">
             <thead>
                 <tr class="border-b border-brand-purple-100 dark:border-brand-purple-500/20">
+                    <th class="w-10 whitespace-nowrap px-4 py-3">
+                        <input type="checkbox" :checked="allSelected" @change="toggleAll($event.target.checked)"
+                            class="h-4 w-4 rounded border-slate-300 text-brand-purple-600 focus:ring-brand-purple-500 dark:border-slate-600">
+                    </th>
                     <x-sortable-th field="activity_code" :label="__('รหัสกิจกรรม')" />
                     <x-sortable-th field="title" :label="__('ชื่อกิจกรรม')" />
                     <x-sortable-th field="start_at" :label="__('วันที่จัด')" />
@@ -135,6 +255,10 @@
                         'bg-white dark:bg-slate-900' => $loop->even,
                         'bg-slate-50/50 dark:bg-slate-800/40' => $loop->odd,
                     ])>
+                        <td class="whitespace-nowrap px-4 py-3">
+                            <input type="checkbox" value="{{ $activity->id }}" x-model="selected"
+                                class="h-4 w-4 rounded border-slate-300 text-brand-purple-600 focus:ring-brand-purple-500 dark:border-slate-600">
+                        </td>
                         <td class="whitespace-nowrap px-4 py-3 font-mono text-xs text-brand-purple-600 dark:text-brand-purple-400">{{ $activity->activity_code ?? '-' }}</td>
                         <td class="whitespace-nowrap px-4 py-3 font-medium text-slate-900 dark:text-slate-100">{{ $activity->title }}</td>
                         <td class="whitespace-nowrap px-4 py-3 text-slate-500 dark:text-slate-400">{{ $activity->start_at->format('d/m/Y H:i') }}</td>
@@ -203,11 +327,12 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="7" class="px-4 py-8 text-center text-slate-400 dark:text-slate-500">{{ __('ยังไม่มีกิจกรรม') }}</td>
+                        <td colspan="8" class="px-4 py-8 text-center text-slate-400 dark:text-slate-500">{{ __('ยังไม่มีกิจกรรม') }}</td>
                     </tr>
                 @endforelse
             </tbody>
         </table>
+    </div>
     </div>
 
     <div class="mt-4">{{ $activities->links() }}</div>

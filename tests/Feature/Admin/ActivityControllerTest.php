@@ -211,6 +211,100 @@ class ActivityControllerTest extends TestCase
         $this->assertDatabaseMissing('activities', ['id' => $activity->id]);
     }
 
+    // --- bulkAction() ---
+
+    public function test_bulk_action_closes_several_activities_and_notifies_missing_students(): void
+    {
+        Notification::fake();
+        $a = Activity::factory()->create(['status' => 'open']);
+        $b = Activity::factory()->create(['status' => 'ongoing']);
+        $missingStudent = $this->student();
+
+        $this->actingAs($this->admin())
+            ->post(route('admin.activities.bulk-action'), ['bulk_action' => 'close', 'activity_ids' => [$a->id, $b->id]])
+            ->assertRedirect();
+
+        $this->assertSame('closed', $a->fresh()->status);
+        $this->assertSame('closed', $b->fresh()->status);
+        Notification::assertSentTo($missingStudent, ActivityMissed::class);
+    }
+
+    public function test_bulk_action_cancels_several_activities_at_once(): void
+    {
+        $a = Activity::factory()->create(['status' => 'open']);
+        $b = Activity::factory()->create(['status' => 'draft']);
+
+        $this->actingAs($this->admin())
+            ->post(route('admin.activities.bulk-action'), ['bulk_action' => 'cancel', 'activity_ids' => [$a->id, $b->id]])
+            ->assertRedirect();
+
+        $this->assertSame('cancelled', $a->fresh()->status);
+        $this->assertSame('cancelled', $b->fresh()->status);
+    }
+
+    public function test_bulk_action_close_skips_an_already_closed_activity_and_reports_the_skip_count(): void
+    {
+        $open = Activity::factory()->create(['status' => 'open']);
+        $alreadyClosed = Activity::factory()->create(['status' => 'closed']);
+
+        $response = $this->actingAs($this->admin())
+            ->post(route('admin.activities.bulk-action'), ['bulk_action' => 'close', 'activity_ids' => [$open->id, $alreadyClosed->id]]);
+
+        $response->assertRedirect();
+        $this->assertSame('closed', $open->fresh()->status);
+        $this->assertStringContainsString('1', session('status'));
+    }
+
+    public function test_bulk_action_cancel_skips_an_already_cancelled_activity(): void
+    {
+        $open = Activity::factory()->create(['status' => 'open']);
+        $alreadyCancelled = Activity::factory()->create(['status' => 'cancelled']);
+
+        $response = $this->actingAs($this->admin())
+            ->post(route('admin.activities.bulk-action'), ['bulk_action' => 'cancel', 'activity_ids' => [$open->id, $alreadyCancelled->id]]);
+
+        $response->assertRedirect();
+        $this->assertSame('cancelled', $open->fresh()->status);
+        $this->assertStringContainsString('1', session('status'));
+    }
+
+    public function test_bulk_action_reopens_closed_and_cancelled_activities(): void
+    {
+        $closed = Activity::factory()->create(['status' => 'closed']);
+        $cancelled = Activity::factory()->create(['status' => 'cancelled']);
+
+        $this->actingAs($this->admin())
+            ->post(route('admin.activities.bulk-action'), ['bulk_action' => 'reopen', 'activity_ids' => [$closed->id, $cancelled->id]])
+            ->assertRedirect();
+
+        $this->assertSame('open', $closed->fresh()->status);
+        $this->assertSame('open', $cancelled->fresh()->status);
+    }
+
+    public function test_bulk_action_reopen_skips_an_activity_that_is_not_closed_or_cancelled(): void
+    {
+        $closed = Activity::factory()->create(['status' => 'closed']);
+        $open = Activity::factory()->create(['status' => 'open']);
+
+        $response = $this->actingAs($this->admin())
+            ->post(route('admin.activities.bulk-action'), ['bulk_action' => 'reopen', 'activity_ids' => [$closed->id, $open->id]]);
+
+        $response->assertRedirect();
+        $this->assertSame('open', $closed->fresh()->status);
+        $this->assertStringContainsString('1', session('status'));
+    }
+
+    public function test_a_student_cannot_use_the_activities_bulk_action_endpoint(): void
+    {
+        $activity = Activity::factory()->create(['status' => 'open']);
+
+        $this->actingAs($this->student())
+            ->post(route('admin.activities.bulk-action'), ['bulk_action' => 'close', 'activity_ids' => [$activity->id]])
+            ->assertForbidden();
+
+        $this->assertSame('open', $activity->fresh()->status);
+    }
+
     public function test_it_sorts_by_title_ascending(): void
     {
         $b = Activity::factory()->create(['title' => 'Zebra Activity']);

@@ -17,6 +17,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 class ActivityController extends Controller
 {
@@ -291,6 +292,90 @@ class ActivityController extends Controller
         return redirect()
             ->route('admin.activities.edit', $copy)
             ->with('status', __('คัดลอกกิจกรรมสำเร็จ กรุณาตรวจสอบวันเวลาก่อนเผยแพร่'));
+    }
+
+    /**
+     * Apply one of the "many activities -> a status" actions to a batch
+     * selected via checkboxes on the list. Same shape as
+     * UserManagementController::bulkAction() — skip rows the action doesn't
+     * apply to (e.g. an already-cancelled activity selected for "cancel")
+     * rather than failing the whole batch, and report how many actually
+     * changed vs. were skipped.
+     */
+    public function bulkAction(Request $request)
+    {
+        $validated = $request->validate([
+            'bulk_action' => ['required', Rule::in(['close', 'cancel', 'reopen'])],
+            'activity_ids' => ['required', 'array', 'min:1'],
+            'activity_ids.*' => ['integer', 'exists:activities,id'],
+        ]);
+
+        $activities = Activity::whereIn('id', $validated['activity_ids'])->get();
+        $applied = 0;
+
+        foreach ($activities as $activity) {
+            $ok = match ($validated['bulk_action']) {
+                'close' => $this->applyClose($activity),
+                'cancel' => $this->applyCancel($activity),
+                'reopen' => $this->applyReopen($activity),
+            };
+
+            $applied += $ok ? 1 : 0;
+        }
+
+        $skipped = $activities->count() - $applied;
+
+        $message = match ($validated['bulk_action']) {
+            'close' => __('ปิดกิจกรรมสำเร็จ :count รายการ', ['count' => $applied]),
+            'cancel' => __('ยกเลิกกิจกรรมสำเร็จ :count รายการ', ['count' => $applied]),
+            'reopen' => __('เปิดกิจกรรมกลับสำเร็จ :count รายการ', ['count' => $applied]),
+        };
+
+        if ($skipped > 0) {
+            $message .= ' '.__('(ข้าม :count รายการที่ไม่เข้าเงื่อนไข)', ['count' => $skipped]);
+        }
+
+        return back()->with('status', $message);
+    }
+
+    private function applyClose(Activity $activity): bool
+    {
+        if (in_array($activity->status, ['closed', 'cancelled'], true)) {
+            return false;
+        }
+
+        $activity->update(['status' => 'closed']);
+        $this->notifyMissingStudents($activity);
+
+        return true;
+    }
+
+    private function applyCancel(Activity $activity): bool
+    {
+        if ($activity->status === 'cancelled') {
+            return false;
+        }
+
+        $activity->update(['status' => 'cancelled']);
+
+        return true;
+    }
+
+    /**
+     * Undo an accidental close/cancel — puts the activity back to 'open'
+     * rather than restoring whatever status it had before (draft/full/
+     * ongoing aren't tracked once overwritten), which is the simplest state
+     * an admin can immediately act on again (edit further, or re-close).
+     */
+    private function applyReopen(Activity $activity): bool
+    {
+        if (! in_array($activity->status, ['closed', 'cancelled'], true)) {
+            return false;
+        }
+
+        $activity->update(['status' => 'open']);
+
+        return true;
     }
 
     /**

@@ -231,6 +231,7 @@ Route::middleware(['auth', 'srru.email'])->group(function () {
         Route::get('/audit-log', [AuditLogController::class, 'index'])->name('audit-log.index');
 
         Route::post('/activities/{activity}/duplicate', [ActivityController::class, 'duplicate'])->name('activities.duplicate');
+        Route::post('/activities/bulk-action', [ActivityController::class, 'bulkAction'])->name('activities.bulk-action');
 
         Route::get('/announcements', [AnnouncementController::class, 'create'])->name('announcements.create');
         Route::post('/announcements', [AnnouncementController::class, 'store'])->name('announcements.store');
