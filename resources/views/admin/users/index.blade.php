@@ -67,8 +67,8 @@
         <table class="min-w-full text-sm">
             <thead>
                 <tr class="border-b border-brand-purple-100 dark:border-brand-purple-500/20">
-                    <th class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">{{ __('ชื่อ-นามสกุล') }}</th>
-                    <th class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">{{ __('อีเมล') }}</th>
+                    <x-sortable-th field="name" :label="__('ชื่อ-นามสกุล')" />
+                    <x-sortable-th field="email" :label="__('อีเมล')" />
                     <th class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">{{ __('สิทธิ์') }}</th>
                     <th class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">{{ __('สถานะบัญชี') }}</th>
                     <th class="whitespace-nowrap px-4 py-3"></th>

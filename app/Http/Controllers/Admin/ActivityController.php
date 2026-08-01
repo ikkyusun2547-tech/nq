@@ -20,6 +20,15 @@ use Illuminate\Support\Str;
 
 class ActivityController extends Controller
 {
+    /** ?sort= value => real column/alias to order by. Whitelisted so the query string can never inject an arbitrary expression into orderBy(). */
+    private const SORTABLE = [
+        'activity_code' => 'activity_code',
+        'title' => 'title',
+        'start_at' => 'start_at',
+        'academic_year' => 'academic_year',
+        'attendances_count' => 'attendances_count',
+    ];
+
     public function __construct(protected ActivityCodeGenerator $activityCodes)
     {
     }
@@ -29,6 +38,9 @@ class ActivityController extends Controller
      */
     public function index(Request $request)
     {
+        $sortColumn = self::SORTABLE[$request->input('sort')] ?? null;
+        $sortDir = $request->input('dir') === 'desc' ? 'desc' : 'asc';
+
         // On a fresh visit (no academic_year in the query string at all) default
         // to the current academic year so the list isn't cluttered with every
         // past year; an explicit "-- ทุกปีการศึกษา --" selection posts an empty
@@ -55,7 +67,11 @@ class ActivityController extends Controller
             ->when($request->filled('status'), fn ($query) => $query->where('status', $request->input('status')))
             ->when($academicYear !== '', fn ($query) => $query->where('academic_year', $academicYear))
             ->when($request->filled('semester'), fn ($query) => $query->where('semester', $request->input('semester')))
-            ->latest('start_at')
+            ->when(
+                $sortColumn,
+                fn ($query) => $query->orderBy($sortColumn, $sortDir),
+                fn ($query) => $query->latest('start_at')
+            )
             ->paginate(20)
             ->withQueryString();
 

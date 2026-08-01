@@ -24,6 +24,7 @@ class DashboardSummaryResource extends JsonResource
             'current_year' => $this->resource['current_year'],
             'yearly_target_hours' => $this->resource['yearly_target_hours'],
             'category_hours' => $this->resource['category_hours'],
+            'hours_by_source' => $this->resource['hours_by_source'],
             'is_cleared' => $this->resource['is_cleared'],
         ];
     }

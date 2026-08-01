@@ -127,4 +127,20 @@ class LateCheckInApprovalControllerTest extends TestCase
             ->post(route('admin.late-checkins.reject', $request), [])
             ->assertSessionHasErrors('reject_reason');
     }
+
+    public function test_it_sorts_by_activity_title_via_a_join(): void
+    {
+        $zebra = Activity::factory()->closed()->create(['title' => 'Zebra Activity']);
+        $alpha = Activity::factory()->closed()->create(['title' => 'Alpha Activity']);
+        $this->pendingRequest(['activity_id' => $zebra->id]);
+        $this->pendingRequest(['activity_id' => $alpha->id]);
+
+        $response = $this->actingAs($this->admin())
+            ->get(route('admin.late-checkins.index', ['sort' => 'activity', 'dir' => 'asc']));
+
+        $response->assertOk();
+        $titles = $response->viewData('requests')->pluck('activity.title')->all();
+
+        $this->assertSame(['Alpha Activity', 'Zebra Activity'], $titles);
+    }
 }

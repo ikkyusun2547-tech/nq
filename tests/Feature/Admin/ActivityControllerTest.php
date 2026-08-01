@@ -210,4 +210,24 @@ class ActivityControllerTest extends TestCase
         $response->assertRedirect()->assertSessionHas('status');
         $this->assertDatabaseMissing('activities', ['id' => $activity->id]);
     }
+
+    public function test_it_sorts_by_title_ascending(): void
+    {
+        $b = Activity::factory()->create(['title' => 'Zebra Activity']);
+        $a = Activity::factory()->create(['title' => 'Alpha Activity']);
+
+        $response = $this->actingAs($this->admin())->get(route('admin.activities.index', ['sort' => 'title', 'dir' => 'asc']));
+
+        $response->assertOk();
+        $content = $response->getContent();
+
+        $this->assertTrue(strpos($content, $a->title) < strpos($content, $b->title));
+    }
+
+    public function test_an_invalid_sort_value_is_ignored_instead_of_erroring(): void
+    {
+        $response = $this->actingAs($this->admin())->get(route('admin.activities.index', ['sort' => 'qr_secret', 'dir' => 'asc']));
+
+        $response->assertOk();
+    }
 }

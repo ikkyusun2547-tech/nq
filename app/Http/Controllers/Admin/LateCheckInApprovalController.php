@@ -16,10 +16,16 @@ class LateCheckInApprovalController extends Controller
     public function index(Request $request)
     {
         $status = $request->input('status', 'pending');
+        $sortField = $request->input('sort');
+        $sortDir = $request->input('dir') === 'desc' ? 'desc' : 'asc';
 
-        $requests = LateCheckInRequest::with(['user.faculty', 'user.major', 'activity'])
-            ->when($status !== 'all', fn ($query) => $query->where('status', $status))
-            ->when($request->filled('activity_id'), fn ($query) => $query->where('activity_id', $request->input('activity_id')))
+        $requestsQuery = LateCheckInRequest::with(['user.faculty', 'user.major', 'activity'])
+            // Table-qualified: the sort=activity branch below joins
+            // `activities`, which also has a `status` column — an
+            // unqualified where('status', ...) becomes ambiguous once
+            // that join is in play.
+            ->when($status !== 'all', fn ($query) => $query->where('late_check_in_requests.status', $status))
+            ->when($request->filled('activity_id'), fn ($query) => $query->where('late_check_in_requests.activity_id', $request->input('activity_id')))
             ->when($request->filled('search'), function ($query) use ($request) {
                 $search = $request->string('search');
 
@@ -31,10 +37,24 @@ class LateCheckInApprovalController extends Controller
                                 ->orWhere('student_id', 'like', "%{$search}%");
                         });
                 });
-            })
-            ->latest('created_at')
-            ->paginate(20)
-            ->withQueryString();
+            });
+
+        // name/activity live on related tables, not late_check_in_requests —
+        // needs an explicit join (with `select(...*)` so the join's own
+        // id/created_at/updated_at columns don't collide with this table's).
+        if ($sortField === 'name') {
+            $requestsQuery->join('users', 'users.id', '=', 'late_check_in_requests.user_id')
+                ->select('late_check_in_requests.*')
+                ->orderBy('users.name_thai', $sortDir);
+        } elseif ($sortField === 'activity') {
+            $requestsQuery->join('activities', 'activities.id', '=', 'late_check_in_requests.activity_id')
+                ->select('late_check_in_requests.*')
+                ->orderBy('activities.title', $sortDir);
+        } else {
+            $requestsQuery->latest('created_at');
+        }
+
+        $requests = $requestsQuery->paginate(20)->withQueryString();
 
         // Tab-pill counts — independent of the search box so they always
         // reflect the true size of each bucket, not just the current view.

@@ -88,11 +88,11 @@
         <table class="min-w-full text-sm">
             <thead>
                 <tr class="border-b border-brand-purple-100 dark:border-brand-purple-500/20">
-                    <th class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">{{ __('ชื่อ-นามสกุล') }}</th>
-                    <th class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">{{ __('รหัสนักศึกษา') }}</th>
+                    <x-sortable-th field="name" :label="__('ชื่อ-นามสกุล')" />
+                    <x-sortable-th field="student_id" :label="__('รหัสนักศึกษา')" />
                     <th class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">{{ __('คณะ / สาขา') }}</th>
-                    <th class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">{{ __('ชั้นปี') }}</th>
-                    <th class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">{{ __('ภาค') }}</th>
+                    <x-sortable-th field="year_level" :label="__('ชั้นปี')" />
+                    <x-sortable-th field="program_type" :label="__('ภาค')" />
                     <th class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">{{ __('สถานะ') }}</th>
                     <th class="whitespace-nowrap px-4 py-3"></th>
                 </tr>

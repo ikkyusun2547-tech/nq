@@ -11,11 +11,23 @@ use Illuminate\Validation\Rule;
 
 class CreditTransferApprovalController extends Controller
 {
+    /** ?sort= value => real column to order by. Whitelisted so the query string can never inject an arbitrary column/expression into orderBy(). */
+    private const SORTABLE = [
+        'position' => 'position',
+        'academic_year' => 'academic_year',
+        'activity_category' => 'activity_category',
+        'hours_requested' => 'hours_requested',
+        'created_at' => 'created_at',
+    ];
+
     public function index(Request $request)
     {
         $status = $request->input('status', 'pending');
+        $sortField = $request->input('sort');
+        $sortColumn = self::SORTABLE[$sortField] ?? null;
+        $sortDir = $request->input('dir') === 'desc' ? 'desc' : 'asc';
 
-        $requests = CreditTransferRequest::with(['user.faculty', 'user.major'])
+        $requestsQuery = CreditTransferRequest::with(['user.faculty', 'user.major'])
             ->when($status !== 'all', fn ($query) => $query->where('status', $status))
             ->when($request->filled('search'), function ($query) use ($request) {
                 $search = $request->string('search');
@@ -26,10 +38,22 @@ class CreditTransferApprovalController extends Controller
                         ->orWhere('student_id', 'like', "%{$search}%");
                 });
             })
-            ->when($request->filled('position'), fn ($query) => $query->where('position', $request->input('position')))
-            ->latest('created_at')
-            ->paginate(20)
-            ->withQueryString();
+            ->when($request->filled('position'), fn ($query) => $query->where('position', $request->input('position')));
+
+        // name lives on the related user, not credit_transfer_requests —
+        // needs an explicit join (with `select(...*)` so the join's own
+        // id/created_at/updated_at columns don't collide with this table's).
+        if ($sortField === 'name') {
+            $requestsQuery->join('users', 'users.id', '=', 'credit_transfer_requests.user_id')
+                ->select('credit_transfer_requests.*')
+                ->orderBy('users.name_thai', $sortDir);
+        } elseif ($sortColumn) {
+            $requestsQuery->orderBy($sortColumn, $sortDir);
+        } else {
+            $requestsQuery->latest('created_at');
+        }
+
+        $requests = $requestsQuery->paginate(20)->withQueryString();
 
         // Tab-pill counts — independent of search/position filters so they
         // always reflect the true size of each bucket, not just the current view.

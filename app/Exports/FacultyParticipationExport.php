@@ -2,7 +2,6 @@
 
 namespace App\Exports;
 
-use App\Models\Faculty;
 use App\Services\ActivityEvaluationService;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
@@ -21,27 +20,14 @@ class FacultyParticipationExport implements FromCollection, WithHeadings
 
     public function collection()
     {
-        return Faculty::with(['users' => fn ($q) => $q->where('role', 'student')])
-            ->orderBy('name_th')
-            ->get()
-            ->map(function (Faculty $faculty) {
-                $students = $faculty->users;
-                $summaries = $students->map(fn ($student) => $this->evaluator->summarize($student));
-
-                $studentCount = $students->count();
-                $clearedCount = $summaries->where('is_cleared', true)->count();
-                $avgHours = $studentCount > 0 ? round($summaries->avg('total_hours'), 1) : 0;
-                $avgActivities = $studentCount > 0 ? round($summaries->avg('total_activities'), 1) : 0;
-
-                return [
-                    $faculty->name_th,
-                    $studentCount,
-                    $clearedCount,
-                    $studentCount > 0 ? round($clearedCount / $studentCount * 100, 1) : 0,
-                    $avgHours,
-                    $avgActivities,
-                ];
-            });
+        return $this->evaluator->facultyParticipationSummary()->map(fn (array $row) => [
+            $row['faculty']->name_th,
+            $row['student_count'],
+            $row['cleared_count'],
+            $row['cleared_pct'],
+            $row['avg_hours'],
+            $row['avg_activities'],
+        ]);
     }
 
     public function headings(): array

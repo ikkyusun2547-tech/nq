@@ -47,12 +47,12 @@
         <table class="min-w-full text-sm">
             <thead>
                 <tr class="border-b border-brand-purple-100 dark:border-brand-purple-500/20">
-                    <th class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">{{ __('เวลา') }}</th>
-                    <th class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">{{ __('ผู้ตรวจสอบ') }}</th>
+                    <x-sortable-th field="reviewed_at" :label="__('เวลา')" />
+                    <x-sortable-th field="reviewer_name" :label="__('ผู้ตรวจสอบ')" />
                     <th class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">{{ __('การกระทำ') }}</th>
-                    <th class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">{{ __('ประเภท') }}</th>
-                    <th class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">{{ __('บุคคลที่เกี่ยวข้อง') }}</th>
-                    <th class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">{{ __('รายการ') }}</th>
+                    <x-sortable-th field="type_label" :label="__('ประเภท')" />
+                    <x-sortable-th field="student_name" :label="__('บุคคลที่เกี่ยวข้อง')" />
+                    <x-sortable-th field="title" :label="__('รายการ')" />
                 </tr>
             </thead>
             <tbody>

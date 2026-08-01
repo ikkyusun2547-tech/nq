@@ -136,4 +136,34 @@ class CreditTransferApprovalControllerTest extends TestCase
         $this->assertSame(1, (int) $tabCounts['rejected']);
         $this->assertSame(3, (int) $tabCounts['all']);
     }
+
+    public function test_it_sorts_by_academic_year_descending(): void
+    {
+        $this->pendingRequest(['academic_year' => 2566]);
+        $this->pendingRequest(['academic_year' => 2568]);
+
+        $response = $this->actingAs($this->admin())
+            ->get(route('admin.credit-transfers.index', ['sort' => 'academic_year', 'dir' => 'desc']));
+
+        $response->assertOk();
+        $years = $response->viewData('requests')->pluck('academic_year')->all();
+
+        $this->assertSame([2568, 2566], $years);
+    }
+
+    public function test_it_sorts_by_student_name_via_a_join_on_users(): void
+    {
+        $zebra = User::factory()->create(['role' => 'student', 'email' => 'zebra@srru.ac.th', 'name_thai' => 'ฮ นักศึกษาท้ายสุด']);
+        $alpha = User::factory()->create(['role' => 'student', 'email' => 'alpha@srru.ac.th', 'name_thai' => 'ก นักศึกษาแรกสุด']);
+        $this->pendingRequest(['user_id' => $zebra->id]);
+        $this->pendingRequest(['user_id' => $alpha->id]);
+
+        $response = $this->actingAs($this->admin())
+            ->get(route('admin.credit-transfers.index', ['sort' => 'name', 'dir' => 'asc']));
+
+        $response->assertOk();
+        $names = $response->viewData('requests')->pluck('user.name_thai')->all();
+
+        $this->assertSame(['ก นักศึกษาแรกสุด', 'ฮ นักศึกษาท้ายสุด'], $names);
+    }
 }

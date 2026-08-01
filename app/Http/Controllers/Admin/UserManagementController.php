@@ -18,10 +18,18 @@ class UserManagementController extends Controller
 {
     private const ROLES = ['student', 'admin', 'super_admin'];
 
+    /** ?sort= value => real column to order by. Whitelisted so the query string can never inject an arbitrary column/expression into orderBy(). */
+    private const SORTABLE = [
+        'name' => 'name_thai',
+        'email' => 'email',
+    ];
+
     public function index(Request $request)
     {
         $role = $request->input('role', 'all');
         $role = in_array($role, self::ROLES, true) ? $role : 'all';
+        $sortColumn = self::SORTABLE[$request->input('sort')] ?? null;
+        $sortDir = $request->input('dir') === 'desc' ? 'desc' : 'asc';
 
         $users = User::query()
             ->with(['faculty', 'major'])
@@ -36,8 +44,13 @@ class UserManagementController extends Controller
                         ->orWhere('student_id', 'like', "%{$search}%");
                 });
             })
-            ->orderByRaw("case role when 'super_admin' then 0 when 'admin' then 1 else 2 end")
-            ->orderBy('name_thai')
+            ->when(
+                $sortColumn,
+                fn ($query) => $query->orderBy($sortColumn, $sortDir),
+                // Default: role-priority (super_admin, admin, student) then name — an
+                // explicit column sort above means "ignore that grouping, just sort".
+                fn ($query) => $query->orderByRaw("case role when 'super_admin' then 0 when 'admin' then 1 else 2 end")->orderBy('name_thai')
+            )
             ->paginate(25)
             ->withQueryString();
 

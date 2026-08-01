@@ -117,6 +117,55 @@ class AttendanceControllerTest extends TestCase
             ->assertSessionHasErrors('attendance_ids');
     }
 
+    public function test_the_attendance_matrix_sorts_by_year_level_via_a_join_on_users(): void
+    {
+        $activity = Activity::factory()->create();
+        $senior = User::factory()->create(['role' => 'student', 'email' => 'senior@srru.ac.th', 'year_level' => 4]);
+        $junior = User::factory()->create(['role' => 'student', 'email' => 'junior@srru.ac.th', 'year_level' => 1]);
+        Attendance::factory()->for($activity)->for($senior)->create();
+        Attendance::factory()->for($activity)->for($junior)->create();
+
+        $response = $this->actingAs($this->admin())
+            ->get(route('admin.attendance.index', ['activity' => $activity, 'sort' => 'year_level', 'dir' => 'asc']));
+
+        $response->assertOk();
+        $years = $response->viewData('attendances')->pluck('user.year_level')->all();
+
+        $this->assertSame([1, 4], $years);
+    }
+
+    public function test_the_attendance_matrix_sorts_by_student_id_via_the_same_join(): void
+    {
+        $activity = Activity::factory()->create();
+        $b = User::factory()->create(['role' => 'student', 'email' => 'b@srru.ac.th', 'student_id' => '20000000002']);
+        $a = User::factory()->create(['role' => 'student', 'email' => 'a@srru.ac.th', 'student_id' => '10000000001']);
+        Attendance::factory()->for($activity)->for($b)->create();
+        Attendance::factory()->for($activity)->for($a)->create();
+
+        $response = $this->actingAs($this->admin())
+            ->get(route('admin.attendance.index', ['activity' => $activity, 'sort' => 'student_id', 'dir' => 'asc']));
+
+        $response->assertOk();
+        $ids = $response->viewData('attendances')->pluck('user.student_id')->all();
+
+        $this->assertSame(['10000000001', '20000000002'], $ids);
+    }
+
+    public function test_the_attendance_matrix_sorts_by_distance_meters(): void
+    {
+        $activity = Activity::factory()->create();
+        Attendance::factory()->for($activity)->create(['distance_meters' => 500]);
+        Attendance::factory()->for($activity)->create(['distance_meters' => 10]);
+
+        $response = $this->actingAs($this->admin())
+            ->get(route('admin.attendance.index', ['activity' => $activity, 'sort' => 'distance_meters', 'dir' => 'asc']));
+
+        $response->assertOk();
+        $distances = $response->viewData('attendances')->pluck('distance_meters')->all();
+
+        $this->assertSame([10, 500], $distances);
+    }
+
     // --- flaggedIndex() ---
 
     public function test_flagged_queue_defaults_to_flagged_status(): void
@@ -146,6 +195,22 @@ class AttendanceControllerTest extends TestCase
         $this->assertSame(2, $response->viewData('tabCounts')['flagged']);
         $this->assertSame(3, $response->viewData('tabCounts')['rejected']);
         $this->assertSame(5, $response->viewData('tabCounts')['all']);
+    }
+
+    public function test_the_flagged_queue_sorts_by_activity_title_via_a_join(): void
+    {
+        $zebra = Activity::factory()->create(['title' => 'Zebra Activity']);
+        $alpha = Activity::factory()->create(['title' => 'Alpha Activity']);
+        Attendance::factory()->for($zebra)->flagged()->create();
+        Attendance::factory()->for($alpha)->flagged()->create();
+
+        $response = $this->actingAs($this->admin())
+            ->get(route('admin.attendance.flagged', ['sort' => 'activity', 'dir' => 'asc']));
+
+        $response->assertOk();
+        $titles = $response->viewData('attendances')->pluck('activity.title')->all();
+
+        $this->assertSame(['Alpha Activity', 'Zebra Activity'], $titles);
     }
 
     // --- approve() ---

@@ -24,6 +24,11 @@ class ClearanceReportControllerTest extends TestCase
         $student = User::factory()->create([
             'role' => 'student',
             'email' => 'stu'.uniqid().'@srru.ac.th',
+            // UserFactory doesn't set student_id at all (stays null unless
+            // given explicitly) — a distinct one per call so tests can tell
+            // rows apart in the rendered output instead of every student
+            // silently sharing an empty string.
+            'student_id' => (string) random_int(10000000000, 99999999999),
             'year_level' => $yearLevel,
             'program_type' => 'special',
             'enrollment_year' => 2565, // clearedGraduatingStudents() requires this to be non-null
@@ -68,28 +73,87 @@ class ClearanceReportControllerTest extends TestCase
 
     // --- controller: authorization + response wiring ---
 
-    public function test_a_student_cannot_download_the_clearance_report(): void
+    public function test_a_student_cannot_view_the_clearance_report(): void
     {
         $student = User::factory()->create(['role' => 'student', 'email' => 'stu@srru.ac.th']);
 
         $this->actingAs($student)->get(route('admin.reports.clearance'))->assertForbidden();
     }
 
+    public function test_it_shows_cleared_students_on_the_web_view(): void
+    {
+        $student = $this->studentWithHours(yearLevel: 4, activityCount: 4, hoursEach: 15);
+
+        $response = $this->actingAs($this->admin())->get(route('admin.reports.clearance'));
+
+        $response->assertOk();
+        $response->assertSee($student->student_id);
+    }
+
+    public function test_the_web_view_accepts_a_year_query_parameter(): void
+    {
+        $response = $this->actingAs($this->admin())->get(route('admin.reports.clearance', ['year' => 2]));
+
+        $response->assertOk();
+    }
+
+    public function test_the_web_view_paginates_at_twenty_students_per_page(): void
+    {
+        for ($i = 0; $i < 25; $i++) {
+            $this->studentWithHours(yearLevel: 4, activityCount: 4, hoursEach: 15);
+        }
+
+        $admin = $this->admin();
+        $page1 = $this->actingAs($admin)->get(route('admin.reports.clearance'));
+        $page2 = $this->actingAs($admin)->get(route('admin.reports.clearance', ['page' => 2]));
+
+        // Table rows share a class string not used by the <thead> row, so
+        // counting it is a reliable proxy for "how many students rendered".
+        $rowMarker = 'border-b border-slate-100 last:border-0';
+
+        $page1->assertOk();
+        $page2->assertOk();
+        $this->assertSame(20, substr_count($page1->getContent(), $rowMarker));
+        $this->assertSame(5, substr_count($page2->getContent(), $rowMarker));
+        $page1->assertSee('25'); // total-cleared stat tile reflects the full count, not just this page
+    }
+
+    public function test_a_student_cannot_download_the_clearance_pdf(): void
+    {
+        $student = User::factory()->create(['role' => 'student', 'email' => 'stu@srru.ac.th']);
+
+        $this->actingAs($student)->get(route('admin.reports.clearance-pdf'))->assertForbidden();
+    }
+
     public function test_it_downloads_the_clearance_report_as_a_pdf(): void
     {
         $this->studentWithHours(yearLevel: 4, activityCount: 4, hoursEach: 15);
 
-        $response = $this->actingAs($this->admin())->get(route('admin.reports.clearance'));
+        $response = $this->actingAs($this->admin())->get(route('admin.reports.clearance-pdf'));
 
         $response->assertOk();
         $response->assertHeader('content-type', 'application/pdf');
     }
 
-    public function test_it_accepts_a_year_query_parameter(): void
+    public function test_the_pdf_export_accepts_a_year_query_parameter(): void
     {
-        $response = $this->actingAs($this->admin())->get(route('admin.reports.clearance', ['year' => 2]));
+        $response = $this->actingAs($this->admin())->get(route('admin.reports.clearance-pdf', ['year' => 2]));
 
         $response->assertOk();
         $response->assertHeader('content-type', 'application/pdf');
+    }
+
+    public function test_it_sorts_by_total_hours_descending(): void
+    {
+        $fewer = $this->studentWithHours(yearLevel: 4, activityCount: 4, hoursEach: 15); // 60 hours
+        $more = $this->studentWithHours(yearLevel: 4, activityCount: 4, hoursEach: 30); // 120 hours
+
+        $response = $this->actingAs($this->admin())
+            ->get(route('admin.reports.clearance', ['sort' => 'total_hours', 'dir' => 'desc']));
+
+        $response->assertOk();
+        $content = $response->getContent();
+
+        $this->assertTrue(strpos($content, $more->student_id) < strpos($content, $fewer->student_id));
     }
 }

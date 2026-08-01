@@ -1,9 +1,12 @@
 <?php
 
 use App\Http\Controllers\Admin\ActivityController;
+use App\Http\Controllers\Admin\ActivityParticipationReportController;
 use App\Http\Controllers\Admin\AnnouncementController;
+use App\Http\Controllers\Admin\AtRiskStudentsReportController;
 use App\Http\Controllers\Admin\AttendanceController;
 use App\Http\Controllers\Admin\AuditLogController;
+use App\Http\Controllers\Admin\CategoryReportController;
 use App\Http\Controllers\Admin\ClearanceReportController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\ExternalApprovalController;
@@ -12,6 +15,8 @@ use App\Http\Controllers\Admin\FacultyController;
 use App\Http\Controllers\Admin\LateCheckInApprovalController;
 use App\Http\Controllers\Admin\MajorController;
 use App\Http\Controllers\Admin\ParticipationReportController;
+use App\Http\Controllers\Admin\ReportsController;
+use App\Http\Controllers\Admin\RequestStatsReportController;
 use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Admin\StudentController;
 use App\Http\Controllers\Admin\StudentImportController;
@@ -205,9 +210,23 @@ Route::middleware(['auth', 'srru.email'])->group(function () {
         Route::post('/late-checkins/{lateCheckInRequest}/approve', [LateCheckInApprovalController::class, 'approve'])->name('late-checkins.approve');
         Route::post('/late-checkins/{lateCheckInRequest}/reject', [LateCheckInApprovalController::class, 'reject'])->name('late-checkins.reject');
 
-        Route::get('/reports', [ParticipationReportController::class, 'index'])->name('reports.index');
-        Route::get('/reports/clearance', [ClearanceReportController::class, 'exportPdf'])->name('reports.clearance');
-        Route::get('/reports/faculty-participation', [ParticipationReportController::class, 'exportExcel'])->name('reports.faculty-participation');
+        Route::get('/reports', [ReportsController::class, 'index'])->name('reports.index');
+
+        Route::get('/reports/clearance', [ClearanceReportController::class, 'index'])->name('reports.clearance');
+        Route::get('/reports/clearance/pdf', [ClearanceReportController::class, 'exportPdf'])->name('reports.clearance-pdf');
+
+        Route::get('/reports/at-risk', [AtRiskStudentsReportController::class, 'index'])->name('reports.at-risk');
+        Route::get('/reports/at-risk/pdf', [AtRiskStudentsReportController::class, 'exportPdf'])->name('reports.at-risk-pdf');
+
+        Route::get('/reports/faculty-participation', [ParticipationReportController::class, 'index'])->name('reports.faculty-participation');
+        Route::get('/reports/faculty-participation/excel', [ParticipationReportController::class, 'exportExcel'])->name('reports.faculty-participation-excel');
+
+        Route::get('/reports/activity-participation', [ActivityParticipationReportController::class, 'index'])->name('reports.activity-participation');
+        Route::get('/reports/activity-participation/excel', [ActivityParticipationReportController::class, 'exportExcel'])->name('reports.activity-participation-excel');
+
+        Route::get('/reports/category', [CategoryReportController::class, 'index'])->name('reports.category');
+
+        Route::get('/reports/request-stats', [RequestStatsReportController::class, 'index'])->name('reports.request-stats');
 
         Route::get('/audit-log', [AuditLogController::class, 'index'])->name('audit-log.index');
 
@@ -215,6 +234,7 @@ Route::middleware(['auth', 'srru.email'])->group(function () {
 
         Route::get('/announcements', [AnnouncementController::class, 'create'])->name('announcements.create');
         Route::post('/announcements', [AnnouncementController::class, 'store'])->name('announcements.store');
+        Route::get('/announcements/history', [AnnouncementController::class, 'index'])->name('announcements.index');
 
         Route::middleware('super_admin')->group(function () {
             Route::get('/users', [UserManagementController::class, 'index'])->name('users.index');

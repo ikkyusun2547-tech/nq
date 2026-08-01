@@ -11,11 +11,23 @@ use Illuminate\Validation\Rule;
 
 class ExternalApprovalController extends Controller
 {
+    /** ?sort= value => real column to order by. Whitelisted so the query string can never inject an arbitrary column/expression into orderBy(). */
+    private const SORTABLE = [
+        'title' => 'title',
+        'activity_category' => 'activity_category',
+        'activity_date' => 'activity_date',
+        'hours_requested' => 'hours_requested',
+        'created_at' => 'created_at',
+    ];
+
     public function index(Request $request)
     {
         $status = $request->input('status', 'pending');
+        $sortField = $request->input('sort');
+        $sortColumn = self::SORTABLE[$sortField] ?? null;
+        $sortDir = $request->input('dir') === 'desc' ? 'desc' : 'asc';
 
-        $requests = ExternalActivityRequest::with(['user.faculty', 'user.major'])
+        $requestsQuery = ExternalActivityRequest::with(['user.faculty', 'user.major'])
             ->when($status !== 'all', fn ($query) => $query->where('status', $status))
             ->when($request->filled('search'), function ($query) use ($request) {
                 $search = $request->string('search');
@@ -29,10 +41,23 @@ class ExternalApprovalController extends Controller
                         });
                 });
             })
-            ->when($request->filled('activity_category'), fn ($query) => $query->where('activity_category', $request->input('activity_category')))
-            ->latest('created_at')
-            ->paginate(20)
-            ->withQueryString();
+            ->when($request->filled('activity_category'), fn ($query) => $query->where('activity_category', $request->input('activity_category')));
+
+        // name/year_level live on the related user, not
+        // external_activity_requests — needs an explicit join (with
+        // `select(...*)` so the join's own id/created_at/updated_at
+        // columns don't collide with this table's).
+        if (in_array($sortField, ['name', 'year_level'], true)) {
+            $requestsQuery->join('users', 'users.id', '=', 'external_activity_requests.user_id')
+                ->select('external_activity_requests.*')
+                ->orderBy($sortField === 'name' ? 'users.name_thai' : 'users.year_level', $sortDir);
+        } elseif ($sortColumn) {
+            $requestsQuery->orderBy($sortColumn, $sortDir);
+        } else {
+            $requestsQuery->latest('created_at');
+        }
+
+        $requests = $requestsQuery->paginate(20)->withQueryString();
 
         // Tab-pill counts — independent of search/category filters so they
         // always reflect the true size of each bucket, not just the current view.

@@ -9,9 +9,11 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class ParticipationReportController extends Controller
 {
-    public function index()
+    public function index(ActivityEvaluationService $evaluator)
     {
-        return view('admin.reports.index');
+        $rows = $evaluator->facultyParticipationSummary();
+
+        return view('admin.reports.faculty-participation', compact('rows'));
     }
 
     public function exportExcel(ActivityEvaluationService $evaluator)

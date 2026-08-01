@@ -122,4 +122,64 @@ class ExternalApprovalControllerTest extends TestCase
         $this->assertTrue($ids->contains($academic->id));
         $this->assertFalse($ids->contains($volunteer->id));
     }
+
+    public function test_it_sorts_by_year_level_via_a_join_on_users(): void
+    {
+        $senior = User::factory()->create(['role' => 'student', 'email' => 'senior@srru.ac.th', 'year_level' => 4]);
+        $junior = User::factory()->create(['role' => 'student', 'email' => 'junior@srru.ac.th', 'year_level' => 1]);
+        $this->pendingRequest(['user_id' => $senior->id]);
+        $this->pendingRequest(['user_id' => $junior->id]);
+
+        $response = $this->actingAs($this->admin())
+            ->get(route('admin.external-activities.index', ['status' => 'all', 'sort' => 'year_level', 'dir' => 'asc']));
+
+        $response->assertOk();
+        $years = $response->viewData('requests')->pluck('user.year_level')->all();
+
+        $this->assertSame([1, 4], $years);
+    }
+
+    public function test_it_sorts_by_hours_requested_ascending(): void
+    {
+        $this->pendingRequest(['hours_requested' => 10]);
+        $this->pendingRequest(['hours_requested' => 2]);
+
+        $response = $this->actingAs($this->admin())
+            ->get(route('admin.external-activities.index', ['status' => 'all', 'sort' => 'hours_requested', 'dir' => 'asc']));
+
+        $response->assertOk();
+        $hours = $response->viewData('requests')->pluck('hours_requested')->all();
+
+        $this->assertSame([2, 10], $hours);
+    }
+
+    public function test_it_sorts_by_student_name_via_a_join_on_users(): void
+    {
+        $zebra = User::factory()->create(['role' => 'student', 'email' => 'zebra@srru.ac.th', 'name_thai' => 'ฮ นักศึกษาท้ายสุด']);
+        $alpha = User::factory()->create(['role' => 'student', 'email' => 'alpha@srru.ac.th', 'name_thai' => 'ก นักศึกษาแรกสุด']);
+        $this->pendingRequest(['user_id' => $zebra->id]);
+        $this->pendingRequest(['user_id' => $alpha->id]);
+
+        $response = $this->actingAs($this->admin())
+            ->get(route('admin.external-activities.index', ['status' => 'all', 'sort' => 'name', 'dir' => 'asc']));
+
+        $response->assertOk();
+        $names = $response->viewData('requests')->pluck('user.name_thai')->all();
+
+        $this->assertSame(['ก นักศึกษาแรกสุด', 'ฮ นักศึกษาท้ายสุด'], $names);
+    }
+
+    public function test_it_sorts_by_title_ascending(): void
+    {
+        $this->pendingRequest(['title' => 'Zebra Camp']);
+        $this->pendingRequest(['title' => 'Alpha Camp']);
+
+        $response = $this->actingAs($this->admin())
+            ->get(route('admin.external-activities.index', ['status' => 'all', 'sort' => 'title', 'dir' => 'asc']));
+
+        $response->assertOk();
+        $titles = $response->viewData('requests')->pluck('title')->all();
+
+        $this->assertSame(['Alpha Camp', 'Zebra Camp'], $titles);
+    }
 }

@@ -134,4 +134,18 @@ class UserManagementTest extends TestCase
 
         $this->assertSame('active', $superAdmin->fresh()->account_status);
     }
+
+    public function test_it_sorts_by_email_ascending_overriding_the_role_grouping(): void
+    {
+        User::factory()->create(['role' => 'student', 'email' => 'zzz@srru.ac.th', 'name_thai' => 'Z']);
+        User::factory()->create(['role' => 'student', 'email' => 'aaa@srru.ac.th', 'name_thai' => 'A']);
+
+        $response = $this->actingAs($this->superAdmin())
+            ->get(route('admin.users.index', ['sort' => 'email', 'dir' => 'asc']));
+
+        $response->assertOk();
+        $content = $response->getContent();
+
+        $this->assertTrue(strpos($content, 'aaa@srru.ac.th') < strpos($content, 'zzz@srru.ac.th'));
+    }
 }

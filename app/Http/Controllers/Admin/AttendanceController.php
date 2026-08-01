@@ -77,7 +77,10 @@ class AttendanceController extends Controller
      */
     public function index(Activity $activity, Request $request)
     {
-        $attendances = $activity->attendances()
+        $sortField = $request->input('sort');
+        $sortDir = $request->input('dir') === 'desc' ? 'desc' : 'asc';
+
+        $attendanceQuery = $activity->attendances()
             ->with(['user.faculty', 'user.major'])
             ->when($request->filled('search'), function ($query) use ($request) {
                 $search = $request->string('search');
@@ -94,9 +97,24 @@ class AttendanceController extends Controller
             })
             ->when($request->filled('major_id'), function ($query) use ($request) {
                 $query->whereHas('user', fn ($userQuery) => $userQuery->where('major_id', $request->input('major_id')));
-            })
-            ->orderByDesc('checkin_time')
-            ->get();
+            });
+
+        // name/student_id/year_level live on the related user, not
+        // attendances — needs an explicit join (with `select('attendances.*')`
+        // to stop the join from pulling users' columns into the result and
+        // colliding with attendances' own id/created_at/updated_at columns).
+        $userColumns = ['name' => 'users.name_thai', 'student_id' => 'users.student_id', 'year_level' => 'users.year_level'];
+        if (isset($userColumns[$sortField])) {
+            $attendanceQuery->join('users', 'users.id', '=', 'attendances.user_id')
+                ->select('attendances.*')
+                ->orderBy($userColumns[$sortField], $sortDir);
+        } elseif (in_array($sortField, ['checkin_time', 'distance_meters'], true)) {
+            $attendanceQuery->orderBy('attendances.'.$sortField, $sortDir);
+        } else {
+            $attendanceQuery->orderByDesc('checkin_time');
+        }
+
+        $attendances = $attendanceQuery->get();
 
         $faculties = Faculty::with(['majors' => fn ($query) => $query->orderBy('name_th')])->orderBy('name_th')->get();
 
@@ -162,10 +180,16 @@ class AttendanceController extends Controller
     {
         $status = $request->input('status', 'flagged');
         $status = in_array($status, ['flagged', 'rejected', 'all'], true) ? $status : 'flagged';
+        $sortField = $request->input('sort');
+        $sortDir = $request->input('dir') === 'desc' ? 'desc' : 'asc';
 
-        $attendances = Attendance::with(['user.faculty', 'user.major', 'activity'])
-            ->when($status !== 'all', fn ($query) => $query->where('status', $status))
-            ->when($status === 'all', fn ($query) => $query->whereIn('status', ['flagged', 'rejected']))
+        $attendanceQuery = Attendance::with(['user.faculty', 'user.major', 'activity'])
+            // Table-qualified: the sort=activity branch below joins
+            // `activities`, which also has a `status` column — an
+            // unqualified where('status', ...) becomes ambiguous once
+            // that join is in play.
+            ->when($status !== 'all', fn ($query) => $query->where('attendances.status', $status))
+            ->when($status === 'all', fn ($query) => $query->whereIn('attendances.status', ['flagged', 'rejected']))
             ->when($request->filled('search'), function ($query) use ($request) {
                 $search = $request->string('search');
 
@@ -174,10 +198,26 @@ class AttendanceController extends Controller
                         ->orWhere('name', 'like', "%{$search}%")
                         ->orWhere('student_id', 'like', "%{$search}%");
                 });
-            })
-            ->latest('checkin_time')
-            ->paginate(20)
-            ->withQueryString();
+            });
+
+        // name/activity live on related tables, not attendances — needs an
+        // explicit join (with `select('attendances.*')` so the join's own
+        // id/created_at/updated_at columns don't collide with attendances').
+        if ($sortField === 'name') {
+            $attendanceQuery->join('users', 'users.id', '=', 'attendances.user_id')
+                ->select('attendances.*')
+                ->orderBy('users.name_thai', $sortDir);
+        } elseif ($sortField === 'activity') {
+            $attendanceQuery->join('activities', 'activities.id', '=', 'attendances.activity_id')
+                ->select('attendances.*')
+                ->orderBy('activities.title', $sortDir);
+        } elseif ($sortField === 'checkin_time') {
+            $attendanceQuery->orderBy('attendances.checkin_time', $sortDir);
+        } else {
+            $attendanceQuery->latest('checkin_time');
+        }
+
+        $attendances = $attendanceQuery->paginate(20)->withQueryString();
 
         // Counts for the tab pills — independent of the search box so the
         // numbers always describe "everything in that bucket", not just

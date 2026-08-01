@@ -46,7 +46,7 @@ class DashboardTest extends TestCase
         $response = $this->getJson('/api/dashboard');
 
         $response->assertOk()->assertJsonStructure([
-            'summary' => ['total_activities', 'required_activities', 'total_hours', 'required_hours', 'category_hours', 'is_cleared'],
+            'summary' => ['total_activities', 'required_activities', 'total_hours', 'required_hours', 'category_hours', 'hours_by_source', 'is_cleared'],
             'approved',
             'pending',
             'rejected',

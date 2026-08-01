@@ -2,7 +2,15 @@
 
 @section('content')
 <div class="mx-auto max-w-2xl">
-    <x-brand-header :title="__('ส่งประกาศถึงนักศึกษา')" :eyebrow="__('กองพัฒนานักศึกษา')" :subtitle="__('ข้อความจะไปแสดงในศูนย์การแจ้งเตือนและ push notification ของนักศึกษาที่ตรงเงื่อนไข')" />
+    <x-brand-header :title="__('ส่งประกาศถึงนักศึกษา')" :eyebrow="__('กองพัฒนานักศึกษา')" :subtitle="__('ข้อความจะไปแสดงในศูนย์การแจ้งเตือนและ push notification ของนักศึกษาที่ตรงเงื่อนไข')">
+        <x-slot:actions>
+            <a href="{{ route('admin.announcements.index') }}"
+                class="flex shrink-0 items-center gap-1.5 rounded-xl bg-white/10 px-3 py-2 text-xs font-medium text-white shadow-soft ring-1 ring-white/15 backdrop-blur transition-colors hover:bg-white/15">
+                <svg class="h-3.5 w-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                {{ __('ประวัติ') }}
+            </a>
+        </x-slot:actions>
+    </x-brand-header>
 
     @if ($errors->any())
         <div class="mb-4 rounded-2xl bg-red-50 px-4 py-3 text-sm text-red-700 shadow-soft ring-1 ring-red-100 dark:bg-red-500/10 dark:text-red-400 dark:ring-red-500/20">

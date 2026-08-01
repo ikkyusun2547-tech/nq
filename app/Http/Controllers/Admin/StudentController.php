@@ -11,8 +11,19 @@ use Illuminate\Http\Request;
 
 class StudentController extends Controller
 {
+    /** field (from ?sort=) => real column to order by. Whitelisted so the query string can never inject an arbitrary column/expression into orderBy(). */
+    private const SORTABLE = [
+        'student_id' => 'student_id',
+        'name' => 'name_thai',
+        'year_level' => 'year_level',
+        'program_type' => 'program_type',
+    ];
+
     public function index(Request $request)
     {
+        $sortColumn = self::SORTABLE[$request->input('sort')] ?? null;
+        $sortDir = $request->input('dir') === 'desc' ? 'desc' : 'asc';
+
         $students = User::query()
             ->where('role', 'student')
             ->with(['faculty', 'major'])
@@ -28,7 +39,11 @@ class StudentController extends Controller
             ->when($request->filled('faculty_id'), fn ($query) => $query->where('faculty_id', $request->input('faculty_id')))
             ->when($request->filled('major_id'), fn ($query) => $query->where('major_id', $request->input('major_id')))
             ->when($request->filled('year_level'), fn ($query) => $query->where('year_level', $request->input('year_level')))
-            ->orderBy('student_id')
+            ->when(
+                $sortColumn,
+                fn ($query) => $query->orderBy($sortColumn, $sortDir)->orderBy('student_id'),
+                fn ($query) => $query->orderBy('student_id')
+            )
             ->paginate(20)
             ->withQueryString();
 

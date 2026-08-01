@@ -30,9 +30,14 @@ class AuditLogController extends Controller
 {
     private const PER_PAGE = 30;
 
+    /** ?sort= value => the union subquery's own select alias to order by (see the selectRaw() calls below). Whitelisted so the query string can never inject an arbitrary expression into orderBy(). */
+    private const SORTABLE = ['reviewed_at', 'reviewer_name', 'type_label', 'student_name', 'title'];
+
     public function index(Request $request)
     {
         $reviewerId = $request->filled('reviewer_id') ? (int) $request->input('reviewer_id') : null;
+        $sortColumn = in_array($request->input('sort'), self::SORTABLE, true) ? $request->input('sort') : null;
+        $sortDir = $request->input('dir') === 'desc' ? 'desc' : 'asc';
         $nameExpr = 'COALESCE(u.name_thai, u.name)';
         $studentNameExpr = 'COALESCE(su.name_thai, su.name)';
 
@@ -127,7 +132,11 @@ class AuditLogController extends Controller
         ];
 
         $entries = DB::query()->fromSub($union, 'entries')
-            ->orderByDesc('reviewed_at')
+            ->when(
+                $sortColumn,
+                fn ($query) => $query->orderBy($sortColumn, $sortDir),
+                fn ($query) => $query->orderByDesc('reviewed_at')
+            )
             ->paginate(self::PER_PAGE)
             ->withQueryString();
 

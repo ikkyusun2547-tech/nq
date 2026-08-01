@@ -8,7 +8,13 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 
-class ClearanceReportController extends Controller
+/**
+ * The inverse of ClearanceReportController — final-year students who
+ * haven't cleared yet, for advisors to follow up with before graduation
+ * rather than finding out too late. See
+ * ActivityEvaluationService::notClearedGraduatingStudents().
+ */
+class AtRiskStudentsReportController extends Controller
 {
     private const PER_PAGE = 20;
 
@@ -24,6 +30,7 @@ class ClearanceReportController extends Controller
             'name' => fn (array $row) => $row['user']->name_thai ?? $row['user']->name,
             'total_activities' => fn (array $row) => $row['total_activities'],
             'total_hours' => fn (array $row) => $row['total_hours'],
+            'hours_remaining' => fn (array $row) => $row['hours_remaining'],
         ];
     }
 
@@ -31,17 +38,16 @@ class ClearanceReportController extends Controller
     {
         $year = (int) $request->input('year', 4);
         $year = in_array($year, [1, 2, 3, 4], true) ? $year : 4;
+        $sortField = $request->input('sort');
         $sortDir = $request->input('dir') === 'desc' ? 'desc' : 'asc';
 
-        $allStudents = $evaluator->clearedGraduatingStudents($year);
+        // Already sorted closest-to-clearing-first (hours_remaining asc) by
+        // the service — an explicit ?sort= overrides that with sortBy() on
+        // the same already-computed Collection; forPage() then slices
+        // whichever order is in effect without disturbing it.
+        $allStudents = $evaluator->notClearedGraduatingStudents($year);
 
-        // clearedGraduatingStudents() computes in PHP (is_cleared isn't a
-        // column to filter/paginate at the DB level), so both sorting and
-        // pagination happen on the already-computed Collection — sortBy()
-        // instead of ->orderBy(), forPage() instead of a normal
-        // ->paginate() call — same pattern as Student\ActivityController's
-        // eligibility-filtered feed.
-        if ($sortKey = self::sortable()[$request->input('sort')] ?? null) {
+        if ($sortKey = self::sortable()[$sortField] ?? null) {
             $allStudents = $sortDir === 'desc'
                 ? $allStudents->sortByDesc($sortKey)->values()
                 : $allStudents->sortBy($sortKey)->values();
@@ -56,20 +62,20 @@ class ClearanceReportController extends Controller
             ['path' => LengthAwarePaginator::resolveCurrentPath(), 'query' => $request->query()]
         );
 
-        return view('admin.reports.clearance', compact('students', 'year'));
+        return view('admin.reports.at-risk', compact('students', 'year'));
     }
 
     public function exportPdf(Request $request, ActivityEvaluationService $evaluator)
     {
         $year = (int) $request->input('year', 4);
-        $students = $evaluator->clearedGraduatingStudents($year);
+        $students = $evaluator->notClearedGraduatingStudents($year);
 
-        $pdf = Pdf::loadView('reports.clearance-pdf', [
+        $pdf = Pdf::loadView('reports.at-risk-pdf', [
             'students' => $students,
             'year' => $year,
             'generatedAt' => now(),
         ])->setPaper('a4', 'portrait');
 
-        return $pdf->download("clearance-report-year-{$year}-".now()->format('Ymd').'.pdf');
+        return $pdf->download("at-risk-report-year-{$year}-".now()->format('Ymd').'.pdf');
     }
 }

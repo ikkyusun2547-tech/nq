@@ -5,8 +5,11 @@ namespace App\Services;
 use App\Models\Attendance;
 use App\Models\CreditTransferRequest;
 use App\Models\ExternalActivityRequest;
+use App\Models\Faculty;
+use App\Models\LateCheckInRequest;
 use App\Models\Setting;
 use App\Models\User;
+use Illuminate\Support\Collection;
 
 class ActivityEvaluationService
 {
@@ -51,7 +54,8 @@ class ActivityEvaluationService
      *     total_activities: int, required_activities: int,
      *     total_hours: int, required_hours: int,
      *     current_year: int|null, yearly_target_hours: int|null,
-     *     category_hours: array<string,int>, is_cleared: bool,
+     *     category_hours: array<string,int>, hours_by_source: array<string,int>,
+     *     is_cleared: bool,
      * }
      */
     public function summarize(User $user): array
@@ -69,12 +73,19 @@ class ActivityEvaluationService
             ->where('activities.activity_type', '!=', 'practice')
             ->count();
 
-        $creditedHoursFromActivities = (int) Attendance::query()
+        // Grouped by checkin_method (realtime/self_report/late_request) rather
+        // than a single summed total — the dashboard's "ที่มาของชั่วโมงสะสม"
+        // card wants the finer breakdown, and the overall total below is just
+        // this collection summed instead of a second, near-identical query.
+        $hoursByCheckinMethod = Attendance::query()
             ->join('activities', 'activities.id', '=', 'attendances.activity_id')
             ->where('attendances.user_id', $user->id)
             ->where('attendances.status', 'auto_approved')
-            ->selectRaw('COALESCE(SUM(COALESCE(attendances.credited_hours, activities.credit_hours)), 0) as total')
-            ->value('total');
+            ->groupBy('attendances.checkin_method')
+            ->selectRaw('attendances.checkin_method, COALESCE(SUM(COALESCE(attendances.credited_hours, activities.credit_hours)), 0) as total')
+            ->pluck('total', 'checkin_method');
+
+        $creditedHoursFromActivities = (int) $hoursByCheckinMethod->sum();
 
         $externalHours = (int) ExternalActivityRequest::where('user_id', $user->id)
             ->where('status', 'approved')
@@ -101,28 +112,40 @@ class ActivityEvaluationService
             'current_year' => $currentYear,
             'yearly_target_hours' => $yearlyTarget,
             'category_hours' => $categoryHours,
+            // Same figures total_hours is already summed from above —
+            // surfaced separately so the dashboard can show where a
+            // student's hours actually came from, not just the total.
+            'hours_by_source' => [
+                'realtime' => (int) ($hoursByCheckinMethod['realtime'] ?? 0),
+                'self_report' => (int) ($hoursByCheckinMethod['self_report'] ?? 0),
+                'late_request' => (int) ($hoursByCheckinMethod['late_request'] ?? 0),
+                'external' => $externalHours,
+                'credit_transfer' => $creditTransferHours,
+            ],
             'is_cleared' => $totalActivities >= $criteria['required_activities']
                 && $totalHours >= $criteria['required_hours'],
         ];
     }
 
     /**
-     * Final-year students who have fully cleared the graduation activity
-     * criteria, for the registrar clearance report. Uses grouped bulk
-     * queries (not one query per student) so it stays fast at thousands
-     * of students.
+     * Bulk-computed progress (total_activities, total_hours, is_cleared) for
+     * an arbitrary set of students — the shared engine behind
+     * studentsProgress() (one academic year, for the clearance/at-risk
+     * reports) and facultyParticipationSummary() (every student, grouped by
+     * faculty instead). A handful of grouped queries regardless of how many
+     * students are passed in — never one query per student, which is what
+     * made facultyParticipationSummary() call summarize() per student used
+     * to cost (7-8 queries × every student in the university, on every
+     * request).
      *
-     * @return \Illuminate\Support\Collection<int, array{user: User, total_activities: int, total_hours: int}>
+     * @param  Collection<int, User>  $students
+     * @return Collection<int, array{
+     *     user: User, total_activities: int, total_hours: int,
+     *     required_activities: int, required_hours: int, is_cleared: bool,
+     * }>
      */
-    public function clearedGraduatingStudents(int $year = 4): \Illuminate\Support\Collection
+    private function bulkProgress(Collection $students): Collection
     {
-        $students = User::with(['faculty', 'major'])
-            ->where('role', 'student')
-            ->whereNotNull('enrollment_year')
-            ->get()
-            ->filter(fn (User $u) => $u->current_year === $year)
-            ->values();
-
         $studentIds = $students->pluck('id');
 
         if ($studentIds->isEmpty()) {
@@ -152,39 +175,104 @@ class ActivityEvaluationService
 
         $allCriteria = $this->criteria();
 
-        return $students
-            ->map(function (User $user) use ($activityStats, $externalHours, $creditTransferHours, $allCriteria) {
-                $criteria = $allCriteria[$user->program_type] ?? $allCriteria['normal'];
-                $stat = $activityStats->get($user->id);
+        return $students->map(function (User $user) use ($activityStats, $externalHours, $creditTransferHours, $allCriteria) {
+            $criteria = $allCriteria[$user->program_type] ?? $allCriteria['normal'];
+            $stat = $activityStats->get($user->id);
 
-                $totalActivities = (int) ($stat->activity_count ?? 0);
-                $totalHours = (int) ($stat->activity_hours ?? 0)
-                    + (int) ($externalHours[$user->id] ?? 0)
-                    + (int) ($creditTransferHours[$user->id] ?? 0);
+            $totalActivities = (int) ($stat->activity_count ?? 0);
+            $totalHours = (int) ($stat->activity_hours ?? 0)
+                + (int) ($externalHours[$user->id] ?? 0)
+                + (int) ($creditTransferHours[$user->id] ?? 0);
 
-                return [
-                    'user' => $user,
-                    'total_activities' => $totalActivities,
-                    'total_hours' => $totalHours,
-                    'is_cleared' => $totalActivities >= $criteria['required_activities']
-                        && $totalHours >= $criteria['required_hours'],
-                ];
-            })
+            return [
+                'user' => $user,
+                'total_activities' => $totalActivities,
+                'total_hours' => $totalHours,
+                'required_activities' => $criteria['required_activities'],
+                'required_hours' => $criteria['required_hours'],
+                'is_cleared' => $totalActivities >= $criteria['required_activities']
+                    && $totalHours >= $criteria['required_hours'],
+            ];
+        });
+    }
+
+    /**
+     * Per-student graduation progress for every enrolled student in a given
+     * academic year — the shared base for both clearedGraduatingStudents()
+     * (registrar handoff) and notClearedGraduatingStudents() (advisor
+     * follow-up), so the same bulk queries aren't run twice for what's
+     * really one dataset sliced two ways.
+     *
+     * @return Collection<int, array{
+     *     user: User, total_activities: int, total_hours: int,
+     *     required_activities: int, required_hours: int, is_cleared: bool,
+     * }>
+     */
+    public function studentsProgress(int $year): Collection
+    {
+        $students = User::with(['faculty', 'major'])
+            ->where('role', 'student')
+            ->whereNotNull('enrollment_year')
+            ->get()
+            ->filter(fn (User $u) => $u->current_year === $year)
+            ->values();
+
+        return $this->bulkProgress($students);
+    }
+
+    /**
+     * Final-year students who have fully cleared the graduation activity
+     * criteria, for the registrar clearance report.
+     *
+     * @return Collection<int, array{user: User, total_activities: int, total_hours: int}>
+     */
+    public function clearedGraduatingStudents(int $year = 4): Collection
+    {
+        return $this->studentsProgress($year)
             ->filter(fn (array $row) => $row['is_cleared'])
             ->values();
     }
 
     /**
-     * @return array<string,int> hours accumulated per one of the 5 activity categories.
+     * The inverse of clearedGraduatingStudents() — final-year students who
+     * have NOT cleared yet, for advisors to follow up with before
+     * graduation. Sorted closest-to-clearing first (least hours still
+     * needed) since that's usually the most actionable slice to work
+     * through first.
+     *
+     * @return Collection<int, array{user: User, total_activities: int, total_hours: int, activities_remaining: int, hours_remaining: int}>
      */
-    private function categoryBreakdown(User $user): array
+    public function notClearedGraduatingStudents(int $year = 4): Collection
+    {
+        return $this->studentsProgress($year)
+            ->filter(fn (array $row) => ! $row['is_cleared'])
+            ->map(function (array $row) {
+                $row['activities_remaining'] = max(0, $row['required_activities'] - $row['total_activities']);
+                $row['hours_remaining'] = max(0, $row['required_hours'] - $row['total_hours']);
+
+                return $row;
+            })
+            ->sortBy('hours_remaining')
+            ->values();
+    }
+
+    /**
+     * Hours accumulated per one of the 5 activity categories — for a single
+     * student when $user is given (the student dashboard's per-person
+     * breakdown), or university-wide across every student when omitted
+     * (see universityCategoryBreakdown() below, for the planning report:
+     * which of the 5 areas is under-served by the activities on offer).
+     *
+     * @return array<string,int>
+     */
+    private function categoryBreakdown(?User $user = null): array
     {
         $breakdown = array_fill_keys(self::CATEGORIES, 0);
 
         Attendance::query()
             ->join('activities', 'activities.id', '=', 'attendances.activity_id')
-            ->where('attendances.user_id', $user->id)
             ->where('attendances.status', 'auto_approved')
+            ->when($user, fn ($q) => $q->where('attendances.user_id', $user->id))
             ->selectRaw('activities.activity_category as category, sum(COALESCE(attendances.credited_hours, activities.credit_hours)) as hours')
             ->groupBy('activities.activity_category')
             ->pluck('hours', 'category')
@@ -192,8 +280,9 @@ class ActivityEvaluationService
                 $breakdown[$category] += (int) $hours;
             });
 
-        ExternalActivityRequest::where('user_id', $user->id)
+        ExternalActivityRequest::query()
             ->where('status', 'approved')
+            ->when($user, fn ($q) => $q->where('user_id', $user->id))
             ->selectRaw('activity_category as category, sum(COALESCE(hours_approved, hours_requested)) as hours')
             ->groupBy('activity_category')
             ->pluck('hours', 'category')
@@ -201,8 +290,9 @@ class ActivityEvaluationService
                 $breakdown[$category] += (int) $hours;
             });
 
-        CreditTransferRequest::where('user_id', $user->id)
+        CreditTransferRequest::query()
             ->where('status', 'approved')
+            ->when($user, fn ($q) => $q->where('user_id', $user->id))
             ->selectRaw('activity_category as category, sum(COALESCE(hours_approved, hours_requested)) as hours')
             ->groupBy('activity_category')
             ->pluck('hours', 'category')
@@ -211,5 +301,108 @@ class ActivityEvaluationService
             });
 
         return $breakdown;
+    }
+
+    /**
+     * @return array<string,int> hours accumulated per category, across every student.
+     */
+    public function universityCategoryBreakdown(): array
+    {
+        return $this->categoryBreakdown();
+    }
+
+    /**
+     * Every faculty's participation at a glance — student count, how many
+     * have cleared the graduation criteria, and average hours/activities
+     * per student. Shared by the on-screen report and its Excel export so
+     * the two can never drift out of sync with each other.
+     *
+     * Uses bulkProgress() (a handful of grouped queries) rather than calling
+     * summarize() once per student — the previous version cost 7-8 queries
+     * per student, which meant every request to this report re-ran roughly
+     * (7-8 × total student count) queries. That's fine at a few dozen
+     * students and genuinely bad at a few thousand.
+     *
+     * @return Collection<int, array{
+     *     faculty: Faculty, student_count: int, cleared_count: int,
+     *     cleared_pct: float, avg_hours: float, avg_activities: float,
+     * }>
+     */
+    public function facultyParticipationSummary(): Collection
+    {
+        $students = User::where('role', 'student')->get(['id', 'faculty_id', 'program_type']);
+        $progressByFaculty = $this->bulkProgress($students)->groupBy(fn (array $row) => $row['user']->faculty_id);
+
+        return Faculty::orderBy('name_th')->get()->map(function (Faculty $faculty) use ($progressByFaculty) {
+            $rows = $progressByFaculty->get($faculty->id, collect());
+            $studentCount = $rows->count();
+            $clearedCount = $rows->where('is_cleared', true)->count();
+
+            return [
+                'faculty' => $faculty,
+                'student_count' => $studentCount,
+                'cleared_count' => $clearedCount,
+                'cleared_pct' => $studentCount > 0 ? round($clearedCount / $studentCount * 100, 1) : 0.0,
+                'avg_hours' => $studentCount > 0 ? round($rows->avg('total_hours'), 1) : 0.0,
+                'avg_activities' => $studentCount > 0 ? round($rows->avg('total_activities'), 1) : 0.0,
+            ];
+        });
+    }
+
+    /**
+     * Volume and turnaround for the three admin-reviewed request types
+     * (external activity, credit transfer, late check-in) — how many of
+     * each are submitted, what fraction get approved, and how long a
+     * decided request typically waits for review.
+     *
+     * @return array<string, array{
+     *     total: int, pending: int, approved: int, rejected: int,
+     *     approval_rate: float|null, avg_turnaround_hours: float|null,
+     * }>
+     */
+    public function requestStats(): array
+    {
+        $models = [
+            'external' => ExternalActivityRequest::class,
+            'credit_transfer' => CreditTransferRequest::class,
+            'late_checkin' => LateCheckInRequest::class,
+        ];
+
+        $stats = [];
+
+        foreach ($models as $key => $modelClass) {
+            $counts = $modelClass::query()
+                ->selectRaw('status, count(*) as total')
+                ->groupBy('status')
+                ->pluck('total', 'status');
+
+            $approved = (int) ($counts['approved'] ?? 0);
+            $rejected = (int) ($counts['rejected'] ?? 0);
+            $decided = $approved + $rejected;
+
+            // Averaged in PHP rather than a DB-side TIMESTAMPDIFF/JULIANDAY
+            // call — those functions aren't portable across the MySQL the
+            // app runs on and the SQLite the test suite runs on (see
+            // phpunit.xml), and reviewed-request volume is nowhere near
+            // large enough for this to matter performance-wise.
+            $reviewed = $modelClass::query()
+                ->whereNotNull('reviewed_at')
+                ->get(['created_at', 'reviewed_at']);
+
+            $avgTurnaroundHours = $reviewed->isNotEmpty()
+                ? $reviewed->avg(fn ($row) => $row->created_at->diffInMinutes($row->reviewed_at) / 60)
+                : null;
+
+            $stats[$key] = [
+                'total' => (int) $counts->sum(),
+                'pending' => (int) ($counts['pending'] ?? 0),
+                'approved' => $approved,
+                'rejected' => $rejected,
+                'approval_rate' => $decided > 0 ? round($approved / $decided * 100, 1) : null,
+                'avg_turnaround_hours' => $avgTurnaroundHours !== null ? round($avgTurnaroundHours, 1) : null,
+            ];
+        }
+
+        return $stats;
     }
 }

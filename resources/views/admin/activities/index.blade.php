@@ -119,11 +119,11 @@
         <table class="min-w-full text-sm">
             <thead>
                 <tr class="border-b border-brand-purple-100 dark:border-brand-purple-500/20">
-                    <th class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">{{ __('รหัสกิจกรรม') }}</th>
-                    <th class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">{{ __('ชื่อกิจกรรม') }}</th>
-                    <th class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">{{ __('วันที่จัด') }}</th>
-                    <th class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">{{ __('ปีการศึกษา') }}</th>
-                    <th class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">{{ __('ผู้เช็คชื่อแล้ว') }}</th>
+                    <x-sortable-th field="activity_code" :label="__('รหัสกิจกรรม')" />
+                    <x-sortable-th field="title" :label="__('ชื่อกิจกรรม')" />
+                    <x-sortable-th field="start_at" :label="__('วันที่จัด')" />
+                    <x-sortable-th field="academic_year" :label="__('ปีการศึกษา')" />
+                    <x-sortable-th field="attendances_count" :label="__('ผู้เช็คชื่อแล้ว')" />
                     <th class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">{{ __('สถานะ') }}</th>
                     <th class="whitespace-nowrap px-4 py-3"></th>
                 </tr>

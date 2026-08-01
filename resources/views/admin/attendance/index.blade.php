@@ -141,12 +141,12 @@
             <thead>
                 <tr class="border-b border-brand-purple-100 dark:border-brand-purple-500/20">
                     <th class="whitespace-nowrap px-3 py-3"><input type="checkbox" @change="toggleAll($event.target.checked)" class="rounded border-slate-300 text-brand-purple-600 focus:ring-brand-purple-500 dark:border-slate-600"></th>
-                    <th class="whitespace-nowrap px-3 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">{{ __('รหัสนักศึกษา') }}</th>
-                    <th class="whitespace-nowrap px-3 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">{{ __('ชื่อ-นามสกุล') }}</th>
+                    <x-sortable-th field="student_id" :label="__('รหัสนักศึกษา')" />
+                    <x-sortable-th field="name" :label="__('ชื่อ-นามสกุล')" />
                     <th class="whitespace-nowrap px-3 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">{{ __('คณะ/สาขา') }}</th>
-                    <th class="whitespace-nowrap px-3 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">{{ __('ชั้นปี') }}</th>
-                    <th class="whitespace-nowrap px-3 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">{{ __('เวลาเช็คชื่อ') }}</th>
-                    <th class="whitespace-nowrap px-3 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">{{ __('ระยะห่าง') }}</th>
+                    <x-sortable-th field="year_level" :label="__('ชั้นปี')" />
+                    <x-sortable-th field="checkin_time" :label="__('เวลาเช็คชื่อ')" />
+                    <x-sortable-th field="distance_meters" :label="__('ระยะห่าง')" />
                     <th class="whitespace-nowrap px-3 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">{{ __('สถานะ') }}</th>
                     <th class="whitespace-nowrap px-3 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500"></th>
                 </tr>
