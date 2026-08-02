@@ -26,6 +26,11 @@
         :subtitle="trim((auth()->user()->faculty?->name_th ?? '').' · '.(auth()->user()->major?->name_th ?? ''), ' ·')"
         :decorated="true"
     >
+        @if ($currentPositionLabel)
+            <span class="inline-flex items-center rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-white ring-1 ring-white/15 backdrop-blur">
+                {{ __('ดำรงตำแหน่ง') }}: {{ $currentPositionLabel }}
+            </span>
+        @endif
         @if ($summary['current_year'])
             <x-slot:actions>
                 <span class="shrink-0 rounded-xl bg-white/10 px-3 py-2 text-center ring-1 ring-white/15 backdrop-blur">

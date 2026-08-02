@@ -2,10 +2,10 @@
 
 @section('content')
 @php
-    // Single source: App\Models\CreditTransferRequest::POSITION_LABELS —
-    // also reused by admin/students/show.blade.php and the student
-    // dashboards, so a position rename/addition only needs updating there.
-    $positionLabels = collect(\App\Models\CreditTransferRequest::POSITION_LABELS)->map(fn ($label) => __($label))->all();
+    // Single source: App\Models\CreditTransferPosition (admin-configurable
+    // via admin/credit-transfer-positions) — also reused by
+    // admin/students/show.blade.php and the student dashboards.
+    $positionLabels = collect(\App\Models\CreditTransferPosition::labelsMap())->map(fn ($label) => __($label))->all();
     $categoryLabels = [
         'culture' => __('ทำนุบำรุงศิลปวัฒนธรรม'),
         'academic' => __('วิชาการ'),
@@ -28,7 +28,9 @@
         showModal: false,
         rejecting: false,
         approving: false,
+        revoking: false,
         rejectReason: '',
+        revokeReason: '',
         approveCategory: '',
         approveHours: null,
         approveComment: '',
@@ -36,12 +38,15 @@
         categories: {{ \Illuminate\Support\Js::from($categoryLabels) }},
         approveUrlTemplate: '{{ route('admin.credit-transfers.approve', ['creditTransferRequest' => '__ID__']) }}',
         rejectUrlTemplate: '{{ route('admin.credit-transfers.reject', ['creditTransferRequest' => '__ID__']) }}',
+        revokeUrlTemplate: '{{ route('admin.credit-transfers.revoke', ['creditTransferRequest' => '__ID__']) }}',
         open(item) {
             this.selected = item;
             this.showModal = true;
             this.rejecting = false;
             this.approving = false;
+            this.revoking = false;
             this.rejectReason = '';
+            this.revokeReason = '';
             this.approveCategory = '';
             this.approveHours = item.hours_requested;
             this.approveComment = '';
@@ -348,6 +353,42 @@
                                 </div>
                             </form>
                         </template>
+
+                        @if (auth()->user()->role === 'super_admin')
+                            <template x-if="selected.status === 'approved' && ! revoking">
+                                <button @click="revoking = true" type="button"
+                                    class="w-full rounded-xl bg-red-50 px-4 py-2.5 text-sm font-semibold text-red-600 shadow-soft transition-all duration-300 hover:-translate-y-0.5 hover:bg-red-100 hover:shadow-lg dark:bg-red-500/10 dark:text-red-400 dark:hover:bg-red-500/20">
+                                    {{ __('ยกเลิกการอนุมัติ') }}
+                                </button>
+                            </template>
+
+                            <template x-if="selected.status === 'approved' && revoking">
+                                <form method="POST" :action="revokeUrlTemplate.replace('__ID__', selected.id)" class="space-y-3 rounded-2xl bg-red-50/50 p-3.5 dark:bg-red-500/5">
+                                    @csrf
+                                    <div>
+                                        <label class="mb-1 flex items-center justify-between text-xs font-medium text-slate-500 dark:text-slate-400">
+                                            <span>{{ __('เหตุผลที่ยกเลิกการอนุมัติ') }}</span>
+                                            <span class="font-mono text-[0.65rem] text-slate-350 dark:text-slate-600" x-text="revokeReason.length + '/500'"></span>
+                                        </label>
+                                        <textarea
+                                            name="reject_reason" x-model="revokeReason" required rows="3" maxlength="500"
+                                            placeholder="{{ __('เช่น อนุมัติผิดตำแหน่ง นักศึกษาไม่ได้ดำรงตำแหน่งนี้จริง') }}"
+                                            @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'"
+                                            class="w-full resize-none rounded-2xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm shadow-soft transition-all duration-200 focus:border-red-500 focus:outline-none focus:ring-4 focus:ring-red-500/10 dark:border-slate-600 dark:bg-slate-800/60 dark:text-slate-100 dark:placeholder:text-slate-500"
+                                        ></textarea>
+                                        <p class="mt-1 text-xs text-slate-400 dark:text-slate-500">{{ __('ชั่วโมงที่เคยให้เครดิตจะถูกตัดออกจากยอดสะสมของนักศึกษาทันที') }}</p>
+                                    </div>
+                                    <div class="flex gap-3">
+                                        <button type="submit" class="flex-1 rounded-xl bg-red-600 px-4 py-2.5 text-sm font-semibold text-white shadow-soft transition-all duration-300 hover:-translate-y-0.5 hover:bg-red-700 hover:shadow-lg">
+                                            {{ __('ยืนยันยกเลิกการอนุมัติ') }}
+                                        </button>
+                                        <button @click="revoking = false" type="button" class="flex-1 rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 shadow-soft transition-colors hover:bg-slate-100 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700">
+                                            {{ __('ยกเลิก') }}
+                                        </button>
+                                    </div>
+                                </form>
+                            </template>
+                        @endif
                     </div>
                 </template>
             </div>

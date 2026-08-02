@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\ClearanceReportController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\ExternalApprovalController;
 use App\Http\Controllers\Admin\CreditTransferApprovalController;
+use App\Http\Controllers\Admin\CreditTransferPositionController;
 use App\Http\Controllers\Admin\FacultyController;
 use App\Http\Controllers\Admin\LateCheckInApprovalController;
 use App\Http\Controllers\Admin\MajorController;
@@ -231,7 +232,7 @@ Route::middleware(['auth', 'srru.email'])->group(function () {
         Route::get('/audit-log', [AuditLogController::class, 'index'])->name('audit-log.index');
 
         Route::post('/activities/{activity}/duplicate', [ActivityController::class, 'duplicate'])->name('activities.duplicate');
-        Route::post('/activities/bulk-action', [ActivityController::class, 'bulkAction'])->name('activities.bulk-action');
+        Route::patch('/activities/{activity}/status', [ActivityController::class, 'updateStatus'])->name('activities.update-status');
 
         Route::get('/announcements', [AnnouncementController::class, 'create'])->name('announcements.create');
         Route::post('/announcements', [AnnouncementController::class, 'store'])->name('announcements.store');
@@ -251,12 +252,17 @@ Route::middleware(['auth', 'srru.email'])->group(function () {
             Route::put('/majors/{major}', [MajorController::class, 'update'])->name('majors.update');
             Route::delete('/majors/{major}', [MajorController::class, 'destroy'])->name('majors.destroy');
 
+            Route::resource('credit-transfer-positions', CreditTransferPositionController::class)->except(['show']);
+
             Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
             Route::get('/settings/create', [SettingsController::class, 'create'])->name('settings.create');
             Route::post('/settings', [SettingsController::class, 'store'])->name('settings.store');
             Route::get('/settings/{year}/edit', [SettingsController::class, 'edit'])->name('settings.edit');
             Route::put('/settings/{year}', [SettingsController::class, 'update'])->name('settings.update');
             Route::delete('/settings/{year}', [SettingsController::class, 'destroy'])->name('settings.destroy');
+
+            Route::post('/students/{student}/credit-transfers/grant', [CreditTransferApprovalController::class, 'grant'])->name('credit-transfers.grant');
+            Route::post('/credit-transfers/{creditTransferRequest}/revoke', [CreditTransferApprovalController::class, 'revoke'])->name('credit-transfers.revoke');
         });
     });
 });

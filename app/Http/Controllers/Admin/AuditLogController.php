@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\CreditTransferRequest;
+use App\Models\CreditTransferPosition;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -68,13 +68,14 @@ class AuditLogController extends Controller
                 e.title as title, e.reviewed_at as reviewed_at
             ", [__('กิจกรรมภายนอก')]);
 
-        // position is a fixed enum (App\Models\CreditTransferRequest::POSITION_LABELS),
+        // position is admin-configurable (App\Models\CreditTransferPosition),
         // translated into a SQL CASE so the human label comes back from the
         // same query instead of a second PHP-side lookup per row.
-        $positionCase = collect(CreditTransferRequest::POSITION_LABELS)
+        $positionLabels = CreditTransferPosition::labelsMap();
+        $positionCase = collect($positionLabels)
             ->map(fn ($label, $key) => "WHEN '{$key}' THEN ?")
             ->implode(' ');
-        $positionBindings = array_map('__', array_values(CreditTransferRequest::POSITION_LABELS));
+        $positionBindings = array_map('__', array_values($positionLabels));
 
         $creditTransfers = DB::table('credit_transfer_requests as c')
             ->join('users as u', 'u.id', '=', 'c.reviewed_by')

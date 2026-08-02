@@ -21,6 +21,11 @@
             @if ($subtitle)
                 <p class="mt-1.5 text-sm font-light text-violet-100/80">{{ $subtitle }}</p>
             @endif
+            @if ($slot->isNotEmpty())
+                <div class="mt-2 flex flex-wrap items-center gap-2">
+                    {{ $slot }}
+                </div>
+            @endif
         </div>
 
         @if (isset($actions) && $actions->isNotEmpty())

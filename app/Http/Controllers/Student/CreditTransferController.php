@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Student;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CreditTransferStoreRequest;
+use App\Models\CreditTransferPosition;
 use App\Models\CreditTransferRequest;
 use App\Models\User;
 use App\Notifications\CreditTransferRequestSubmitted;
@@ -22,7 +23,7 @@ class CreditTransferController extends Controller
             'user_id' => $request->user()->id,
             'position' => $position,
             'academic_year' => $validated['academic_year'],
-            'hours_requested' => CreditTransferRequest::POSITION_HOURS[$position],
+            'hours_requested' => CreditTransferPosition::hoursMap()[$position],
             'proof_image_path' => $request->file('proof_image')->store('credit-transfer-proofs', 'public'),
             'status' => 'pending',
         ]);

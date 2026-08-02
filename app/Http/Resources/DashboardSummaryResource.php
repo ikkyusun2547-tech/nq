@@ -26,6 +26,7 @@ class DashboardSummaryResource extends JsonResource
             'category_hours' => $this->resource['category_hours'],
             'hours_by_source' => $this->resource['hours_by_source'],
             'is_cleared' => $this->resource['is_cleared'],
+            'current_position_label' => $this->resource['current_position_label'] ?? null,
         ];
     }
 }

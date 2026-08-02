@@ -4,7 +4,9 @@ namespace Tests\Feature\Admin;
 
 use App\Models\Activity;
 use App\Models\Attendance;
+use App\Models\CreditTransferPosition;
 use App\Models\User;
+use App\Services\AcademicYearCalculator;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -42,6 +44,41 @@ class AuditLogTest extends TestCase
         $response->assertSee('นักศึกษาทดสอบ');
         $response->assertSee('กิจกรรมทดสอบ');
         $response->assertSee('ผู้ตรวจสอบ');
+    }
+
+    public function test_it_translates_a_credit_transfer_entry_using_the_current_position_label(): void
+    {
+        $superAdmin = User::factory()->create(['role' => 'super_admin', 'email' => 'super@srru.ac.th', 'name_thai' => 'ผู้ดูแลระบบ']);
+        $student = User::factory()->create(['role' => 'student', 'email' => 'stu@srru.ac.th', 'name_thai' => 'นักศึกษาตำแหน่ง']);
+
+        $this->actingAs($superAdmin)->post(route('admin.credit-transfer-positions.store'), [
+            'key' => 'secretary',
+            'label' => 'เลขานุการ (เดิม)',
+            'hours' => 30,
+        ]);
+
+        $this->actingAs($superAdmin)->post(route('admin.credit-transfers.grant', $student), [
+            'position' => 'secretary',
+            'academic_year' => AcademicYearCalculator::forDate(now()),
+            'activity_category' => 'volunteer',
+        ]);
+
+        // Renamed *after* granting — the audit log's raw-SQL translation
+        // reads the position table live, so it should show this new label,
+        // not whatever the label happened to be at grant time.
+        CreditTransferPosition::where('key', 'secretary')->update(['label' => 'เลขานุการ (เปลี่ยนชื่อแล้ว)']);
+
+        $response = $this->actingAs($superAdmin)->get(route('admin.audit-log.index'));
+
+        // The "created ตำแหน่งเทียบโอนชั่วโมง" entry legitimately still shows
+        // "เลขานุการ (เดิม)" forever — it's a historical record of what the
+        // position was called at creation time, so only the credit-transfer
+        // entry's translated title is checked here.
+        $response->assertOk();
+        $entries = $response->viewData('entries');
+        $creditTransferEntry = collect($entries->items())->firstWhere('type_label', 'เทียบโอนตำแหน่ง');
+        $this->assertNotNull($creditTransferEntry);
+        $this->assertSame('เลขานุการ (เปลี่ยนชื่อแล้ว)', $creditTransferEntry->title);
     }
 
     public function test_it_lists_admin_actions_alongside_reviewed_records(): void

@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Models\CreditTransferRequest;
+use App\Models\CreditTransferPosition;
 use App\Models\LateCheckInRequest;
 use App\Models\User;
 use Illuminate\Support\Collection;
@@ -52,11 +52,12 @@ class StudentActivityFeed
                 'is_approved' => $ext->status === 'approved',
             ]);
 
+        $positionLabels = CreditTransferPosition::labelsMap();
         $creditTransfers = $user->creditTransferRequests()
             ->whereIn('status', ['approved', 'pending'])
             ->get()
             ->map(fn ($credit) => (object) [
-                'title' => __(CreditTransferRequest::POSITION_LABELS[$credit->position]),
+                'title' => __($positionLabels[$credit->position] ?? $credit->position),
                 'date' => $credit->created_at,
                 'hours' => $credit->hours_credited,
                 'type' => 'credit_transfer',
@@ -128,6 +129,7 @@ class StudentActivityFeed
                 'reject_reason' => $att->reject_reason,
             ]);
 
+        $rejectedPositionLabels = CreditTransferPosition::labelsMap();
         $rejectedCreditTransfers = $user->creditTransferRequests()
             ->where('status', 'rejected')
             ->get()
@@ -138,7 +140,7 @@ class StudentActivityFeed
                     ->exists();
             })
             ->map(fn ($credit) => (object) [
-                'title' => __(CreditTransferRequest::POSITION_LABELS[$credit->position]),
+                'title' => __($rejectedPositionLabels[$credit->position] ?? $credit->position),
                 'date' => $credit->created_at,
                 'type' => 'credit_transfer',
                 'reject_reason' => $credit->reject_reason,

@@ -4,7 +4,10 @@ namespace Tests\Feature\Api;
 
 use App\Models\Activity;
 use App\Models\Attendance;
+use App\Models\CreditTransferRequest;
+use App\Models\Faculty;
 use App\Models\User;
+use App\Services\AcademicYearCalculator;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
@@ -12,6 +15,18 @@ use Tests\TestCase;
 class DashboardTest extends TestCase
 {
     use RefreshDatabase;
+
+    private function completeStudent(string $email): User
+    {
+        return User::factory()->create([
+            'role' => 'student',
+            'email' => $email,
+            'faculty_id' => Faculty::factory(),
+            'student_id' => '12345678901',
+            'year_level' => 2,
+            'program_type' => 'normal',
+        ]);
+    }
 
     public function test_it_requires_authentication(): void
     {
@@ -52,6 +67,36 @@ class DashboardTest extends TestCase
             'rejected',
         ]);
         $this->assertSame(1, $response->json('summary.total_activities'));
+    }
+
+    public function test_summary_includes_the_current_position_label_for_an_approved_current_year_claim(): void
+    {
+        $user = $this->completeStudent('withposition@srru.ac.th');
+        CreditTransferRequest::create([
+            'user_id' => $user->id,
+            'position' => 'class_leader',
+            'academic_year' => AcademicYearCalculator::forDate(now()),
+            'hours_requested' => 50,
+            'activity_category' => 'volunteer',
+            'status' => 'approved',
+        ]);
+        Sanctum::actingAs($user);
+
+        $response = $this->getJson('/api/dashboard');
+
+        $response->assertOk();
+        $this->assertSame('หัวหน้าหมู่เรียน', $response->json('summary.current_position_label'));
+    }
+
+    public function test_summary_current_position_label_is_null_without_a_current_year_claim(): void
+    {
+        $user = $this->completeStudent('noposition@srru.ac.th');
+        Sanctum::actingAs($user);
+
+        $response = $this->getJson('/api/dashboard');
+
+        $response->assertOk();
+        $this->assertNull($response->json('summary.current_position_label'));
     }
 
     public function test_admin_is_blocked_from_the_student_dashboard(): void

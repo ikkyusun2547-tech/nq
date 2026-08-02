@@ -3,7 +3,10 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\AdminCreditTransferGrantRequest;
+use App\Models\CreditTransferPosition;
 use App\Models\CreditTransferRequest;
+use App\Models\User;
 use App\Notifications\CreditTransferRequestReviewed;
 use App\Services\SafeNotifier;
 use Illuminate\Http\Request;
@@ -117,5 +120,80 @@ class CreditTransferApprovalController extends Controller
         SafeNotifier::send($creditTransferRequest->user, new CreditTransferRequestReviewed($creditTransferRequest));
 
         return back()->with('status', __('ปฏิเสธคำร้องสำเร็จ'));
+    }
+
+    /**
+     * Super-admin-only shortcut that skips the usual "student submits,
+     * admin reviews" flow entirely — lands the row already approved, for
+     * cases where the professor/registrar already knows a student qualifies
+     * and the student never filed a request themselves. Still bound by the
+     * same position→hours table and one-claim-per-academic-year rule as the
+     * student-submitted flow (AdminCreditTransferGrantRequest).
+     */
+    public function grant(AdminCreditTransferGrantRequest $request, User $student)
+    {
+        abort_unless($student->role === 'student', 404);
+
+        $validated = $request->validated();
+        $position = $validated['position'];
+        $hoursRequested = CreditTransferPosition::hoursMap()[$position];
+
+        // Same "only store an override when it actually differs" rule as
+        // approve() — null means "credited at the position's standard
+        // hours" and keeps the common case free of redundant data.
+        $hoursApproved = $validated['hours_approved'] ?? null;
+        if ($hoursApproved !== null && $hoursApproved === $hoursRequested) {
+            $hoursApproved = null;
+        }
+
+        $creditTransferRequest = CreditTransferRequest::create([
+            'user_id' => $student->id,
+            'position' => $position,
+            'academic_year' => $validated['academic_year'],
+            'hours_requested' => $hoursRequested,
+            'hours_approved' => $hoursApproved,
+            'activity_category' => $validated['activity_category'],
+            'proof_image_path' => $request->file('proof_image')?->store('credit-transfer-proofs', 'public'),
+            'status' => 'approved',
+            'reviewed_by' => $request->user()->id,
+            'reviewed_at' => now(),
+        ]);
+
+        SafeNotifier::send($student, new CreditTransferRequestReviewed($creditTransferRequest));
+
+        return redirect()
+            ->route('admin.students.show', $student)
+            ->with('status', __('เพิ่มชั่วโมงเทียบโอนตำแหน่งให้นักศึกษาสำเร็จ'));
+    }
+
+    /**
+     * Super-admin-only undo for an approval made in error (student claimed
+     * the wrong position, admin approved without catching it, etc.). Flips
+     * an approved request back to 'rejected' rather than deleting it or
+     * introducing a new status — the hours drop out of the student's total
+     * immediately since ActivityEvaluationService only sums 'approved'
+     * rows, and the existing reject_reason/notification machinery already
+     * does everything else a reversal needs.
+     */
+    public function revoke(Request $request, CreditTransferRequest $creditTransferRequest)
+    {
+        abort_if($creditTransferRequest->status !== 'approved', 422, __('คำร้องนี้ไม่ได้อยู่ในสถานะอนุมัติ'));
+
+        $validated = $request->validate([
+            'reject_reason' => ['required', 'string', 'max:500'],
+            'admin_comment' => ['nullable', 'string', 'max:500'],
+        ]);
+
+        $creditTransferRequest->update([
+            'status' => 'rejected',
+            'reject_reason' => $validated['reject_reason'],
+            'admin_comment' => $validated['admin_comment'] ?? null,
+            'reviewed_by' => $request->user()->id,
+            'reviewed_at' => now(),
+        ]);
+
+        SafeNotifier::send($creditTransferRequest->user, new CreditTransferRequestReviewed($creditTransferRequest));
+
+        return back()->with('status', __('ยกเลิกการอนุมัติสำเร็จ ชั่วโมงถูกตัดออกจากยอดสะสมแล้ว'));
     }
 }

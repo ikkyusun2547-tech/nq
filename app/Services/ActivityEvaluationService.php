@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Attendance;
+use App\Models\CreditTransferPosition;
 use App\Models\CreditTransferRequest;
 use App\Models\ExternalActivityRequest;
 use App\Models\Faculty;
@@ -177,6 +178,27 @@ class ActivityEvaluationService
             'is_cleared' => $totalActivities >= $criteria['required_activities']
                 && $totalHours >= $criteria['required_hours'],
         ];
+    }
+
+    /**
+     * The position label a student currently holds, if any — only counts an
+     * approved credit-transfer claim for the *current* academic year, since
+     * a position held in a past year isn't a role the student holds
+     * anymore. Shared by the web and API student dashboards so both surface
+     * the same "ดำรงตำแหน่ง" badge from one query instead of two copies.
+     */
+    public function currentPositionLabel(User $user): ?string
+    {
+        $request = CreditTransferRequest::where('user_id', $user->id)
+            ->where('status', 'approved')
+            ->where('academic_year', AcademicYearCalculator::forDate(now()))
+            ->first();
+
+        if (! $request) {
+            return null;
+        }
+
+        return CreditTransferPosition::labelsMap()[$request->position] ?? $request->position;
     }
 
     /**

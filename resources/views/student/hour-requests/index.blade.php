@@ -21,24 +21,13 @@
             ? 'border-red-400 focus:border-red-500 focus:ring-red-500/10 dark:border-red-500/70'
             : 'border-slate-200 focus:border-brand-green-500 focus:ring-brand-green-500/10 dark:border-slate-600');
 
-    $positionLabels = [
-        'student_council_president' => __('นายกองค์การบริหารนักศึกษา').' (60 '.__('ชม.').')',
-        'student_club_president' => __('นายกสโมสรนักศึกษา').' (60 '.__('ชม.').')',
-        'student_parliament_president' => __('ประธานสภานักศึกษา').' (60 '.__('ชม.').')',
-        'club_president' => __('ประธานชมรม').' (50 '.__('ชม.').')',
-        'dormitory_president' => __('ประธานหอพักมหาวิทยาลัย').' (50 '.__('ชม.').')',
-        'class_leader' => __('หัวหน้าหมู่เรียน').' (50 '.__('ชม.').')',
-        'class_representative' => __('ตัวแทนหมู่เรียน').' (50 '.__('ชม.').')',
-    ];
-    $positionLabelsPlain = [
-        'student_council_president' => __('นายกองค์การบริหารนักศึกษา'),
-        'student_club_president' => __('นายกสโมสรนักศึกษา'),
-        'student_parliament_president' => __('ประธานสภานักศึกษา'),
-        'club_president' => __('ประธานชมรม'),
-        'dormitory_president' => __('ประธานหอพักมหาวิทยาลัย'),
-        'class_leader' => __('หัวหน้าหมู่เรียน'),
-        'class_representative' => __('ตัวแทนหมู่เรียน'),
-    ];
+    // Single source: App\Models\CreditTransferPosition (admin-configurable
+    // via admin/credit-transfer-positions).
+    $positionLabelsPlain = collect(\App\Models\CreditTransferPosition::labelsMap())->map(fn ($label) => __($label))->all();
+    $positionHoursMap = \App\Models\CreditTransferPosition::hoursMap();
+    $positionLabels = collect($positionLabelsPlain)
+        ->map(fn ($label, $key) => $label.' ('.$positionHoursMap[$key].' '.__('ชม.').')')
+        ->all();
 @endphp
 
 <div
@@ -48,7 +37,7 @@
         showExternalForm: {{ $errors->any() ? 'true' : 'false' }},
         showCreditForm: {{ $errors->any() ? 'true' : 'false' }},
         creditPosition: '{{ old('position', '') }}',
-        positionHours: @js(\App\Models\CreditTransferRequest::POSITION_HOURS),
+        positionHours: @js(\App\Models\CreditTransferPosition::hoursMap()),
     }"
     @change="if ($event.target.name === 'position') creditPosition = $event.target.value"
 >

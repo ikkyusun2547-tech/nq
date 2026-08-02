@@ -2,9 +2,12 @@
 
 namespace Tests\Feature\Admin;
 
+use App\Models\CreditTransferPosition;
 use App\Models\CreditTransferRequest;
 use App\Models\User;
 use App\Notifications\CreditTransferRequestReviewed;
+use App\Services\AcademicYearCalculator;
+use App\Services\ActivityEvaluationService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
 use Tests\TestCase;
@@ -16,6 +19,19 @@ class CreditTransferApprovalControllerTest extends TestCase
     private function admin(): User
     {
         return User::factory()->create(['role' => 'admin', 'email' => 'admin@srru.ac.th']);
+    }
+
+    private function superAdmin(): User
+    {
+        return User::factory()->create(['role' => 'super_admin', 'email' => 'super@srru.ac.th']);
+    }
+
+    private function student(array $overrides = []): User
+    {
+        return User::factory()->create(array_merge([
+            'role' => 'student',
+            'email' => 'stu'.uniqid().'@srru.ac.th',
+        ], $overrides));
     }
 
     private function pendingRequest(array $overrides = []): CreditTransferRequest
@@ -165,5 +181,245 @@ class CreditTransferApprovalControllerTest extends TestCase
         $names = $response->viewData('requests')->pluck('user.name_thai')->all();
 
         $this->assertSame(['ก นักศึกษาแรกสุด', 'ฮ นักศึกษาท้ายสุด'], $names);
+    }
+
+    // --- grant() ---
+
+    public function test_super_admin_grants_credit_transfer_hours_directly_to_a_student(): void
+    {
+        Notification::fake();
+        $student = $this->student();
+        $year = AcademicYearCalculator::forDate(now());
+
+        $response = $this->actingAs($this->superAdmin())
+            ->post(route('admin.credit-transfers.grant', $student), [
+                'position' => 'class_leader',
+                'academic_year' => $year,
+                'activity_category' => 'volunteer',
+            ]);
+
+        $response->assertRedirect(route('admin.students.show', $student));
+
+        $this->assertDatabaseHas('credit_transfer_requests', [
+            'user_id' => $student->id,
+            'position' => 'class_leader',
+            'academic_year' => $year,
+            'hours_requested' => CreditTransferPosition::hoursMap()['class_leader'],
+            'activity_category' => 'volunteer',
+            'status' => 'approved',
+            'proof_image_path' => null,
+        ]);
+
+        $request = CreditTransferRequest::where('user_id', $student->id)->first();
+        $this->assertNotNull($request->reviewed_by);
+        $this->assertNotNull($request->reviewed_at);
+
+        Notification::assertSentTo($student, CreditTransferRequestReviewed::class);
+
+        $summary = app(ActivityEvaluationService::class)->summarize($student->fresh());
+        $this->assertSame(CreditTransferPosition::hoursMap()['class_leader'], $summary['total_hours']);
+        $this->assertSame(CreditTransferPosition::hoursMap()['class_leader'], $summary['category_hours']['volunteer']);
+    }
+
+    public function test_super_admin_grants_hours_for_a_position_created_through_the_crud(): void
+    {
+        $superAdmin = $this->superAdmin();
+        $student = $this->student();
+        $year = AcademicYearCalculator::forDate(now());
+
+        // Not one of the seeded 7 — proves grant() reads live from the DB
+        // rather than assuming a fixed set of positions.
+        $this->actingAs($superAdmin)->post(route('admin.credit-transfer-positions.store'), [
+            'key' => 'secretary',
+            'label' => 'เลขานุการ',
+            'hours' => 35,
+        ])->assertRedirect();
+
+        $response = $this->actingAs($superAdmin)
+            ->post(route('admin.credit-transfers.grant', $student), [
+                'position' => 'secretary',
+                'academic_year' => $year,
+                'activity_category' => 'volunteer',
+            ]);
+
+        $response->assertRedirect(route('admin.students.show', $student));
+        $this->assertDatabaseHas('credit_transfer_requests', [
+            'user_id' => $student->id,
+            'position' => 'secretary',
+            'hours_requested' => 35,
+            'status' => 'approved',
+        ]);
+    }
+
+    public function test_super_admin_can_override_the_hours_when_granting(): void
+    {
+        $student = $this->student();
+
+        $this->actingAs($this->superAdmin())
+            ->post(route('admin.credit-transfers.grant', $student), [
+                'position' => 'class_leader',
+                'academic_year' => AcademicYearCalculator::forDate(now()),
+                'activity_category' => 'volunteer',
+                'hours_approved' => 30,
+            ]);
+
+        $request = CreditTransferRequest::where('user_id', $student->id)->first();
+        $this->assertSame(CreditTransferPosition::hoursMap()['class_leader'], $request->hours_requested);
+        $this->assertSame(30, $request->hours_approved);
+        $this->assertSame(30, $request->hours_credited);
+    }
+
+    public function test_hours_approved_is_left_null_when_it_matches_the_positions_standard_hours(): void
+    {
+        $student = $this->student();
+
+        $this->actingAs($this->superAdmin())
+            ->post(route('admin.credit-transfers.grant', $student), [
+                'position' => 'class_leader',
+                'academic_year' => AcademicYearCalculator::forDate(now()),
+                'activity_category' => 'volunteer',
+                'hours_approved' => CreditTransferPosition::hoursMap()['class_leader'],
+            ]);
+
+        $request = CreditTransferRequest::where('user_id', $student->id)->first();
+        $this->assertNull($request->hours_approved);
+    }
+
+    public function test_a_plain_admin_cannot_grant_credit_transfer_hours(): void
+    {
+        $student = $this->student();
+
+        $this->actingAs($this->admin())
+            ->post(route('admin.credit-transfers.grant', $student), [
+                'position' => 'class_leader',
+                'academic_year' => AcademicYearCalculator::forDate(now()),
+                'activity_category' => 'volunteer',
+            ])
+            ->assertForbidden();
+
+        $this->assertDatabaseCount('credit_transfer_requests', 0);
+    }
+
+    public function test_a_student_cannot_grant_credit_transfer_hours(): void
+    {
+        $student = $this->student();
+
+        $this->actingAs($this->student())
+            ->post(route('admin.credit-transfers.grant', $student), [
+                'position' => 'class_leader',
+                'academic_year' => AcademicYearCalculator::forDate(now()),
+                'activity_category' => 'volunteer',
+            ])
+            ->assertForbidden();
+
+        $this->assertDatabaseCount('credit_transfer_requests', 0);
+    }
+
+    public function test_granting_a_second_claim_for_the_same_student_and_year_fails_validation(): void
+    {
+        $student = $this->student();
+        $year = AcademicYearCalculator::forDate(now());
+        $this->pendingRequest(['user_id' => $student->id, 'academic_year' => $year, 'status' => 'approved']);
+
+        $this->actingAs($this->superAdmin())
+            ->post(route('admin.credit-transfers.grant', $student), [
+                'position' => 'club_president',
+                'academic_year' => $year,
+                'activity_category' => 'volunteer',
+            ])
+            ->assertSessionHasErrors('academic_year');
+
+        $this->assertDatabaseCount('credit_transfer_requests', 1);
+    }
+
+    public function test_grant_requires_a_valid_position_and_category(): void
+    {
+        $student = $this->student();
+
+        $this->actingAs($this->superAdmin())
+            ->post(route('admin.credit-transfers.grant', $student), [
+                'position' => 'not_a_real_position',
+                'academic_year' => AcademicYearCalculator::forDate(now()),
+                'activity_category' => 'not_a_real_category',
+            ])
+            ->assertSessionHasErrors(['position', 'activity_category']);
+
+        $this->assertDatabaseCount('credit_transfer_requests', 0);
+    }
+
+    // --- revoke() ---
+
+    public function test_super_admin_revokes_an_approved_request_and_the_hours_drop_off(): void
+    {
+        Notification::fake();
+        $student = $this->student();
+        $request = $this->pendingRequest([
+            'user_id' => $student->id,
+            'status' => 'approved',
+            'activity_category' => 'volunteer',
+            'reviewed_by' => $this->admin()->id,
+            'reviewed_at' => now(),
+        ]);
+
+        $response = $this->actingAs($this->superAdmin())
+            ->post(route('admin.credit-transfers.revoke', $request), [
+                'reject_reason' => 'อนุมัติผิดตำแหน่ง นักศึกษาไม่ได้ดำรงตำแหน่งนี้จริง',
+            ]);
+
+        $response->assertRedirect();
+        $this->assertDatabaseHas('credit_transfer_requests', [
+            'id' => $request->id,
+            'status' => 'rejected',
+            'reject_reason' => 'อนุมัติผิดตำแหน่ง นักศึกษาไม่ได้ดำรงตำแหน่งนี้จริง',
+        ]);
+
+        $summary = app(ActivityEvaluationService::class)->summarize($student->fresh());
+        $this->assertSame(0, $summary['total_hours']);
+
+        Notification::assertSentTo($student, CreditTransferRequestReviewed::class);
+    }
+
+    public function test_a_plain_admin_cannot_revoke_an_approved_request(): void
+    {
+        $request = $this->pendingRequest(['status' => 'approved', 'activity_category' => 'volunteer']);
+
+        $this->actingAs($this->admin())
+            ->post(route('admin.credit-transfers.revoke', $request), ['reject_reason' => 'ทดสอบ'])
+            ->assertForbidden();
+
+        $this->assertSame('approved', $request->fresh()->status);
+    }
+
+    public function test_a_student_cannot_revoke_an_approved_request(): void
+    {
+        $request = $this->pendingRequest(['status' => 'approved', 'activity_category' => 'volunteer']);
+
+        $this->actingAs($this->student())
+            ->post(route('admin.credit-transfers.revoke', $request), ['reject_reason' => 'ทดสอบ'])
+            ->assertForbidden();
+
+        $this->assertSame('approved', $request->fresh()->status);
+    }
+
+    public function test_revoke_fails_on_a_request_that_is_not_approved(): void
+    {
+        $request = $this->pendingRequest(['status' => 'pending']);
+
+        $this->actingAs($this->superAdmin())
+            ->post(route('admin.credit-transfers.revoke', $request), ['reject_reason' => 'ทดสอบ'])
+            ->assertStatus(422);
+
+        $this->assertSame('pending', $request->fresh()->status);
+    }
+
+    public function test_revoke_requires_a_reason(): void
+    {
+        $request = $this->pendingRequest(['status' => 'approved', 'activity_category' => 'volunteer']);
+
+        $this->actingAs($this->superAdmin())
+            ->post(route('admin.credit-transfers.revoke', $request), [])
+            ->assertSessionHasErrors('reject_reason');
+
+        $this->assertSame('approved', $request->fresh()->status);
     }
 }

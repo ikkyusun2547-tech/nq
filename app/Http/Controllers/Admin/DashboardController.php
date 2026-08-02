@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Activity;
 use App\Models\Attendance;
+use App\Models\CreditTransferPosition;
 use App\Models\CreditTransferRequest;
 use App\Models\ExternalActivityRequest;
 use App\Models\Faculty;
@@ -147,6 +148,7 @@ class DashboardController extends Controller
                 'reviewed_at' => $req->reviewed_at,
             ]);
 
+        $positionLabels = CreditTransferPosition::labelsMap();
         $creditTransfers = CreditTransferRequest::whereNotNull('reviewed_by')
             ->with(['user', 'reviewer'])
             ->latest('reviewed_at')
@@ -157,7 +159,7 @@ class DashboardController extends Controller
                 'action' => $req->status,
                 'type_label' => __('เทียบโอนตำแหน่ง'),
                 'student' => $req->user,
-                'title' => __(CreditTransferRequest::POSITION_LABELS[$req->position] ?? $req->position),
+                'title' => __($positionLabels[$req->position] ?? $req->position),
                 'reviewed_at' => $req->reviewed_at,
             ]);
 

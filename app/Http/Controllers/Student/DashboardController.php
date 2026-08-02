@@ -20,6 +20,7 @@ class DashboardController extends Controller
         }
 
         $summary = $evaluator->summarize($user);
+        $currentPositionLabel = $evaluator->currentPositionLabel($user);
 
         $items = $feed->approvedAndPending($user);
         $approved = $items->where('is_approved', true);
@@ -39,7 +40,7 @@ class DashboardController extends Controller
 
         return view('student.dashboard', compact(
             'summary', 'approvedActivities', 'pendingActivities', 'rejectedActivities',
-            'hasMoreApproved', 'hasMorePending', 'hasMoreRejected',
+            'hasMoreApproved', 'hasMorePending', 'hasMoreRejected', 'currentPositionLabel',
         ));
     }
 }

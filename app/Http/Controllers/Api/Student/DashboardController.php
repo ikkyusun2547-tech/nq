@@ -20,6 +20,7 @@ class DashboardController extends Controller
         abort_if($user->isAdmin(), 403, 'Admins should use the web admin panel');
 
         $summary = $evaluator->summarize($user);
+        $summary['current_position_label'] = $evaluator->currentPositionLabel($user);
 
         $items = $feed->approvedAndPending($user);
         $approved = $items->where('is_approved', true);

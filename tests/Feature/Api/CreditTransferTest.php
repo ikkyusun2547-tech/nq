@@ -2,6 +2,8 @@
 
 namespace Tests\Feature\Api;
 
+use App\Models\CreditTransferPosition;
+use App\Models\CreditTransferRequest;
 use App\Models\Faculty;
 use App\Models\User;
 use App\Services\AcademicYearCalculator;
@@ -83,10 +85,32 @@ class CreditTransferTest extends TestCase
         ])->assertOk();
 
         $this->postJson('/api/credit-transfers', [
-            'position' => 'class_representative',
+            'position' => 'class_rep',
             'academic_year' => $year,
             'proof_image' => UploadedFile::fake()->image('proof2.jpg'),
         ])->assertStatus(422)->assertJsonValidationErrors('academic_year');
+    }
+
+    public function test_index_reflects_a_renamed_position_label_not_a_stale_one(): void
+    {
+        $user = $this->studentUser();
+        Sanctum::actingAs($user);
+
+        CreditTransferPosition::where('key', 'class_leader')->update(['label' => 'ชื่อใหม่ที่เปลี่ยนแล้ว']);
+
+        CreditTransferRequest::create([
+            'user_id' => $user->id,
+            'position' => 'class_leader',
+            'academic_year' => AcademicYearCalculator::forDate(now()),
+            'hours_requested' => 50,
+            'activity_category' => 'volunteer',
+            'status' => 'approved',
+        ]);
+
+        $response = $this->getJson('/api/credit-transfers');
+
+        $response->assertOk();
+        $this->assertSame('ชื่อใหม่ที่เปลี่ยนแล้ว', $response->json('data.0.position_label'));
     }
 
     public function test_positions_endpoint_lists_all_positions_with_hours(): void

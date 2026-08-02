@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Student;
 
 use App\Http\Controllers\Controller;
 use App\Models\Attendance;
+use App\Models\CreditTransferPosition;
 use App\Models\CreditTransferRequest;
 use App\Models\ExternalActivityRequest;
 use App\Services\ActivityEvaluationService;
@@ -27,16 +28,6 @@ class TranscriptController extends Controller
         'sports' => '#fbbf24',
         'volunteer' => '#8b5cf6',
         'ethics' => '#e879f9',
-    ];
-
-    private const POSITION_LABELS = [
-        'student_council_president' => 'นายกองค์การบริหารนักศึกษา',
-        'student_club_president' => 'นายกสโมสรนักศึกษา',
-        'student_parliament_president' => 'ประธานสภานักศึกษา',
-        'club_president' => 'ประธานชมรม',
-        'dormitory_president' => 'ประธานหอพักมหาวิทยาลัย',
-        'class_leader' => 'หัวหน้าหมู่เรียน',
-        'class_representative' => 'ตัวแทนหมู่เรียน',
     ];
 
     private const HEADER_GRADIENT_STOPS = [
@@ -75,11 +66,12 @@ class TranscriptController extends Controller
                 'source' => 'กิจกรรมภายนอก',
             ]);
 
+        $positionLabels = CreditTransferPosition::labelsMap();
         $creditTransfers = CreditTransferRequest::where('user_id', $user->id)
             ->where('status', 'approved')
             ->get()
             ->map(fn ($row) => (object) [
-                'title' => self::POSITION_LABELS[$row->position] ?? $row->position,
+                'title' => $positionLabels[$row->position] ?? $row->position,
                 'category' => $row->activity_category,
                 'date' => $row->created_at,
                 'hours' => $row->hours_credited,

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\Student;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CreditTransferStoreRequest;
 use App\Http\Resources\CreditTransferRequestResource;
+use App\Models\CreditTransferPosition;
 use App\Models\CreditTransferRequest;
 use App\Models\User;
 use App\Notifications\CreditTransferRequestSubmitted;
@@ -15,21 +16,6 @@ use Illuminate\Support\Facades\Storage;
 
 class CreditTransferController extends Controller
 {
-    /**
-     * Thai labels for CreditTransferRequest::POSITION_HOURS keys — kept in
-     * sync with the same map in CreditTransferRequestResource (see that
-     * class's docblock for why it isn't a shared class).
-     */
-    private const POSITION_LABELS = [
-        'student_council_president' => 'นายกองค์การบริหารนักศึกษา',
-        'student_club_president' => 'นายกสโมสรนักศึกษา',
-        'student_parliament_president' => 'ประธานสภานักศึกษา',
-        'club_president' => 'ประธานชมรม',
-        'dormitory_president' => 'ประธานหอพักมหาวิทยาลัย',
-        'class_leader' => 'หัวหน้าหมู่เรียน',
-        'class_representative' => 'ตัวแทนหมู่เรียน',
-    ];
-
     public function index(Request $request)
     {
         $requests = CreditTransferRequest::where('user_id', $request->user()->id)
@@ -62,7 +48,7 @@ class CreditTransferController extends Controller
             'user_id' => $request->user()->id,
             'position' => $position,
             'academic_year' => $validated['academic_year'],
-            'hours_requested' => CreditTransferRequest::POSITION_HOURS[$position],
+            'hours_requested' => CreditTransferPosition::hoursMap()[$position],
             'proof_image_path' => $request->file('proof_image')->store('credit-transfer-proofs', 'public'),
             'status' => 'pending',
         ]);
@@ -92,15 +78,18 @@ class CreditTransferController extends Controller
     }
 
     /**
-     * So the Flutter app never hardcodes a duplicate of POSITION_HOURS/labels.
+     * So the Flutter app never hardcodes a duplicate of the admin-configured
+     * position list (App\Models\CreditTransferPosition, managed at
+     * admin/credit-transfer-positions).
      */
     public function positions()
     {
-        $positions = collect(CreditTransferRequest::POSITION_HOURS)
-            ->map(fn (int $hours, string $key) => [
-                'key' => $key,
-                'label' => __(self::POSITION_LABELS[$key]),
-                'hours' => $hours,
+        $positions = CreditTransferPosition::orderBy('sort_order')
+            ->get()
+            ->map(fn (CreditTransferPosition $position) => [
+                'key' => $position->key,
+                'label' => __($position->label),
+                'hours' => $position->hours,
             ])
             ->values();
 

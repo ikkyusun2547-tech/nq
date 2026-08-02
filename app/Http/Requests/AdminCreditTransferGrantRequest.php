@@ -9,14 +9,14 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
 
-class CreditTransferStoreRequest extends FormRequest
+class AdminCreditTransferGrantRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
-        return $this->user()?->isStudent() ?? false;
+        return $this->user()?->role === 'super_admin';
     }
 
     /**
@@ -29,13 +29,16 @@ class CreditTransferStoreRequest extends FormRequest
         return [
             'position' => ['required', Rule::in(array_keys(CreditTransferPosition::hoursMap()))],
             'academic_year' => ['required', 'integer', 'min:2560', 'max:'.AcademicYearCalculator::forDate(now())],
-            'proof_image' => ['required', 'mimes:jpg,jpeg,png,pdf', 'max:2048'],
+            'activity_category' => ['required', Rule::in(['culture', 'academic', 'sports', 'volunteer', 'ethics'])],
+            'hours_approved' => ['nullable', 'integer', 'min:0', 'max:200'],
+            'proof_image' => ['nullable', 'mimes:jpg,jpeg,png,pdf', 'max:2048'],
         ];
     }
 
     /**
-     * Enforce the "1 credit-transfer request per academic year" quota from
-     * ข้อ 14 of the university announcement.
+     * Same "1 credit-transfer claim per academic year" quota
+     * (CreditTransferStoreRequest) applies here — an admin grant and a
+     * student's own claim share the same yearly slot.
      */
     public function withValidator(Validator $validator): void
     {
@@ -44,9 +47,11 @@ class CreditTransferStoreRequest extends FormRequest
                 return;
             }
 
-            if (CreditTransferRequest::hasClaimedAcademicYear($this->user()->id, (int) $this->input('academic_year'))) {
+            $student = $this->route('student');
+
+            if (CreditTransferRequest::hasClaimedAcademicYear($student->id, (int) $this->input('academic_year'))) {
                 $validator->errors()->add('academic_year', __(
-                    'คุณส่งคำร้องเทียบโอนชั่วโมงสำหรับปีการศึกษานี้ไปแล้ว (ขอได้ 1 ครั้งต่อปีการศึกษา)'
+                    'นักศึกษาคนนี้มีการเทียบโอนชั่วโมงสำหรับปีการศึกษานี้ไปแล้ว (ได้ 1 ครั้งต่อปีการศึกษา)'
                 ));
             }
         });

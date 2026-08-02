@@ -25,7 +25,9 @@
     $externalLabel = ['pending' => __('รอตรวจสอบ'), 'approved' => __('อนุมัติแล้ว'), 'rejected' => __('ปฏิเสธแล้ว')];
     // Same badge/label sets apply to late check-ins and credit transfers —
     // all three request types share the pending/approved/rejected enum.
-    $positionLabels = collect(\App\Models\CreditTransferRequest::POSITION_LABELS)->map(fn ($label) => __($label))->all();
+    $positionLabels = collect(\App\Models\CreditTransferPosition::labelsMap())->map(fn ($label) => __($label))->all();
+    $categoryOptions = collect($categoryMeta)->map(fn ($meta) => $meta['label'])->all();
+    $currentAcademicYear = \App\Services\AcademicYearCalculator::forDate(now());
 @endphp
 
 <div class="mx-auto max-w-4xl">
@@ -60,6 +62,16 @@
             <span class="text-xs text-violet-200/60">{{ $student->email }}</span>
         </div>
     </div>
+
+    @if ($errors->any())
+        <div class="mt-4 rounded-2xl bg-red-50 px-4 py-3 text-sm text-red-700 shadow-soft ring-1 ring-red-100 dark:bg-red-500/10 dark:text-red-400 dark:ring-red-500/20">
+            <ul class="list-inside list-disc space-y-1">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
 
     @if ($student->isGraduated())
         <div class="mt-4 flex flex-wrap items-center gap-3 rounded-2xl bg-brand-purple-50 p-4 text-sm shadow-soft ring-1 ring-brand-purple-100 dark:bg-brand-purple-500/10 dark:ring-brand-purple-500/20">
@@ -227,6 +239,35 @@
 
         <div class="rounded-2xl glass-card p-5 shadow-soft">
             <h2 class="mb-3 text-sm font-semibold text-slate-900 dark:text-slate-100">{{ __('คำร้องเทียบโอนตำแหน่งล่าสุด') }}</h2>
+
+            @if (auth()->user()->role === 'super_admin')
+                <form method="POST" action="{{ route('admin.credit-transfers.grant', $student) }}" enctype="multipart/form-data"
+                    class="mb-4 space-y-3 rounded-xl bg-white/60 p-3.5 shadow-soft dark:bg-slate-800/60">
+                    @csrf
+                    <p class="text-xs font-medium text-slate-500 dark:text-slate-400">{{ __('เพิ่มชั่วโมงเทียบโอนตำแหน่งให้นักศึกษาคนนี้โดยตรง (Admin สูงสุด)') }}</p>
+
+                    <div class="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+                        <x-premium-select name="position" :options="$positionLabels" :selected="old('position')" placeholder="{{ __('-- เลือกตำแหน่ง --') }}" />
+                        <x-premium-select name="activity_category" :options="$categoryOptions" :selected="old('activity_category')" placeholder="{{ __('-- เลือกหมวดหมู่ --') }}" />
+                    </div>
+
+                    <div class="grid grid-cols-1 gap-2.5 sm:grid-cols-3">
+                        <input type="number" name="academic_year" value="{{ old('academic_year', $currentAcademicYear) }}" required
+                            placeholder="{{ __('ปีการศึกษา') }}"
+                            class="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm shadow-soft transition-all duration-200 focus:border-brand-purple-500 focus:outline-none focus:ring-4 focus:ring-brand-purple-500/10 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100">
+                        <input type="number" name="hours_approved" value="{{ old('hours_approved') }}" min="0" max="200"
+                            placeholder="{{ __('ชั่วโมง (ค่ามาตรฐานตามตำแหน่ง)') }}"
+                            class="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm shadow-soft transition-all duration-200 focus:border-brand-purple-500 focus:outline-none focus:ring-4 focus:ring-brand-purple-500/10 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100">
+                        <input type="file" name="proof_image" accept=".jpg,.jpeg,.png,.pdf"
+                            class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-500 shadow-soft file:mr-2 file:rounded-lg file:border-0 file:bg-brand-purple-50 file:px-2.5 file:py-1.5 file:text-xs file:font-medium file:text-brand-purple-700 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-400">
+                    </div>
+                    <p class="text-xs text-slate-400 dark:text-slate-500">{{ __('เว้นว่างช่องชั่วโมง = ใช้ชั่วโมงมาตรฐานของตำแหน่งที่เลือก') }}</p>
+
+                    <x-confirm-submit tone="purple" :message="__('ยืนยันเพิ่มชั่วโมงเทียบโอนตำแหน่งให้นักศึกษาคนนี้?')" :label="__('เพิ่มชั่วโมง')"
+                        class="rounded-lg bg-gradient-to-r from-brand-purple-600 to-brand-purple-500 px-3.5 py-2 text-xs font-semibold text-white shadow-soft transition-all duration-200 hover:shadow-lg">{{ __('เพิ่มชั่วโมง') }}</x-confirm-submit>
+                </form>
+            @endif
+
             <div class="space-y-2.5">
                 @forelse ($creditTransfers as $req)
                     <div class="flex items-start justify-between gap-2 rounded-xl bg-white/60 p-3 text-sm shadow-soft dark:bg-slate-800/60">
