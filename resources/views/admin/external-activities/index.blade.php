@@ -149,7 +149,7 @@
                             @endif
                         </td>
                         <td class="whitespace-nowrap px-4 py-3 text-slate-500 dark:text-slate-400">{{ $req->user->year_level ? __('ปี :year', ['year' => $req->user->year_level]) : '-' }}</td>
-                        <td class="whitespace-nowrap px-4 py-3 font-medium text-slate-700 transition-colors group-hover:text-brand-purple-700 dark:text-slate-300 dark:group-hover:text-brand-purple-400">{{ $req->title }}</td>
+                        <td class="min-w-[16rem] max-w-xs whitespace-normal break-words px-4 py-3 font-medium text-slate-700 transition-colors group-hover:text-brand-purple-700 dark:text-slate-300 dark:group-hover:text-brand-purple-400">{{ $req->title }}</td>
                         <td class="whitespace-nowrap px-4 py-3 text-slate-500 dark:text-slate-400">{{ $categoryLabels[$req->activity_category] }}</td>
                         <td class="whitespace-nowrap px-4 py-3 text-slate-500 dark:text-slate-400">
                             @if ($req->status === 'approved' && $req->hours_approved !== null && $req->hours_approved != $req->hours_requested)

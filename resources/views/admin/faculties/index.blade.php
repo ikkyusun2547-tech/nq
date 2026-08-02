@@ -33,7 +33,7 @@
                         'bg-slate-50/50 dark:bg-slate-800/40' => $loop->odd,
                     ])>
                         <td class="whitespace-nowrap px-4 py-3 font-mono text-slate-500 dark:text-slate-400">{{ $faculty->code }}</td>
-                        <td class="whitespace-nowrap px-4 py-3 font-medium text-slate-900 dark:text-slate-100">{{ $faculty->name_th }}</td>
+                        <td class="min-w-[14rem] max-w-xs whitespace-normal break-words px-4 py-3 font-medium text-slate-900 dark:text-slate-100">{{ $faculty->name_th }}</td>
                         <td class="whitespace-nowrap px-4 py-3 text-slate-500 dark:text-slate-400">{{ $faculty->majors_count }}</td>
                         <td class="whitespace-nowrap px-4 py-3 text-slate-500 dark:text-slate-400">{{ $faculty->users_count }}</td>
                         <td class="whitespace-nowrap px-4 py-3 text-right">

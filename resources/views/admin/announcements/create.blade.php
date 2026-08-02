@@ -28,7 +28,7 @@
         <div>
             <label class="mb-1.5 block text-xs font-medium text-slate-500 dark:text-slate-400">{{ __('หัวข้อ') }}</label>
             <input type="text" name="subject" value="{{ old('subject') }}" required maxlength="255"
-                placeholder="{{ __('เช่น ปิดปรับปรุงระบบชั่วคราว') }}"
+                placeholder="{{ __('ระบุหัวข้อประกาศ') }}"
                 class="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm shadow-soft transition-all duration-200 focus:border-brand-purple-500 focus:outline-none focus:ring-4 focus:ring-brand-purple-500/10 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100">
         </div>
 

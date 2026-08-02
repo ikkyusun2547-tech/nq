@@ -123,7 +123,7 @@
                                 </div>
                             </div>
                         </td>
-                        <td class="whitespace-nowrap px-4 py-3 font-medium text-slate-700 transition-colors group-hover:text-brand-purple-700 dark:text-slate-300 dark:group-hover:text-brand-purple-400">{{ $att->activity->title }}</td>
+                        <td class="min-w-[16rem] max-w-xs whitespace-normal break-words px-4 py-3 font-medium text-slate-700 transition-colors group-hover:text-brand-purple-700 dark:text-slate-300 dark:group-hover:text-brand-purple-400">{{ $att->activity->title }}</td>
                         <td class="whitespace-nowrap px-4 py-3 text-slate-500 dark:text-slate-400">{{ $att->checkin_time->translatedFormat('d M Y H:i') }}</td>
                         <td class="max-w-xs truncate px-4 py-3 text-slate-500 dark:text-slate-400">{{ $att->flagReasonLabel() ?? '-' }}</td>
                         <td class="whitespace-nowrap px-4 py-3">

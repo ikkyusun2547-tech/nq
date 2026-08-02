@@ -211,95 +211,60 @@ class ActivityControllerTest extends TestCase
         $this->assertDatabaseMissing('activities', ['id' => $activity->id]);
     }
 
-    // --- bulkAction() ---
+    // --- updateStatus() ---
 
-    public function test_bulk_action_closes_several_activities_and_notifies_missing_students(): void
+    public function test_it_updates_an_activity_status_from_the_dropdown(): void
+    {
+        $activity = Activity::factory()->create(['status' => 'open']);
+
+        $response = $this->actingAs($this->admin())
+            ->patch(route('admin.activities.update-status', $activity), ['status' => 'ongoing']);
+
+        $response->assertRedirect()->assertSessionHas('status');
+        $this->assertSame('ongoing', $activity->fresh()->status);
+    }
+
+    public function test_transitioning_into_closed_notifies_students_who_never_checked_in(): void
     {
         Notification::fake();
-        $a = Activity::factory()->create(['status' => 'open']);
-        $b = Activity::factory()->create(['status' => 'ongoing']);
+        $activity = Activity::factory()->create(['status' => 'open']);
         $missingStudent = $this->student();
 
         $this->actingAs($this->admin())
-            ->post(route('admin.activities.bulk-action'), ['bulk_action' => 'close', 'activity_ids' => [$a->id, $b->id]])
-            ->assertRedirect();
+            ->patch(route('admin.activities.update-status', $activity), ['status' => 'closed']);
 
-        $this->assertSame('closed', $a->fresh()->status);
-        $this->assertSame('closed', $b->fresh()->status);
         Notification::assertSentTo($missingStudent, ActivityMissed::class);
     }
 
-    public function test_bulk_action_cancels_several_activities_at_once(): void
+    public function test_re_saving_an_already_closed_activity_does_not_notify_again(): void
     {
-        $a = Activity::factory()->create(['status' => 'open']);
-        $b = Activity::factory()->create(['status' => 'draft']);
+        Notification::fake();
+        $activity = Activity::factory()->create(['status' => 'closed']);
+        $this->student();
 
         $this->actingAs($this->admin())
-            ->post(route('admin.activities.bulk-action'), ['bulk_action' => 'cancel', 'activity_ids' => [$a->id, $b->id]])
-            ->assertRedirect();
+            ->patch(route('admin.activities.update-status', $activity), ['status' => 'closed']);
 
-        $this->assertSame('cancelled', $a->fresh()->status);
-        $this->assertSame('cancelled', $b->fresh()->status);
+        Notification::assertNothingSent();
     }
 
-    public function test_bulk_action_close_skips_an_already_closed_activity_and_reports_the_skip_count(): void
+    public function test_update_status_rejects_an_invalid_value(): void
     {
-        $open = Activity::factory()->create(['status' => 'open']);
-        $alreadyClosed = Activity::factory()->create(['status' => 'closed']);
-
-        $response = $this->actingAs($this->admin())
-            ->post(route('admin.activities.bulk-action'), ['bulk_action' => 'close', 'activity_ids' => [$open->id, $alreadyClosed->id]]);
-
-        $response->assertRedirect();
-        $this->assertSame('closed', $open->fresh()->status);
-        $this->assertStringContainsString('1', session('status'));
-    }
-
-    public function test_bulk_action_cancel_skips_an_already_cancelled_activity(): void
-    {
-        $open = Activity::factory()->create(['status' => 'open']);
-        $alreadyCancelled = Activity::factory()->create(['status' => 'cancelled']);
-
-        $response = $this->actingAs($this->admin())
-            ->post(route('admin.activities.bulk-action'), ['bulk_action' => 'cancel', 'activity_ids' => [$open->id, $alreadyCancelled->id]]);
-
-        $response->assertRedirect();
-        $this->assertSame('cancelled', $open->fresh()->status);
-        $this->assertStringContainsString('1', session('status'));
-    }
-
-    public function test_bulk_action_reopens_closed_and_cancelled_activities(): void
-    {
-        $closed = Activity::factory()->create(['status' => 'closed']);
-        $cancelled = Activity::factory()->create(['status' => 'cancelled']);
+        $activity = Activity::factory()->create(['status' => 'open']);
 
         $this->actingAs($this->admin())
-            ->post(route('admin.activities.bulk-action'), ['bulk_action' => 'reopen', 'activity_ids' => [$closed->id, $cancelled->id]])
-            ->assertRedirect();
+            ->patch(route('admin.activities.update-status', $activity), ['status' => 'bogus'])
+            ->assertSessionHasErrors('status');
 
-        $this->assertSame('open', $closed->fresh()->status);
-        $this->assertSame('open', $cancelled->fresh()->status);
+        $this->assertSame('open', $activity->fresh()->status);
     }
 
-    public function test_bulk_action_reopen_skips_an_activity_that_is_not_closed_or_cancelled(): void
-    {
-        $closed = Activity::factory()->create(['status' => 'closed']);
-        $open = Activity::factory()->create(['status' => 'open']);
-
-        $response = $this->actingAs($this->admin())
-            ->post(route('admin.activities.bulk-action'), ['bulk_action' => 'reopen', 'activity_ids' => [$closed->id, $open->id]]);
-
-        $response->assertRedirect();
-        $this->assertSame('open', $closed->fresh()->status);
-        $this->assertStringContainsString('1', session('status'));
-    }
-
-    public function test_a_student_cannot_use_the_activities_bulk_action_endpoint(): void
+    public function test_a_student_cannot_use_the_update_status_endpoint(): void
     {
         $activity = Activity::factory()->create(['status' => 'open']);
 
         $this->actingAs($this->student())
-            ->post(route('admin.activities.bulk-action'), ['bulk_action' => 'close', 'activity_ids' => [$activity->id]])
+            ->patch(route('admin.activities.update-status', $activity), ['status' => 'closed'])
             ->assertForbidden();
 
         $this->assertSame('open', $activity->fresh()->status);

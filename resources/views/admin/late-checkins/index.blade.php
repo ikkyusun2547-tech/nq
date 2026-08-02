@@ -130,7 +130,7 @@
                                 <span class="text-slate-300 dark:text-slate-600">·</span> {{ $req->user->major->name_th }}
                             @endif
                         </td>
-                        <td class="whitespace-nowrap px-4 py-3 font-medium text-slate-700 transition-colors group-hover:text-brand-purple-700 dark:text-slate-300 dark:group-hover:text-brand-purple-400">{{ $req->activity->title }}</td>
+                        <td class="min-w-[16rem] max-w-xs whitespace-normal break-words px-4 py-3 font-medium text-slate-700 transition-colors group-hover:text-brand-purple-700 dark:text-slate-300 dark:group-hover:text-brand-purple-400">{{ $req->activity->title }}</td>
                         <td class="whitespace-nowrap px-4 py-3 text-slate-500 dark:text-slate-400">
                             @if ($req->status === 'approved' && $req->hours_approved !== null && $req->hours_approved != $req->activity->credit_hours)
                                 <span class="text-slate-300 line-through dark:text-slate-600">{{ $req->activity->credit_hours }}</span> <span class="font-medium text-brand-green-700 dark:text-brand-green-400">{{ $req->hours_credited }}</span>

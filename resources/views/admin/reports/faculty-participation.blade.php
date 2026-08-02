@@ -31,7 +31,7 @@
                         'bg-white dark:bg-slate-900' => $loop->even,
                         'bg-slate-50/50 dark:bg-slate-800/40' => $loop->odd,
                     ])>
-                        <td class="whitespace-nowrap px-4 py-3 font-medium text-slate-800 dark:text-slate-100">{{ $row['faculty']->name_th }}</td>
+                        <td class="min-w-[14rem] max-w-xs whitespace-normal break-words px-4 py-3 font-medium text-slate-800 dark:text-slate-100">{{ $row['faculty']->name_th }}</td>
                         <td class="whitespace-nowrap px-4 py-3 tabular-nums text-slate-700 dark:text-slate-200">{{ number_format($row['student_count']) }}</td>
                         <td class="whitespace-nowrap px-4 py-3 tabular-nums text-slate-700 dark:text-slate-200">{{ number_format($row['cleared_count']) }}</td>
                         <td class="whitespace-nowrap px-4 py-3">
