@@ -7,6 +7,11 @@
         'pending' => __('รออนุมัติ'),
         'rejected' => __('ถูกปฏิเสธ'),
     ];
+    $tabIcon = [
+        'approved' => 'M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
+        'pending' => 'M12 6.75V12l3.75 1.875M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
+        'rejected' => 'M9 9l6 6m0-6l-6 6M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
+    ];
     $rowTint = match ($status) {
         'approved' => 'bg-brand-green-50/50 dark:bg-brand-green-500/5',
         'pending' => 'bg-amber-50/50 dark:bg-amber-500/5',
@@ -26,7 +31,7 @@
 @endphp
 
 <div class="mx-auto max-w-3xl" x-data>
-    <x-brand-header :title="__('ประวัติกิจกรรมของฉัน')" :back="route('dashboard')" />
+    <x-brand-header :title="__('ประวัติกิจกรรมของฉัน')" />
 
     <div class="mt-4 flex gap-2">
         @foreach ($tabs as $key => $label)
@@ -41,43 +46,45 @@
         @endforeach
     </div>
 
-    <div class="mt-4 space-y-2.5">
-        @forelse ($items as $item)
-            @php $rowHref = $href($item); @endphp
-            <{{ $rowHref ? 'a' : 'div' }} @if($rowHref) href="{{ $rowHref }}" @endif
-                class="block w-full rounded-2xl {{ $rowTint }} px-4 py-3 shadow-soft transition-colors {{ $rowHref ? 'hover:opacity-80' : '' }}">
-                <div class="flex items-start justify-between gap-3">
-                    <div class="min-w-0">
-                        <p class="truncate text-sm font-medium text-slate-800 dark:text-slate-200">{{ $item->title }}</p>
-                        <p class="text-xs text-slate-400 dark:text-slate-500">
-                            {{ $item->date->translatedFormat('d M Y') }}
-                            @if ($typeLabel($item))
-                                · <span class="text-brand-purple-500 dark:text-brand-purple-400">{{ $typeLabel($item) }}</span>
-                            @endif
-                        </p>
+    <div class="mt-4">
+        <x-section-card :icon="$tabIcon[$status]" :title="$tabs[$status]">
+            @forelse ($items as $item)
+                @php $rowHref = $href($item); @endphp
+                <{{ $rowHref ? 'a' : 'div' }} @if($rowHref) href="{{ $rowHref }}" @endif
+                    class="block w-full rounded-xl {{ $rowTint }} px-3.5 py-2.5 text-left transition-colors {{ $rowHref ? 'hover:opacity-80' : '' }}">
+                    <div class="flex items-start justify-between gap-3">
+                        <div class="min-w-0">
+                            <p class="truncate text-sm font-medium text-slate-800 dark:text-slate-200">{{ $item->title }}</p>
+                            <p class="text-xs text-slate-400 dark:text-slate-500">
+                                {{ $item->date->translatedFormat('d M Y') }}
+                                @if ($typeLabel($item))
+                                    · <span class="text-brand-purple-500 dark:text-brand-purple-400">{{ $typeLabel($item) }}</span>
+                                @endif
+                            </p>
+                        </div>
+                        @if (isset($item->hours) && $item->hours !== null)
+                            <span class="shrink-0 text-xs font-medium text-brand-green-700 dark:text-brand-green-400">{{ __(':hours ชม.', ['hours' => $item->hours]) }}</span>
+                        @endif
                     </div>
-                    @if (isset($item->hours) && $item->hours !== null)
-                        <span class="shrink-0 text-xs font-medium text-brand-green-700 dark:text-brand-green-400">{{ __(':hours ชม.', ['hours' => $item->hours]) }}</span>
-                    @endif
-                </div>
 
-                @if (! empty($item->flag_reason ?? null))
-                    <p class="mt-1 text-xs text-amber-600 dark:text-amber-400">{{ __('เหตุผลที่ต้องตรวจสอบ:') }} {{ $item->flag_reason }}</p>
-                @endif
-                @if (! empty($item->reject_reason ?? null))
-                    <p class="mt-1 text-xs text-red-500 dark:text-red-400">{{ __('เหตุผล:') }} {{ $item->reject_reason }}</p>
-                @endif
-                @if ((! empty($item->flag_reason ?? null) || ! empty($item->reject_reason ?? null)) && config('support.email'))
-                    <span @click.stop="window.location.href = 'mailto:{{ config('support.email') }}?subject={{ urlencode(__('สอบถามเรื่อง: :title', ['title' => $item->title])) }}'"
-                        class="mt-1 inline-flex cursor-pointer items-center gap-1 text-xs font-medium text-brand-purple-600 hover:underline dark:text-brand-purple-400">
-                        <svg class="h-3 w-3 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"/></svg>
-                        {{ __('ติดต่อเจ้าหน้าที่') }}
-                    </span>
-                @endif
-            </{{ $rowHref ? 'a' : 'div' }}>
-        @empty
-            <p class="py-10 text-center text-sm text-slate-400 dark:text-slate-500">{{ __('ไม่มีรายการในหมวดนี้') }}</p>
-        @endforelse
+                    @if (! empty($item->flag_reason ?? null))
+                        <p class="mt-1 text-xs text-amber-600 dark:text-amber-400">{{ __('เหตุผลที่ต้องตรวจสอบ:') }} {{ $item->flag_reason }}</p>
+                    @endif
+                    @if (! empty($item->reject_reason ?? null))
+                        <p class="mt-1 text-xs text-red-500 dark:text-red-400">{{ __('เหตุผล:') }} {{ $item->reject_reason }}</p>
+                    @endif
+                    @if (! empty($item->flag_reason ?? null) || ! empty($item->reject_reason ?? null))
+                        <span @click.stop="window.location.href = '{{ route('contact.create', ['subject' => __('สอบถามเรื่อง: :title', ['title' => $item->title]), 'context_type' => $item->type, 'context_id' => $item->activity_id ?? null]) }}'"
+                            class="mt-1 inline-flex cursor-pointer items-center gap-1 text-xs font-medium text-brand-purple-600 hover:underline dark:text-brand-purple-400">
+                            <svg class="h-3 w-3 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z"/></svg>
+                            {{ __('ติดต่อเจ้าหน้าที่') }}
+                        </span>
+                    @endif
+                </{{ $rowHref ? 'a' : 'div' }}>
+            @empty
+                <p class="py-6 text-center text-sm text-slate-400 dark:text-slate-500">{{ __('ไม่มีรายการในหมวดนี้') }}</p>
+            @endforelse
+        </x-section-card>
     </div>
 
     <div class="mt-4">{{ $items->links() }}</div>

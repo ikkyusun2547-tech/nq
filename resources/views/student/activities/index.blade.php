@@ -31,6 +31,16 @@
         'upcoming' => __('กิจกรรมที่ยังไม่เปิด'),
         'ended' => __('กิจกรรมที่จบไปแล้ว'),
     ][$statusGroup];
+
+    // Drives the mobile filter-sheet trigger's badge — mirrors the mobile
+    // app's activities screen (see mobile/lib/features/activities/activities_screen.dart),
+    // which counts level+category the same way.
+    $activeFilterCount = collect([
+        request()->filled('activity_category'),
+        request()->filled('activity_level'),
+        request()->filled('faculty_id'),
+        request()->filled('academic_year'),
+    ])->filter()->count();
 @endphp
 
 <div class="mx-auto max-w-6xl">
@@ -55,44 +65,170 @@
         @endforeach
     </div>
 
-    <form method="GET" action="{{ route('activities.index') }}" class="mb-5 space-y-3">
+    @php
+        $facultyOptions = $faculties->pluck('name_th', 'id')->all();
+        $academicYearOptions = $academicYears->mapWithKeys(fn ($y) => [$y => __('ปีการศึกษา :year', ['year' => $y])])->all();
+        $categoryOptions = collect($categoryMeta)->map(fn ($meta) => $meta['label'])->all();
+    @endphp
+
+    {{--
+        The mobile sheet and the desktop grid below both render the same
+        four fields (search + 3 selects) so each layout can be styled
+        independently, but that means two real, same-named form controls
+        exist in the DOM at once — a plain GET submit would send both
+        values and let whichever sits last in the DOM silently clobber the
+        other. `isDesktop` (tracked via matchMedia, not just CSS display)
+        disables whichever copy isn't the one actually visible/usable at
+        the current viewport, so exactly one of each field is ever
+        submitted.
+    --}}
+    <form method="GET" action="{{ route('activities.index') }}" class="mb-5"
+        x-data="{
+            filtersOpen: false,
+            isDesktop: window.matchMedia('(min-width: 640px)').matches,
+            init() {
+                const mq = window.matchMedia('(min-width: 640px)');
+                mq.addEventListener('change', (e) => { this.isDesktop = e.matches; });
+            },
+        }"
+    >
         <input type="hidden" name="status_group" value="{{ $statusGroup }}">
 
-        @php
-            $facultyOptions = $faculties->pluck('name_th', 'id')->all();
-            $academicYearOptions = $academicYears->mapWithKeys(fn ($y) => [$y => __('ปีการศึกษา :year', ['year' => $y])])->all();
-            $categoryOptions = collect($categoryMeta)->map(fn ($meta) => $meta['label'])->all();
-        @endphp
-
-        <div class="relative">
-            <svg class="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
-            <input
-                type="search" name="search" value="{{ request('search') }}"
-                placeholder="{{ __('ค้นหากิจกรรม (ชื่อหรือหน่วยงานจัด)') }}"
-                class="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-3.5 text-sm shadow-soft transition-all duration-200 placeholder:text-slate-400 focus:border-brand-purple-500 focus:outline-none focus:ring-4 focus:ring-brand-purple-500/10 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500"
+        {{-- Mobile: search + a compact filter-sheet trigger on one row,
+             matching the app's activities screen (search + tune-icon button
+             that opens a bottom sheet) instead of stacking four full-width
+             dropdowns before any activity is even visible. --}}
+        <div class="flex gap-2 sm:hidden">
+            <div class="relative flex-1">
+                <svg class="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
+                <input
+                    type="search" name="search" value="{{ request('search') }}" x-bind:disabled="isDesktop"
+                    placeholder="{{ __('ค้นหากิจกรรม') }}"
+                    class="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-3.5 text-sm shadow-soft transition-all duration-200 placeholder:text-slate-400 focus:border-brand-purple-500 focus:outline-none focus:ring-4 focus:ring-brand-purple-500/10 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500"
+                >
+            </div>
+            <button type="button" @click="filtersOpen = true" aria-label="{{ __('ตัวกรอง') }}"
+                @class([
+                    // Matches the search input's actual rendered height —
+                    // py-2.5 + text-sm + a 1px border computes to 42px, not
+                    // the 46px this button previously guessed, which is why
+                    // it stood visibly taller than the input next to it.
+                    'relative flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded-xl shadow-soft transition-colors duration-200',
+                    'bg-brand-purple-600 text-white' => $activeFilterCount > 0,
+                    'border border-slate-200 bg-white text-slate-500 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-400' => $activeFilterCount === 0,
+                ])
             >
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m9 12h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9-12H3.75m9 12H3.75m9-12H9m6 12v.007M12 6.75a1.5 1.5 0 100-3 1.5 1.5 0 000 3zm-6 6a1.5 1.5 0 100-3 1.5 1.5 0 000 3zm0 0H3.75m3 0H12"/></svg>
+                @if ($activeFilterCount > 0)
+                    <span class="absolute -right-1.5 -top-1.5 flex h-4.5 w-4.5 items-center justify-center rounded-full bg-brand-green-500 text-[0.65rem] font-bold text-brand-purple-950">{{ $activeFilterCount }}</span>
+                @endif
+            </button>
         </div>
 
-        <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            <x-premium-select
-                name="activity_category" :options="$categoryOptions" :selected="request('activity_category')"
-                placeholder="{{ __('-- ทุกหมวดหมู่ --') }}" autosubmit
-            />
+        {{-- Desktop/tablet: unchanged from before — full search bar with a
+             visible 2/4-column select grid, since there's room for it. --}}
+        <div class="hidden sm:block sm:space-y-3">
+            <div class="relative">
+                <svg class="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
+                <input
+                    type="search" name="search" value="{{ request('search') }}" x-bind:disabled="! isDesktop"
+                    placeholder="{{ __('ค้นหากิจกรรม (ชื่อหรือหน่วยงานจัด)') }}"
+                    class="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-3.5 text-sm shadow-soft transition-all duration-200 placeholder:text-slate-400 focus:border-brand-purple-500 focus:outline-none focus:ring-4 focus:ring-brand-purple-500/10 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500"
+                >
+            </div>
 
-            <x-premium-select
-                name="activity_level" :options="$levelLabel" :selected="request('activity_level')"
-                placeholder="{{ __('-- ทุกระดับ (รวม) --') }}" autosubmit
-            />
+            <div class="grid grid-cols-2 gap-3 lg:grid-cols-4">
+                <x-premium-select
+                    name="activity_category" :options="$categoryOptions" :selected="request('activity_category')"
+                    placeholder="{{ __('-- ทุกหมวดหมู่ --') }}" autosubmit x-bind:disabled="! isDesktop"
+                />
 
-            <x-premium-select
-                name="faculty_id" :options="$facultyOptions" :selected="request('faculty_id')"
-                placeholder="{{ __('-- ทุกคณะ (แยกดูได้) --') }}" autosubmit
-            />
+                <x-premium-select
+                    name="activity_level" :options="$levelLabel" :selected="request('activity_level')"
+                    placeholder="{{ __('-- ทุกระดับ (รวม) --') }}" autosubmit x-bind:disabled="! isDesktop"
+                />
 
-            <x-premium-select
-                name="academic_year" :options="$academicYearOptions" :selected="$academicYear"
-                placeholder="{{ __('-- ทุกปีการศึกษา --') }}" autosubmit
-            />
+                <x-premium-select
+                    name="faculty_id" :options="$facultyOptions" :selected="request('faculty_id')"
+                    placeholder="{{ __('-- ทุกคณะ (แยกดูได้) --') }}" autosubmit x-bind:disabled="! isDesktop"
+                />
+
+                <x-premium-select
+                    name="academic_year" :options="$academicYearOptions" :selected="$academicYear"
+                    placeholder="{{ __('-- ทุกปีการศึกษา --') }}" autosubmit x-bind:disabled="! isDesktop"
+                />
+            </div>
+        </div>
+
+        {{-- Mobile filter sheet — same 4 fields as the desktop grid above,
+             just stacked in a bottom sheet instead of the page body, so
+             picking one still auto-submits the same GET form (a fresh page
+             load closes the sheet naturally, same as every other
+             autosubmit filter in this app — no separate JS state to keep
+             in sync). --}}
+        <div x-show="filtersOpen" x-cloak class="fixed inset-0 z-50 sm:hidden">
+            <div
+                x-show="filtersOpen" x-cloak x-transition.opacity
+                class="absolute inset-0 bg-slate-950/50"
+                @click="filtersOpen = false"
+            ></div>
+            <div
+                x-show="filtersOpen" x-cloak
+                x-transition:enter="transition ease-out duration-200"
+                x-transition:enter-start="translate-y-full"
+                x-transition:enter-end="translate-y-0"
+                x-transition:leave="transition ease-in duration-150"
+                x-transition:leave-start="translate-y-0"
+                x-transition:leave-end="translate-y-full"
+                class="absolute inset-x-0 bottom-0 max-h-[85vh] overflow-y-auto rounded-t-3xl bg-white p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] shadow-soft-lg dark:bg-slate-900"
+            >
+                <div class="mx-auto mb-4 h-1.5 w-10 shrink-0 rounded-full bg-slate-200 dark:bg-slate-700"></div>
+                <div class="mb-4 flex items-center justify-between">
+                    <h3 class="text-base font-bold text-slate-900 dark:text-slate-100">{{ __('ตัวกรอง') }}</h3>
+                    @if ($activeFilterCount > 0)
+                        <a href="{{ route('activities.index', array_merge(request()->only(['search']), ['status_group' => $statusGroup])) }}"
+                            class="text-xs font-medium text-brand-purple-600 dark:text-brand-purple-400">
+                            {{ __('ล้างตัวกรอง') }}
+                        </a>
+                    @endif
+                </div>
+
+                <div class="space-y-4">
+                    <div>
+                        <label class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">{{ __('หมวดหมู่') }}</label>
+                        <x-premium-select
+                            name="activity_category" :options="$categoryOptions" :selected="request('activity_category')"
+                            placeholder="{{ __('-- ทุกหมวดหมู่ --') }}" autosubmit x-bind:disabled="isDesktop"
+                        />
+                    </div>
+                    <div>
+                        <label class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">{{ __('ระดับ') }}</label>
+                        <x-premium-select
+                            name="activity_level" :options="$levelLabel" :selected="request('activity_level')"
+                            placeholder="{{ __('-- ทุกระดับ (รวม) --') }}" autosubmit x-bind:disabled="isDesktop"
+                        />
+                    </div>
+                    <div>
+                        <label class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">{{ __('คณะ') }}</label>
+                        <x-premium-select
+                            name="faculty_id" :options="$facultyOptions" :selected="request('faculty_id')"
+                            placeholder="{{ __('-- ทุกคณะ (แยกดูได้) --') }}" autosubmit x-bind:disabled="isDesktop"
+                        />
+                    </div>
+                    <div>
+                        <label class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">{{ __('ปีการศึกษา') }}</label>
+                        <x-premium-select
+                            name="academic_year" :options="$academicYearOptions" :selected="$academicYear"
+                            placeholder="{{ __('-- ทุกปีการศึกษา --') }}" autosubmit x-bind:disabled="isDesktop"
+                        />
+                    </div>
+                </div>
+
+                <button type="button" @click="filtersOpen = false"
+                    class="mt-5 w-full rounded-xl bg-brand-purple-600 px-4 py-3 text-sm font-semibold text-white shadow-soft transition-colors hover:bg-brand-purple-700">
+                    {{ __('เสร็จสิ้น') }}
+                </button>
+            </div>
         </div>
     </form>
 

@@ -207,7 +207,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                'มหาวิทยาลัยราชภัฏสุรินทร์',
+                                'ระบบเช็คกิจกรรมนักศึกษา มหาวิทยาลัยราชภัฏสุรินทร์',
+                                textAlign: TextAlign.center,
                                 style: TextStyle(
                                   fontSize: 13,
                                   color: Colors.grey.shade600,

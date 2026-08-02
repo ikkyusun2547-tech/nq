@@ -25,6 +25,7 @@
         :title="auth()->user()->name_thai"
         :subtitle="trim((auth()->user()->faculty?->name_th ?? '').' · '.(auth()->user()->major?->name_th ?? ''), ' ·')"
         :decorated="true"
+        :pin-actions="true"
     >
         @if ($currentPositionLabel)
             <span class="inline-flex items-center rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-white ring-1 ring-white/15 backdrop-blur">
@@ -33,7 +34,7 @@
         @endif
         @if ($summary['current_year'])
             <x-slot:actions>
-                <span class="shrink-0 rounded-xl bg-white/10 px-3 py-2 text-center ring-1 ring-white/15 backdrop-blur">
+                <span class="shrink-0 whitespace-nowrap rounded-xl bg-white/10 px-3 py-2 text-center ring-1 ring-white/15 backdrop-blur">
                     <span class="block text-[10px] uppercase tracking-wider text-violet-200/70">{{ __('ชั้นปีที่') }}</span>
                     <span class="block text-lg font-bold leading-none text-brand-green-400">{{ $summary['current_year'] }}</span>
                 </span>
@@ -47,18 +48,28 @@
         </x-slot:footer>
     </x-brand-header>
 
-    <div class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
+    {{-- Four equal quick-action buttons in one row, same set/order as the
+         app's dashboard _QuickActions (QR check-in, external activity,
+         credit transfer, contact us) — was 3 stacked full-width buttons
+         missing "ติดต่อเรา" entirely; short two-line labels here match the
+         app's tight button text so four columns stay comfortable even on
+         a narrow phone. --}}
+    <div class="mt-4 grid grid-cols-4 gap-2 sm:gap-3">
         <a href="{{ route('checkin.show') }}"
-            class="flex items-center justify-center gap-2 rounded-2xl bg-brand-green-500 p-4 text-center text-sm font-semibold text-brand-purple-950 shadow-soft transition-all duration-300 hover:-translate-y-0.5 hover:bg-brand-green-400 hover:shadow-lg">
-            {{ __('สแกน QR เช็คชื่อ') }}
+            class="flex flex-col items-center justify-center rounded-2xl bg-brand-green-500 px-1.5 py-3 text-center text-[0.68rem] font-semibold leading-tight text-brand-purple-950 shadow-soft transition-all duration-300 hover:-translate-y-0.5 hover:bg-brand-green-400 hover:shadow-lg sm:text-sm">
+            {{ __('สแกน QR') }}<br>{{ __('เช็คชื่อ') }}
         </a>
         <a href="{{ route('hour-requests.index', ['tab' => 'external']) }}"
-            class="flex items-center justify-center gap-2 rounded-2xl bg-white p-4 text-center text-sm font-semibold text-brand-purple-700 shadow-soft ring-1 ring-brand-purple-100 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg dark:bg-slate-900 dark:text-brand-purple-400 dark:ring-brand-purple-500/20">
-            {{ __('ยื่นคำร้องกิจกรรมภายนอก') }}
+            class="flex flex-col items-center justify-center rounded-2xl bg-white px-1.5 py-3 text-center text-[0.68rem] font-semibold leading-tight text-brand-purple-700 shadow-soft ring-1 ring-brand-purple-100 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg dark:bg-slate-900 dark:text-brand-purple-400 dark:ring-brand-purple-500/20 sm:text-sm">
+            {{ __('ยื่นกิจกรรม') }}<br>{{ __('ภายนอก') }}
         </a>
         <a href="{{ route('hour-requests.index', ['tab' => 'credit']) }}"
-            class="flex items-center justify-center gap-2 rounded-2xl bg-white p-4 text-center text-sm font-semibold text-brand-purple-700 shadow-soft ring-1 ring-brand-purple-100 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg dark:bg-slate-900 dark:text-brand-purple-400 dark:ring-brand-purple-500/20">
-            {{ __('เทียบโอนชั่วโมงจากตำแหน่ง') }}
+            class="flex flex-col items-center justify-center rounded-2xl bg-white px-1.5 py-3 text-center text-[0.68rem] font-semibold leading-tight text-brand-purple-700 shadow-soft ring-1 ring-brand-purple-100 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg dark:bg-slate-900 dark:text-brand-purple-400 dark:ring-brand-purple-500/20 sm:text-sm">
+            {{ __('เทียบโอน') }}<br>{{ __('ชั่วโมง') }}
+        </a>
+        <a href="{{ route('contact.index') }}"
+            class="flex flex-col items-center justify-center rounded-2xl bg-white px-1.5 py-3 text-center text-[0.68rem] font-semibold leading-tight text-brand-purple-700 shadow-soft ring-1 ring-brand-purple-100 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg dark:bg-slate-900 dark:text-brand-purple-400 dark:ring-brand-purple-500/20 sm:text-sm">
+            {{ __('ติดต่อเรา') }}
         </a>
     </div>
 
@@ -238,13 +249,11 @@
                         </p>
                         @if (! empty($item->flag_reason))
                             <p class="mt-1 truncate text-xs text-amber-600 dark:text-amber-400">{{ __('เหตุผลที่ต้องตรวจสอบ:') }} {{ $item->flag_reason }}</p>
-                            @if (config('support.email'))
-                                <a href="mailto:{{ config('support.email') }}?subject={{ urlencode(__('สอบถามเรื่องการเช็คชื่อติดธงแดง: :title', ['title' => $item->title])) }}"
-                                    class="mt-1 inline-flex items-center gap-1 text-xs font-medium text-brand-purple-600 hover:underline dark:text-brand-purple-400">
-                                    <svg class="h-3 w-3 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"/></svg>
-                                    {{ __('ติดต่อเจ้าหน้าที่') }}
-                                </a>
-                            @endif
+                            <a href="{{ route('contact.create', ['subject' => __('สอบถามเรื่องการเช็คชื่อติดธงแดง: :title', ['title' => $item->title]), 'context_type' => $item->type, 'context_id' => $item->activity_id]) }}"
+                                class="mt-1 inline-flex items-center gap-1 text-xs font-medium text-brand-purple-600 hover:underline dark:text-brand-purple-400">
+                                <svg class="h-3 w-3 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z"/></svg>
+                                {{ __('ติดต่อเจ้าหน้าที่') }}
+                            </a>
                         @endif
                     </div>
                     <span class="shrink-0 text-xs font-medium text-amber-600 dark:text-amber-400">{{ __(':hours ชม.', ['hours' => $item->hours]) }}</span>
@@ -291,17 +300,15 @@
                     </p>
                     @if ($item->reject_reason)
                         <p class="mt-1 truncate text-xs text-red-500 dark:text-red-400">{{ __('เหตุผล:') }} {{ $item->reject_reason }}</p>
-                        @if (config('support.email'))
-                            {{-- A plain <a> would be an invalid nested anchor when
-                                 $rejectedHref wraps this whole row in <a> already —
-                                 @click.stop keeps this tap from also triggering the
-                                 row's own resubmission-page link underneath it. --}}
-                            <span @click.stop="window.location.href = 'mailto:{{ config('support.email') }}?subject={{ urlencode(__('สอบถามเรื่องคำร้องที่ถูกปฏิเสธ: :title', ['title' => $item->title])) }}'"
-                                class="mt-1 inline-flex cursor-pointer items-center gap-1 text-xs font-medium text-brand-purple-600 hover:underline dark:text-brand-purple-400">
-                                <svg class="h-3 w-3 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"/></svg>
-                                {{ __('ติดต่อเจ้าหน้าที่') }}
-                            </span>
-                        @endif
+                        {{-- A plain <a> would be an invalid nested anchor when
+                             $rejectedHref wraps this whole row in <a> already —
+                             @click.stop keeps this tap from also triggering the
+                             row's own resubmission-page link underneath it. --}}
+                        <span @click.stop="window.location.href = '{{ route('contact.create', ['subject' => __('สอบถามเรื่องคำร้องที่ถูกปฏิเสธ: :title', ['title' => $item->title]), 'context_type' => $item->type, 'context_id' => $item->activity_id ?? null]) }}'"
+                            class="mt-1 inline-flex cursor-pointer items-center gap-1 text-xs font-medium text-brand-purple-600 hover:underline dark:text-brand-purple-400">
+                            <svg class="h-3 w-3 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z"/></svg>
+                            {{ __('ติดต่อเจ้าหน้าที่') }}
+                        </span>
                     @endif
                 </{{ $rejectedHref ? 'a' : 'div' }}>
             @empty
