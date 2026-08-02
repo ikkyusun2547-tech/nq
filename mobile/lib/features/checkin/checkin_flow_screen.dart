@@ -222,10 +222,6 @@ class _CheckInFlowScreenState extends ConsumerState<CheckInFlowScreen> {
               title: widget.activity?.title ?? 'สแกน QR เช็คชื่อ',
               subtitle:
                   'สแกน QR ที่หน้างาน ถ่ายเซลฟี แล้วยืนยันตำแหน่งเพื่อเช็คชื่อ',
-              leading: IconButton(
-                icon: const Icon(Icons.arrow_back, color: Colors.white),
-                onPressed: () => Navigator.of(context).pop(),
-              ),
             ),
             _StepIndicator(labels: _stepLabels, currentIndex: _stepIndex),
             Expanded(

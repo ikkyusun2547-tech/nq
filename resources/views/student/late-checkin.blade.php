@@ -11,7 +11,7 @@
     $statusLabel = ['pending' => __('รอตรวจสอบ'), 'approved' => __('อนุมัติแล้ว'), 'rejected' => __('ถูกปฏิเสธ')];
 @endphp
 <div class="mx-auto max-w-md">
-    <x-brand-header :title="__('ขอเช็คชื่อย้อนหลัง')" :back="route('activities.index', ['status_group' => 'ended'])" />
+    <x-brand-header :title="__('ขอเช็คชื่อย้อนหลัง')" />
 
     <div class="rounded-3xl glass-card p-5 shadow-soft-lg sm:p-6">
         <div class="flex items-start justify-between gap-2">

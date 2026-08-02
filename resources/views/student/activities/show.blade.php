@@ -29,7 +29,7 @@
 @endphp
 
 <div class="mx-auto max-w-3xl">
-    <x-brand-header :title="__('รายละเอียดกิจกรรม')" :back="route('activities.index')" />
+    <x-brand-header :title="__('รายละเอียดกิจกรรม')" />
 
     <div class="overflow-hidden rounded-3xl glass-card shadow-soft-lg">
         <div class="relative aspect-[16/7] w-full overflow-hidden bg-gradient-to-br from-brand-purple-600 to-brand-purple-900">

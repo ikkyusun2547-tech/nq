@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="mx-auto max-w-3xl">
-    <x-brand-header :title="__('แก้ไขเกณฑ์ รหัสนักศึกษาปี :year', ['year' => $year])" :eyebrow="__('กองพัฒนานักศึกษา')" :subtitle="__('มีผลกับนักศึกษาที่เข้าศึกษาปีนี้เท่านั้น')" :back="route('admin.settings.index')" />
+    <x-brand-header :title="__('แก้ไขเกณฑ์ รหัสนักศึกษาปี :year', ['year' => $year])" :eyebrow="__('กองพัฒนานักศึกษา')" :subtitle="__('มีผลกับนักศึกษาที่เข้าศึกษาปีนี้เท่านั้น')" />
 
     @if ($errors->any())
         <div class="mb-4 rounded-2xl bg-red-50 px-4 py-3 text-sm text-red-700 shadow-soft ring-1 ring-red-100 dark:bg-red-500/10 dark:text-red-400 dark:ring-red-500/20">

@@ -2,8 +2,8 @@
     'title',
     'subtitle' => null,
     'eyebrow' => null,
-    'back' => null,
     'decorated' => false,
+    'pinActions' => false,
 ])
 
 <div {{ $attributes->class(['relative mb-4 sm:mb-6 overflow-hidden rounded-3xl brand-gradient p-6 shadow-soft-lg sm:p-8']) }}>
@@ -13,7 +13,7 @@
     @endif
 
     <div class="relative flex flex-wrap items-start justify-between gap-3">
-        <div>
+        <div class="min-w-0 {{ $pinActions && isset($actions) && $actions->isNotEmpty() ? 'pr-24 sm:pr-28' : '' }}">
             @if ($eyebrow)
                 <p class="text-xs font-medium uppercase tracking-[0.2em] text-violet-200/70">{{ $eyebrow }}</p>
             @endif
@@ -29,15 +29,12 @@
         </div>
 
         @if (isset($actions) && $actions->isNotEmpty())
-            <div class="flex shrink-0 items-center gap-2">
+            <div @class([
+                'flex shrink-0 items-center gap-2',
+                'absolute right-0 top-0' => $pinActions,
+            ])>
                 {{ $actions }}
             </div>
-        @elseif ($back)
-            <a href="{{ $back }}"
-                class="inline-flex shrink-0 items-center gap-1.5 rounded-xl bg-white/10 px-3.5 py-2 text-sm font-medium text-white shadow-soft ring-1 ring-white/15 backdrop-blur transition-all duration-300 hover:-translate-y-0.5 hover:bg-white/15">
-                <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/></svg>
-                {{ __('กลับ') }}
-            </a>
         @endif
     </div>
 

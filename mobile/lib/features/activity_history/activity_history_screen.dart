@@ -115,10 +115,6 @@ class _ActivityHistoryScreenState extends ConsumerState<ActivityHistoryScreen> {
             children: [
               BrandHeader(
                 title: 'ประวัติกิจกรรมของฉัน',
-                leading: IconButton(
-                  icon: const Icon(Icons.arrow_back, color: Colors.white),
-                  onPressed: () => Navigator.of(context).pop(),
-                ),
               ),
               Padding(
                 padding: const EdgeInsets.all(20),

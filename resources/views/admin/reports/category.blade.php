@@ -17,7 +17,7 @@
 @endphp
 
 <div class="mx-auto max-w-4xl">
-    <x-brand-header :title="__('ชั่วโมงสะสมแยกตามหมวดหมู่ (5 ด้าน)')" :eyebrow="__('กองพัฒนานักศึกษา')" :subtitle="__('ภาพรวมทั้งมหาวิทยาลัย ไม่ใช่รายบุคคล — ใช้ดูว่าหมวดไหนมีกิจกรรมครอบคลุมน้อยเพื่อวางแผนปีถัดไป')" :back="route('admin.reports.index')" />
+    <x-brand-header :title="__('ชั่วโมงสะสมแยกตามหมวดหมู่ (5 ด้าน)')" :eyebrow="__('กองพัฒนานักศึกษา')" :subtitle="__('ภาพรวมทั้งมหาวิทยาลัย ไม่ใช่รายบุคคล — ใช้ดูว่าหมวดไหนมีกิจกรรมครอบคลุมน้อยเพื่อวางแผนปีถัดไป')" />
 
     <div class="mb-4 rounded-xl border border-brand-purple-200 bg-brand-purple-50 p-4 dark:border-brand-purple-500/20 dark:bg-brand-purple-500/10">
         <p class="text-xs font-medium text-brand-purple-700 dark:text-brand-purple-400">{{ __('ชั่วโมงสะสมรวมทุกหมวดหมู่') }}</p>

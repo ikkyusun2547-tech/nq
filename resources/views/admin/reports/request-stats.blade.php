@@ -25,7 +25,7 @@
 @endphp
 
 <div class="mx-auto max-w-5xl">
-    <x-brand-header :title="__('สถิติคำร้อง')" :eyebrow="__('กองพัฒนานักศึกษา')" :subtitle="__('ปริมาณ อัตราอนุมัติ และเวลาตรวจสอบเฉลี่ยของคำร้องแต่ละประเภท')" :back="route('admin.reports.index')" />
+    <x-brand-header :title="__('สถิติคำร้อง')" :eyebrow="__('กองพัฒนานักศึกษา')" :subtitle="__('ปริมาณ อัตราอนุมัติ และเวลาตรวจสอบเฉลี่ยของคำร้องแต่ละประเภท')" />
 
     <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
         @foreach ($typeMeta as $key => $meta)

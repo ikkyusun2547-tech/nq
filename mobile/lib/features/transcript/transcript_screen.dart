@@ -73,10 +73,6 @@ class _TranscriptScreenState extends ConsumerState<TranscriptScreen> {
             BrandHeader(
               title: 'ใบสรุปกิจกรรม',
               subtitle: 'เอกสารรับรองชั่วโมงกิจกรรมนักศึกษา',
-              leading: IconButton(
-                icon: const Icon(Icons.arrow_back, color: Colors.white),
-                onPressed: () => Navigator.of(context).pop(),
-              ),
               actions: [
                 if (_savedPath != null)
                   IconButton(

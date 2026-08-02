@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="mx-auto max-w-3xl">
-    <x-brand-header :title="__('เพิ่มเกณฑ์การจบการศึกษา')" :eyebrow="__('กองพัฒนานักศึกษา')" :subtitle="__('กำหนดเกณฑ์สำหรับนักศึกษาที่เข้าศึกษาปีที่ระบุ')" :back="route('admin.settings.index')" />
+    <x-brand-header :title="__('เพิ่มเกณฑ์การจบการศึกษา')" :eyebrow="__('กองพัฒนานักศึกษา')" :subtitle="__('กำหนดเกณฑ์สำหรับนักศึกษาที่เข้าศึกษาปีที่ระบุ')" />
 
     @if ($errors->any())
         <div class="mb-4 rounded-2xl bg-red-50 px-4 py-3 text-sm text-red-700 shadow-soft ring-1 ring-red-100 dark:bg-red-500/10 dark:text-red-400 dark:ring-red-500/20">

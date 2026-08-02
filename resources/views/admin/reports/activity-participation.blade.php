@@ -12,7 +12,7 @@
 @endphp
 
 <div class="mx-auto max-w-6xl">
-    <x-brand-header :title="__('อัตราเข้าร่วมต่อกิจกรรม')" :eyebrow="__('กองพัฒนานักศึกษา')" :subtitle="__('เทียบจำนวนที่เช็คชื่อจริงกับจำนวนนักศึกษาที่มีสิทธิ์เข้าร่วมของแต่ละกิจกรรม')" :back="route('admin.reports.index')">
+    <x-brand-header :title="__('อัตราเข้าร่วมต่อกิจกรรม')" :eyebrow="__('กองพัฒนานักศึกษา')" :subtitle="__('เทียบจำนวนที่เช็คชื่อจริงกับจำนวนนักศึกษาที่มีสิทธิ์เข้าร่วมของแต่ละกิจกรรม')">
         <x-slot:actions>
             <a href="{{ route('admin.reports.activity-participation-excel') }}"
                 class="flex shrink-0 items-center gap-1.5 rounded-xl bg-white/10 px-3 py-2 text-xs font-medium text-white shadow-soft ring-1 ring-white/15 backdrop-blur transition-colors hover:bg-white/15">

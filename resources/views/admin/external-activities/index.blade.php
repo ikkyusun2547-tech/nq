@@ -41,7 +41,7 @@
         },
     }"
 >
-    <x-brand-header :title="__('คำร้องกิจกรรมภายนอก')" :eyebrow="__('กองพัฒนานักศึกษา')" :back="route('admin.dashboard')" />
+    <x-brand-header :title="__('คำร้องกิจกรรมภายนอก')" :eyebrow="__('กองพัฒนานักศึกษา')" />
 
     <div class="mb-4 mt-4 flex flex-wrap gap-2 text-sm">
         @foreach ($tabs as $value => $label)

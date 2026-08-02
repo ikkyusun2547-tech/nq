@@ -97,7 +97,6 @@ class BrandHeader extends StatelessWidget {
     this.subtitle,
     this.actions,
     this.footer,
-    this.leading,
   });
 
   final String title;
@@ -107,9 +106,6 @@ class BrandHeader extends StatelessWidget {
   /// Extra content below the subtitle, still inside the gradient — e.g. the
   /// dashboard's avatar/name/student-id identity strip.
   final Widget? footer;
-
-  /// Back-button slot for pushed (non-tab-root) screens using this header.
-  final Widget? leading;
 
   @override
   Widget build(BuildContext context) {
@@ -128,12 +124,7 @@ class BrandHeader extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Container(
               width: double.infinity,
-              padding: EdgeInsets.fromLTRB(
-                leading != null ? 12 : 24,
-                20,
-                24,
-                28,
-              ),
+              padding: const EdgeInsets.fromLTRB(24, 20, 24, 28),
               decoration: BoxDecoration(
                 gradient: AppColors.brandGradient,
                 borderRadius: BorderRadius.circular(28),
@@ -151,7 +142,6 @@ class BrandHeader extends StatelessWidget {
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      ?leading,
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,

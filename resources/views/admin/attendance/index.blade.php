@@ -38,7 +38,7 @@
         },
     }"
 >
-    <x-brand-header :title="$activity->title" :back="route('admin.activities.index')">
+    <x-brand-header :title="$activity->title">
         <x-slot:eyebrow>
             Live Event Control
             @if ($activity->activity_code)

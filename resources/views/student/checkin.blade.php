@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="mx-auto max-w-md" x-data="checkinApp()" x-init="init()">
-    <x-brand-header :title="__('เช็คชื่อเข้าร่วมกิจกรรม')" :back="route('dashboard')" />
+    <x-brand-header :title="__('เช็คชื่อเข้าร่วมกิจกรรม')" />
 
     <div class="overflow-hidden rounded-3xl glass-card shadow-soft-lg">
         <!-- Step indicator -->

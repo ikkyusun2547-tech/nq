@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="mx-auto max-w-md">
-    <x-brand-header :title="__('เช็คชื่อแบบรายงานตนเอง')" :back="route('activities.index')" />
+    <x-brand-header :title="__('เช็คชื่อแบบรายงานตนเอง')" />
 
     <div class="rounded-3xl glass-card p-5 shadow-soft-lg sm:p-6">
         <h2 class="font-semibold text-slate-900 dark:text-slate-100">{{ $activity->title }}</h2>

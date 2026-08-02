@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="mx-auto max-w-3xl">
-    <x-brand-header :title="__('นำเข้ารายชื่อนักศึกษา')" :eyebrow="__('กองพัฒนานักศึกษา')" :back="route('admin.students.index')" />
+    <x-brand-header :title="__('นำเข้ารายชื่อนักศึกษา')" :eyebrow="__('กองพัฒนานักศึกษา')" />
 
     <div class="mb-6 rounded-2xl glass-card p-5 shadow-soft">
         <p class="text-sm text-slate-600 dark:text-slate-300">

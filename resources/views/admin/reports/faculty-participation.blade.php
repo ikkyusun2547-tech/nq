@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="mx-auto max-w-5xl">
-    <x-brand-header :title="__('สรุปการเข้าร่วมกิจกรรมรายคณะ')" :eyebrow="__('กองพัฒนานักศึกษา')" :back="route('admin.reports.index')">
+    <x-brand-header :title="__('สรุปการเข้าร่วมกิจกรรมรายคณะ')" :eyebrow="__('กองพัฒนานักศึกษา')">
         <x-slot:actions>
             <a href="{{ route('admin.reports.faculty-participation-excel') }}"
                 class="flex shrink-0 items-center gap-1.5 rounded-xl bg-white/10 px-3 py-2 text-xs font-medium text-white shadow-soft ring-1 ring-white/15 backdrop-blur transition-colors hover:bg-white/15">

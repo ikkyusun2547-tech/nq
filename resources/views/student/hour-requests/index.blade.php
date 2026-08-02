@@ -41,7 +41,7 @@
     }"
     @change="if ($event.target.name === 'position') creditPosition = $event.target.value"
 >
-    <x-brand-header eyebrow="{{ __('เทียบชั่วโมงกิจกรรม') }}" :title="__('ขอชั่วโมงกิจกรรม')" :back="route('dashboard')" />
+    <x-brand-header eyebrow="{{ __('เทียบชั่วโมงกิจกรรม') }}" :title="__('ขอชั่วโมงกิจกรรม')" />
 
     <!-- Pill tab switch -->
     <div class="mb-4 flex gap-1 rounded-2xl bg-slate-100 p-1 dark:bg-slate-800">

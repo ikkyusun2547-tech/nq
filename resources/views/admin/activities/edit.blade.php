@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="mx-auto max-w-3xl">
-    <x-brand-header :title="__('แก้ไขกิจกรรม').': '.$activity->title" :back="route('admin.activities.index')">
+    <x-brand-header :title="__('แก้ไขกิจกรรม').': '.$activity->title">
         <x-slot:eyebrow>
             {{ __('กองพัฒนานักศึกษา') }}
             @if ($activity->activity_code)

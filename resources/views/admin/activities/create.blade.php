@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="mx-auto max-w-3xl">
-    <x-brand-header :title="__('สร้างกิจกรรมใหม่')" :eyebrow="__('กองพัฒนานักศึกษา')" :back="route('admin.activities.index')" />
+    <x-brand-header :title="__('สร้างกิจกรรมใหม่')" :eyebrow="__('กองพัฒนานักศึกษา')" />
 
     @if ($errors->any())
         <div class="mb-4 rounded-2xl bg-red-50 px-4 py-3 text-sm text-red-700 shadow-soft ring-1 ring-red-100 dark:bg-red-500/10 dark:text-red-400 dark:ring-red-500/20">
