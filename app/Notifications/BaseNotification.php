@@ -28,9 +28,30 @@ abstract class BaseNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
+    /**
+     * Laravel's built-in mail channel (unlike FcmChannel/SafeNotifier) has
+     * no try/catch around its own send — an SMTP failure throws and aborts
+     * whatever channels haven't run yet in this attempt, and by default
+     * the queued job then retries from scratch. A retry re-runs *every*
+     * channel again, including 'database' — which isn't idempotent — so a
+     * single flaky mail send previously produced duplicate rows in the
+     * notification bell (and duplicate push notifications) every time it
+     * was retried. Capping to one attempt means a mail failure just drops
+     * the email instead of ever re-running the channels that already
+     * succeeded.
+     */
+    public int $tries = 1;
+
+    /**
+     * 'mail' goes last specifically so its fragility can never prevent
+     * 'database' (the bell) or FcmChannel (push) from running first —
+     * both of those already fail safe (FcmChannel catches its own
+     * exceptions; SafeNotifier isolates failures per recipient), so mail
+     * is the only channel here that can abort its own attempt.
+     */
     public function via(object $notifiable): array
     {
-        return ['database', 'mail', FcmChannel::class];
+        return ['database', FcmChannel::class, 'mail'];
     }
 
     public function toMail(object $notifiable): MailMessage
