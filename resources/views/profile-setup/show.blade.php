@@ -9,7 +9,7 @@
     ];
 @endphp
 <div
-    class="grid min-h-screen grid-cols-1 lg:grid-cols-5"
+    class="grid min-h-dvh grid-cols-1 lg:grid-cols-5"
     x-data="{
         facultyId: '{{ old('faculty_id', $user->faculty_id) }}',
         majorId: '{{ old('major_id', $user->major_id) }}',

@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="qr-stage relative flex min-h-screen flex-col items-center justify-center overflow-hidden px-4 py-10 text-center">
+<div class="qr-stage relative flex min-h-dvh flex-col items-center justify-center overflow-hidden px-4 py-10 text-center">
     <!-- Ambient field: deep violet base, drifting glow, fine grain -->
     <div class="pointer-events-none absolute inset-0 qr-noise"></div>
     <div class="qr-blob qr-blob--a pointer-events-none absolute -left-32 -top-32 h-[28rem] w-[28rem] rounded-full blur-3xl"></div>
