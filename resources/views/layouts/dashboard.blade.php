@@ -14,7 +14,7 @@
     </script>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="min-h-screen bg-slate-50 text-slate-900 antialiased dark:bg-slate-950 dark:text-slate-100">
+<body class="min-h-dvh bg-slate-50 text-slate-900 antialiased dark:bg-slate-950 dark:text-slate-100">
     @php
         $isAdmin = auth()->user()?->isAdmin();
         $isSuperAdmin = auth()->user()?->role === 'super_admin';
@@ -123,7 +123,7 @@
                  app's nav — only the main content area follows the theme toggle. -->
             <aside
                 :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'"
-                class="fixed inset-y-0 left-0 z-50 flex h-screen w-64 shrink-0 flex-col overflow-hidden bg-brand-purple-950 shadow-soft-lg transition-transform duration-200 ease-out lg:!translate-x-0"
+                class="fixed inset-y-0 left-0 z-50 flex h-dvh w-64 shrink-0 flex-col overflow-hidden bg-brand-purple-950 shadow-soft-lg transition-transform duration-200 ease-out -translate-x-full lg:!translate-x-0"
             >
 
                 <div class="relative flex shrink-0 items-center justify-between gap-2 border-b border-white/10 px-4 py-5">
@@ -189,7 +189,7 @@
                  flow) instead of participating in a flex layout — without it,
                  content would render underneath the sidebar at desktop widths. -->
             <div class="min-w-0 lg:pl-64">
-                <main class="mx-auto max-w-[90rem] {{ $fullscreenChat ? 'p-0 lg:px-6 lg:py-8' : 'px-4 py-6 sm:px-6 sm:py-8' }}">
+                <main class="mx-auto max-w-[90rem] {{ $fullscreenChat ? 'p-0 lg:px-6 lg:py-8' : 'px-4 py-6 pb-20 sm:px-6 sm:py-8 lg:pb-8' }}">
                     @if (session('status'))
                         <div class="mb-4 rounded-xl bg-brand-green-50 px-4 py-3 text-sm text-brand-green-700 ring-1 ring-brand-green-100 dark:bg-brand-green-500/10 dark:text-brand-green-400 dark:ring-brand-green-500/20">
                             {{ session('status') }}
@@ -205,6 +205,10 @@
                     @yield('content')
                 </main>
             </div>
+
+            @unless ($fullscreenChat)
+                @include('partials.admin-mobile-tab-bar')
+            @endunless
         </div>
     @else
         <nav class="{{ $fullscreenChat ? 'hidden md:block' : '' }} sticky top-0 z-40 bg-brand-purple-950 shadow-soft-lg" x-data="{ mobileOpen: false }" @click.outside="mobileOpen = false">
@@ -297,7 +301,7 @@
             </div>
         </nav>
 
-        <main class="mx-auto max-w-[90rem] {{ $fullscreenChat ? 'p-0 md:px-6 md:py-8' : 'px-4 py-6 pb-28 sm:px-6 sm:py-8 md:pb-8' }}">
+        <main class="mx-auto max-w-[90rem] {{ $fullscreenChat ? 'p-0 md:px-6 md:py-8' : 'px-4 py-6 pb-20 sm:px-6 sm:py-8 md:pb-8' }}">
             @if (session('status'))
                 <div class="mb-4 rounded-xl bg-brand-green-50 px-4 py-3 text-sm text-brand-green-700 ring-1 ring-brand-green-100 dark:bg-brand-green-500/10 dark:text-brand-green-400 dark:ring-brand-green-500/20">
                     {{ session('status') }}
