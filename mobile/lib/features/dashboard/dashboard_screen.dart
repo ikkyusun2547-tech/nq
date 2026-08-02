@@ -64,6 +64,8 @@ class DashboardScreen extends ConsumerWidget {
                       ? _StudentIdentitySection(
                           user: user,
                           currentYear: data.summary.currentYear,
+                          currentPositionLabel:
+                              data.summary.currentPositionLabel,
                         )
                       : null,
                 ),
@@ -178,10 +180,12 @@ class _StudentIdentitySection extends StatelessWidget {
   const _StudentIdentitySection({
     required this.user,
     required this.currentYear,
+    this.currentPositionLabel,
   });
 
   final AppUser user;
   final int? currentYear;
+  final String? currentPositionLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -238,6 +242,27 @@ class _StudentIdentitySection extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 12,
                           color: Colors.white.withValues(alpha: 0.8),
+                        ),
+                      ),
+                    ],
+                    if (currentPositionLabel != null) ...[
+                      const SizedBox(height: 6),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.14),
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                        child: Text(
+                          'ดำรงตำแหน่ง: $currentPositionLabel',
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white.withValues(alpha: 0.95),
+                          ),
                         ),
                       ),
                     ],

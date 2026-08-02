@@ -8,6 +8,7 @@ class DashboardSummary {
     this.yearlyTargetHours,
     required this.categoryHours,
     required this.isCleared,
+    this.currentPositionLabel,
   });
 
   final int totalActivities;
@@ -18,6 +19,11 @@ class DashboardSummary {
   final int? yearlyTargetHours;
   final Map<String, int> categoryHours;
   final bool isCleared;
+
+  /// The position a student currently holds (e.g. "หัวหน้าหมู่เรียน"), only
+  /// set when they have an approved credit-transfer claim for the current
+  /// academic year — null otherwise.
+  final String? currentPositionLabel;
 
   factory DashboardSummary.fromJson(Map<String, dynamic> json) {
     return DashboardSummary(
@@ -31,6 +37,7 @@ class DashboardSummary {
         (k, v) => MapEntry(k, v as int),
       ),
       isCleared: json['is_cleared'] as bool,
+      currentPositionLabel: json['current_position_label'] as String?,
     );
   }
 }
