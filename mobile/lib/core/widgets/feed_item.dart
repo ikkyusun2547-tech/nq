@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../models/dashboard.dart';
-import '../support_contact.dart';
 import '../theme.dart';
+import '../../features/contact/contact_create_screen.dart';
 import '../../features/hour_requests/hour_requests_screen.dart';
 
 /// Icon per feed item type, shared between the dashboard's preview lists and
@@ -143,16 +142,19 @@ class FeedRow extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.only(top: 2),
                   child: InkWell(
-                    onTap: () => _contactStaff(
+                    onTap: () => _openContactCreate(
+                      context,
                       subject: flagReason != null
                           ? 'สอบถามเรื่องการเช็คชื่อติดธงแดง: ${item.title}'
                           : 'สอบถามเรื่องคำร้องที่ถูกปฏิเสธ: ${item.title}',
+                      contextType: item.type,
+                      contextId: item.activityId,
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         const Icon(
-                          Icons.mail_outline,
+                          Icons.chat_bubble_outline,
                           size: 12,
                           color: AppColors.purple600,
                         ),
@@ -192,13 +194,21 @@ class FeedRow extends StatelessWidget {
     );
   }
 
-  Future<void> _contactStaff({required String subject}) async {
-    final uri = Uri(
-      scheme: 'mailto',
-      path: supportContactEmail,
-      query: 'subject=${Uri.encodeComponent(subject)}',
+  void _openContactCreate(
+    BuildContext context, {
+    required String subject,
+    String? contextType,
+    int? contextId,
+  }) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => ContactCreateScreen(
+          prefilledSubject: subject,
+          contextType: contextType,
+          contextId: contextId,
+        ),
+      ),
     );
-    await launchUrl(uri);
   }
 }
 

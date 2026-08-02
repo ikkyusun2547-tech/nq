@@ -153,4 +153,28 @@ class StudentActivityFeed
             ->sortByDesc('date')
             ->values();
     }
+
+    /**
+     * Flagged-pending and rejected items a student might want to ask staff
+     * about, for the contact-thread "topic" picker — reuses the same two
+     * feeds as the dashboard's inline "ติดต่อเจ้าหน้าที่" links instead of a
+     * third copy of this merge logic.
+     */
+    public function askableTopics(User $user): Collection
+    {
+        $flagged = $this->approvedAndPending($user)
+            ->where('is_approved', false)
+            ->filter(fn ($item) => ! empty($item->flag_reason ?? null));
+
+        return $flagged->concat($this->rejected($user))
+            ->map(fn ($item) => (object) [
+                'title' => $item->title,
+                'type' => $item->type,
+                'activity_id' => $item->activity_id ?? null,
+                'reason' => $item->flag_reason ?? $item->reject_reason ?? null,
+                'date' => $item->date,
+            ])
+            ->sortByDesc('date')
+            ->values();
+    }
 }

@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\AttendanceController;
 use App\Http\Controllers\Admin\AuditLogController;
 use App\Http\Controllers\Admin\CategoryReportController;
 use App\Http\Controllers\Admin\ClearanceReportController;
+use App\Http\Controllers\Admin\ContactController as AdminContactController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\ExternalApprovalController;
 use App\Http\Controllers\Admin\CreditTransferApprovalController;
@@ -29,6 +30,7 @@ use App\Http\Controllers\ProfileSetupController;
 use App\Http\Controllers\Student\ActivityController as StudentActivityController;
 use App\Http\Controllers\Student\ActivityHistoryController;
 use App\Http\Controllers\Student\CheckInController;
+use App\Http\Controllers\Student\ContactController;
 use App\Http\Controllers\Student\CreditTransferController;
 use App\Http\Controllers\Student\DashboardController;
 use App\Http\Controllers\Student\ExternalActivityController;
@@ -155,6 +157,13 @@ Route::middleware(['auth', 'srru.email'])->group(function () {
         Route::post('/credit-transfers', [CreditTransferController::class, 'store'])->name('credit-transfers.store');
         Route::delete('/credit-transfers/{creditTransferRequest}', [CreditTransferController::class, 'destroy'])->name('credit-transfers.destroy');
 
+        Route::get('/contact', [ContactController::class, 'index'])->name('contact.index');
+        Route::get('/contact/create', [ContactController::class, 'create'])->name('contact.create');
+        Route::post('/contact', [ContactController::class, 'store'])->name('contact.store');
+        Route::get('/contact/{contactThread}', [ContactController::class, 'show'])->name('contact.show');
+        Route::get('/contact/{contactThread}/poll', [ContactController::class, 'poll'])->name('contact.poll');
+        Route::post('/contact/{contactThread}/messages', [ContactController::class, 'reply'])->name('contact.reply');
+
         Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
 
         Route::get('/transcript', [TranscriptController::class, 'download'])->name('transcript.download');
@@ -210,6 +219,15 @@ Route::middleware(['auth', 'srru.email'])->group(function () {
         Route::get('/late-checkins', [LateCheckInApprovalController::class, 'index'])->name('late-checkins.index');
         Route::post('/late-checkins/{lateCheckInRequest}/approve', [LateCheckInApprovalController::class, 'approve'])->name('late-checkins.approve');
         Route::post('/late-checkins/{lateCheckInRequest}/reject', [LateCheckInApprovalController::class, 'reject'])->name('late-checkins.reject');
+
+        Route::get('/contact', [AdminContactController::class, 'index'])->name('contact.index');
+        Route::get('/contact/{contactThread}', [AdminContactController::class, 'show'])->name('contact.show');
+        Route::get('/contact/{contactThread}/poll', [AdminContactController::class, 'poll'])->name('contact.poll');
+        Route::post('/contact/{contactThread}/messages', [AdminContactController::class, 'reply'])->name('contact.reply');
+        Route::post('/contact/{contactThread}/close', [AdminContactController::class, 'close'])->name('contact.close');
+        Route::post('/contact/{contactThread}/reopen', [AdminContactController::class, 'reopen'])->name('contact.reopen');
+        Route::post('/contact/{contactThread}/claim', [AdminContactController::class, 'claim'])->name('contact.claim');
+        Route::post('/contact/{contactThread}/release', [AdminContactController::class, 'release'])->name('contact.release');
 
         Route::get('/reports', [ReportsController::class, 'index'])->name('reports.index');
 

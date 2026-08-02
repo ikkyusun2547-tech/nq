@@ -1,0 +1,118 @@
+@extends('layouts.dashboard')
+
+@section('content')
+@php
+    $tabs = ['open' => __('เปิดอยู่'), 'closed' => __('ปิดแล้ว'), 'all' => __('ทั้งหมด')];
+    $statusBadge = [
+        'open' => 'bg-brand-green-50 text-brand-green-700 dark:bg-brand-green-500/10 dark:text-brand-green-400',
+        'closed' => 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400',
+    ];
+    $statusLabel = ['open' => __('เปิดอยู่'), 'closed' => __('ปิดแล้ว')];
+@endphp
+
+<div class="mx-auto max-w-7xl">
+    <x-brand-header :title="__('ข้อความจากนักศึกษา')" :eyebrow="__('กองพัฒนานักศึกษา')" />
+
+    <div class="mb-4 mt-4 flex flex-wrap gap-2 text-sm">
+        @foreach ($tabs as $value => $label)
+            <a href="{{ route('admin.contact.index', array_merge(request()->only(['search']), ['status' => $value])) }}"
+                @class([
+                    'inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 font-medium transition-all duration-200',
+                    'bg-gradient-to-r from-brand-purple-600 to-brand-purple-500 text-white shadow-soft' => $status === $value,
+                    'bg-white text-slate-500 shadow-soft ring-1 ring-slate-200 hover:-translate-y-0.5 hover:text-brand-purple-600 dark:bg-slate-900 dark:text-slate-400 dark:ring-slate-700 dark:hover:text-brand-purple-400' => $status !== $value,
+                ])>
+                {{ $label }}
+                <span @class([
+                    'rounded-full px-1.5 py-0.5 text-[0.68rem] font-semibold tabular-nums',
+                    'bg-white/20' => $status === $value,
+                    'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400' => $status !== $value,
+                ])>{{ number_format($tabCounts[$value] ?? 0) }}</span>
+            </a>
+        @endforeach
+    </div>
+
+    <form method="GET" action="{{ route('admin.contact.index') }}" class="mb-4">
+        <input type="hidden" name="status" value="{{ $status }}">
+        <div class="flex flex-col gap-3 sm:flex-row">
+            <div class="relative flex-1">
+                <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400 dark:text-slate-500">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
+                </span>
+                <input
+                    type="text" name="search" value="{{ request('search') }}" placeholder="{{ __('ค้นหาชื่อนักศึกษาหรือรหัสนักศึกษา') }}"
+                    class="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-3.5 text-sm text-slate-700 placeholder:text-slate-400 shadow-soft transition-all duration-200 focus:border-brand-purple-500 focus:outline-none focus:ring-4 focus:ring-brand-purple-500/10 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500"
+                >
+            </div>
+
+            <button type="submit"
+                class="flex shrink-0 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-brand-purple-600 to-brand-purple-500 px-6 py-2.5 text-sm font-semibold text-white shadow-soft transition-all duration-300 hover:-translate-y-0.5 hover:from-brand-purple-500 hover:to-brand-purple-400 hover:shadow-lg active:scale-[0.99]">
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
+                {{ __('ค้นหา') }}
+            </button>
+        </div>
+    </form>
+
+    <div class="overflow-x-auto rounded-2xl glass-card shadow-soft">
+        <table class="min-w-full text-sm">
+            <thead>
+                <tr class="border-b border-brand-purple-100 dark:border-brand-purple-500/20">
+                    <th class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">{{ __('นักศึกษา') }}</th>
+                    <th class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">{{ __('หัวข้อ') }}</th>
+                    <th class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">{{ __('อัปเดตล่าสุด') }}</th>
+                    <th class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">{{ __('ผู้ดูแล') }}</th>
+                    <th class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">{{ __('สถานะ') }}</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse ($threads as $thread)
+                    <tr
+                        onclick="window.location='{{ route('admin.contact.show', $thread) }}'"
+                        @class([
+                            'group cursor-pointer border-b border-slate-100 transition-colors duration-150 last:border-0 hover:bg-brand-purple-50/50 dark:border-slate-800 dark:hover:bg-slate-800/60',
+                            'bg-white dark:bg-slate-900' => $loop->even,
+                            'bg-slate-50/50 dark:bg-slate-800/40' => $loop->odd,
+                        ])
+                    >
+                        <td class="whitespace-nowrap px-4 py-3">
+                            <div class="flex items-center gap-2.5">
+                                @if ($thread->admin_unread)
+                                    <span class="h-2 w-2 shrink-0 rounded-full bg-brand-purple-500"></span>
+                                @endif
+                                <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-brand-purple-500 to-brand-purple-700 text-xs font-semibold text-white shadow-soft">
+                                    {{ mb_substr($thread->student->name_thai ?? $thread->student->name, 0, 1) }}
+                                </span>
+                                <div>
+                                    <p class="font-medium text-slate-900 dark:text-slate-100">{{ $thread->student->name_thai ?? $thread->student->name }}</p>
+                                    <p class="font-mono text-xs text-slate-400 dark:text-slate-500">{{ $thread->student->student_id }}</p>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="min-w-[16rem] max-w-xs whitespace-normal break-words px-4 py-3 font-medium text-slate-700 transition-colors group-hover:text-brand-purple-700 dark:text-slate-300 dark:group-hover:text-brand-purple-400">{{ $thread->subject }}</td>
+                        <td class="whitespace-nowrap px-4 py-3 text-slate-500 dark:text-slate-400">{{ $thread->last_message_at?->format('d/m/Y H:i') }}</td>
+                        <td class="whitespace-nowrap px-4 py-3">
+                            @if ($thread->assignedAdmin)
+                                <span class="inline-flex items-center gap-1.5 rounded-full bg-brand-purple-50 px-2.5 py-1 text-xs font-medium text-brand-purple-700 dark:bg-brand-purple-500/10 dark:text-brand-purple-400">
+                                    {{ $thread->assignedAdmin->name_thai ?? $thread->assignedAdmin->name }}
+                                </span>
+                            @else
+                                <span class="text-xs text-slate-400 dark:text-slate-500">{{ __('ยังไม่มีใครรับเรื่อง') }}</span>
+                            @endif
+                        </td>
+                        <td class="whitespace-nowrap px-4 py-3">
+                            <span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium {{ $statusBadge[$thread->status] }}">
+                                {{ $statusLabel[$thread->status] }}
+                            </span>
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="5" class="px-4 py-8 text-center text-slate-400 dark:text-slate-500">{{ __('ไม่มีข้อความในหมวดนี้') }}</td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+
+    <div class="mt-4">{{ $threads->links() }}</div>
+</div>
+@endsection

@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\ProfileSetupController;
 use App\Http\Controllers\Api\Student\ActivityController;
 use App\Http\Controllers\Api\Student\ActivityHistoryController;
 use App\Http\Controllers\Api\Student\CheckInController;
+use App\Http\Controllers\Api\Student\ContactController;
 use App\Http\Controllers\Api\Student\CreditTransferController;
 use App\Http\Controllers\Api\Student\DashboardController;
 use App\Http\Controllers\Api\Student\ExternalActivityController;
@@ -80,6 +81,16 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::get('/credit-transfers', [CreditTransferController::class, 'index']);
             Route::post('/credit-transfers', [CreditTransferController::class, 'store']);
             Route::delete('/credit-transfers/{creditTransferRequest}', [CreditTransferController::class, 'destroy']);
+
+            Route::get('/contact', [ContactController::class, 'index']);
+            Route::post('/contact', [ContactController::class, 'store']);
+            // Must stay registered before /contact/{contactThread} — otherwise
+            // that route-model-bound wildcard would try (and fail) to resolve
+            // a ContactThread with id "topics"/"info".
+            Route::get('/contact/topics', [ContactController::class, 'topics']);
+            Route::get('/contact/info', [ContactController::class, 'officeInfo']);
+            Route::get('/contact/{contactThread}', [ContactController::class, 'show']);
+            Route::post('/contact/{contactThread}/messages', [ContactController::class, 'reply']);
 
             Route::get('/transcript', [TranscriptController::class, 'download']);
 

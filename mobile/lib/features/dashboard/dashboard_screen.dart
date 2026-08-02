@@ -16,6 +16,7 @@ import '../../core/widgets/section_card.dart';
 import '../activity_history/activity_history_screen.dart';
 import '../auth/auth_controller.dart';
 import '../checkin/checkin_flow_screen.dart';
+import '../contact/contact_threads_screen.dart';
 import '../hour_requests/hour_requests_screen.dart';
 import '../notifications/notifications_screen.dart';
 import '../transcript/transcript_screen.dart';
@@ -405,6 +406,14 @@ class _QuickActions extends StatelessWidget {
                   builder: (_) =>
                       const HourRequestsScreen(initialTab: 1, standalone: true),
                 ),
+              ),
+            ),
+          ),
+          Expanded(
+            child: _QuickActionButton(
+              label: 'ติดต่อเรา',
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const ContactThreadsScreen()),
               ),
             ),
           ),

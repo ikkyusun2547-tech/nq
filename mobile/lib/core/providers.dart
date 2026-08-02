@@ -15,6 +15,7 @@ import '../features/external_activities/external_activities_repository.dart';
 import '../features/credit_transfers/credit_transfers_repository.dart';
 import '../features/transcript/transcript_repository.dart';
 import '../features/notifications/notifications_repository.dart';
+import '../features/contact/contact_repository.dart';
 
 final authStorageProvider = Provider<AuthStorage>((ref) => AuthStorage());
 
@@ -183,4 +184,16 @@ final notificationsPageProvider = FutureProvider.autoDispose((ref) {
 
 final unreadNotificationCountProvider = FutureProvider.autoDispose((ref) {
   return ref.watch(notificationsRepositoryProvider).fetchUnreadCount();
+});
+
+final contactRepositoryProvider = Provider<ContactRepository>((ref) {
+  return ContactRepository(apiClient: ref.watch(apiClientProvider));
+});
+
+final contactThreadsProvider = FutureProvider.autoDispose((ref) {
+  return ref.watch(contactRepositoryProvider).fetchThreads();
+});
+
+final contactInfoProvider = FutureProvider.autoDispose((ref) {
+  return ref.watch(contactRepositoryProvider).fetchOfficeInfo();
 });

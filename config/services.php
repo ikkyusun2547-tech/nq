@@ -49,6 +49,18 @@ return [
         // stable domain. Flip to true once deployed there (no redeploy
         // needed, just set the env var and the change takes effect).
         'pwa_install_prompt_enabled' => env('PWA_INSTALL_PROMPT_ENABLED', false),
+
+        // Static office-contact details shown on the "ติดต่อเรา" page
+        // alongside the chat (see partials/contact-info-panel.blade.php).
+        // Phone/email/address are left unset by default rather than
+        // guessed — the view hides whichever of these three isn't
+        // configured instead of showing a placeholder. Set the real values
+        // via .env when deploying; no code change needed.
+        'office_phone' => env('SRRU_OFFICE_PHONE'),
+        'office_email' => env('SRRU_OFFICE_EMAIL'),
+        'office_address' => env('SRRU_OFFICE_ADDRESS'),
+        'office_hours' => env('SRRU_OFFICE_HOURS', 'จันทร์–ศุกร์ 08:30–16:30 น. (ยกเว้นวันหยุดราชการ)'),
+        'response_time' => env('SRRU_RESPONSE_TIME', 'โดยปกติตอบกลับภายใน 1–2 วันทำการ'),
     ],
 
 ];
