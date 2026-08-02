@@ -48,13 +48,11 @@
         </x-slot:footer>
     </x-brand-header>
 
-    {{-- Four equal quick-action buttons in one row, same set/order as the
-         app's dashboard _QuickActions (QR check-in, external activity,
-         credit transfer, contact us) — was 3 stacked full-width buttons
-         missing "ติดต่อเรา" entirely; short two-line labels here match the
-         app's tight button text so four columns stay comfortable even on
-         a narrow phone. --}}
-    <div class="mt-4 grid grid-cols-4 gap-2 sm:gap-3">
+    {{-- Three equal quick-action buttons for the most important actions
+         (QR check-in, external activity, credit transfer) — "ติดต่อเรา" was
+         dropped from here since it's reachable from the nav/menu already
+         and this row is meant to stay to just the essentials. --}}
+    <div class="mt-4 grid grid-cols-3 gap-2 sm:gap-3">
         <a href="{{ route('checkin.show') }}"
             class="flex flex-col items-center justify-center rounded-2xl bg-brand-green-500 px-1.5 py-3 text-center text-[0.68rem] font-semibold leading-tight text-brand-purple-950 shadow-soft transition-all duration-300 hover:-translate-y-0.5 hover:bg-brand-green-400 hover:shadow-lg sm:text-sm">
             {{ __('สแกน QR') }}<br>{{ __('เช็คชื่อ') }}
@@ -66,10 +64,6 @@
         <a href="{{ route('hour-requests.index', ['tab' => 'credit']) }}"
             class="flex flex-col items-center justify-center rounded-2xl bg-white px-1.5 py-3 text-center text-[0.68rem] font-semibold leading-tight text-brand-purple-700 shadow-soft ring-1 ring-brand-purple-100 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg dark:bg-slate-900 dark:text-brand-purple-400 dark:ring-brand-purple-500/20 sm:text-sm">
             {{ __('เทียบโอน') }}<br>{{ __('ชั่วโมง') }}
-        </a>
-        <a href="{{ route('contact.index') }}"
-            class="flex flex-col items-center justify-center rounded-2xl bg-white px-1.5 py-3 text-center text-[0.68rem] font-semibold leading-tight text-brand-purple-700 shadow-soft ring-1 ring-brand-purple-100 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg dark:bg-slate-900 dark:text-brand-purple-400 dark:ring-brand-purple-500/20 sm:text-sm">
-            {{ __('ติดต่อเรา') }}
         </a>
     </div>
 
