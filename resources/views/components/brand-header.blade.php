@@ -30,7 +30,14 @@
 
         @if (isset($actions) && $actions->isNotEmpty())
             <div @class([
-                'flex shrink-0 items-center gap-2',
+                // No shrink-0 + flex-wrap: a page with one short action (the
+                // common case) is unaffected, since it already fits on one
+                // line and nothing shrinks or wraps. A page with two-plus
+                // actions (e.g. admin/attendance/index.blade.php) that don't
+                // jointly fit a narrow screen now shrinks/wraps onto its own
+                // stacked lines instead of overflowing off the right edge.
+                'flex flex-wrap items-center gap-2' => ! $pinActions,
+                'flex shrink-0 items-center gap-2' => $pinActions,
                 'absolute right-0 top-0' => $pinActions,
             ])>
                 {{ $actions }}
