@@ -32,9 +32,47 @@
         </x-slot:actions>
     </x-brand-header>
 
-    <form method="GET" action="{{ route('admin.students.index') }}" class="mt-4 space-y-3">
-        <div class="flex flex-col gap-3 sm:flex-row">
-            <div class="relative flex-1">
+    @php
+        $facultyOptions = $faculties->pluck('name_th', 'id')->all();
+
+        if (request('faculty_id')) {
+            $selectedFaculty = $faculties->firstWhere('id', (int) request('faculty_id'));
+            $majorOptions = $selectedFaculty?->majors->pluck('name_th', 'id')->all() ?? [];
+            $majorGroups = null;
+        } else {
+            $majorOptions = null;
+            $majorGroups = $faculties->filter(fn ($f) => $f->majors->isNotEmpty())
+                ->mapWithKeys(fn ($f) => [$f->name_th => $f->majors->pluck('name_th', 'id')->all()])
+                ->all();
+        }
+
+        $yearOptions = collect([1, 2, 3, 4])->mapWithKeys(fn ($y) => [$y => __('ชั้นปีที่ :year', ['year' => $y])])->all();
+
+        // Drives the mobile filter-sheet trigger's badge — see
+        // admin/attendance/index.blade.php for the same pattern.
+        // enrollment_status defaults to 'enrolled' server-side, so only
+        // count it as "active" when explicitly set away from that default.
+        $activeFilterCount = collect([
+            request()->filled('faculty_id'),
+            request()->filled('major_id'),
+            request()->filled('year_level'),
+            request()->filled('enrollment_status') && $enrollmentStatus !== 'enrolled',
+        ])->filter()->count();
+    @endphp
+
+    <form
+        method="GET" action="{{ route('admin.students.index') }}" class="mt-4 space-y-3"
+        x-data="{
+            filtersOpen: false,
+            isDesktop: window.matchMedia('(min-width: 640px)').matches,
+            init() {
+                const mq = window.matchMedia('(min-width: 640px)');
+                mq.addEventListener('change', (e) => { this.isDesktop = e.matches; });
+            },
+        }"
+    >
+        <div class="flex gap-2">
+            <div class="relative min-w-0 flex-1">
                 <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400 dark:text-slate-500">
                     <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
                 </span>
@@ -45,49 +83,111 @@
             </div>
 
             <button type="submit"
-                class="flex shrink-0 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-brand-purple-600 to-brand-purple-500 px-6 py-2.5 text-sm font-semibold text-white shadow-soft transition-all duration-300 hover:-translate-y-0.5 hover:from-brand-purple-500 hover:to-brand-purple-400 hover:shadow-lg active:scale-[0.99]">
-                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
-                {{ __('ค้นหา') }}
+                class="flex shrink-0 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-brand-purple-600 to-brand-purple-500 px-4 py-2.5 text-sm font-semibold text-white shadow-soft transition-all duration-300 hover:-translate-y-0.5 hover:from-brand-purple-500 hover:to-brand-purple-400 hover:shadow-lg active:scale-[0.99] sm:px-6">
+                <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
+                <span class="hidden sm:inline">{{ __('ค้นหา') }}</span>
+            </button>
+
+            {{-- Mobile: opens the filter sheet below instead of showing the
+                 4 selects inline (see admin/attendance/index.blade.php,
+                 same reasoning). --}}
+            <button type="button" @click="filtersOpen = true" aria-label="{{ __('ตัวกรอง') }}"
+                class="relative flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded-xl shadow-soft transition-colors duration-200 sm:hidden {{ $activeFilterCount > 0 ? 'bg-brand-purple-600 text-white' : 'border border-slate-200 bg-white text-slate-500 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-400' }}"
+            >
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m9 12h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9-12H3.75m9 12H3.75m9-12H9m6 12v.007M12 6.75a1.5 1.5 0 100-3 1.5 1.5 0 000 3zm-6 6a1.5 1.5 0 100-3 1.5 1.5 0 000 3zm0 0H3.75m3 0H12"/></svg>
+                @if ($activeFilterCount > 0)
+                    <span class="absolute -right-1.5 -top-1.5 flex h-4.5 w-4.5 items-center justify-center rounded-full bg-brand-green-500 text-[0.65rem] font-bold text-brand-purple-950">{{ $activeFilterCount }}</span>
+                @endif
             </button>
         </div>
 
-        @php
-            $facultyOptions = $faculties->pluck('name_th', 'id')->all();
-
-            if (request('faculty_id')) {
-                $selectedFaculty = $faculties->firstWhere('id', (int) request('faculty_id'));
-                $majorOptions = $selectedFaculty?->majors->pluck('name_th', 'id')->all() ?? [];
-                $majorGroups = null;
-            } else {
-                $majorOptions = null;
-                $majorGroups = $faculties->filter(fn ($f) => $f->majors->isNotEmpty())
-                    ->mapWithKeys(fn ($f) => [$f->name_th => $f->majors->pluck('name_th', 'id')->all()])
-                    ->all();
-            }
-
-            $yearOptions = collect([1, 2, 3, 4])->mapWithKeys(fn ($y) => [$y => __('ชั้นปีที่ :year', ['year' => $y])])->all();
-        @endphp
-
-        <div class="grid grid-cols-1 gap-3 sm:grid-cols-4">
+        {{-- Desktop/tablet: unchanged 4-column grid. --}}
+        <div class="hidden sm:grid sm:grid-cols-4 sm:gap-3">
             <x-premium-select
                 name="faculty_id" :options="$facultyOptions" :selected="request('faculty_id')"
-                placeholder="{{ __('-- ทุกคณะ --') }}" autosubmit resets="major_id"
+                placeholder="{{ __('-- ทุกคณะ --') }}" autosubmit resets="major_id" x-bind:disabled="! isDesktop"
             />
 
             <x-premium-select
                 name="major_id" :options="$majorOptions" :groups="$majorGroups" :selected="request('major_id')"
-                placeholder="{{ __('-- ทุกสาขา --') }}" autosubmit
+                placeholder="{{ __('-- ทุกสาขา --') }}" autosubmit x-bind:disabled="! isDesktop"
             />
 
             <x-premium-select
                 name="year_level" :options="$yearOptions" :selected="request('year_level')"
-                placeholder="{{ __('-- ทุกชั้นปี --') }}" autosubmit
+                placeholder="{{ __('-- ทุกชั้นปี --') }}" autosubmit x-bind:disabled="! isDesktop"
             />
 
             <x-premium-select
                 name="enrollment_status" :options="$enrollmentOptions" :selected="$enrollmentStatus"
-                autosubmit :nullable="false"
+                autosubmit :nullable="false" x-bind:disabled="! isDesktop"
             />
+        </div>
+
+        {{-- Mobile filter sheet — same 4 fields, stacked. --}}
+        <div x-show="filtersOpen" x-cloak class="fixed inset-0 z-50 sm:hidden">
+            <div
+                x-show="filtersOpen" x-cloak x-transition.opacity
+                class="absolute inset-0 bg-slate-950/50"
+                @click="filtersOpen = false"
+            ></div>
+            <div
+                x-show="filtersOpen" x-cloak
+                x-transition:enter="transition ease-out duration-200"
+                x-transition:enter-start="translate-y-full"
+                x-transition:enter-end="translate-y-0"
+                x-transition:leave="transition ease-in duration-150"
+                x-transition:leave-start="translate-y-0"
+                x-transition:leave-end="translate-y-full"
+                class="absolute inset-x-0 bottom-0 max-h-[85vh] overflow-y-auto rounded-t-3xl bg-white p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] shadow-soft-lg dark:bg-slate-900"
+            >
+                <div class="mx-auto mb-4 h-1.5 w-10 shrink-0 rounded-full bg-slate-200 dark:bg-slate-700"></div>
+                <div class="mb-4 flex items-center justify-between">
+                    <h3 class="text-base font-bold text-slate-900 dark:text-slate-100">{{ __('ตัวกรอง') }}</h3>
+                    @if ($activeFilterCount > 0)
+                        <a href="{{ route('admin.students.index', request()->only('search')) }}"
+                            class="text-xs font-medium text-brand-purple-600 dark:text-brand-purple-400">
+                            {{ __('ล้างตัวกรอง') }}
+                        </a>
+                    @endif
+                </div>
+
+                <div class="space-y-4">
+                    <div>
+                        <label class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">{{ __('คณะ') }}</label>
+                        <x-premium-select
+                            name="faculty_id" :options="$facultyOptions" :selected="request('faculty_id')"
+                            placeholder="{{ __('-- ทุกคณะ --') }}" autosubmit resets="major_id" x-bind:disabled="isDesktop"
+                        />
+                    </div>
+                    <div>
+                        <label class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">{{ __('สาขา') }}</label>
+                        <x-premium-select
+                            name="major_id" :options="$majorOptions" :groups="$majorGroups" :selected="request('major_id')"
+                            placeholder="{{ __('-- ทุกสาขา --') }}" autosubmit x-bind:disabled="isDesktop"
+                        />
+                    </div>
+                    <div>
+                        <label class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">{{ __('ชั้นปี') }}</label>
+                        <x-premium-select
+                            name="year_level" :options="$yearOptions" :selected="request('year_level')"
+                            placeholder="{{ __('-- ทุกชั้นปี --') }}" autosubmit x-bind:disabled="isDesktop"
+                        />
+                    </div>
+                    <div>
+                        <label class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">{{ __('สถานะการศึกษา') }}</label>
+                        <x-premium-select
+                            name="enrollment_status" :options="$enrollmentOptions" :selected="$enrollmentStatus"
+                            autosubmit :nullable="false" x-bind:disabled="isDesktop"
+                        />
+                    </div>
+                </div>
+
+                <button type="button" @click="filtersOpen = false"
+                    class="mt-5 w-full rounded-xl bg-brand-purple-600 px-4 py-3 text-sm font-semibold text-white shadow-soft transition-colors hover:bg-brand-purple-700">
+                    {{ __('เสร็จสิ้น') }}
+                </button>
+            </div>
         </div>
     </form>
 

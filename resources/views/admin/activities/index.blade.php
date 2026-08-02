@@ -49,11 +49,21 @@
         </x-slot:actions>
     </x-brand-header>
 
-    <!-- Status chips: at-a-glance counts, doubling as one-click filters -->
-    <div class="flex flex-wrap gap-2">
+    {{-- Status chips: at-a-glance counts, doubling as one-click filters.
+         7 chips wrapping onto several lines ate most of a phone screen
+         before any activity was visible — a single horizontally-swipeable
+         row reads as organized instead, same idea as a native app's
+         segmented filter bar. Desktop still has the room, so it wraps
+         normally there instead of scrolling for no reason.
+
+         No extra inset here — sitting flush in the normal content column
+         (same as this <div>'s own left edge) lines the first chip up with
+         the search box below and the header card's edge above, instead of
+         indenting it further in than everything else on the page. --}}
+    <div class="flex snap-x gap-2 overflow-x-auto pb-1 sm:flex-wrap sm:overflow-visible sm:pb-0">
         <a href="{{ route('admin.activities.index', array_filter(['academic_year' => $academicYear])) }}"
             @class([
-                'inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-xs font-medium shadow-soft transition hover:-translate-y-0.5',
+                'inline-flex shrink-0 snap-start items-center gap-2 rounded-full border px-3.5 py-1.5 text-xs font-medium shadow-soft transition hover:-translate-y-0.5',
                 'border-brand-purple-300 bg-brand-purple-100 text-brand-purple-800 dark:border-brand-purple-500/40 dark:bg-brand-purple-500/20 dark:text-brand-purple-300' => ! request('status'),
                 'border-slate-200 bg-white text-slate-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300' => request('status'),
             ])>
@@ -63,7 +73,7 @@
             @php $count = $statusCounts[$statusKey] ?? 0; @endphp
             <a href="{{ route('admin.activities.index', array_filter(['academic_year' => $academicYear, 'status' => $statusKey])) }}"
                 @class([
-                    'inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-xs font-medium shadow-soft transition hover:-translate-y-0.5',
+                    'inline-flex shrink-0 snap-start items-center gap-2 rounded-full border px-3.5 py-1.5 text-xs font-medium shadow-soft transition hover:-translate-y-0.5',
                     $statusChipColor[$statusKey]['bg'], $statusChipColor[$statusKey]['border'],
                     'text-slate-800 dark:text-slate-100 ring-1 ring-inset ring-black/5' => request('status') === $statusKey,
                     'text-slate-500 dark:text-slate-400' => request('status') !== $statusKey,
@@ -74,9 +84,31 @@
         @endforeach
     </div>
 
-    <form method="GET" action="{{ route('admin.activities.index') }}" class="mt-4 space-y-3">
-        <div class="flex flex-col gap-3 sm:flex-row">
-            <div class="relative flex-1">
+    @php
+        $academicYearOptions = $academicYears->mapWithKeys(fn ($y) => [$y => $y])->all();
+
+        // Drives the mobile filter-sheet trigger's badge — see
+        // admin/attendance/index.blade.php for the same pattern.
+        $activeFilterCount = collect([
+            request()->filled('status'),
+            request()->filled('academic_year'),
+            request()->filled('semester'),
+        ])->filter()->count();
+    @endphp
+
+    <form
+        method="GET" action="{{ route('admin.activities.index') }}" class="mt-4 space-y-3"
+        x-data="{
+            filtersOpen: false,
+            isDesktop: window.matchMedia('(min-width: 640px)').matches,
+            init() {
+                const mq = window.matchMedia('(min-width: 640px)');
+                mq.addEventListener('change', (e) => { this.isDesktop = e.matches; });
+            },
+        }"
+    >
+        <div class="flex gap-2">
+            <div class="relative min-w-0 flex-1">
                 <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400 dark:text-slate-500">
                     <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
                 </span>
@@ -87,31 +119,99 @@
             </div>
 
             <button type="submit"
-                class="flex shrink-0 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-brand-purple-600 to-brand-purple-500 px-6 py-2.5 text-sm font-semibold text-white shadow-soft transition-all duration-300 hover:-translate-y-0.5 hover:from-brand-purple-500 hover:to-brand-purple-400 hover:shadow-lg active:scale-[0.99]">
-                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
-                {{ __('ค้นหา') }}
+                class="flex shrink-0 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-brand-purple-600 to-brand-purple-500 px-4 py-2.5 text-sm font-semibold text-white shadow-soft transition-all duration-300 hover:-translate-y-0.5 hover:from-brand-purple-500 hover:to-brand-purple-400 hover:shadow-lg active:scale-[0.99] sm:px-6">
+                <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
+                <span class="hidden sm:inline">{{ __('ค้นหา') }}</span>
+            </button>
+
+            {{-- Mobile: opens the filter sheet below instead of showing the
+                 3 selects inline (see admin/attendance/index.blade.php,
+                 same reasoning). --}}
+            <button type="button" @click="filtersOpen = true" aria-label="{{ __('ตัวกรอง') }}"
+                class="relative flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded-xl shadow-soft transition-colors duration-200 sm:hidden {{ $activeFilterCount > 0 ? 'bg-brand-purple-600 text-white' : 'border border-slate-200 bg-white text-slate-500 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-400' }}"
+            >
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m9 12h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9-12H3.75m9 12H3.75m9-12H9m6 12v.007M12 6.75a1.5 1.5 0 100-3 1.5 1.5 0 000 3zm-6 6a1.5 1.5 0 100-3 1.5 1.5 0 000 3zm0 0H3.75m3 0H12"/></svg>
+                @if ($activeFilterCount > 0)
+                    <span class="absolute -right-1.5 -top-1.5 flex h-4.5 w-4.5 items-center justify-center rounded-full bg-brand-green-500 text-[0.65rem] font-bold text-brand-purple-950">{{ $activeFilterCount }}</span>
+                @endif
             </button>
         </div>
 
-        @php
-            $academicYearOptions = $academicYears->mapWithKeys(fn ($y) => [$y => $y])->all();
-        @endphp
-
-        <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
+        {{-- Desktop/tablet: unchanged 3-column grid. --}}
+        <div class="hidden sm:grid sm:grid-cols-3 sm:gap-3">
             <x-premium-select
                 name="status" :options="$statusLabel" :selected="request('status')"
-                placeholder="{{ __('-- ทุกสถานะ --') }}" autosubmit
+                placeholder="{{ __('-- ทุกสถานะ --') }}" autosubmit x-bind:disabled="! isDesktop"
             />
 
             <x-premium-select
                 name="academic_year" :options="$academicYearOptions" :selected="$academicYear"
-                placeholder="{{ __('-- ทุกปีการศึกษา --') }}" autosubmit
+                placeholder="{{ __('-- ทุกปีการศึกษา --') }}" autosubmit x-bind:disabled="! isDesktop"
             />
 
             <x-premium-select
                 name="semester" :options="$semesterShort" :selected="request('semester')"
-                placeholder="{{ __('-- ทุกภาคเรียน --') }}" autosubmit
+                placeholder="{{ __('-- ทุกภาคเรียน --') }}" autosubmit x-bind:disabled="! isDesktop"
             />
+        </div>
+
+        {{-- Mobile filter sheet — same 3 fields, stacked. --}}
+        <div x-show="filtersOpen" x-cloak class="fixed inset-0 z-50 sm:hidden">
+            <div
+                x-show="filtersOpen" x-cloak x-transition.opacity
+                class="absolute inset-0 bg-slate-950/50"
+                @click="filtersOpen = false"
+            ></div>
+            <div
+                x-show="filtersOpen" x-cloak
+                x-transition:enter="transition ease-out duration-200"
+                x-transition:enter-start="translate-y-full"
+                x-transition:enter-end="translate-y-0"
+                x-transition:leave="transition ease-in duration-150"
+                x-transition:leave-start="translate-y-0"
+                x-transition:leave-end="translate-y-full"
+                class="absolute inset-x-0 bottom-0 max-h-[85vh] overflow-y-auto rounded-t-3xl bg-white p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] shadow-soft-lg dark:bg-slate-900"
+            >
+                <div class="mx-auto mb-4 h-1.5 w-10 shrink-0 rounded-full bg-slate-200 dark:bg-slate-700"></div>
+                <div class="mb-4 flex items-center justify-between">
+                    <h3 class="text-base font-bold text-slate-900 dark:text-slate-100">{{ __('ตัวกรอง') }}</h3>
+                    @if ($activeFilterCount > 0)
+                        <a href="{{ route('admin.activities.index', request()->only('search')) }}"
+                            class="text-xs font-medium text-brand-purple-600 dark:text-brand-purple-400">
+                            {{ __('ล้างตัวกรอง') }}
+                        </a>
+                    @endif
+                </div>
+
+                <div class="space-y-4">
+                    <div>
+                        <label class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">{{ __('สถานะ') }}</label>
+                        <x-premium-select
+                            name="status" :options="$statusLabel" :selected="request('status')"
+                            placeholder="{{ __('-- ทุกสถานะ --') }}" autosubmit x-bind:disabled="isDesktop"
+                        />
+                    </div>
+                    <div>
+                        <label class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">{{ __('ปีการศึกษา') }}</label>
+                        <x-premium-select
+                            name="academic_year" :options="$academicYearOptions" :selected="$academicYear"
+                            placeholder="{{ __('-- ทุกปีการศึกษา --') }}" autosubmit x-bind:disabled="isDesktop"
+                        />
+                    </div>
+                    <div>
+                        <label class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">{{ __('ภาคเรียน') }}</label>
+                        <x-premium-select
+                            name="semester" :options="$semesterShort" :selected="request('semester')"
+                            placeholder="{{ __('-- ทุกภาคเรียน --') }}" autosubmit x-bind:disabled="isDesktop"
+                        />
+                    </div>
+                </div>
+
+                <button type="button" @click="filtersOpen = false"
+                    class="mt-5 w-full rounded-xl bg-brand-purple-600 px-4 py-3 text-sm font-semibold text-white shadow-soft transition-colors hover:bg-brand-purple-700">
+                    {{ __('เสร็จสิ้น') }}
+                </button>
+            </div>
         </div>
     </form>
 

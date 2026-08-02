@@ -12,11 +12,13 @@
         </x-slot:actions>
     </x-brand-header>
 
-    <div class="mb-4 flex flex-wrap gap-2 text-sm">
+    {{-- Horizontally scrollable on mobile instead of wrapping onto several
+         lines (same pattern as admin/activities/index.blade.php). --}}
+    <div class="mb-4 flex snap-x gap-2 overflow-x-auto pb-1 text-sm sm:flex-wrap sm:overflow-visible sm:pb-0">
         @foreach ([1, 2, 3, 4] as $y)
             <a href="{{ route('admin.reports.at-risk', ['year' => $y]) }}"
                 @class([
-                    'inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 font-medium transition-all duration-200',
+                    'inline-flex shrink-0 snap-start items-center gap-1.5 rounded-full px-3.5 py-1.5 font-medium transition-all duration-200',
                     'bg-gradient-to-r from-brand-purple-600 to-brand-purple-500 text-white shadow-soft' => $year === $y,
                     'bg-white text-slate-500 shadow-soft ring-1 ring-slate-200 hover:-translate-y-0.5 hover:text-brand-purple-600 dark:bg-slate-900 dark:text-slate-400 dark:ring-slate-700 dark:hover:text-brand-purple-400' => $year !== $y,
                 ])>

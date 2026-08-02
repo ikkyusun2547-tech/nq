@@ -43,11 +43,13 @@
 >
     <x-brand-header :title="__('คำร้องกิจกรรมภายนอก')" :eyebrow="__('กองพัฒนานักศึกษา')" />
 
-    <div class="mb-4 mt-4 flex flex-wrap gap-2 text-sm">
+    {{-- Horizontally scrollable on mobile instead of wrapping onto several
+         lines (same pattern as admin/activities/index.blade.php). --}}
+    <div class="mb-4 mt-4 flex snap-x gap-2 overflow-x-auto pb-1 text-sm sm:flex-wrap sm:overflow-visible sm:pb-0">
         @foreach ($tabs as $value => $label)
             <a href="{{ route('admin.external-activities.index', array_merge(request()->only(['search', 'activity_category']), ['status' => $value])) }}"
                 @class([
-                    'inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 font-medium transition-all duration-200',
+                    'inline-flex shrink-0 snap-start items-center gap-1.5 rounded-full px-3.5 py-1.5 font-medium transition-all duration-200',
                     'bg-gradient-to-r from-brand-purple-600 to-brand-purple-500 text-white shadow-soft' => $status === $value,
                     'bg-white text-slate-500 shadow-soft ring-1 ring-slate-200 hover:-translate-y-0.5 hover:text-brand-purple-600 dark:bg-slate-900 dark:text-slate-400 dark:ring-slate-700 dark:hover:text-brand-purple-400' => $status !== $value,
                 ])>
@@ -64,8 +66,12 @@
     <form method="GET" action="{{ route('admin.external-activities.index') }}" class="mb-4 space-y-3">
         <input type="hidden" name="status" value="{{ $status }}">
 
-        <div class="flex flex-col gap-3 sm:flex-row">
-            <div class="relative flex-1">
+        {{-- Search+button share a row at every width (was stacking into
+             separate rows on phones), with the category filter wrapping to
+             its own line on mobile via `order` — but sitting back inline
+             between them on desktop (sm:order-2), unchanged from before. --}}
+        <div class="flex flex-wrap gap-2">
+            <div class="relative min-w-0 flex-1">
                 <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400 dark:text-slate-500">
                     <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
                 </span>
@@ -75,18 +81,17 @@
                 >
             </div>
 
-            <div class="sm:w-64">
+            <button type="submit" class="order-2 flex shrink-0 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-brand-purple-600 to-brand-purple-500 px-4 py-2.5 text-sm font-semibold text-white shadow-soft transition-all duration-300 hover:-translate-y-0.5 hover:from-brand-purple-500 hover:to-brand-purple-400 hover:shadow-lg active:scale-[0.99] sm:order-3 sm:px-6">
+                <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
+                <span class="hidden sm:inline">{{ __('ค้นหา') }}</span>
+            </button>
+
+            <div class="order-3 w-full sm:order-2 sm:w-64">
                 <x-premium-select
                     name="activity_category" :options="$categoryLabels" :selected="request('activity_category')"
                     placeholder="{{ __('-- ทุกหมวดหมู่ --') }}" autosubmit
                 />
             </div>
-
-            <button type="submit"
-                class="flex shrink-0 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-brand-purple-600 to-brand-purple-500 px-6 py-2.5 text-sm font-semibold text-white shadow-soft transition-all duration-300 hover:-translate-y-0.5 hover:from-brand-purple-500 hover:to-brand-purple-400 hover:shadow-lg active:scale-[0.99]">
-                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
-                {{ __('ค้นหา') }}
-            </button>
         </div>
     </form>
 
