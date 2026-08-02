@@ -10,6 +10,7 @@
         'reject' => ['tint' => 'bg-red-500/15 text-red-300', 'path' => 'M6 18L18 6M6 6l12 12'],
         'flag' => ['tint' => 'bg-amber-500/15 text-amber-300', 'path' => 'M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z'],
         'credit' => ['tint' => 'bg-brand-purple-500/15 text-brand-purple-300', 'path' => 'M4.5 6.75h15m-15 0A2.25 2.25 0 002.25 9v6a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 15V9a2.25 2.25 0 00-2.25-2.25m-15 0V5.25A2.25 2.25 0 016.75 3h10.5a2.25 2.25 0 012.25 2.25v1.5m-15 0h15M6 12h.008v.008H6V12zm3 0h6'],
+        'chat' => ['tint' => 'bg-sky-500/15 text-sky-300', 'path' => 'M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z'],
     ];
 @endphp
 <div
@@ -135,27 +136,61 @@
                     <p class="px-4 py-8 text-center text-xs text-slate-400 dark:text-slate-500">{{ __('ไม่มีการแจ้งเตือน') }}</p>
                 </template>
                 <template x-for="item in items" :key="item.id">
-                    <div class="group flex items-start transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/60" :class="! item.read ? 'bg-brand-purple-50/60 dark:bg-brand-purple-500/[0.06]' : ''">
-                        <form method="POST" :action="'{{ url('notifications') }}/' + item.id + '/read'" class="min-w-0 flex-1">
-                            @csrf
-                            <button type="submit" class="flex w-full min-w-0 items-start gap-3 py-3 pl-4 pr-1 text-left">
-                                <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full" :class="(icons[item.icon] || icons.check).tint">
-                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" :d="(icons[item.icon] || icons.check).path"/></svg>
-                                </span>
-                                <span class="min-w-0 flex-1">
-                                    <span class="block truncate text-sm font-medium text-slate-800 dark:text-slate-100" x-text="item.title"></span>
-                                    <span class="mt-0.5 block text-xs text-slate-500 dark:text-slate-400" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;" x-text="item.body"></span>
-                                    <span class="mt-1 block text-[0.65rem] text-slate-400 dark:text-slate-500" x-text="item.created_at"></span>
-                                </span>
-                                <span x-show="! item.read" class="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-brand-purple-500"></span>
-                            </button>
-                        </form>
-                        <button type="button" @click="remove(item)"
-                            class="mr-2 mt-3 shrink-0 rounded-lg p-1.5 text-slate-300 opacity-0 transition-all hover:bg-red-50 hover:text-red-500 group-hover:opacity-100 dark:text-slate-600 dark:hover:bg-red-500/10 dark:hover:text-red-400"
-                            aria-label="{{ __('ลบการแจ้งเตือน') }}"
+                    {{-- Swipe-to-delete on touch devices ("ทำเหมือนแอพ") —
+                         nested x-data for per-row drag state (dragX/dragging)
+                         while still reading/calling the parent scope's
+                         `items`/`remove()` directly, since Alpine's x-data
+                         scopes nest lexically. touch-action:pan-y lets the
+                         panel's own vertical scroll keep working for a
+                         mostly-vertical touch, only horizontal drags are
+                         captured here. The existing trash button/tap-to-read
+                         row are untouched, so mouse/desktop behavior doesn't
+                         change at all. --}}
+                    <div class="relative overflow-hidden" x-data="{ dragX: 0, dragging: false, startX: 0, startY: 0, horizontal: false }">
+                        <div class="absolute inset-0 flex items-center justify-end bg-red-500 px-5">
+                            <svg class="h-4.5 w-4.5 text-white" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/></svg>
+                        </div>
+                        <div
+                            class="group relative flex items-start bg-white transition-colors hover:bg-slate-50 dark:bg-slate-900 dark:hover:bg-slate-800/60"
+                            :class="! item.read ? 'bg-brand-purple-50/60 dark:bg-brand-purple-500/[0.06]' : ''"
+                            style="touch-action: pan-y;"
+                            :style="`transform: translateX(${dragX}px); transition: ${dragging ? 'none' : 'transform 0.2s ease-out'};`"
+                            @touchstart="startX = $event.touches[0].clientX; startY = $event.touches[0].clientY; dragging = true; horizontal = false"
+                            @touchmove="
+                                if (! dragging) return;
+                                const dx = $event.touches[0].clientX - startX;
+                                const dy = $event.touches[0].clientY - startY;
+                                if (! horizontal && Math.abs(dx) > Math.abs(dy) + 4) horizontal = true;
+                                if (horizontal) dragX = Math.min(0, dx);
+                            "
+                            @touchend="
+                                dragging = false;
+                                if (horizontal && dragX < -80) { dragX = -400; setTimeout(() => remove(item), 150); }
+                                else { dragX = 0; }
+                                horizontal = false;
+                            "
                         >
-                            <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
-                        </button>
+                            <form method="POST" :action="'{{ url('notifications') }}/' + item.id + '/read'" class="min-w-0 flex-1">
+                                @csrf
+                                <button type="submit" class="flex w-full min-w-0 items-start gap-3 py-3 pl-4 pr-1 text-left">
+                                    <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full" :class="(icons[item.icon] || icons.check).tint">
+                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" :d="(icons[item.icon] || icons.check).path"/></svg>
+                                    </span>
+                                    <span class="min-w-0 flex-1">
+                                        <span class="block truncate text-sm font-medium text-slate-800 dark:text-slate-100" x-text="item.title"></span>
+                                        <span class="mt-0.5 block text-xs text-slate-500 dark:text-slate-400" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;" x-text="item.body"></span>
+                                        <span class="mt-1 block text-[0.65rem] text-slate-400 dark:text-slate-500" x-text="item.created_at"></span>
+                                    </span>
+                                    <span x-show="! item.read" class="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-brand-purple-500"></span>
+                                </button>
+                            </form>
+                            <button type="button" @click="remove(item)"
+                                class="mr-2 mt-3 shrink-0 rounded-lg p-1.5 text-slate-300 opacity-0 transition-all hover:bg-red-50 hover:text-red-500 group-hover:opacity-100 dark:text-slate-600 dark:hover:bg-red-500/10 dark:hover:text-red-400"
+                                aria-label="{{ __('ลบการแจ้งเตือน') }}"
+                            >
+                                <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                            </button>
+                        </div>
                     </div>
                 </template>
             </div>

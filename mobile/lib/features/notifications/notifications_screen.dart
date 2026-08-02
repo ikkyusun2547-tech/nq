@@ -22,6 +22,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
     'flag': Icons.flag_outlined,
     'credit': Icons.swap_horiz,
     'external': Icons.groups_outlined,
+    'chat': Icons.chat_bubble_outline,
   };
 
   static const _iconColors = {
@@ -30,6 +31,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
     'flag': AppColors.statusPending,
     'credit': Color(0xFF3B82F6),
     'external': Color(0xFF8B5CF6),
+    'chat': Color(0xFF0EA5E9),
   };
 
   // Dismissible items must disappear from the list on this exact build (not
@@ -126,10 +128,6 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
               BrandHeader(
                 title: 'การแจ้งเตือน',
                 subtitle: 'ความเคลื่อนไหวล่าสุดของกิจกรรมและคำร้องของคุณ',
-                leading: IconButton(
-                  icon: const Icon(Icons.arrow_back, color: Colors.white),
-                  onPressed: () => Navigator.of(context).pop(),
-                ),
                 actions: [
                   if ((page.value?.unreadCount ?? 0) > 0)
                     IconButton(

@@ -2,7 +2,6 @@
 
 @section('content')
 @php
-    $isAdmin = auth()->user()->isAdmin();
     $iconMeta = [
         'external' => ['tint' => 'bg-brand-purple-50 text-brand-purple-600 dark:bg-brand-purple-500/10 dark:text-brand-purple-400', 'path' => 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z'],
         'check' => ['tint' => 'bg-brand-green-50 text-brand-green-600 dark:bg-brand-green-500/10 dark:text-brand-green-400', 'path' => 'M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z'],
@@ -16,7 +15,6 @@
     <x-brand-header
         eyebrow="{{ __('ศูนย์การแจ้งเตือน') }}"
         :title="__('การแจ้งเตือน')"
-        :back="$isAdmin ? route('admin.dashboard') : route('dashboard')"
     />
 
     @if ($notifications->isNotEmpty())
@@ -36,32 +34,59 @@
         <div class="space-y-2">
             @foreach ($notifications as $notification)
                 @php $meta = $iconMeta[$notification->data['icon'] ?? 'check'] ?? $iconMeta['check']; @endphp
-                <div class="group flex items-start gap-1 rounded-2xl bg-white shadow-sm ring-1 ring-gray-200 transition hover:ring-brand-purple-300 dark:bg-slate-900 dark:ring-slate-700 {{ $notification->read_at ? '' : 'bg-brand-purple-50/40 dark:bg-brand-purple-500/[0.05]' }}">
-                    <form method="POST" action="{{ route('notifications.read', $notification->id) }}" class="min-w-0 flex-1">
-                        @csrf
-                        <button type="submit" class="flex w-full items-start gap-3 p-4 text-left">
-                            <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl {{ $meta['tint'] }}">
-                                <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $meta['path'] }}"/></svg>
-                            </span>
-                            <span class="min-w-0 flex-1">
-                                <span class="block text-sm font-medium text-gray-900 dark:text-slate-100">{{ __($notification->data['title_key'] ?? '') }}</span>
-                                <span class="mt-0.5 block text-sm text-gray-500 dark:text-slate-400">{{ __($notification->data['body_key'] ?? '', $notification->data['body_params'] ?? []) }}</span>
-                                <span class="mt-1.5 block text-xs text-gray-400 dark:text-slate-500">{{ $notification->created_at->diffForHumans() }}</span>
-                            </span>
-                            @unless ($notification->read_at)
-                                <span class="mt-2 h-2 w-2 shrink-0 rounded-full bg-brand-purple-500"></span>
-                            @endunless
-                        </button>
-                    </form>
-                    <form method="POST" action="{{ route('notifications.destroy', $notification->id) }}" class="shrink-0 pr-3 pt-4">
-                        @csrf
-                        @method('DELETE')
-                        <x-confirm-submit tone="red" :message="__('ลบการแจ้งเตือนนี้?')" :label="__('ลบ')"
-                            class="rounded-lg p-1.5 text-slate-300 opacity-0 transition-all hover:bg-red-50 hover:text-red-500 group-hover:opacity-100 dark:text-slate-600 dark:hover:bg-red-500/10 dark:hover:text-red-400"
-                            aria-label="{{ __('ลบการแจ้งเตือน') }}">
-                            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
-                        </x-confirm-submit>
-                    </form>
+                {{-- Swipe left to delete on touch devices ("ทำเหมือนแอพ"): dragging
+                     past the threshold submits the existing delete form directly
+                     (the same route/CSRF the trash-icon button already uses), so
+                     there's no separate deletion code path to keep in sync. --}}
+                <div class="relative overflow-hidden rounded-2xl" x-data="{ dragX: 0, dragging: false, startX: 0, startY: 0, horizontal: false }">
+                    <div class="absolute inset-0 flex items-center justify-end rounded-2xl bg-red-500 px-6">
+                        <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/></svg>
+                    </div>
+                    <div
+                        class="group relative flex items-start gap-1 rounded-2xl bg-white shadow-sm ring-1 ring-gray-200 transition hover:ring-brand-purple-300 dark:bg-slate-900 dark:ring-slate-700 {{ $notification->read_at ? '' : 'bg-brand-purple-50/40 dark:bg-brand-purple-500/[0.05]' }}"
+                        style="touch-action: pan-y;"
+                        :style="`transform: translateX(${dragX}px); transition: ${dragging ? 'none' : 'transform 0.2s ease-out'};`"
+                        @touchstart="startX = $event.touches[0].clientX; startY = $event.touches[0].clientY; dragging = true; horizontal = false"
+                        @touchmove="
+                            if (! dragging) return;
+                            const dx = $event.touches[0].clientX - startX;
+                            const dy = $event.touches[0].clientY - startY;
+                            if (! horizontal && Math.abs(dx) > Math.abs(dy) + 4) horizontal = true;
+                            if (horizontal) dragX = Math.min(0, dx);
+                        "
+                        @touchend="
+                            dragging = false;
+                            if (horizontal && dragX < -80) { dragX = -400; setTimeout(() => $refs.deleteForm.requestSubmit(), 150); }
+                            else { dragX = 0; }
+                            horizontal = false;
+                        "
+                    >
+                        <form method="POST" action="{{ route('notifications.read', $notification->id) }}" class="min-w-0 flex-1">
+                            @csrf
+                            <button type="submit" class="flex w-full items-start gap-3 p-4 text-left">
+                                <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl {{ $meta['tint'] }}">
+                                    <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $meta['path'] }}"/></svg>
+                                </span>
+                                <span class="min-w-0 flex-1">
+                                    <span class="block text-sm font-medium text-gray-900 dark:text-slate-100">{{ __($notification->data['title_key'] ?? '') }}</span>
+                                    <span class="mt-0.5 block text-sm text-gray-500 dark:text-slate-400">{{ __($notification->data['body_key'] ?? '', $notification->data['body_params'] ?? []) }}</span>
+                                    <span class="mt-1.5 block text-xs text-gray-400 dark:text-slate-500">{{ $notification->created_at->diffForHumans() }}</span>
+                                </span>
+                                @unless ($notification->read_at)
+                                    <span class="mt-2 h-2 w-2 shrink-0 rounded-full bg-brand-purple-500"></span>
+                                @endunless
+                            </button>
+                        </form>
+                        <form x-ref="deleteForm" method="POST" action="{{ route('notifications.destroy', $notification->id) }}" class="shrink-0 pr-3 pt-4">
+                            @csrf
+                            @method('DELETE')
+                            <x-confirm-submit tone="red" :message="__('ลบการแจ้งเตือนนี้?')" :label="__('ลบ')"
+                                class="rounded-lg p-1.5 text-slate-300 opacity-0 transition-all hover:bg-red-50 hover:text-red-500 group-hover:opacity-100 dark:text-slate-600 dark:hover:bg-red-500/10 dark:hover:text-red-400"
+                                aria-label="{{ __('ลบการแจ้งเตือน') }}">
+                                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                            </x-confirm-submit>
+                        </form>
+                    </div>
                 </div>
             @endforeach
         </div>
