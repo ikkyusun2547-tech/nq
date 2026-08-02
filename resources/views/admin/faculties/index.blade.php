@@ -14,15 +14,20 @@
         </x-slot:actions>
     </x-brand-header>
 
+    {{-- Headers shortened + a lighter mobile padding + the name column's
+         forced min-width dropped (it already wraps to 2 lines fine at any
+         width) so the whole table fits a phone screen without needing to
+         scroll for the handful of faculties this ever really has —
+         overflow-x-auto stays only as a safety net for when it doesn't. --}}
     <div class="overflow-x-auto rounded-2xl glass-card shadow-soft">
         <table class="min-w-full text-sm">
             <thead>
                 <tr class="border-b border-brand-purple-100 dark:border-brand-purple-500/20">
-                    <th class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">{{ __('รหัส') }}</th>
-                    <th class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">{{ __('ชื่อคณะ') }}</th>
-                    <th class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">{{ __('จำนวนสาขา') }}</th>
-                    <th class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">{{ __('จำนวนนักศึกษา') }}</th>
-                    <th class="whitespace-nowrap px-4 py-3"></th>
+                    <th class="whitespace-nowrap px-2 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500 sm:px-4">{{ __('รหัส') }}</th>
+                    <th class="whitespace-nowrap px-2 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500 sm:px-4">{{ __('ชื่อคณะ') }}</th>
+                    <th class="whitespace-nowrap px-2 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500 sm:px-4">{{ __('สาขา') }}</th>
+                    <th class="whitespace-nowrap px-2 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500 sm:px-4">{{ __('นักศึกษา') }}</th>
+                    <th class="whitespace-nowrap px-2 py-3 sm:px-4"></th>
                 </tr>
             </thead>
             <tbody>
@@ -32,11 +37,11 @@
                         'bg-white dark:bg-slate-900' => $loop->even,
                         'bg-slate-50/50 dark:bg-slate-800/40' => $loop->odd,
                     ])>
-                        <td class="whitespace-nowrap px-4 py-3 font-mono text-slate-500 dark:text-slate-400">{{ $faculty->code }}</td>
-                        <td class="min-w-[14rem] max-w-xs whitespace-normal break-words px-4 py-3 font-medium text-slate-900 dark:text-slate-100">{{ $faculty->name_th }}</td>
-                        <td class="whitespace-nowrap px-4 py-3 text-slate-500 dark:text-slate-400">{{ $faculty->majors_count }}</td>
-                        <td class="whitespace-nowrap px-4 py-3 text-slate-500 dark:text-slate-400">{{ $faculty->users_count }}</td>
-                        <td class="whitespace-nowrap px-4 py-3 text-right">
+                        <td class="whitespace-nowrap px-2 py-3 font-mono text-slate-500 dark:text-slate-400 sm:px-4">{{ $faculty->code }}</td>
+                        <td class="max-w-[9rem] whitespace-normal break-words px-2 py-3 font-medium text-slate-900 dark:text-slate-100 sm:max-w-xs sm:px-4">{{ $faculty->name_th }}</td>
+                        <td class="whitespace-nowrap px-2 py-3 text-slate-500 dark:text-slate-400 sm:px-4">{{ $faculty->majors_count }}</td>
+                        <td class="whitespace-nowrap px-2 py-3 text-slate-500 dark:text-slate-400 sm:px-4">{{ $faculty->users_count }}</td>
+                        <td class="whitespace-nowrap px-2 py-3 text-right sm:px-4">
                             <a href="{{ route('admin.faculties.edit', $faculty) }}" class="font-medium text-brand-purple-600 transition-colors hover:text-brand-purple-800 dark:text-brand-purple-400 dark:hover:text-brand-purple-300">{{ __('จัดการ') }}</a>
                         </td>
                     </tr>

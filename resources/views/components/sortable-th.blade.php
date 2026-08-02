@@ -12,7 +12,7 @@
     $ascUrl = request()->url().'?'.http_build_query($baseQuery->merge(['sort' => $field, 'dir' => 'asc'])->all());
     $descUrl = request()->url().'?'.http_build_query($baseQuery->merge(['sort' => $field, 'dir' => 'desc'])->all());
 @endphp
-<th {{ $attributes->class(['whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500']) }}>
+<th {{ $attributes->class(['whitespace-nowrap px-2 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500 sm:px-4']) }}>
     <div class="flex items-center gap-1.5">
         {{ $label }}
         <span class="flex flex-col leading-none">

@@ -55,8 +55,11 @@
 
     <form method="GET" action="{{ route('admin.attendance.flagged') }}" class="mb-4">
         <input type="hidden" name="status" value="{{ $status }}">
-        <div class="flex flex-col gap-3 sm:flex-row">
-            <div class="relative flex-1">
+        {{-- Search input + button on one row at every width (was stacking
+             into two rows on phones) — matches
+             admin/activities/index.blade.php's mobile layout. --}}
+        <div class="flex gap-2">
+            <div class="relative min-w-0 flex-1">
                 <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400 dark:text-slate-500">
                     <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
                 </span>
@@ -67,9 +70,9 @@
             </div>
 
             <button type="submit"
-                class="flex shrink-0 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-brand-purple-600 to-brand-purple-500 px-6 py-2.5 text-sm font-semibold text-white shadow-soft transition-all duration-300 hover:-translate-y-0.5 hover:from-brand-purple-500 hover:to-brand-purple-400 hover:shadow-lg active:scale-[0.99]">
-                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
-                {{ __('ค้นหา') }}
+                class="flex shrink-0 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-brand-purple-600 to-brand-purple-500 px-4 py-2.5 text-sm font-semibold text-white shadow-soft transition-all duration-300 hover:-translate-y-0.5 hover:from-brand-purple-500 hover:to-brand-purple-400 hover:shadow-lg active:scale-[0.99] sm:px-6">
+                <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
+                <span class="hidden sm:inline">{{ __('ค้นหา') }}</span>
             </button>
         </div>
     </form>
@@ -79,10 +82,10 @@
             <thead>
                 <tr class="border-b border-brand-purple-100 dark:border-brand-purple-500/20">
                     <x-sortable-th field="name" :label="__('นักศึกษา')" />
-                    <x-sortable-th field="activity" :label="__('ชื่อกิจกรรม')" />
-                    <x-sortable-th field="checkin_time" :label="__('เวลาเช็คชื่อ')" />
-                    <th class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">{{ __('เหตุผลที่ต้องตรวจสอบ') }}</th>
-                    <th class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">{{ __('สถานะ') }}</th>
+                    <x-sortable-th field="activity" :label="__('กิจกรรม')" />
+                    <x-sortable-th field="checkin_time" :label="__('เวลา')" />
+                    <th class="whitespace-nowrap px-2 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500 sm:px-4">{{ __('เหตุผล') }}</th>
+                    <th class="whitespace-nowrap px-2 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500 sm:px-4">{{ __('สถานะ') }}</th>
                 </tr>
             </thead>
             <tbody>
@@ -112,7 +115,7 @@
                             'year_level' => $att->user->year_level,
                         ]) }})"
                     >
-                        <td class="whitespace-nowrap px-4 py-3">
+                        <td class="whitespace-nowrap px-2 py-3 sm:px-4">
                             <div class="flex items-center gap-2.5">
                                 <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-brand-purple-500 to-brand-purple-700 text-xs font-semibold text-white shadow-soft">
                                     {{ mb_substr($att->user->name_thai ?? $att->user->name, 0, 1) }}
@@ -123,10 +126,10 @@
                                 </div>
                             </div>
                         </td>
-                        <td class="min-w-[16rem] max-w-xs whitespace-normal break-words px-4 py-3 font-medium text-slate-700 transition-colors group-hover:text-brand-purple-700 dark:text-slate-300 dark:group-hover:text-brand-purple-400">{{ $att->activity->title }}</td>
-                        <td class="whitespace-nowrap px-4 py-3 text-slate-500 dark:text-slate-400">{{ $att->checkin_time->translatedFormat('d M Y H:i') }}</td>
-                        <td class="max-w-xs truncate px-4 py-3 text-slate-500 dark:text-slate-400">{{ $att->flagReasonLabel() ?? '-' }}</td>
-                        <td class="whitespace-nowrap px-4 py-3">
+                        <td class="min-w-[9rem] max-w-[13rem] whitespace-normal break-words px-2 py-3 font-medium text-slate-700 transition-colors group-hover:text-brand-purple-700 dark:text-slate-300 dark:group-hover:text-brand-purple-400 sm:max-w-xs sm:px-4">{{ $att->activity->title }}</td>
+                        <td class="whitespace-nowrap px-2 py-3 text-slate-500 dark:text-slate-400 sm:px-4">{{ $att->checkin_time->translatedFormat('d M Y H:i') }}</td>
+                        <td class="max-w-[10rem] truncate px-2 py-3 text-slate-500 dark:text-slate-400 sm:max-w-xs sm:px-4">{{ $att->flagReasonLabel() ?? '-' }}</td>
+                        <td class="whitespace-nowrap px-2 py-3 sm:px-4">
                             <span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium {{ $statusBadge[$att->status] ?? '' }}">
                                 <span class="relative flex h-1.5 w-1.5">
                                     <span @class(['absolute inline-flex h-full w-full animate-ping rounded-full opacity-60', $statusDot[$att->status] ?? 'bg-slate-400'])></span>
