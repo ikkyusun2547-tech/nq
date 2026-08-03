@@ -15,13 +15,15 @@
         majorId: '{{ old('major_id', $user->major_id) }}',
         majors: [],
         loadingMajors: false,
+        get majorOptions() {
+            return this.majors.map(m => ({ heading: false, value: String(m.id), label: `${m.name_th} (${m.degree_abbr ?? '-'})` }));
+        },
         async loadMajors() {
             if (! this.facultyId) { this.majors = []; return; }
             this.loadingMajors = true;
             const res = await fetch(`/api/faculties/${this.facultyId}/majors`);
             this.majors = await res.json();
             this.loadingMajors = false;
-            this.$nextTick(() => { if (this.$refs.majorSelect) this.$refs.majorSelect.value = this.majorId; });
         },
     }"
     x-init="loadMajors()"
@@ -112,20 +114,12 @@
                     <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
                         <div>
                             <label class="mb-2 block text-sm font-medium text-slate-600 dark:text-slate-400">{{ __('คำนำหน้าชื่อ') }}</label>
-                            <div class="relative">
-                                <select
-                                    name="title_prefix" required
-                                    class="w-full appearance-none rounded-xl border bg-white py-2.5 pl-3.5 pr-9 text-sm text-slate-700 shadow-soft transition-all duration-200 focus:outline-none focus:ring-4 dark:bg-slate-800 dark:text-slate-100 @error('title_prefix') border-red-400 focus:border-red-500 focus:ring-red-500/10 dark:border-red-500/70 @else border-slate-200 focus:border-brand-purple-500 focus:ring-brand-purple-500/10 dark:border-slate-600 @enderror"
-                                >
-                                    <option value="">-- {{ __('เลือก') }} --</option>
-                                    @foreach (['นาย', 'นาง', 'นางสาว'] as $prefix)
-                                        <option value="{{ $prefix }}" @selected(old('title_prefix', $namePrefix) === $prefix)>{{ $prefix }}</option>
-                                    @endforeach
-                                </select>
-                                <span class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3.5 text-slate-400 dark:text-slate-500">
-                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
-                                </span>
-                            </div>
+                            <x-premium-select
+                                name="title_prefix" required
+                                :options="['นาย' => 'นาย', 'นาง' => 'นาง', 'นางสาว' => 'นางสาว']"
+                                :selected="old('title_prefix', $namePrefix)"
+                                placeholder="{{ __('เลือก') }}"
+                            />
                         </div>
                         <div class="sm:col-span-2">
                             <label class="mb-2 block text-sm font-medium text-slate-600 dark:text-slate-400">{{ __('ชื่อ') }}</label>
@@ -192,23 +186,16 @@
 
                         <div>
                             <label class="mb-2 block text-sm font-medium text-slate-600 dark:text-slate-400">{{ __('ชั้นปีปัจจุบัน') }}</label>
-                            <div class="relative">
-                                <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400 dark:text-slate-500">
+                            <x-premium-select
+                                name="year_level" required
+                                :options="collect([1, 2, 3, 4])->mapWithKeys(fn ($year) => [$year => __('ชั้นปีที่ :year', ['year' => $year])])->all()"
+                                :selected="old('year_level', $user->year_level)"
+                                placeholder="{{ __('เลือกชั้นปี') }}"
+                            >
+                                <x-slot:icon>
                                     <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.26 10.147a60.436 60.436 0 00-.491 6.347A48.627 48.627 0 0112 20.904a48.627 48.627 0 018.232-4.41 60.46 60.46 0 00-.491-6.347M4.26 10.147a48.474 48.474 0 017.748-3.909m0 0a48.94 48.94 0 013.98 0M4.26 10.147L2.16 8.42m9.828-2.182a48.94 48.94 0 013.98 0m0 0l2.09-1.727m-2.09 1.727l2.09 1.727M4.26 10.147L2.16 11.874m17.68-1.727l2.1 1.727"/></svg>
-                                </span>
-                                <select
-                                    name="year_level" required
-                                    class="w-full appearance-none rounded-xl border bg-white py-2.5 pl-10 pr-9 text-sm text-slate-700 shadow-soft transition-all duration-200 focus:outline-none focus:ring-4 dark:bg-slate-800 dark:text-slate-100 @error('year_level') border-red-400 focus:border-red-500 focus:ring-red-500/10 dark:border-red-500/70 @else border-slate-200 focus:border-brand-purple-500 focus:ring-brand-purple-500/10 dark:border-slate-600 @enderror"
-                                >
-                                    <option value="">-- {{ __('เลือกชั้นปี') }} --</option>
-                                    @foreach ([1, 2, 3, 4] as $year)
-                                        <option value="{{ $year }}" @selected((int) old('year_level', $user->year_level) === $year)>{{ __('ชั้นปีที่ :year', ['year' => $year]) }}</option>
-                                    @endforeach
-                                </select>
-                                <span class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3.5 text-slate-400 dark:text-slate-500">
-                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
-                                </span>
-                            </div>
+                                </x-slot:icon>
+                            </x-premium-select>
                         </div>
                     </div>
 
@@ -228,44 +215,34 @@
 
                     <div>
                         <label class="mb-2 block text-sm font-medium text-slate-600 dark:text-slate-400">{{ __('คณะ') }}</label>
-                        <div class="relative">
-                            <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400 dark:text-slate-500">
+                        <x-premium-select
+                            name="faculty_id" required
+                            :options="$faculties->pluck('name_th', 'id')->all()"
+                            :selected="old('faculty_id', $user->faculty_id)"
+                            placeholder="{{ __('เลือกคณะ') }}"
+                            liveSelected="facultyId"
+                            @change="majorId = ''; loadMajors()"
+                        >
+                            <x-slot:icon>
                                 <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 21V9.75l8.25-4.5 8.25 4.5V21M8.25 21v-6h7.5v6M3 21h18"/></svg>
-                            </span>
-                            <select
-                                name="faculty_id" x-model="facultyId" @change="majorId = ''; loadMajors()" required
-                                class="w-full appearance-none rounded-xl border bg-white py-2.5 pl-10 pr-9 text-sm text-slate-700 shadow-soft transition-all duration-200 focus:outline-none focus:ring-4 dark:bg-slate-800 dark:text-slate-100 @error('faculty_id') border-red-400 focus:border-red-500 focus:ring-red-500/10 dark:border-red-500/70 @else border-slate-200 focus:border-brand-purple-500 focus:ring-brand-purple-500/10 dark:border-slate-600 @enderror"
-                            >
-                                <option value="">-- {{ __('เลือกคณะ') }} --</option>
-                                @foreach ($faculties as $faculty)
-                                    <option value="{{ $faculty->id }}">{{ $faculty->name_th }}</option>
-                                @endforeach
-                            </select>
-                            <span class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3.5 text-slate-400 dark:text-slate-500">
-                                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
-                            </span>
-                        </div>
+                            </x-slot:icon>
+                        </x-premium-select>
                     </div>
 
                     <div>
                         <label class="mb-2 block text-sm font-medium text-slate-600 dark:text-slate-400">{{ __('สาขาวิชา') }}</label>
-                        <div class="relative">
-                            <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400 dark:text-slate-500">
+                        <x-premium-select
+                            name="major_id" required
+                            :selected="old('major_id', $user->major_id)"
+                            placeholder="{{ __('เลือกสาขาวิชา') }}"
+                            liveOptions="majorOptions"
+                            liveSelected="majorId"
+                            disabled="! facultyId || loadingMajors"
+                        >
+                            <x-slot:icon>
                                 <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25"/></svg>
-                            </span>
-                            <select
-                                name="major_id" x-ref="majorSelect" required :disabled="! facultyId || loadingMajors"
-                                class="w-full appearance-none rounded-xl border bg-white py-2.5 pl-10 pr-9 text-sm text-slate-700 shadow-soft transition-all duration-200 focus:outline-none focus:ring-4 disabled:bg-slate-50 disabled:text-slate-400 dark:bg-slate-800 dark:text-slate-100 dark:disabled:bg-slate-800/60 dark:disabled:text-slate-500 @error('major_id') border-red-400 focus:border-red-500 focus:ring-red-500/10 dark:border-red-500/70 @else border-slate-200 focus:border-brand-purple-500 focus:ring-brand-purple-500/10 dark:border-slate-600 @enderror"
-                            >
-                                <option value="">-- <span x-text="loadingMajors ? '{{ __('กำลังโหลด...') }}' : '{{ __('เลือกสาขาวิชา') }}'"></span> --</option>
-                                <template x-for="major in majors" :key="major.id">
-                                    <option :value="major.id" x-text="`${major.name_th} (${major.degree_abbr ?? '-'})`"></option>
-                                </template>
-                            </select>
-                            <span class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3.5 text-slate-400 dark:text-slate-500">
-                                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
-                            </span>
-                        </div>
+                            </x-slot:icon>
+                        </x-premium-select>
                     </div>
                 </div>
 

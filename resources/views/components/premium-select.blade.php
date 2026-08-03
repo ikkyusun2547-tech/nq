@@ -7,6 +7,18 @@
     'autosubmit' => false,
     'resets' => null,
     'nullable' => true,
+    // Name of an ancestor Alpine variable holding an already-shaped
+    // [{value, label}, ...] array — for options that only exist once a
+    // parent field is chosen (e.g. majors depending on faculty), where the
+    // list can't be rendered server-side up front like a normal `options` prop.
+    'liveOptions' => null,
+    // Name of an ancestor Alpine variable to keep two-way synced with the
+    // internal `selected` value, for cases where sibling logic outside this
+    // component (e.g. "load majors for this faculty") needs to react to it.
+    'liveSelected' => null,
+    // Raw Alpine boolean expression (string) controlling both the trigger
+    // button and the underlying native select, e.g. "! facultyId".
+    'disabled' => null,
 ])
 
 @php
@@ -110,6 +122,14 @@
             this.selected = opt.value;
             this.open = false;
             this.$refs.native.value = opt.value;
+
+            @if ($liveSelected)
+                {{ $liveSelected }} = opt.value;
+            @endif
+
+            // Dispatched after the liveSelected write above so a sibling
+            // @change handler (e.g. reloading majors for a newly picked
+            // faculty) reads the updated value instead of the stale one.
             this.$refs.native.dispatchEvent(new Event('change', { bubbles: true }));
 
             @if ($resets)
@@ -130,6 +150,9 @@
     }"
     @keydown.escape="open = false"
     @click.outside="open = false"
+    @if ($liveOptions)
+        x-init="options = {{ $liveOptions }}; $watch('{{ $liveOptions }}', (val) => { options = val; })"
+    @endif
 >
     {{-- Real <select> stays in the DOM (visually hidden) so the form posts
          normally and no JS-disabled fallback is needed. --}}
@@ -137,6 +160,7 @@
         x-ref="native" name="{{ $name }}" tabindex="-1" aria-hidden="true"
         class="pointer-events-none absolute h-px w-px overflow-hidden opacity-0"
         x-on:change="syncFromNative()"
+        @if ($disabled) :disabled="{{ $disabled }}" @endif
         {{ $attributes }}
     >
         @if ($nullable)
@@ -152,11 +176,15 @@
     <button
         x-ref="trigger"
         type="button" @click="toggleOpen()" aria-haspopup="listbox" :aria-expanded="open"
-        class="flex w-full items-center justify-between gap-2 rounded-xl border bg-white py-2.5 pl-3.5 pr-3 text-left text-sm shadow-soft transition-all duration-200 dark:bg-slate-800"
+        @if ($disabled) :disabled="{{ $disabled }}" @endif
+        class="flex w-full items-center justify-between gap-2 rounded-xl border bg-white py-2.5 {{ isset($icon) ? 'pl-10' : 'pl-3.5' }} pr-3 text-left text-sm shadow-soft transition-all duration-200 dark:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400 dark:disabled:bg-slate-800/60 dark:disabled:text-slate-500"
         :class="open
             ? '{{ $hasError ? 'border-red-400 ring-4 ring-red-500/10' : 'border-brand-purple-500 ring-4 ring-brand-purple-500/10' }} text-slate-900 dark:text-slate-100'
             : '{{ $hasError ? 'border-red-300 dark:border-red-500/70' : 'border-slate-200 dark:border-slate-600' }} text-slate-700 hover:border-brand-purple-300 dark:text-slate-100 dark:hover:border-brand-purple-500/50'"
     >
+        @isset($icon)
+            <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400 dark:text-slate-500">{{ $icon }}</span>
+        @endisset
         <span class="truncate" :class="selected === '' && 'text-slate-400 dark:text-slate-500'" x-text="label"></span>
         <svg class="h-4 w-4 shrink-0 text-slate-400 transition-transform duration-200" :class="open && 'rotate-180'" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
     </button>
