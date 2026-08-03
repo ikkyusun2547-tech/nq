@@ -24,7 +24,25 @@
                  badge — it's only as tall as one short line, so squeezing
                  the subtitle and everything below it too just wrapped that
                  text earlier than the available width actually required. --}}
-            <h1 class="{{ $eyebrow ? 'mt-1' : '' }} {{ $reservesCornerSpace ? 'pr-24 sm:pr-28' : '' }} text-xl font-bold text-white sm:text-2xl">{{ $title }}</h1>
+            <h1
+                x-init="
+                    const el = $el;
+                    const fit = () => {
+                        el.style.fontSize = '';
+                        el.style.whiteSpace = 'nowrap';
+                        const base = parseFloat(getComputedStyle(el).fontSize);
+                        let size = base;
+                        while (el.scrollWidth > el.clientWidth && size > 13) {
+                            size -= 1;
+                            el.style.fontSize = size + 'px';
+                        }
+                        if (el.scrollWidth > el.clientWidth) el.style.whiteSpace = 'normal';
+                    };
+                    fit();
+                    window.addEventListener('resize', fit);
+                "
+                class="{{ $eyebrow ? 'mt-1' : '' }} {{ $reservesCornerSpace ? 'pr-24 sm:pr-28' : '' }} text-xl font-bold text-white sm:text-2xl"
+            >{{ $title }}</h1>
             @if ($subtitle)
                 <p class="mt-1.5 text-sm font-light text-violet-100/80">{{ $subtitle }}</p>
             @endif
