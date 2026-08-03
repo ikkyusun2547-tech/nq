@@ -12,12 +12,19 @@
         <div class="pointer-events-none absolute -bottom-20 -left-10 h-56 w-56 rounded-full bg-brand-green-500/10 blur-2xl"></div>
     @endif
 
+    @php
+        $reservesCornerSpace = $pinActions && isset($actions) && $actions->isNotEmpty();
+    @endphp
     <div class="relative flex flex-wrap items-start justify-between gap-3">
-        <div class="min-w-0 {{ $pinActions && isset($actions) && $actions->isNotEmpty() ? 'pr-24 sm:pr-28' : '' }}">
+        <div class="min-w-0">
             @if ($eyebrow)
-                <p class="text-xs font-medium uppercase tracking-[0.2em] text-violet-200/70">{{ $eyebrow }}</p>
+                <p class="{{ $reservesCornerSpace ? 'pr-24 sm:pr-28' : '' }} text-xs font-medium uppercase tracking-[0.2em] text-violet-200/70">{{ $eyebrow }}</p>
             @endif
-            <h1 class="{{ $eyebrow ? 'mt-1' : '' }} text-xl font-bold text-white sm:text-2xl">{{ $title }}</h1>
+            {{-- Only the eyebrow/title reserve room for the pinned corner
+                 badge — it's only as tall as one short line, so squeezing
+                 the subtitle and everything below it too just wrapped that
+                 text earlier than the available width actually required. --}}
+            <h1 class="{{ $eyebrow ? 'mt-1' : '' }} {{ $reservesCornerSpace ? 'pr-24 sm:pr-28' : '' }} text-xl font-bold text-white sm:text-2xl">{{ $title }}</h1>
             @if ($subtitle)
                 <p class="mt-1.5 text-sm font-light text-violet-100/80">{{ $subtitle }}</p>
             @endif
