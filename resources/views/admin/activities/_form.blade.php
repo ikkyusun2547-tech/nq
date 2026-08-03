@@ -151,9 +151,9 @@
         <div>
             <label class="mb-1 block text-sm font-medium text-slate-600 dark:text-slate-400">{{ __('วันเวลาเริ่มกิจกรรม') }}</label>
             <div class="relative">
-                <input type="datetime-local" name="start_at"
-                    value="{{ old('start_at', isset($activity->start_at) ? $activity->start_at->format('Y-m-d\TH:i') : '') }}" required
-                    class="datetime-input w-full rounded-2xl border bg-white px-3.5 py-2.5 pr-9 text-sm text-slate-700 placeholder:text-slate-400 shadow-soft transition-all duration-200 focus:outline-none focus:ring-4 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 @error('start_at') border-red-400 focus:border-red-500 focus:ring-red-500/10 dark:border-red-500/70 @else border-slate-300 focus:border-brand-purple-500 focus:ring-brand-purple-500/10 dark:border-slate-600 @enderror">
+                <input type="text" name="start_at" autocomplete="off"
+                    value="{{ old('start_at', isset($activity->start_at) ? $activity->start_at->format('Y-m-d H:i') : '') }}" required
+                    class="js-datetime-picker w-full rounded-2xl border bg-white px-3.5 py-2.5 pr-9 text-sm text-slate-700 placeholder:text-slate-400 shadow-soft transition-all duration-200 focus:outline-none focus:ring-4 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 @error('start_at') border-red-400 focus:border-red-500 focus:ring-red-500/10 dark:border-red-500/70 @else border-slate-300 focus:border-brand-purple-500 focus:ring-brand-purple-500/10 dark:border-slate-600 @enderror">
                 <span class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3.5 text-slate-400 dark:text-slate-500">
                     <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
                 </span>
@@ -163,9 +163,9 @@
         <div>
             <label class="mb-1 block text-sm font-medium text-slate-600 dark:text-slate-400">{{ __('วันเวลาสิ้นสุดกิจกรรม') }}</label>
             <div class="relative">
-                <input type="datetime-local" name="end_at"
-                    value="{{ old('end_at', isset($activity->end_at) ? $activity->end_at->format('Y-m-d\TH:i') : '') }}" required
-                    class="datetime-input w-full rounded-2xl border bg-white px-3.5 py-2.5 pr-9 text-sm text-slate-700 placeholder:text-slate-400 shadow-soft transition-all duration-200 focus:outline-none focus:ring-4 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 @error('end_at') border-red-400 focus:border-red-500 focus:ring-red-500/10 dark:border-red-500/70 @else border-slate-300 focus:border-brand-purple-500 focus:ring-brand-purple-500/10 dark:border-slate-600 @enderror">
+                <input type="text" name="end_at" autocomplete="off"
+                    value="{{ old('end_at', isset($activity->end_at) ? $activity->end_at->format('Y-m-d H:i') : '') }}" required
+                    class="js-datetime-picker w-full rounded-2xl border bg-white px-3.5 py-2.5 pr-9 text-sm text-slate-700 placeholder:text-slate-400 shadow-soft transition-all duration-200 focus:outline-none focus:ring-4 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 @error('end_at') border-red-400 focus:border-red-500 focus:ring-red-500/10 dark:border-red-500/70 @else border-slate-300 focus:border-brand-purple-500 focus:ring-brand-purple-500/10 dark:border-slate-600 @enderror">
                 <span class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3.5 text-slate-400 dark:text-slate-500">
                     <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
                 </span>
@@ -253,9 +253,9 @@
                 <div>
                     <label class="mb-1 block text-xs text-slate-400 dark:text-slate-500">{{ __('เปิดให้เช็คชื่อตั้งแต่') }}</label>
                     <div class="relative">
-                        <input type="datetime-local" name="checkin_opens_at"
-                            value="{{ old('checkin_opens_at', isset($activity->checkin_opens_at) ? $activity->checkin_opens_at->format('Y-m-d\TH:i') : '') }}"
-                            class="datetime-input w-full rounded-2xl border bg-white px-3.5 py-2.5 pr-9 text-sm text-slate-700 shadow-soft transition-all duration-200 focus:outline-none focus:ring-4 dark:bg-slate-800 dark:text-slate-100 @error('checkin_opens_at') border-red-400 focus:border-red-500 focus:ring-red-500/10 dark:border-red-500/70 @else border-slate-300 focus:border-brand-purple-500 focus:ring-brand-purple-500/10 dark:border-slate-600 @enderror">
+                        <input type="text" name="checkin_opens_at" autocomplete="off"
+                            value="{{ old('checkin_opens_at', isset($activity->checkin_opens_at) ? $activity->checkin_opens_at->format('Y-m-d H:i') : '') }}"
+                            class="js-datetime-picker w-full rounded-2xl border bg-white px-3.5 py-2.5 pr-9 text-sm text-slate-700 shadow-soft transition-all duration-200 focus:outline-none focus:ring-4 dark:bg-slate-800 dark:text-slate-100 @error('checkin_opens_at') border-red-400 focus:border-red-500 focus:ring-red-500/10 dark:border-red-500/70 @else border-slate-300 focus:border-brand-purple-500 focus:ring-brand-purple-500/10 dark:border-slate-600 @enderror">
                         <span class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3.5 text-slate-400 dark:text-slate-500">
                             <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
                         </span>
@@ -264,9 +264,9 @@
                 <div>
                     <label class="mb-1 block text-xs text-slate-400 dark:text-slate-500">{{ __('ปิดรับเช็คชื่อเมื่อ') }}</label>
                     <div class="relative">
-                        <input type="datetime-local" name="checkin_closes_at"
-                            value="{{ old('checkin_closes_at', isset($activity->checkin_closes_at) ? $activity->checkin_closes_at->format('Y-m-d\TH:i') : '') }}"
-                            class="datetime-input w-full rounded-2xl border bg-white px-3.5 py-2.5 pr-9 text-sm text-slate-700 shadow-soft transition-all duration-200 focus:outline-none focus:ring-4 dark:bg-slate-800 dark:text-slate-100 @error('checkin_closes_at') border-red-400 focus:border-red-500 focus:ring-red-500/10 dark:border-red-500/70 @else border-slate-300 focus:border-brand-purple-500 focus:ring-brand-purple-500/10 dark:border-slate-600 @enderror">
+                        <input type="text" name="checkin_closes_at" autocomplete="off"
+                            value="{{ old('checkin_closes_at', isset($activity->checkin_closes_at) ? $activity->checkin_closes_at->format('Y-m-d H:i') : '') }}"
+                            class="js-datetime-picker w-full rounded-2xl border bg-white px-3.5 py-2.5 pr-9 text-sm text-slate-700 shadow-soft transition-all duration-200 focus:outline-none focus:ring-4 dark:bg-slate-800 dark:text-slate-100 @error('checkin_closes_at') border-red-400 focus:border-red-500 focus:ring-red-500/10 dark:border-red-500/70 @else border-slate-300 focus:border-brand-purple-500 focus:ring-brand-purple-500/10 dark:border-slate-600 @enderror">
                         <span class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3.5 text-slate-400 dark:text-slate-500">
                             <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
                         </span>
@@ -395,6 +395,25 @@
 @push('scripts')
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/flatpickr@4.6.13/dist/flatpickr.min.css">
+<script src="https://unpkg.com/flatpickr@4.6.13/dist/flatpickr.min.js"></script>
+<script src="https://unpkg.com/flatpickr@4.6.13/dist/l10n/th.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // A single click-to-pick calendar + time list replaces the native
+        // datetime-local control, which forced clicking into each of its
+        // five separate segments (day/month/year/hour/minute) one at a time.
+        document.querySelectorAll('.js-datetime-picker').forEach((el) => {
+            flatpickr(el, {
+                enableTime: true,
+                time_24hr: true,
+                dateFormat: 'Y-m-d H:i',
+                allowInput: true,
+                locale: 'th',
+            });
+        });
+    });
+</script>
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         const latInput = document.getElementById('location_lat');
