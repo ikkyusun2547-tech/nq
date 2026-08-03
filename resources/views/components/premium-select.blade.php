@@ -177,7 +177,7 @@
         x-ref="trigger"
         type="button" @click="toggleOpen()" aria-haspopup="listbox" :aria-expanded="open"
         @if ($disabled) :disabled="{{ $disabled }}" @endif
-        class="flex w-full items-center justify-between gap-2 rounded-xl border bg-white py-2.5 {{ isset($icon) ? 'pl-10' : 'pl-3.5' }} pr-3 text-left text-sm shadow-soft transition-all duration-200 dark:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400 dark:disabled:bg-slate-800/60 dark:disabled:text-slate-500"
+        class="flex w-full cursor-pointer items-center justify-between gap-2 rounded-xl border bg-white py-2.5 {{ isset($icon) ? 'pl-10' : 'pl-3.5' }} pr-3 text-left text-sm shadow-soft transition-all duration-200 dark:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400 dark:disabled:bg-slate-800/60 dark:disabled:text-slate-500"
         :class="open
             ? '{{ $hasError ? 'border-red-400 ring-4 ring-red-500/10' : 'border-brand-purple-500 ring-4 ring-brand-purple-500/10' }} text-slate-900 dark:text-slate-100'
             : '{{ $hasError ? 'border-red-300 dark:border-red-500/70' : 'border-slate-200 dark:border-slate-600' }} text-slate-700 hover:border-brand-purple-300 dark:text-slate-100 dark:hover:border-brand-purple-500/50'"
@@ -204,7 +204,7 @@
             @if ($nullable)
                 <button
                     type="button" @click="pick({ value: '', label: placeholderText })"
-                    class="flex w-full items-center rounded-lg px-3 py-2 text-left text-sm transition-colors hover:bg-brand-purple-50 dark:hover:bg-slate-700/70"
+                    class="flex w-full cursor-pointer items-center rounded-lg px-3 py-2 text-left text-sm transition-colors hover:bg-brand-purple-50 dark:hover:bg-slate-700/70"
                     :class="selected === '' ? 'font-medium text-brand-purple-700 dark:text-brand-purple-400' : 'text-slate-500 dark:text-slate-400'"
                 >
                     {{ $placeholder }}
@@ -217,7 +217,7 @@
                     <button
                         x-show="! opt.heading"
                         type="button" @click="pick(opt)" role="option" :aria-selected="selected === opt.value"
-                        class="flex w-full items-center justify-between gap-2 rounded-lg px-3 py-2 text-left text-sm transition-colors hover:bg-brand-purple-50 dark:hover:bg-slate-700/70"
+                        class="flex w-full cursor-pointer items-center justify-between gap-2 rounded-lg px-3 py-2 text-left text-sm transition-colors hover:bg-brand-purple-50 dark:hover:bg-slate-700/70"
                         :class="selected === opt.value ? 'bg-brand-purple-50 font-medium text-brand-purple-700 dark:bg-brand-purple-500/10 dark:text-brand-purple-400' : 'text-slate-600 dark:text-slate-300'"
                     >
                         <span class="truncate" x-text="opt.label"></span>
