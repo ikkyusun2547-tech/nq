@@ -128,7 +128,7 @@
             // after a faculty is picked) never rendered any <option> tags
             // server-side, so the very first pick silently failed to
             // register on the real select the form actually submits.
-            if (opt.value !== '' && ! this.$refs.native.querySelector(`option[value="${CSS.escape(opt.value)}"]`)) {
+            if (opt.value !== '' && ! this.$refs.native.querySelector(`option[value='${CSS.escape(opt.value)}']`)) {
                 const optionEl = document.createElement('option');
                 optionEl.value = opt.value;
                 this.$refs.native.appendChild(optionEl);
