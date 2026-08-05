@@ -1,0 +1,297 @@
+<title>DFD Level 1 — SRRU Check บทที่ 3</title>
+<style>
+  :root{
+    --bg:#fafafa; --ink:#1a1a1a; --line:#1a1a1a; --fill:#ffffff;
+    --entity-bg:#ffffff; --muted:#666666; --labelbg:#fafafa;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{ --bg:#141414; --ink:#f0f0f0; --line:#f0f0f0; --fill:#1c1c1c; --entity-bg:#1c1c1c; --muted:#aaaaaa; --labelbg:#141414; }
+  }
+  :root[data-theme="dark"]{ --bg:#141414; --ink:#f0f0f0; --line:#f0f0f0; --fill:#1c1c1c; --entity-bg:#1c1c1c; --muted:#aaaaaa; --labelbg:#141414; }
+  :root[data-theme="light"]{ --bg:#fafafa; --ink:#1a1a1a; --line:#1a1a1a; --fill:#ffffff; --entity-bg:#ffffff; --muted:#666666; --labelbg:#fafafa; }
+
+  * { box-sizing:border-box; }
+  body{ margin:0; background:var(--bg); color:var(--ink); font-family:-apple-system,"Segoe UI","Noto Sans Thai",system-ui,sans-serif; padding:2rem 1.25rem 5rem; }
+  h1{ font-size:1.4rem; font-weight:700; text-align:center; margin:0 0 .25rem; text-wrap:balance; }
+  .sub{ text-align:center; color:var(--muted); font-size:.85rem; margin:0 auto 2.5rem; max-width:680px; }
+  .wrap{ max-width:1300px; margin:0 auto; overflow-x:auto; }
+
+  .stage{ position:relative; width:1220px; min-height:1000px; margin:0 auto; }
+
+  .col-head{ position:absolute; top:0; text-align:center; font-size:.72rem; color:var(--muted); font-weight:700; letter-spacing:.03em; text-transform:uppercase; width:260px; }
+  .col-head.a{ left:0; } .col-head.b{ left:480px; } .col-head.c{ left:960px; }
+
+  .node{ position:absolute; z-index:2; }
+
+  .entity{
+    width:220px; border:1.5px solid var(--line); background:var(--entity-bg);
+    padding:.6rem .8rem; text-align:center; font-size:.76rem; font-weight:700;
+  }
+
+  .process{
+    width:220px; min-height:86px; border-radius:50%; border:1.5px solid var(--line); background:var(--fill);
+    display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center;
+    padding:.6rem 1rem; font-size:.72rem;
+  }
+  .process .num{ font-size:.66rem; color:var(--muted); font-weight:700; margin-bottom:.2rem; }
+  .process .name{ font-weight:700; line-height:1.3; }
+
+  .store{
+    width:230px; border-top:1.5px solid var(--line); border-bottom:1.5px solid var(--line);
+    padding:.6rem .9rem; text-align:center; font-size:.72rem;
+  }
+  .store .dkey{ font-size:.66rem; color:var(--muted); font-weight:700; }
+  .store .dname{ font-weight:700; line-height:1.3; margin-top:.15rem; }
+
+  svg.connectors{ position:absolute; inset:0; width:100%; height:100%; pointer-events:none; z-index:1; overflow:visible; }
+  .flow{ fill:none; stroke-width:2.25; stroke-linejoin:round; }
+  .flabel{
+    position:absolute; z-index:2; max-width:150px; font-size:.66rem; font-weight:600; line-height:1.3;
+    background:var(--labelbg); padding:.15rem .4rem .15rem .5rem; text-align:center; transform:translate(-50%,-50%);
+    border:1px solid var(--muted); border-left-width:3px; border-radius:4px;
+  }
+
+  .legend{ max-width:1300px; margin:2rem auto 0; font-size:.72rem; color:var(--ink); display:flex; flex-wrap:wrap; gap:.5rem 1.4rem; justify-content:center; }
+  .legend .item{ display:flex; align-items:center; gap:.4rem; }
+  .legend .swatch{ width:14px; height:14px; border-radius:3px; flex-shrink:0; }
+  .legend-note{ text-align:center; color:var(--muted); font-size:.72rem; margin:.6rem auto 0; }
+</style>
+
+<h1>ภาพที่ 4 — แผนภาพกระแสข้อมูลระดับ 1 (Data Flow Diagram Level 1)</h1>
+<p class="sub">แตกรายละเอียดจากแผนภาพบริบท (ภาพที่ 3) แสดงกระบวนการทำงานหลัก (Process) และแหล่งจัดเก็บข้อมูล (Data Store) ของระบบ SRRU Check · screenshot ภาพนี้ไปใช้แทนภาพที่ 4 ในบทที่ 3</p>
+
+<div class="wrap">
+  <div class="stage" id="stage">
+    <div class="col-head a">ผู้ใช้งานภายนอก (External Entity)</div>
+    <div class="col-head b">กระบวนการ (Process)</div>
+    <div class="col-head c">แหล่งจัดเก็บข้อมูล (Data Store)</div>
+
+    <div class="node entity" id="e-student" style="left:0; top:70px; border-color:#2563eb;">นักศึกษา</div>
+    <div class="node entity" id="e-coordinator" style="left:0; top:330px; border-color:#059669;">ผู้รับผิดชอบกิจกรรม<br>กองพัฒนานักศึกษา</div>
+    <div class="node entity" id="e-admin" style="left:0; top:590px; border-color:#c026d3;">ผู้ดูแลระบบ</div>
+    <div class="node entity" id="e-google" style="left:0; top:850px; border-color:#ea580c;">Google<br>(OAuth Provider)</div>
+
+    <div class="node process" id="p1" style="left:480px; top:20px;"><div class="num">1</div><div class="name">ตรวจสอบสิทธิ์ จัดการบัญชี<br>และข้อมูลพื้นฐาน</div></div>
+    <div class="node process" id="p2" style="left:480px; top:180px;"><div class="num">2</div><div class="name">จัดการกิจกรรม</div></div>
+    <div class="node process" id="p3" style="left:480px; top:340px;"><div class="num">3</div><div class="name">เช็คชื่อเข้าร่วมกิจกรรม</div></div>
+    <div class="node process" id="p4" style="left:480px; top:500px;"><div class="num">4</div><div class="name">พิจารณาอนุมัติคำร้อง</div></div>
+    <div class="node process" id="p5" style="left:480px; top:660px;"><div class="num">5</div><div class="name">ติดตามชั่วโมงและสร้างรายงาน<br>/เอกสารสรุปผล</div></div>
+    <div class="node process" id="p6" style="left:480px; top:820px;"><div class="num">6</div><div class="name">แจ้งเตือนและ<br>ติดต่อสื่อสาร</div></div>
+
+    <div class="node store" id="d1" style="left:960px; top:40px; border-color:#0891b2;"><div class="dkey">D1</div><div class="dname">ผู้ใช้งาน<br>(users, faculties, majors)</div></div>
+    <div class="node store" id="d2" style="left:960px; top:220px; border-color:#7c3aed;"><div class="dkey">D2</div><div class="dname">กิจกรรม<br>(activities, activity_restrictions)</div></div>
+    <div class="node store" id="d3" style="left:960px; top:400px; border-color:#ca8a04;"><div class="dkey">D3</div><div class="dname">การเข้าร่วมกิจกรรม<br>(attendances)</div></div>
+    <div class="node store" id="d4" style="left:960px; top:580px; border-color:#dc2626;"><div class="dkey">D4</div><div class="dname">คำร้องและการเทียบโอน<br>(requests, credit_transfer_*)</div></div>
+    <div class="node store" id="d5" style="left:960px; top:760px; border-color:#0d9488;"><div class="dkey">D5</div><div class="dname">การสื่อสารและประวัติระบบ<br>(contact_*, announcement_logs, audit_logs)</div></div>
+
+    <svg class="connectors" id="svg"></svg>
+  </div>
+</div>
+
+<div class="legend" id="legend"></div>
+<p class="legend-note">สีของเส้น/ป้ายกำกับ/กรอบกล่อง = เจ้าของเส้นเดียวกัน (ไล่สีตามเจ้าของเพื่อแยกเส้นที่ทับกัน) — เส้นสองหัวลูกศร หมายถึงข้อมูลไหลทั้งสองทิศทาง</p>
+
+<script>
+const flows = [
+  ["e-student","p1","ข้อมูลบัญชี / เข้าสู่ระบบ","<->"],
+  ["e-coordinator","p1","เข้าสู่ระบบ","->"],
+  ["e-admin","p1","จัดการสิทธิ์ / ข้อมูลพื้นฐาน / Audit Log","<->"],
+  ["e-google","p1","ยืนยันตัวตน (OAuth)","<->"],
+
+  ["e-coordinator","p2","สร้าง/แก้ไขกิจกรรม","<->"],
+
+  ["e-student","p3","เช็คชื่อเข้าร่วมกิจกรรม","<->"],
+
+  ["e-student","p4","ยื่น/รับผลคำร้อง","<->"],
+  ["e-coordinator","p4","ตรวจสอบ/อนุมัติคำร้อง","<->"],
+
+  ["p5","e-student","ชั่วโมงสะสม / เอกสารสรุปผล","->"],
+  ["p5","e-coordinator","รายงานสรุปผล","->"],
+
+  ["e-student","p6","แจ้งเตือน/ติดต่อสอบถาม","<->"],
+  ["e-coordinator","p6","ประกาศข่าวสาร","->"],
+
+  ["p1","d1","อ่าน/บันทึกข้อมูลผู้ใช้งาน","<->"],
+  ["p2","d2","อ่าน/บันทึกข้อมูลกิจกรรม","<->"],
+  ["p3","d3","บันทึกผลการเช็คชื่อ","->"],
+  ["p4","d4","อ่าน/บันทึกคำร้อง","<->"],
+  ["p5","d3","อ่านข้อมูลการเช็คชื่อ","->"],
+  ["p5","d4","อ่านข้อมูลคำร้องที่อนุมัติ","->"],
+  ["p6","d5","บันทึก/อ่านข้อมูลการสื่อสาร","<->"],
+];
+
+// Left column (entities) and right column (stores) both fan out to several
+// processes each — drawn as direct diagonal lines they crossed at random
+// angles and read as a tangle. Give every entity/store its own vertical
+// "trunk" lane instead, like a subway map: one trunk per source, short
+// horizontal branches off it into each connected process's row.
+const entityLaneX = { "e-student": 260, "e-coordinator": 300, "e-admin": 340, "e-google": 380 };
+const storeLaneX = { "d1": 780, "d2": 820, "d3": 860, "d4": 900, "d5": 940 };
+
+// Every entity/store gets its own color, carried through its trunk line,
+// its label's left edge, and its own box border — so tracing "which line
+// is this label for" no longer depends on untangling position alone.
+const entityColor = { "e-student": "#2563eb", "e-coordinator": "#059669", "e-admin": "#c026d3", "e-google": "#ea580c" };
+const storeColor = { "d1": "#0891b2", "d2": "#7c3aed", "d3": "#ca8a04", "d4": "#dc2626", "d5": "#0d9488" };
+const entityLabel = { "e-student": "นักศึกษา", "e-coordinator": "ผู้รับผิดชอบกิจกรรม", "e-admin": "ผู้ดูแลระบบ", "e-google": "Google (OAuth)" };
+const storeLabel = { "d1": "D1 ผู้ใช้งาน", "d2": "D2 กิจกรรม", "d3": "D3 การเข้าร่วมกิจกรรม", "d4": "D4 คำร้องและการเทียบโอน", "d5": "D5 การสื่อสารและประวัติระบบ" };
+
+// A process reached by several entities, or a store reached by several
+// processes, would otherwise have every incoming branch land on that
+// node's exact center row. These per-source offsets spread those landing
+// points out so the branch stubs (and their labels) don't overlap.
+// The previous offsets (12-16px apart) were sized for a single-line label;
+// most labels here wrap to two lines (~34px tall), so adjacent branches
+// still overlapped. Widened the gaps to actually clear a two-line label.
+const entityNudge = { "e-student": -60, "e-coordinator": -20, "e-admin": 20, "e-google": 60 };
+// Only p3/p5 share d3 and only p4/p5 share d4 — p1, p2, p6 each own a
+// store nobody else touches, so they don't need separation from anything.
+const processNudge = { "p1": 0, "p2": 0, "p3": -30, "p4": -30, "p5": 30, "p6": 0 };
+
+function el(id){ return document.getElementById(id); }
+function center(rect, sRect){ return { x: rect.left + rect.width/2 - sRect.left, y: rect.top + rect.height/2 - sRect.top }; }
+
+// Builds an SVG path through `points`, and on every horizontal segment,
+// hops in a small semicircle over any x in `obstacles` it passes through —
+// the schematic-diagram convention for "these two lines cross but don't
+// connect", so a crossing never reads as one line quietly joining another.
+function hopPath(points, obstacles){
+  let d = `M${points[0].x},${points[0].y}`;
+  for (let i=1;i<points.length;i++){
+    const a = points[i-1], b = points[i];
+    if (Math.abs(a.y-b.y) < 0.5 && Math.abs(a.x-b.x) > 1){
+      const dir = b.x > a.x ? 1 : -1;
+      const lo = Math.min(a.x,b.x), hi = Math.max(a.x,b.x);
+      const hops = obstacles
+        .filter(ox => ox > lo+10 && ox < hi-10)
+        .sort((x,y) => dir>0 ? x-y : y-x);
+      hops.forEach(ox => {
+        d += ` L${ox-dir*7},${a.y} A7,7 0 0 ${dir>0?1:0} ${ox+dir*7},${a.y}`;
+      });
+      d += ` L${b.x},${b.y}`;
+    } else {
+      d += ` L${b.x},${b.y}`;
+    }
+  }
+  return d;
+}
+
+function draw(){
+  const stage = el("stage");
+  const svg = el("svg");
+  const sRect = stage.getBoundingClientRect();
+
+  // One arrowhead marker per lane color (SVG markers don't inherit the
+  // referencing path's stroke color automatically), keyed by a safe id
+  // derived from the hex value.
+  const allColors = [...Object.values(entityColor), ...Object.values(storeColor)];
+  const cid = c => "c" + c.replace("#","");
+  const defs = allColors.map(c => `
+    <marker id="arrowE_${cid(c)}" markerWidth="13" markerHeight="13" refX="9.5" refY="5" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="${c}"/>
+    </marker>
+    <marker id="arrowS_${cid(c)}" markerWidth="13" markerHeight="13" refX="2.5" refY="5" orient="auto">
+      <path d="M10,0 L0,5 L10,10 z" fill="${c}"/>
+    </marker>`).join("");
+  svg.innerHTML = `<defs>${defs}</defs>`;
+  stage.querySelectorAll(".flabel").forEach(n => n.remove());
+
+  // Legend: one swatch per entity/store, same colors as the lines/boxes.
+  const legend = el("legend");
+  legend.innerHTML = [
+    ...Object.keys(entityLaneX).map(id => `<span class="item"><span class="swatch" style="background:${entityColor[id]}"></span>${entityLabel[id]}</span>`),
+    ...Object.keys(storeLaneX).map(id => `<span class="item"><span class="swatch" style="background:${storeColor[id]}"></span>${storeLabel[id]}</span>`),
+  ].join("");
+
+  flows.forEach(([fromId, toId, label, dir]) => {
+    const laneOwner = entityLaneX[fromId] !== undefined ? fromId
+      : entityLaneX[toId] !== undefined ? toId
+      : storeLaneX[fromId] !== undefined ? fromId : toId;
+    const laneX = entityLaneX[laneOwner] !== undefined ? entityLaneX[laneOwner] : storeLaneX[laneOwner];
+    const isEntityLane = entityLaneX[laneOwner] !== undefined;
+    const ownerIsSource = laneOwner === fromId;
+
+    const fRect = el(fromId).getBoundingClientRect(), tRect = el(toId).getBoundingClientRect();
+    const fC = center(fRect, sRect), tC = center(tRect, sRect);
+
+    // Branch point sits on the lane owner's own row; the far end (the
+    // process) gets a short horizontal stub into its own row. Three
+    // segments: out of the source, straight down/up the shared trunk,
+    // into the target — every edge for the same entity/store rides the
+    // same vertical trunk instead of cutting its own diagonal path.
+    const ownerC = ownerIsSource ? fC : tC;
+    const otherC = ownerIsSource ? tC : fC;
+    const ownerRect = ownerIsSource ? fRect : tRect;
+    const otherRect = ownerIsSource ? tRect : fRect;
+
+    // A process fed by several entities (or a store fed by several
+    // processes) had every branch land on the exact same center row,
+    // stacking their stub lines and labels on top of each other. Widening
+    // that offset enough to clear a two-line label pushed several arrows
+    // past the node's own (much shorter) height, so they landed in empty
+    // space instead of touching it. Split the two needs apart: the arrow
+    // gets only a small nudge clamped to safely stay inside the node it's
+    // entering; the label keeps the full-size nudge but sits back near
+    // the lane trunk instead, where there's open space to spread into.
+    const entityId = entityLaneX[fromId] !== undefined ? fromId : (entityLaneX[toId] !== undefined ? toId : null);
+    const rawNudge = entityId !== null
+      ? entityNudge[entityId]
+      : (processNudge[storeLaneX[fromId] !== undefined ? toId : fromId] || 0);
+    const nudgeTargetIsOther = entityId !== null; // entity case nudges the process (other); store case nudges the store (owner)
+    const nudgeBaseY = nudgeTargetIsOther ? otherC.y : ownerC.y;
+    const clampRect = nudgeTargetIsOther ? otherRect : ownerRect;
+    const safeNudge = Math.sign(rawNudge) * Math.min(Math.abs(rawNudge), clampRect.height*0.32);
+    if (nudgeTargetIsOther){ otherC.y = nudgeBaseY + safeNudge; } else { ownerC.y = nudgeBaseY + safeNudge; }
+
+    const ownerExitX = laneX > ownerC.x ? ownerC.x + ownerRect.width/2 : ownerC.x - ownerRect.width/2;
+    const otherExitX = laneX > otherC.x ? otherC.x + otherRect.width/2 : otherC.x - otherRect.width/2;
+
+    const p1 = { x: ownerExitX, y: ownerC.y };
+    const p2 = { x: laneX, y: ownerC.y };
+    const p3 = { x: laneX, y: otherC.y };
+    const p4 = { x: otherExitX, y: otherC.y };
+    const pts = ownerIsSource ? [p1,p2,p3,p4] : [p4,p3,p2,p1];
+
+    // Every entity (or store) rides its own trunk, but several trunks sit
+    // close together in the same narrow gap — a flow whose trunk isn't the
+    // nearest one has to cross its neighbors' trunks to reach its node.
+    // Left as plain crossing lines those reads as one line quietly merging
+    // into another. Hop over every *other* same-side trunk the path
+    // crosses, same convention as a wire jump on a schematic, so a
+    // crossing always reads as "two unrelated lines", never a join.
+    const laneMap = isEntityLane ? entityLaneX : storeLaneX;
+    const laneColorMap = isEntityLane ? entityColor : storeColor;
+    const color = laneColorMap[laneOwner];
+    const obstacles = Object.values(laneMap).filter(x => x !== laneX);
+    const d = hopPath(pts, obstacles);
+    const path = document.createElementNS("http://www.w3.org/2000/svg","path");
+    path.setAttribute("d", d);
+    path.setAttribute("class","flow");
+    path.setAttribute("stroke", color);
+    if (dir === "->" || dir === "<->") path.setAttribute("marker-end",`url(#arrowE_${cid(color)})`);
+    if (dir === "<-" || dir === "<->") path.setAttribute("marker-start",`url(#arrowS_${cid(color)})`);
+    svg.appendChild(path);
+
+    // Label rides the trunk near the lane (not the cramped node edge),
+    // using the full unclamped nudge so labels from different sources
+    // actually clear each other. Entity lanes sit left of the process
+    // column, store lanes sit right of it — the offset direction has to
+    // follow which side the lane is on, not which end of the edge is the
+    // arrow's source (those aren't the same thing, and using the wrong
+    // one drops the label back inside the entity column for the two
+    // process→entity edges, which run the opposite way).
+    const labelX = laneX + (isEntityLane ? 55 : -55);
+    const labelY = nudgeBaseY + rawNudge;
+    const div = document.createElement("div");
+    div.className = "flabel";
+    div.textContent = label;
+    div.style.left = labelX + "px";
+    div.style.top = labelY + "px";
+    div.style.borderLeftColor = color;
+    stage.appendChild(div);
+  });
+}
+
+requestAnimationFrame(() => requestAnimationFrame(draw));
+window.addEventListener("resize", () => requestAnimationFrame(draw));
+</script>

@@ -1,0 +1,151 @@
+<title>Context Diagram — SRRU Check บทที่ 3</title>
+<style>
+  :root{
+    --bg:#fafafa; --ink:#1a1a1a; --line:#1a1a1a; --fill:#ffffff;
+    --entity-bg:#ffffff; --muted:#666666; --labelbg:#fafafa;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{ --bg:#141414; --ink:#f0f0f0; --line:#f0f0f0; --fill:#1c1c1c; --entity-bg:#1c1c1c; --muted:#aaaaaa; --labelbg:#141414; }
+  }
+  :root[data-theme="dark"]{ --bg:#141414; --ink:#f0f0f0; --line:#f0f0f0; --fill:#1c1c1c; --entity-bg:#1c1c1c; --muted:#aaaaaa; --labelbg:#141414; }
+  :root[data-theme="light"]{ --bg:#fafafa; --ink:#1a1a1a; --line:#1a1a1a; --fill:#ffffff; --entity-bg:#ffffff; --muted:#666666; --labelbg:#fafafa; }
+
+  * { box-sizing:border-box; }
+  body{ margin:0; background:var(--bg); color:var(--ink); font-family:-apple-system,"Segoe UI","Noto Sans Thai",system-ui,sans-serif; padding:2rem 1.25rem 5rem; }
+  h1{ font-size:1.4rem; font-weight:700; text-align:center; margin:0 0 .25rem; text-wrap:balance; }
+  .sub{ text-align:center; color:var(--muted); font-size:.85rem; margin:0 auto 2.5rem; max-width:640px; }
+  .wrap{ max-width:980px; margin:0 auto; }
+
+  .stage{ position:relative; height:900px; overflow:visible; }
+
+  .system{
+    position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
+    width:230px; height:230px; border-radius:50%; border:2px solid var(--line);
+    background:var(--fill); display:flex; flex-direction:column; align-items:center; justify-content:center;
+    text-align:center; z-index:2; padding:1rem;
+  }
+  .system .num{ font-size:.72rem; color:var(--muted); font-weight:700; margin-bottom:.3rem; }
+  .system .name{ font-size:.9rem; font-weight:700; line-height:1.35; }
+
+  .entity{
+    position:absolute; width:190px; border:1.5px solid var(--line); background:var(--entity-bg);
+    padding:.7rem .9rem; text-align:center; font-size:.78rem; font-weight:700; z-index:2;
+  }
+  .entity.n{ left:50%; top:0; transform:translateX(-50%); }
+  .entity.e{ right:0; top:50%; transform:translateY(-50%); }
+  .entity.s{ left:50%; bottom:0; transform:translateX(-50%); }
+  .entity.w{ left:0; top:50%; transform:translateY(-50%); }
+
+  svg.connectors{ position:absolute; inset:0; width:100%; height:100%; pointer-events:none; z-index:1; overflow:visible; }
+  .flow{ fill:none; stroke:var(--line); stroke-width:1.4; }
+  .flabel{
+    position:absolute; z-index:2; max-width:170px; font-size:.66rem; line-height:1.3;
+    background:var(--labelbg); padding:.1rem .35rem; text-align:center; transform:translate(-50%,-50%);
+  }
+
+  .legend{ max-width:980px; margin:2rem auto 0; font-size:.72rem; color:var(--muted); text-align:center; }
+</style>
+
+<h1>ภาพที่ 3 — แผนภาพบริบท (Context Diagram)</h1>
+<p class="sub">แสดงภาพรวมการทำงานของระบบ SRRU Check และเส้นทางการไหลของข้อมูลระหว่างระบบกับผู้ใช้งานภายนอก (External Entities) · screenshot ภาพนี้ไปใช้แทนภาพที่ 3 ในบทที่ 3</p>
+
+<div class="wrap">
+  <div class="stage" id="stage">
+    <div class="system">
+      <div class="num">0</div>
+      <div class="name">ระบบบริหารจัดการและตรวจสอบผลการดำเนินกิจกรรมนักศึกษา<br>(SRRU Check)</div>
+    </div>
+
+    <div class="entity n" id="e-student">นักศึกษา</div>
+    <div class="entity e" id="e-coordinator">ผู้รับผิดชอบกิจกรรม<br>กองพัฒนานักศึกษา</div>
+    <div class="entity s" id="e-admin">ผู้ดูแลระบบ</div>
+    <div class="entity w" id="e-google">Google<br>(OAuth Provider)</div>
+
+    <svg class="connectors" id="svg"></svg>
+  </div>
+</div>
+
+<p class="legend">ลูกศรแสดงทิศทางการไหลของข้อมูล (Data Flow) — หัวลูกศรชี้เข้าสู่ผู้รับข้อมูล</p>
+
+<script>
+const flows = [
+  // [fromId, toId, label, side]  side offsets the parallel line so in/out don't overlap
+  ["e-student", "system", "ข้อมูลโปรไฟล์ / คำขอเช็คชื่อ-เช็คชื่อย้อนหลัง / คำร้องเทียบโอนชั่วโมง / ข้อความติดต่อสอบถาม", "l"],
+  ["system", "e-student", "ข้อมูลกิจกรรม / ผลการอนุมัติ / ชั่วโมงสะสม / เอกสารสรุปผล PDF / การแจ้งเตือน", "r"],
+
+  ["e-coordinator", "system", "ข้อมูลกิจกรรมที่สร้าง/แก้ไข / ผลการตรวจสอบและอนุมัติคำร้อง / ประกาศข่าวสาร", "l"],
+  ["system", "e-coordinator", "รายชื่อผู้เข้าร่วมกิจกรรม / คำร้องที่รอพิจารณา / รายงานสรุปผล", "r"],
+
+  ["e-admin", "system", "การกำหนดสิทธิ์ผู้ใช้งาน / ข้อมูลพื้นฐาน (คณะ-สาขา-ตำแหน่ง-เกณฑ์) / ไฟล์นำเข้าข้อมูลนักศึกษา", "l"],
+  ["system", "e-admin", "ประวัติการดำเนินการ (Audit Log)", "r"],
+
+  ["e-google", "system", "ข้อมูลยืนยันตัวตน (อีเมล ชื่อ Google ID)", "l"],
+  ["system", "e-google", "คำขอตรวจสอบสิทธิ์ (OAuth Request)", "r"],
+];
+
+function el(id){ return document.getElementById(id); }
+
+function draw(){
+  const stage = el("stage");
+  const svg = el("svg");
+  const sRect = stage.getBoundingClientRect();
+  const sysRect = document.querySelector(".system").getBoundingClientRect();
+  const sysCx = sysRect.left + sysRect.width/2 - sRect.left;
+  const sysCy = sysRect.top + sysRect.height/2 - sRect.top;
+  const sysR = sysRect.width/2;
+
+  svg.innerHTML = `<defs>
+    <marker id="arrow" markerWidth="9" markerHeight="9" refX="7" refY="3.5" orient="auto">
+      <path d="M0,0 L7,3.5 L0,7 z" fill="var(--line)"/>
+    </marker>
+  </defs>`;
+  stage.querySelectorAll(".flabel").forEach(n => n.remove());
+
+  flows.forEach(([fromId, toId, label, side]) => {
+    const isOutbound = fromId === "system";
+    const entityId = isOutbound ? toId : fromId;
+
+    const eRect = el(entityId).getBoundingClientRect();
+    const ex = eRect.left + eRect.width/2 - sRect.left;
+    const ey = eRect.top + eRect.height/2 - sRect.top;
+
+    // Point on the entity box's edge facing the system, and a matching point
+    // on the system circle's edge facing the entity, offset sideways so the
+    // inbound/outbound lines for the same entity run parallel, not on top
+    // of each other.
+    const dx = sysCx - ex, dy = sysCy - ey;
+    const dist = Math.hypot(dx, dy);
+    const ux = dx/dist, uy = dy/dist;
+    const perpX = -uy, perpY = ux;
+    const offset = (side === "l" ? -1 : 1) * 14;
+
+    const sysEdgeX = sysCx - ux*sysR + perpX*offset;
+    const sysEdgeY = sysCy - uy*sysR + perpY*offset;
+
+    // Clip the entity-side point to the box border (approx via half-extents)
+    const hw = eRect.width/2, hh = eRect.height/2;
+    const scale = Math.min(hw/Math.abs(ux || 1e-6), hh/Math.abs(uy || 1e-6));
+    const entEdgeX = ex + ux*Math.min(scale, dist) + perpX*offset;
+    const entEdgeY = ey + uy*Math.min(scale, dist) + perpY*offset;
+
+    const [x1,y1,x2,y2] = isOutbound ? [sysEdgeX,sysEdgeY,entEdgeX,entEdgeY] : [entEdgeX,entEdgeY,sysEdgeX,sysEdgeY];
+
+    const p = document.createElementNS("http://www.w3.org/2000/svg","path");
+    p.setAttribute("d", `M${x1},${y1} L${x2},${y2}`);
+    p.setAttribute("class","flow");
+    p.setAttribute("marker-end","url(#arrow)");
+    svg.appendChild(p);
+
+    const midX = (x1+x2)/2, midY = (y1+y2)/2;
+    const div = document.createElement("div");
+    div.className = "flabel";
+    div.textContent = label;
+    div.style.left = (midX + perpX*offset*1.6) + "px";
+    div.style.top = (midY + perpY*offset*1.6) + "px";
+    stage.appendChild(div);
+  });
+}
+
+requestAnimationFrame(() => requestAnimationFrame(draw));
+window.addEventListener("resize", () => requestAnimationFrame(draw));
+</script>

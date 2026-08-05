@@ -1,0 +1,390 @@
+<title>สคริปต์พรีเซนต์ระบบ — SRRU Check</title>
+<style>
+  :root{
+    /* Pulled directly from the live app's resources/css/app.css @theme block
+       and .brand-gradient rule, so this matches the real product, not a
+       guess at "purple-ish". */
+    --purple-950:#2e1065; --purple-900:#4c1d95; --purple-800:#5b21b6; --purple-700:#6d28d9;
+    --purple-600:#7c3aed; --purple-500:#8b5cf6; --purple-200:#ddd6fe; --purple-100:#ede9fe; --purple-50:#f5f3ff;
+    --green-800:#065f46; --green-700:#047857; --green-600:#059669; --green-500:#10b981; --green-100:#d1fae5; --green-50:#ecfdf5;
+
+    --bg:var(--purple-50); --ink:#1e1633; --muted:#6b6083; --card:#ffffff; --card-border:var(--purple-100);
+    --caps-bg:var(--green-50); --caps-border:var(--green-100); --step-bg:var(--purple-100); --mono:#1e1633;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{ --bg:#150f28; --ink:#f1edfa; --muted:#b6a9d9; --card:#1e1738; --card-border:#3a2d5c;
+      --caps-bg:#12231d; --caps-border:#1f3d31; --step-bg:#2a2050; --mono:#e8e1f7; }
+  }
+  :root[data-theme="dark"]{ --bg:#150f28; --ink:#f1edfa; --muted:#b6a9d9; --card:#1e1738; --card-border:#3a2d5c;
+    --caps-bg:#12231d; --caps-border:#1f3d31; --step-bg:#2a2050; --mono:#e8e1f7; }
+  :root[data-theme="light"]{ --bg:var(--purple-50); --ink:#1e1633; --muted:#6b6083; --card:#ffffff; --card-border:var(--purple-100);
+    --caps-bg:var(--green-50); --caps-border:var(--green-100); --step-bg:var(--purple-100); --mono:#1e1633; }
+
+  * { box-sizing:border-box; }
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:"Noto Sans Thai","Segoe UI",-apple-system,system-ui,sans-serif;
+    line-height:1.65; padding:0 0 6rem;
+  }
+  .brand-gradient{ background-image:linear-gradient(135deg, var(--purple-950), var(--purple-800) 55%, var(--green-600)); }
+
+  .hero{
+    max-width:100%; margin:0 auto 1.75rem; padding:3rem 1.5rem 2.25rem; text-align:center; color:#fff;
+    -webkit-print-color-adjust:exact; print-color-adjust:exact;
+  }
+  .hero .eyebrow{ font-size:.72rem; font-weight:700; letter-spacing:.2em; text-transform:uppercase; color:var(--purple-200); }
+  .hero h1{ font-size:1.8rem; font-weight:800; margin:.4rem 0 .6rem; text-wrap:balance; }
+  .hero p{ color:#e7defc; font-size:.95rem; max-width:580px; margin:0 auto; }
+  .hero .time{
+    display:inline-block; margin-top:1.1rem; background:rgba(255,255,255,.14); border:1px solid rgba(255,255,255,.25);
+    border-radius:999px; padding:.4rem 1.1rem; font-size:.8rem; font-weight:700;
+  }
+
+  .agenda{ max-width:780px; margin:0 auto 1.75rem; padding:0 1.5rem; display:flex; flex-direction:column; gap:.5rem; }
+  .agenda a{ text-decoration:none; color:inherit; }
+  .agenda-row{
+    display:flex; align-items:center; gap:.8rem; background:var(--card); border:1px solid var(--card-border);
+    border-radius:12px; padding:.75rem 1rem;
+  }
+  .agenda-row .dot{ width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+  .agenda-row .txt{ flex:1; font-size:.88rem; font-weight:700; }
+  .agenda-row .dur{ font-size:.75rem; color:var(--muted); font-weight:700; }
+
+  .wrap{ max-width:780px; margin:0 auto; padding:0 1.5rem; display:flex; flex-direction:column; gap:1.25rem; }
+
+  .actHead{
+    margin-top:2.25rem; padding:1.1rem 1.3rem; border-radius:14px; color:#fff;
+    display:flex; align-items:center; justify-content:space-between; gap:1rem; flex-wrap:wrap;
+    -webkit-print-color-adjust:exact; print-color-adjust:exact; break-after:avoid;
+  }
+  .actHead .l .tag{ font-size:.68rem; font-weight:800; letter-spacing:.06em; text-transform:uppercase; opacity:.85; }
+  .actHead .l h2{ margin:.15rem 0 0; font-size:1.2rem; font-weight:800; }
+  .actHead .dur{ font-size:.78rem; font-weight:800; background:rgba(255,255,255,.2); padding:.3rem .7rem; border-radius:999px; }
+  .act0{ background:var(--purple-900); }
+  .act1{ background-image:linear-gradient(135deg, var(--purple-800), var(--green-600)); }
+  .act2{ background-image:linear-gradient(135deg, var(--purple-900), var(--purple-600)); }
+  .act3{ background-image:linear-gradient(135deg, var(--green-700), var(--purple-700)); }
+  .act4{ background:var(--purple-950); }
+
+  .step{
+    background:var(--card); border:1px solid var(--card-border); border-radius:14px; padding:1.2rem 1.3rem;
+    break-inside:avoid;
+  }
+  .step .shead{ display:flex; align-items:center; gap:.6rem; margin-bottom:.7rem; }
+  .step .shead .num{
+    flex-shrink:0; width:26px; height:26px; border-radius:8px; background:var(--step-bg); color:var(--purple-600);
+    display:flex; align-items:center; justify-content:center; font-size:.8rem; font-weight:800;
+  }
+  .step .shead .page{ font-weight:800; font-size:.98rem; }
+  .step .shead .device{
+    margin-left:auto; font-size:.66rem; font-weight:700; color:var(--purple-600); background:var(--purple-100);
+    padding:.15rem .55rem; border-radius:999px; flex-shrink:0;
+  }
+
+  .caps{
+    background:var(--caps-bg); border:1px solid var(--caps-border); border-radius:10px;
+    padding:.75rem .9rem .75rem 1.1rem; border-left:3px solid var(--green-600);
+  }
+  .caps .lbl{ font-size:.66rem; font-weight:800; color:var(--green-700); margin-bottom:.4rem; display:block; }
+  .caps ul{ margin:0; padding-left:1.1rem; display:flex; flex-direction:column; gap:.35rem; }
+  .caps li{ font-size:.85rem; color:var(--mono); }
+  .caps li b{ color:var(--purple-700); font-weight:700; }
+
+  .prepnote{
+    font-size:.78rem; color:var(--muted); background:var(--step-bg); border-radius:8px; padding:.5rem .7rem; margin-top:.6rem;
+  }
+
+  .checklist, .qa{
+    background:var(--card); border:1px solid var(--card-border); border-radius:14px; padding:1.3rem 1.4rem;
+    break-inside:avoid;
+  }
+  .checklist h2, .qa h2{ font-size:1rem; margin:0 0 .9rem; color:var(--purple-700); }
+  .checklist ul{ margin:0; padding-left:1.2rem; display:flex; flex-direction:column; gap:.55rem; font-size:.87rem; }
+
+  .qaItem{ margin-bottom:1rem; break-inside:avoid; }
+  .qaItem:last-child{ margin-bottom:0; }
+  .qaItem .q{ font-weight:700; font-size:.88rem; margin-bottom:.3rem; }
+  .qaItem .q::before{ content:"ถาม: "; color:var(--purple-600); }
+  .qaItem .a{ font-size:.85rem; color:var(--muted); }
+  .qaItem .a::before{ content:"ตอบ: "; color:var(--ink); font-weight:700; }
+
+  @media print{
+    body{ background:#fff; padding:0; }
+    .hero{ border-radius:0; }
+    a[href^="#"]{ pointer-events:none; }
+  }
+  @page{ margin:14mm 12mm; }
+
+  @media (max-width:520px){ .hero h1{ font-size:1.4rem; } .actHead{ flex-direction:column; align-items:flex-start; } }
+</style>
+
+<div class="hero brand-gradient">
+  <div class="eyebrow">SRRU Check</div>
+  <h1>คู่มือพรีเซนต์ระบบ</h1>
+  <p>ลำดับหน้าที่ต้องโชว์ พร้อมสรุปว่าแต่ละหน้าทำอะไรได้บ้าง มีปุ่ม/ฟีเจอร์อะไร — ใช้เป็นแนวเวลาเดโมสด พูดเองตามธรรมชาติได้เลย</p>
+  <div class="time">⏱ เวลารวมประมาณ 13-15 นาที</div>
+</div>
+
+<div class="agenda">
+  <a href="#act0"><div class="agenda-row"><span class="dot" style="background:var(--purple-900)"></span><span class="txt">บทนำ</span><span class="dur">30 วิ</span></div></a>
+  <a href="#act1"><div class="agenda-row"><span class="dot" style="background:var(--green-600)"></span><span class="txt">มุมมองนักศึกษา</span><span class="dur">~5 นาที</span></div></a>
+  <a href="#act2"><div class="agenda-row"><span class="dot" style="background:var(--purple-600)"></span><span class="txt">มุมมองผู้รับผิดชอบกิจกรรม</span><span class="dur">~4 นาที</span></div></a>
+  <a href="#act3"><div class="agenda-row"><span class="dot" style="background:var(--purple-800)"></span><span class="txt">มุมมองผู้ดูแลระบบ</span><span class="dur">~3 นาที</span></div></a>
+  <a href="#act4"><div class="agenda-row"><span class="dot" style="background:var(--purple-950)"></span><span class="txt">สรุปปิดท้าย</span><span class="dur">~1 นาที</span></div></a>
+</div>
+
+<div class="wrap">
+
+  <div class="checklist">
+    <h2>✅ เตรียมก่อนเริ่มพรีเซนต์ (ทำล่วงหน้า 1 วันก่อนสอบ)</h2>
+    <ul>
+      <li><b>เตรียม 3 บัญชีทดสอบ</b> — 1 บัญชีนักศึกษา, 1 บัญชีผู้รับผิดชอบกิจกรรม, 1 บัญชีผู้ดูแลระบบ (ล็อกอินไว้ล่วงหน้าคนละอุปกรณ์/เบราว์เซอร์ จะได้ไม่ต้องสลับล็อกอินสดหน้ากรรมการ)</li>
+      <li><b>สร้างกิจกรรมทดสอบ 1 รายการไว้ล่วงหน้า</b> ที่ยัง "เปิดรับ" อยู่ พร้อมพิกัดตรงกับสถานที่สอบจริง (หรือตั้งรัศมีให้กว้างพอ) จะได้เดโมเช็คชื่อได้จริงสด ๆ
+      <li><b>เปิดสิทธิ์กล้อง/ตำแหน่ง (GPS) ของเบราว์เซอร์ไว้ล่วงหน้า</b> ในอุปกรณ์ที่จะใช้เดโม กันไม่ให้ popup ขอสิทธิ์ขึ้นกวนตอนพรีเซนต์สด</li>
+      <li><b>เตรียมมือถือ 1 เครื่อง + คอมพิวเตอร์/โน้ตบุ๊ก 1 เครื่อง</b> เปิดพร้อมกัน — มือถือใช้โชว์ฝั่งนักศึกษา (เช็คชื่อ) คอมใช้โชว์ฝั่งผู้รับผิดชอบกิจกรรม/ผู้ดูแลระบบ (ตาราง รายงาน)</li>
+      <li><b>เช็กอินเทอร์เน็ตของสถานที่สอบล่วงหน้า</b> ระบบต้องใช้เน็ตตลอดการเดโม (เป็นเว็บแอป ไม่มีโหมดออฟไลน์)</li>
+    </ul>
+  </div>
+
+  <!-- ACT 0 -->
+  <div class="actHead act0" id="act0">
+    <div class="l"><div class="tag">เริ่มต้น</div><h2>บทนำ</h2></div>
+    <div class="dur">30 วินาที</div>
+  </div>
+
+  <div class="step">
+    <div class="shead"><span class="num">•</span><span class="page">แนะนำระบบสั้น ๆ ก่อนเข้าเดโม</span></div>
+    <div class="caps">
+      <span class="lbl">พูดถึง</span>
+      <ul>
+        <li>ชื่อระบบ <b>SRRU Check</b> — เว็บแอปบริหารจัดการและตรวจสอบชั่วโมงกิจกรรมนักศึกษา ม.ราชภัฏสุรินทร์</li>
+        <li>ปัญหาเดิม: ใช้เอกสารกระดาษ ตรวจสอบด้วยมือ ล่าช้า</li>
+        <li>ทางแก้: เช็คชื่อผ่าน QR+GPS+เซลฟี, ติดตามชั่วโมงเรียลไทม์, จัดการคำร้อง/รายงานผ่านระบบทั้งหมด</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ACT 1: STUDENT -->
+  <div class="actHead act1" id="act1">
+    <div class="l"><div class="tag">Act 1 — นักศึกษา</div><h2>มุมมองนักศึกษา</h2></div>
+    <div class="dur">~5 นาที</div>
+  </div>
+
+  <div class="step">
+    <div class="shead"><span class="num">1</span><span class="page">หน้าเข้าสู่ระบบ (Login)</span><span class="device">มือถือ</span></div>
+    <div class="caps">
+      <span class="lbl">ทำอะไรได้ / มีอะไร</span>
+      <ul>
+        <li>ปุ่ม <b>"เข้าสู่ระบบด้วย Google"</b> ปุ่มเดียว ไม่มีช่องกรอกรหัสผ่าน</li>
+        <li>ระบบตรวจสอบโดเมนอีเมลอัตโนมัติ อนุญาตเฉพาะ <b>@srru.ac.th</b></li>
+        <li>ไม่มีหน้าสมัครสมาชิกแยก — บัญชีถูกสร้างอัตโนมัติตอนล็อกอินครั้งแรก</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="shead"><span class="num">2</span><span class="page">แดชบอร์ดนักศึกษา</span><span class="device">มือถือ</span></div>
+    <div class="caps">
+      <span class="lbl">ทำอะไรได้ / มีอะไร</span>
+      <ul>
+        <li>แสดง <b>ชั่วโมงสะสมเทียบเป้าหมายแบบเรียลไทม์</b> (ภาคปกติ 100 ชม. / ภาคพิเศษ 50 ชม.)</li>
+        <li>แถบ/กราฟความคืบหน้า อัปเดตทันทีที่คำร้องได้รับอนุมัติ</li>
+        <li>รายการประวัติกิจกรรมที่เข้าร่วมล่าสุด</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="shead"><span class="num">3</span><span class="page">รายการกิจกรรม → เช็คชื่อเข้าร่วมกิจกรรม</span><span class="device">มือถือ</span></div>
+    <div class="caps">
+      <span class="lbl">ทำอะไรได้ / มีอะไร</span>
+      <ul>
+        <li>ตัวกรองกิจกรรมตาม <b>หมวดหมู่ / ระดับกิจกรรม / ปีการศึกษา</b></li>
+        <li>ปุ่ม <b>สแกน QR Code</b> — รหัสเปลี่ยนอัตโนมัติตามช่วงเวลา กันแคปภาพไปให้คนอื่นสแกนแทน</li>
+        <li>ตรวจสอบ <b>ตำแหน่ง GPS</b> เทียบกับรัศมีที่กิจกรรมกำหนดไว้ อัตโนมัติ</li>
+        <li>ปุ่ม <b>ถ่ายภาพเซลฟี</b> ยืนยันตัวตนก่อนบันทึกผล</li>
+        <li>ทางเลือก <b>"รายงานตนเอง"</b> พร้อมแนบรูปหลักฐาน — สำหรับกิจกรรมที่สแกน QR หน้างานไม่ได้</li>
+      </ul>
+    </div>
+    <div class="prepnote">ถ้าสแกนสดไม่ได้ (เน็ตช้า/แสงไม่พอ) เตรียม screenshot/วิดีโอสำรองไว้เผื่อสถานการณ์ฉุกเฉิน</div>
+  </div>
+
+  <div class="step">
+    <div class="shead"><span class="num">4</span><span class="page">ยื่นคำขอเช็คชื่อย้อนหลัง / เทียบโอนชั่วโมง</span><span class="device">มือถือ</span></div>
+    <div class="caps">
+      <span class="lbl">ทำอะไรได้ / มีอะไร</span>
+      <ul>
+        <li><b>ยื่นคำขอเช็คชื่อย้อนหลัง</b> — กรอกเหตุผล + แนบรูปหลักฐาน กรณีพลาดสแกนในเวลาที่กำหนด</li>
+        <li><b>ยื่นคำร้องเทียบโอนชั่วโมงกิจกรรมภายนอก</b> — กรอกรายละเอียด+แนบหลักฐาน จำกัดสูงสุด 10 ชั่วโมง/ปีการศึกษา</li>
+        <li><b>ยื่นคำร้องเทียบโอนชั่วโมงตำแหน่ง</b> — สำหรับนักศึกษาที่ดำรงตำแหน่งในองค์กรนักศึกษา ระบบคำนวณชั่วโมงมาตรฐานของตำแหน่งให้อัตโนมัติ</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="shead"><span class="num">5</span><span class="page">ดาวน์โหลดเอกสารสรุปผลกิจกรรม (PDF)</span><span class="device">มือถือ/คอม</span></div>
+    <div class="caps">
+      <span class="lbl">ทำอะไรได้ / มีอะไร</span>
+      <ul>
+        <li>ปุ่ม <b>ดาวน์โหลด PDF</b> — สรุปประวัติกิจกรรมและชั่วโมงสะสมทั้งหมด ได้ทันทีไม่ต้องรอเจ้าหน้าที่ออกเอกสารให้</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ACT 2: COORDINATOR -->
+  <div class="actHead act2" id="act2">
+    <div class="l"><div class="tag">Act 2 — เจ้าหน้าที่</div><h2>มุมมองผู้รับผิดชอบกิจกรรม</h2></div>
+    <div class="dur">~4 นาที</div>
+  </div>
+
+  <div class="step">
+    <div class="shead"><span class="num">1</span><span class="page">สร้างและจัดการกิจกรรม</span><span class="device">คอม</span></div>
+    <div class="caps">
+      <span class="lbl">ทำอะไรได้ / มีอะไร</span>
+      <ul>
+        <li>ฟอร์มกรอก ชื่อ/รายละเอียด/ระดับกิจกรรม/<b>หมวดหมู่ 5 ด้าน</b>/<b>ลักษณะกิจกรรม 3 ประเภท</b>/วันเวลา/จำนวนรับ</li>
+        <li><b>ปักหมุดสถานที่บนแผนที่</b> + กำหนดรัศมีพื้นที่ที่อนุญาตให้เช็คชื่อ (ค่านี้คือสิ่งที่ใช้ตรวจ GPS ตอนนักศึกษาเช็คชื่อ)</li>
+        <li>แก้ไข/ปิดกิจกรรมที่สร้างไว้แล้วได้</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="shead"><span class="num">2</span><span class="page">ตรวจสอบและอนุมัติคำร้อง</span><span class="device">คอม</span></div>
+    <div class="caps">
+      <span class="lbl">ทำอะไรได้ / มีอะไร</span>
+      <ul>
+        <li>รวมคำร้องทุกประเภทไว้หน้าเดียว: เช็คชื่อสถานะรอตรวจสอบ (Flagged), คำขอเช็คชื่อย้อนหลัง, คำร้องเทียบโอนชั่วโมง</li>
+        <li>ปุ่ม <b>อนุมัติ / ปฏิเสธ</b> พร้อมดูรูปหลักฐาน/เซลฟี/ตำแหน่งที่แนบมา</li>
+        <li>อนุมัติแล้วระบบ<b>บวกชั่วโมงเข้ายอดสะสมอัตโนมัติ</b>ทันที</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="shead"><span class="num">3</span><span class="page">เทียบโอนชั่วโมงกิจกรรมโดยตรง</span><span class="device">คอม</span></div>
+    <div class="caps">
+      <span class="lbl">ทำอะไรได้ / มีอะไร</span>
+      <ul>
+        <li>ค้นหานักศึกษาด้วย<b>รหัสนักศึกษา</b></li>
+        <li>เลือกตำแหน่งที่ดำรง → ระบบคำนวณชั่วโมงมาตรฐานให้อัตโนมัติ → บันทึกอนุมัติทันที (ไม่ต้องรอนักศึกษายื่นคำร้อง)</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="shead"><span class="num">4</span><span class="page">รายงาน</span><span class="device">คอม</span></div>
+    <div class="caps">
+      <span class="lbl">ทำอะไรได้ / มีอะไร</span>
+      <ul>
+        <li>รายงานสรุปการเข้าร่วมกิจกรรม<b>แยกตามคณะ</b></li>
+        <li>รายงานชั่วโมงสะสม<b>แยกตามหมวดหมู่ 5 ด้าน</b></li>
+        <li>รายงานสถิติคำร้องต่าง ๆ</li>
+        <li><b>รายงานนักศึกษากลุ่มเสี่ยง</b> ที่ยังสะสมชั่วโมงไม่ครบเกณฑ์ก่อนจบการศึกษา</li>
+        <li>ปุ่ม <b>ส่งออก Excel / PDF</b></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="shead"><span class="num">5</span><span class="page">ประกาศข่าวสาร / ติดต่อนักศึกษา</span><span class="device">คอม</span></div>
+    <div class="caps">
+      <span class="lbl">ทำอะไรได้ / มีอะไร</span>
+      <ul>
+        <li>ส่งประกาศข่าวสารถึงนักศึกษา เลือกกลุ่มเป้าหมายตามคณะได้</li>
+        <li>ระบบติดต่อสื่อสารกับนักศึกษาแบบแยกกระทู้ตามเรื่อง</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ACT 3: ADMIN -->
+  <div class="actHead act3" id="act3">
+    <div class="l"><div class="tag">Act 3 — ผู้ดูแลระบบ</div><h2>มุมมองผู้ดูแลระบบ</h2></div>
+    <div class="dur">~3 นาที</div>
+  </div>
+
+  <div class="step">
+    <div class="shead"><span class="num">1</span><span class="page">จัดการบัญชีผู้ใช้งาน</span><span class="device">คอม</span></div>
+    <div class="caps">
+      <span class="lbl">ทำอะไรได้ / มีอะไร</span>
+      <ul>
+        <li>กำหนด/เปลี่ยนสิทธิ์การใช้งาน — 3 ระดับ: นักศึกษา, ผู้รับผิดชอบกิจกรรม, ผู้ดูแลระบบ</li>
+        <li>ปุ่ม <b>ระงับ / ยกเลิกการระงับ</b> บัญชีผู้ใช้งาน</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="shead"><span class="num">2</span><span class="page">จัดการข้อมูลพื้นฐาน (Master Data)</span><span class="device">คอม</span></div>
+    <div class="caps">
+      <span class="lbl">ทำอะไรได้ / มีอะไร</span>
+      <ul>
+        <li>เพิ่ม/แก้ไข ข้อมูล<b>คณะและสาขาวิชา</b></li>
+        <li>กำหนด<b>ตำแหน่งสำหรับเทียบโอนชั่วโมง</b> และจำนวนชั่วโมงมาตรฐานของแต่ละตำแหน่ง</li>
+        <li>ตั้ง<b>เกณฑ์จำนวนกิจกรรม/ชั่วโมง</b>ที่ใช้ประเมินนักศึกษาแต่ละรุ่น (ไม่ต้องแก้โค้ด)</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="shead"><span class="num">3</span><span class="page">ประวัติการดำเนินการ (Audit Log)</span><span class="device">คอม</span></div>
+    <div class="caps">
+      <span class="lbl">ทำอะไรได้ / มีอะไร</span>
+      <ul>
+        <li>บันทึกทุกการอนุมัติ/ปฏิเสธคำร้อง และการแก้ไขข้อมูลพื้นฐาน — ใครทำ อะไร เมื่อไหร่</li>
+        <li>ตรวจสอบย้อนหลังได้ทั้งหมดในหน้าเดียว เพิ่มความโปร่งใส</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="shead"><span class="num">4</span><span class="page">นำเข้าข้อมูลนักศึกษาจำนวนมาก</span><span class="device">คอม</span></div>
+    <div class="caps">
+      <span class="lbl">ทำอะไรได้ / มีอะไร</span>
+      <ul>
+        <li>อัปโหลดไฟล์ <b>Excel/CSV</b> นำเข้าข้อมูลนักศึกษาทีละหลายคน</li>
+        <li>มีไฟล์แม่แบบ (Template) ให้ดาวน์โหลดไปกรอกก่อนอัปโหลด</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ACT 4: CLOSING -->
+  <div class="actHead act4" id="act4">
+    <div class="l"><div class="tag">ปิดท้าย</div><h2>สรุปปิดท้าย</h2></div>
+    <div class="dur">~1 นาที</div>
+  </div>
+
+  <div class="step">
+    <div class="shead"><span class="num">•</span><span class="page">สรุปจุดเด่นรวม</span></div>
+    <div class="caps">
+      <span class="lbl">พูดถึง</span>
+      <ul>
+        <li>เช็คชื่อป้องกันสวมสิทธิ์ด้วย <b>3 ชั้น</b>: QR หมุนรหัส + GPS + เซลฟี</li>
+        <li>ติดตามชั่วโมงสะสม<b>แบบเรียลไทม์</b> ทั้งฝั่งนักศึกษาและเจ้าหน้าที่</li>
+        <li>ระบบรายงาน/แจ้งเตือนกลุ่มเสี่ยง ช่วยเจ้าหน้าที่ทำงานเร็วขึ้น</li>
+        <li>ใช้งานได้ทั้ง<b>คอมพิวเตอร์และมือถือ</b> — พัฒนาด้วย Laravel + MySQL, ทดลองใช้งานจริงบน Railway แล้ว</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="qa">
+    <h2>🎤 คำถามที่กรรมการมักถาม (เตรียมคำตอบไว้ล่วงหน้า)</h2>
+    <div class="qaItem">
+      <div class="q">ถ้านักศึกษาปลอมตำแหน่ง GPS ได้ไหม ป้องกันยังไง</div>
+      <div class="a">ระบบใช้ 3 ชั้นร่วมกัน (QR ที่เปลี่ยนรหัสอัตโนมัติ + ตำแหน่ง GPS + เซลฟียืนยันตัวตน) ลดความเสี่ยงได้มากเมื่อเทียบกับการเช็คชื่อแบบเดิม แต่ยอมรับตรงๆ ว่าไม่มีระบบไหนป้องกันการปลอม GPS ได้ 100% หากเช็คชื่อที่ระบบตั้งค่าสถานะรอตรวจสอบ (Flagged) เจ้าหน้าที่จะตรวจสอบภาพเซลฟีและตำแหน่งอีกชั้นก่อนอนุมัติ</div>
+    </div>
+    <div class="qaItem">
+      <div class="q">ทำไมเลือกทำเว็บแอปแทนที่จะทำแอปมือถือ (Native App)</div>
+      <div class="a">เว็บแอปเข้าถึงได้ทันทีผ่านเบราว์เซอร์ ไม่ต้องติดตั้งหรือดาวน์โหลดจาก App Store/Play Store ลดอุปสรรคการใช้งาน และรองรับทั้งคอมพิวเตอร์และมือถือในโค้ดชุดเดียว ในข้อเสนอแนะของงานวิจัยก็ระบุไว้ว่าควรพัฒนาเป็น Native Mobile Application ในอนาคตเพื่อประสบการณ์ใช้งานที่ดียิ่งขึ้น โดยเฉพาะการแจ้งเตือนและการเข้าถึงกล้อง/GPS</div>
+    </div>
+    <div class="qaItem">
+      <div class="q">การเทียบโอนชั่วโมงกิจกรรมภายนอกมีข้อจำกัดไหม</div>
+      <div class="a">มีการจำกัดจำนวนชั่วโมงสูงสุดจากกิจกรรมภายนอกมหาวิทยาลัยไว้ที่ 10 ชั่วโมงต่อปีการศึกษา เพื่อไม่ให้ชั่วโมงสะสมพึ่งพากิจกรรมภายนอกมากเกินไป</div>
+    </div>
+    <div class="qaItem">
+      <div class="q">ระบบมีมาตรการความปลอดภัยของข้อมูลอย่างไรบ้าง</div>
+      <div class="a">ยืนยันตัวตนผ่าน Google OAuth จำกัดเฉพาะโดเมนอีเมลมหาวิทยาลัย ไม่มีรหัสผ่านให้ถูกขโมย มีระบบสิทธิ์การใช้งาน 3 ระดับ (Role-Based Access Control) และมี Audit Log บันทึกทุกการเปลี่ยนแปลงข้อมูลสำคัญ</div>
+    </div>
+  </div>
+
+</div>

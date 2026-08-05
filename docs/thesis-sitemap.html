@@ -1,0 +1,129 @@
+<title>Site Map — SRRU Check บทที่ 3</title>
+<style>
+  :root{
+    --bg:#fafafa; --ink:#1a1a1a; --line:#1a1a1a; --fill:#ffffff; --muted:#666666;
+    --root-fill:#1a1a1a; --root-ink:#fafafa;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{ --bg:#141414; --ink:#f0f0f0; --line:#f0f0f0; --fill:#1c1c1c; --muted:#aaaaaa; --root-fill:#f0f0f0; --root-ink:#141414; }
+  }
+  :root[data-theme="dark"]{ --bg:#141414; --ink:#f0f0f0; --line:#f0f0f0; --fill:#1c1c1c; --muted:#aaaaaa; --root-fill:#f0f0f0; --root-ink:#141414; }
+  :root[data-theme="light"]{ --bg:#fafafa; --ink:#1a1a1a; --line:#1a1a1a; --fill:#ffffff; --muted:#666666; --root-fill:#1a1a1a; --root-ink:#fafafa; }
+
+  * { box-sizing:border-box; }
+  body{ margin:0; background:var(--bg); color:var(--ink); font-family:-apple-system,"Segoe UI","Noto Sans Thai",system-ui,sans-serif; padding:2rem 1.25rem 5rem; }
+  h1{ font-size:1.4rem; font-weight:700; text-align:center; margin:0 0 .25rem; text-wrap:balance; }
+  .sub{ text-align:center; color:var(--muted); font-size:.85rem; margin:0 auto 2.5rem; max-width:680px; }
+  .wrap{ max-width:1300px; margin:0 auto; overflow-x:auto; }
+
+  .stage{ position:relative; min-width:1180px; }
+
+  .trunk{ display:flex; flex-direction:column; align-items:center; gap:34px; padding-top:4px; }
+
+  .node{
+    border:1.5px solid var(--line); border-radius:10px; background:var(--fill);
+    padding:.55rem 1rem; text-align:center; font-size:.76rem; font-weight:600; line-height:1.35;
+    position:relative; z-index:2; max-width:220px;
+  }
+  .node.root{ background:var(--root-fill); color:var(--root-ink); border-color:var(--root-fill); font-weight:700; }
+  .node.leaf{ font-weight:400; font-size:.7rem; }
+
+  .branches{ display:flex; gap:40px; align-items:flex-start; justify-content:center; }
+  .branch{ display:flex; flex-direction:column; align-items:center; gap:26px; width:280px; }
+  .branch-title{ font-size:.72rem; color:var(--muted); font-weight:700; text-transform:uppercase; letter-spacing:.03em; }
+  .leaves{ display:flex; flex-direction:column; gap:16px; align-items:center; width:100%; }
+
+  svg.connectors{ position:absolute; inset:0; width:100%; height:100%; pointer-events:none; z-index:1; overflow:visible; }
+  .link{ fill:none; stroke:var(--line); stroke-width:1.4; }
+</style>
+
+<h1>ภาพที่ 15 — การออกแบบโครงสร้างหน้าจอระบบ (Site Map)</h1>
+<p class="sub">แสดงโครงสร้างเมนูและการนำทาง (Navigation) ของเว็บแอปพลิเคชัน SRRU Check ตามลำดับชั้นการเข้าถึงหน้าจอของผู้ใช้งานแต่ละกลุ่ม · screenshot ภาพนี้ไปใช้แทนภาพที่ 15 ในบทที่ 3</p>
+
+<div class="wrap">
+  <div class="stage" id="stage">
+    <div class="trunk">
+      <div class="node root" id="n-home">หน้าแรก (Home)</div>
+      <div class="node" id="n-login">เข้าสู่ระบบด้วย Google (Login)</div>
+      <div class="node" id="n-profile">กรอกข้อมูลโปรไฟล์ (Profile Setup)<br><span style="font-weight:400;font-size:.62rem;color:var(--muted)">เฉพาะการเข้าสู่ระบบครั้งแรก</span></div>
+
+      <div class="branches">
+        <div class="branch">
+          <div class="node" id="n-student">แดชบอร์ดนักศึกษา</div>
+          <div class="branch-title">นักศึกษา</div>
+          <div class="leaves">
+            <div class="node leaf" id="n-s1">รายการกิจกรรม → เช็คชื่อเข้าร่วมกิจกรรม</div>
+            <div class="node leaf" id="n-s2">ยื่นคำขอเช็คชื่อย้อนหลัง</div>
+            <div class="node leaf" id="n-s3">ยื่นคำร้องเทียบโอนชั่วโมง (ภายนอก/ตำแหน่ง)</div>
+            <div class="node leaf" id="n-s4">เอกสารสรุปผลกิจกรรม (PDF)</div>
+            <div class="node leaf" id="n-s5">แจ้งเตือน / ติดต่อสอบถาม</div>
+          </div>
+        </div>
+
+        <div class="branch">
+          <div class="node" id="n-coord">แดชบอร์ดผู้รับผิดชอบกิจกรรม</div>
+          <div class="branch-title">ผู้รับผิดชอบกิจกรรมกองพัฒนานักศึกษา</div>
+          <div class="leaves">
+            <div class="node leaf" id="n-c1">สร้าง / จัดการกิจกรรม</div>
+            <div class="node leaf" id="n-c2">ตรวจสอบและอนุมัติคำร้อง</div>
+            <div class="node leaf" id="n-c3">เทียบโอนชั่วโมงกิจกรรมโดยตรง</div>
+            <div class="node leaf" id="n-c4">รายงานสรุปผล</div>
+            <div class="node leaf" id="n-c5">ประกาศข่าวสาร</div>
+          </div>
+        </div>
+
+        <div class="branch">
+          <div class="node" id="n-admin">แดชบอร์ดผู้ดูแลระบบ</div>
+          <div class="branch-title">ผู้ดูแลระบบ</div>
+          <div class="leaves">
+            <div class="node leaf" id="n-a1">จัดการบัญชีผู้ใช้งานและสิทธิ์</div>
+            <div class="node leaf" id="n-a2">จัดการข้อมูลพื้นฐาน (Master Data)</div>
+            <div class="node leaf" id="n-a3">ประวัติการดำเนินการ (Audit Log)</div>
+            <div class="node leaf" id="n-a4">นำเข้าข้อมูลนักศึกษาจำนวนมาก</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <svg class="connectors" id="svg"></svg>
+  </div>
+</div>
+
+<script>
+const links = [
+  ["n-home","n-login"],
+  ["n-login","n-profile"],
+  ["n-profile","n-student"],
+  ["n-profile","n-coord"],
+  ["n-profile","n-admin"],
+  ["n-student","n-s1"],["n-s1","n-s2"],["n-s2","n-s3"],["n-s3","n-s4"],["n-s4","n-s5"],
+  ["n-coord","n-c1"],["n-c1","n-c2"],["n-c2","n-c3"],["n-c3","n-c4"],["n-c4","n-c5"],
+  ["n-admin","n-a1"],["n-a1","n-a2"],["n-a2","n-a3"],["n-a3","n-a4"],
+];
+
+function el(id){ return document.getElementById(id); }
+
+function draw(){
+  const stage = el("stage");
+  const svg = el("svg");
+  const sRect = stage.getBoundingClientRect();
+  svg.innerHTML = "";
+
+  links.forEach(([fromId, toId]) => {
+    const fRect = el(fromId).getBoundingClientRect(), tRect = el(toId).getBoundingClientRect();
+    const fx = fRect.left + fRect.width/2 - sRect.left, fy = fRect.bottom - sRect.top;
+    const tx = tRect.left + tRect.width/2 - sRect.left, ty = tRect.top - sRect.top;
+    const midY = (fy + ty) / 2;
+    const path = document.createElementNS("http://www.w3.org/2000/svg","path");
+    const d = Math.abs(fx - tx) < 2
+      ? `M${fx},${fy} L${tx},${ty}`
+      : `M${fx},${fy} L${fx},${midY} L${tx},${midY} L${tx},${ty}`;
+    path.setAttribute("d", d);
+    path.setAttribute("class","link");
+    svg.appendChild(path);
+  });
+}
+
+requestAnimationFrame(() => requestAnimationFrame(draw));
+window.addEventListener("resize", () => requestAnimationFrame(draw));
+</script>

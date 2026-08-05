@@ -1,0 +1,159 @@
+<title>โลโก้ SRRU Check — ช้างสุรินทร์</title>
+<style>
+  :root{
+    --purple-950:#2e1065; --purple-900:#4c1d95; --purple-800:#5b21b6; --purple-700:#6d28d9;
+    --purple-600:#7c3aed; --purple-500:#8b5cf6; --purple-200:#ddd6fe; --purple-100:#ede9fe; --purple-50:#f5f3ff;
+    --green-800:#065f46; --green-700:#047857; --green-600:#059669; --green-500:#10b981; --green-100:#d1fae5; --green-50:#ecfdf5;
+
+    --bg:#faf9fc; --ink:#1c1730; --muted:#71698e; --card:#ffffff; --card-border:#eae6f5;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{ --bg:#120c22; --ink:#f1edfa; --muted:#a89bd1; --card:#1b1533; --card-border:#332a54; }
+  }
+  :root[data-theme="dark"]{ --bg:#120c22; --ink:#f1edfa; --muted:#a89bd1; --card:#1b1533; --card-border:#332a54; }
+  :root[data-theme="light"]{ --bg:#faf9fc; --ink:#1c1730; --muted:#71698e; --card:#ffffff; --card-border:#eae6f5; }
+
+  * { box-sizing:border-box; }
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:"Noto Sans Thai","Segoe UI",-apple-system,system-ui,sans-serif;
+    line-height:1.6; padding:0 0 6rem;
+  }
+
+  /* ===== Hero stage: dark, dramatic, lets the mark breathe ===== */
+  .stage{
+    background:radial-gradient(120% 140% at 50% -10%, #241a48, #150f28 60%);
+    padding:4.5rem 1.5rem 3.5rem; text-align:center; color:#fff;
+    -webkit-print-color-adjust:exact; print-color-adjust:exact;
+  }
+  .stage .eyebrow{ font-size:.7rem; font-weight:700; letter-spacing:.24em; text-transform:uppercase; color:var(--purple-200); }
+  .stage .mark{ width:150px; height:150px; margin:2rem auto 1.5rem; }
+  .stage h1{ font-size:1.6rem; font-weight:800; margin:0 0 .6rem; text-wrap:balance; }
+  .stage p{ color:#cabdf0; font-size:.92rem; max-width:520px; margin:0 auto; }
+
+  .wrap{ max-width:820px; margin:0 auto; padding:0 1.5rem; }
+
+  /* ===== Story section ===== */
+  .story{ display:grid; grid-template-columns:1fr; gap:1rem; margin:3rem 0; }
+  .story h2{ font-size:1.05rem; font-weight:800; margin:0 0 .5rem; color:var(--purple-700); }
+  .story p{ margin:0; font-size:.92rem; color:var(--muted); max-width:640px; }
+  .story .quote{
+    border-left:3px solid var(--green-600); background:var(--green-50); border-radius:0 10px 10px 0;
+    padding:.8rem 1rem; font-size:.88rem; margin-top:.5rem;
+  }
+
+  /* ===== Size ladder ===== */
+  .section-title{ font-size:.72rem; font-weight:800; letter-spacing:.1em; text-transform:uppercase; color:var(--purple-600); margin:3rem 0 1rem; }
+  .ladder{ display:flex; align-items:flex-end; gap:1.75rem; flex-wrap:wrap; padding:1.5rem 0; }
+  .ladder-item{ display:flex; flex-direction:column; align-items:center; gap:.6rem; }
+  .ladder-item .swatch{ background:var(--card); border:1px solid var(--card-border); border-radius:18%; display:flex; align-items:center; justify-content:center; }
+  .ladder-item .cap{ font-size:.72rem; color:var(--muted); font-weight:700; }
+  .s1{ width:128px; height:128px; } .s1 svg{ width:80px; height:80px; }
+  .s2{ width:88px; height:88px; border-radius:22%; } .s2 svg{ width:56px; height:56px; }
+  .s3{ width:56px; height:56px; border-radius:26%; } .s3 svg{ width:36px; height:36px; }
+  .s4{ width:32px; height:32px; border-radius:30%; } .s4 svg{ width:22px; height:22px; }
+
+  /* ===== On backgrounds ===== */
+  .bggrid{ display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin:1.5rem 0 3rem; }
+  .bgchip{ border-radius:16px; padding:2.2rem 1rem; display:flex; align-items:center; justify-content:center; }
+  .bgchip svg{ width:64px; height:64px; }
+  .bg-white{ background:#ffffff; border:1px solid var(--card-border); }
+  .bg-dark{ background:#150f28; }
+  .bg-tint{ background:var(--purple-50); }
+  .bg-photo{ background:linear-gradient(135deg,#2e1065,#047857); }
+
+  /* ===== Wordmark lockup ===== */
+  .lockups{ display:flex; flex-direction:column; gap:1rem; margin:1.5rem 0 3rem; }
+  .lockup{
+    display:flex; align-items:center; gap:.85rem; padding:1.3rem 1.5rem; border-radius:14px;
+    background:var(--card); border:1px solid var(--card-border);
+  }
+  .lockup svg{ width:44px; height:44px; flex-shrink:0; }
+  .lockup .word{ display:flex; flex-direction:column; line-height:1.15; }
+  .lockup .word .top{ font-size:1.3rem; font-weight:800; letter-spacing:.03em; }
+  .lockup .word .top .u{ color:var(--green-700); }
+  .lockup .word .sub{ font-size:.68rem; color:var(--muted); letter-spacing:.08em; text-transform:uppercase; margin-top:.15rem; }
+
+  .footer-note{ text-align:center; color:var(--muted); font-size:.85rem; margin:3rem 0 0; }
+
+  @media (max-width:560px){ .bggrid{ grid-template-columns:1fr; } }
+</style>
+
+<div class="stage">
+  <div class="eyebrow">Logo Concept · SRRU Check · v2</div>
+  <div class="mark">
+    <svg viewBox="0 0 120 120" role="img" aria-label="โลโก้รูปหัวช้างสุรินทร์แบบมินิมอล งวงม้วนเป็นเครื่องหมายถูก">
+      <defs>
+        <linearGradient id="gHero" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#4c1d95"/><stop offset="1" stop-color="#047857"/>
+        </linearGradient>
+      </defs>
+      <ellipse cx="35" cy="40" rx="13" ry="17" fill="url(#gHero)" opacity="0.5"/>
+      <ellipse cx="85" cy="40" rx="13" ry="17" fill="url(#gHero)" opacity="0.5"/>
+      <circle cx="60" cy="36" r="23" fill="url(#gHero)"/>
+      <path d="M60,56 C57,66 52,72 56,81 C59,88 68,89 73,82 L84,68"
+            fill="none" stroke="url(#gHero)" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </div>
+  <h1>ช้างสุรินทร์ — ฉบับมินิมอล</h1>
+  <p>ปรับจากเวอร์ชันแรก: ตัดตาออกเพื่อไม่ให้กลายเป็นหน้าตัวการ์ตูน ใช้โทนสีเข้มขึ้น (ม่วงเข้ม → เขียวเข้ม) แทนสีสดใส และคุมสัดส่วนหูให้เรียบร้อยขึ้น ให้ความรู้สึกเป็นเครื่องหมายองค์กรที่นิ่งและน่าเชื่อถือ แต่ยังอ่านออกชัดว่าเป็นช้าง</p>
+</div>
+
+<div class="wrap">
+
+  <div class="story">
+    <h2>ทำไมถึงเป็นช้าง</h2>
+    <p>SRRU = Surindra Rajabhat University หรือ "มหาวิทยาลัยราชภัฏสุรินทร์" และจังหวัดสุรินทร์เป็นที่รู้จักทั่วประเทศในฐานะ "เมืองช้าง" มีงานแสดงช้างสุรินทร์ (Surin Elephant Round-up) ที่บ้านตากลาง อ.ท่าตูม เป็นสัญลักษณ์ประจำจังหวัดที่คนไทยทั้งประเทศจำได้ทันที การใช้ช้างจึงบอกทั้ง "ที่มา" ของมหาวิทยาลัยและ "เอกลักษณ์" ที่ไม่ซ้ำใคร ต่างจากโลโก้เช็คอินทั่วไปที่ใช้ได้กับแอปไหนก็ได้ในโลก</p>
+    <div class="quote">💡 จุดที่ทำให้ไม่ธรรมดา: งวงช้างไม่ได้ "ถูกดัดให้เป็น" เครื่องหมายถูก — แต่ธรรมชาติของงวงช้างที่ม้วนปลายขึ้นมันมีเส้นทางเดียวกับเครื่องหมายถูกอยู่แล้ว ทำให้ไอคอนเดียวสื่อสารสองความหมายพร้อมกันโดยไม่ต้องเพิ่มสัญลักษณ์ที่สาม</div>
+  </div>
+
+  <div class="section-title">ทดสอบขนาด — ต้องอ่านออกแม้เล็กสุด</div>
+  <div class="ladder">
+    <div class="ladder-item">
+      <div class="swatch s1">
+        <svg viewBox="0 0 120 120"><defs><linearGradient id="gL" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4c1d95"/><stop offset="1" stop-color="#047857"/></linearGradient></defs><ellipse cx="35" cy="40" rx="13" ry="17" fill="url(#gL)" opacity="0.5"/><ellipse cx="85" cy="40" rx="13" ry="17" fill="url(#gL)" opacity="0.5"/><circle cx="60" cy="36" r="23" fill="url(#gL)"/><path d="M60,56 C57,66 52,72 56,81 C59,88 68,89 73,82 L84,68" fill="none" stroke="url(#gL)" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="cap">128px · หน้าปก</div>
+    </div>
+    <div class="ladder-item">
+      <div class="swatch s2">
+        <svg viewBox="0 0 120 120"><ellipse cx="35" cy="40" rx="13" ry="17" fill="url(#gL)" opacity="0.5"/><ellipse cx="85" cy="40" rx="13" ry="17" fill="url(#gL)" opacity="0.5"/><circle cx="60" cy="36" r="23" fill="url(#gL)"/><path d="M60,56 C57,66 52,72 56,81 C59,88 68,89 73,82 L84,68" fill="none" stroke="url(#gL)" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="cap">88px · เมนู</div>
+    </div>
+    <div class="ladder-item">
+      <div class="swatch s3">
+        <svg viewBox="0 0 120 120"><ellipse cx="35" cy="40" rx="13" ry="17" fill="url(#gL)" opacity="0.5"/><ellipse cx="85" cy="40" rx="13" ry="17" fill="url(#gL)" opacity="0.5"/><circle cx="60" cy="36" r="23" fill="url(#gL)"/><path d="M60,56 C57,66 52,72 56,81 C59,88 68,89 73,82 L84,68" fill="none" stroke="url(#gL)" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="cap">56px · ไอคอนแอป</div>
+    </div>
+    <div class="ladder-item">
+      <div class="swatch s4">
+        <svg viewBox="0 0 120 120"><ellipse cx="35" cy="40" rx="13" ry="17" fill="url(#gL)" opacity="0.5"/><ellipse cx="85" cy="40" rx="13" ry="17" fill="url(#gL)" opacity="0.5"/><circle cx="60" cy="36" r="23" fill="url(#gL)"/><path d="M60,56 C57,66 52,72 56,81 C59,88 68,89 73,82 L84,68" fill="none" stroke="url(#gL)" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="cap">32px · favicon</div>
+    </div>
+  </div>
+
+  <div class="section-title">บนพื้นหลังต่าง ๆ</div>
+  <div class="bggrid">
+    <div class="bgchip bg-white"><svg viewBox="0 0 120 120"><ellipse cx="35" cy="40" rx="13" ry="17" fill="url(#gL)" opacity="0.5"/><ellipse cx="85" cy="40" rx="13" ry="17" fill="url(#gL)" opacity="0.5"/><circle cx="60" cy="36" r="23" fill="url(#gL)"/><path d="M60,56 C57,66 52,72 56,81 C59,88 68,89 73,82 L84,68" fill="none" stroke="url(#gL)" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    <div class="bgchip bg-dark"><svg viewBox="0 0 120 120"><ellipse cx="35" cy="40" rx="13" ry="17" fill="url(#gL)" opacity="0.65"/><ellipse cx="85" cy="40" rx="13" ry="17" fill="url(#gL)" opacity="0.65"/><circle cx="60" cy="36" r="23" fill="url(#gL)"/><path d="M60,56 C57,66 52,72 56,81 C59,88 68,89 73,82 L84,68" fill="none" stroke="url(#gL)" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    <div class="bgchip bg-tint"><svg viewBox="0 0 120 120"><ellipse cx="35" cy="40" rx="13" ry="17" fill="url(#gL)" opacity="0.5"/><ellipse cx="85" cy="40" rx="13" ry="17" fill="url(#gL)" opacity="0.5"/><circle cx="60" cy="36" r="23" fill="url(#gL)"/><path d="M60,56 C57,66 52,72 56,81 C59,88 68,89 73,82 L84,68" fill="none" stroke="url(#gL)" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    <div class="bgchip bg-photo"><svg viewBox="0 0 120 120"><ellipse cx="35" cy="40" rx="13" ry="17" fill="#fff" opacity="0.4"/><ellipse cx="85" cy="40" rx="13" ry="17" fill="#fff" opacity="0.4"/><circle cx="60" cy="36" r="23" fill="#ffffff"/><path d="M60,56 C57,66 52,72 56,81 C59,88 68,89 73,82 L84,68" fill="none" stroke="#ffffff" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+  </div>
+
+  <div class="section-title">คำและสัญลักษณ์ (Wordmark Lockup)</div>
+  <div class="lockups">
+    <div class="lockup">
+      <svg viewBox="0 0 120 120"><ellipse cx="35" cy="40" rx="13" ry="17" fill="url(#gL)" opacity="0.5"/><ellipse cx="85" cy="40" rx="13" ry="17" fill="url(#gL)" opacity="0.5"/><circle cx="60" cy="36" r="23" fill="url(#gL)"/><path d="M60,56 C57,66 52,72 56,81 C59,88 68,89 73,82 L84,68" fill="none" stroke="url(#gL)" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <div class="word">
+        <div class="top">SRR<span class="u">U</span> Check</div>
+        <div class="sub">มหาวิทยาลัยราชภัฏสุรินทร์</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer-note">SVG แก้สี/ปรับสัดส่วนได้ไม่จำกัด — บอกได้เลยว่ายังอยากปรับจุดไหนอีก (ขนาดหู ความโค้งงวง โทนสี)</div>

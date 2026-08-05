@@ -1,0 +1,208 @@
+<title>Use Case Diagram — SRRU Check บทที่ 3</title>
+<style>
+  :root{
+    --bg:#fafafa; --ink:#1a1a1a; --line:#1a1a1a; --fill:#ffffff;
+    --boundary-bg:#ffffff; --boundary-border:#1a1a1a; --muted:#666666; --labelbg:#fafafa;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{ --bg:#141414; --ink:#f0f0f0; --line:#f0f0f0; --fill:#1c1c1c; --boundary-bg:#1c1c1c; --boundary-border:#f0f0f0; --muted:#aaaaaa; --labelbg:#141414; }
+  }
+  :root[data-theme="dark"]{ --bg:#141414; --ink:#f0f0f0; --line:#f0f0f0; --fill:#1c1c1c; --boundary-bg:#1c1c1c; --boundary-border:#f0f0f0; --muted:#aaaaaa; --labelbg:#141414; }
+  :root[data-theme="light"]{ --bg:#fafafa; --ink:#1a1a1a; --line:#1a1a1a; --fill:#ffffff; --boundary-bg:#ffffff; --boundary-border:#1a1a1a; --muted:#666666; --labelbg:#fafafa; }
+
+  * { box-sizing:border-box; }
+  body{ margin:0; background:var(--bg); color:var(--ink); font-family:-apple-system,"Segoe UI","Noto Sans Thai",system-ui,sans-serif; padding:2rem 1.25rem 5rem; }
+  h1{ font-size:1.4rem; font-weight:700; text-align:center; margin:0 0 .25rem; text-wrap:balance; }
+  .sub{ text-align:center; color:var(--muted); font-size:.85rem; margin:0 auto 2.5rem; max-width:640px; }
+  .wrap{ max-width:1180px; margin:0 auto; }
+
+  .stage{ position:relative; overflow-x:auto; padding:2.6rem 7.5rem 8rem; }
+
+  .boundary{
+    position:relative; border:1.5px solid var(--boundary-border); border-radius:20px;
+    background:var(--boundary-bg); display:grid; grid-template-columns:repeat(3,1fr);
+    gap:0 1.6rem; padding:2.6rem 1.8rem 1.8rem;
+  }
+  .boundary-label{
+    position:absolute; top:-.65rem; left:1.6rem; background:var(--bg); padding:0 .5rem;
+    font-weight:700; font-size:.85rem;
+  }
+  .col{ display:flex; flex-direction:column; gap:1.1rem; align-items:stretch; }
+  .col-head{ text-align:center; font-size:.68rem; color:var(--muted); font-weight:700; letter-spacing:.02em; margin-bottom:-.3rem; text-transform:uppercase; }
+
+  .uc{
+    border:1.5px solid var(--line); border-radius:50%; background:var(--fill);
+    min-height:64px; display:flex; align-items:center; justify-content:center; text-align:center;
+    padding:.5rem 1rem; font-size:.68rem; line-height:1.3; position:relative; z-index:2;
+  }
+  .uc.shared{ background:var(--fill); border-style:dashed; }
+
+  .actor{
+    position:absolute; display:flex; flex-direction:column; align-items:center; gap:.35rem;
+    width:110px; z-index:3;
+  }
+  .actor .icon{ width:34px; height:34px; }
+  .actor .icon .stick{ fill:none; stroke:var(--line); stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round; }
+  .actor .icon .head{ fill:var(--fill); stroke:var(--line); stroke-width:2.2; }
+  .actor .label{ font-size:.72rem; font-weight:700; text-align:center; line-height:1.25; }
+  .actor.student{ left:0; top:0; }
+  .actor.admin{ right:0; top:0; }
+  .actor.coordinator{ left:0; top:0; }
+
+  svg.connectors{ position:absolute; inset:0; width:100%; height:100%; pointer-events:none; z-index:1; overflow:visible; }
+  .assoc{ fill:none; stroke:var(--line); stroke-width:1.3; }
+  .general{ fill:none; stroke:var(--line); stroke-width:1.4; }
+
+  .legend{ max-width:1180px; margin:2rem auto 0; font-size:.72rem; color:var(--muted); display:flex; flex-wrap:wrap; gap:1.4rem; justify-content:center; }
+  .legend span{ display:inline-flex; align-items:center; gap:.4rem; }
+  .legend .ln{ width:22px; height:0; border-top:1.3px solid var(--muted); display:inline-block; }
+  .legend .ln.dash{ border-top-style:dashed; }
+  .legend .tri{ width:0; height:0; border-top:5px solid transparent; border-bottom:5px solid transparent; border-left:8px solid var(--muted); }
+</style>
+
+<h1>ภาพที่ 2 — ยูสเคสไดอะแกรม (Use Case Diagram)</h1>
+<p class="sub">แสดงขอบเขตและฟังก์ชันการทำงานของระบบ SRRU Check จำแนกตามกลุ่มผู้ใช้งาน (Actor) ทั้ง 3 กลุ่ม · screenshot ภาพนี้ไปใช้แทนภาพที่ 2 ในบทที่ 3</p>
+
+<div class="wrap">
+  <div class="stage" id="stage">
+    <div class="boundary" id="boundary">
+      <div class="boundary-label">ระบบ SRRU Check</div>
+
+      <div class="col" id="col-student">
+        <div class="col-head">เฉพาะนักศึกษา</div>
+        <div class="uc" id="uc-login" style="grid-row:1">เข้าสู่ระบบด้วย Google</div>
+        <div class="uc" id="uc-profile">กรอก/แก้ไขข้อมูลโปรไฟล์</div>
+        <div class="uc" id="uc-browse">เรียกดูรายการกิจกรรม</div>
+        <div class="uc" id="uc-checkin">เช็คชื่อเข้าร่วมกิจกรรม (QR + GPS + เซลฟี)</div>
+        <div class="uc" id="uc-selfreport">รายงานตนเอง (กรณีสแกน QR ไม่ได้)</div>
+        <div class="uc" id="uc-late">ยื่นคำขอเช็คชื่อย้อนหลัง</div>
+        <div class="uc" id="uc-extcredit">ยื่นคำร้องเทียบโอนชั่วโมงกิจกรรมภายนอก</div>
+        <div class="uc" id="uc-poscredit">ยื่นคำร้องเทียบโอนชั่วโมงตำแหน่ง</div>
+        <div class="uc" id="uc-progress">ตรวจสอบชั่วโมงกิจกรรมสะสม</div>
+        <div class="uc" id="uc-pdf">ดาวน์โหลดเอกสารสรุปผลกิจกรรม (PDF)</div>
+      </div>
+
+      <div class="col" id="col-shared">
+        <div class="col-head">ใช้งานร่วมกัน / ผู้รับผิดชอบกิจกรรม</div>
+        <div class="uc shared" id="uc-notify">รับการแจ้งเตือน</div>
+        <div class="uc shared" id="uc-contact">ติดต่อสื่อสารระหว่างกัน</div>
+        <div class="uc" id="uc-create">สร้าง/แก้ไข/ปิดกิจกรรม</div>
+        <div class="uc" id="uc-qr">จัดการรัศมีพื้นที่และ QR Code เช็คชื่อ</div>
+        <div class="uc" id="uc-review">ตรวจสอบและอนุมัติคำร้องต่าง ๆ</div>
+        <div class="uc" id="uc-grant">เทียบโอนชั่วโมงกิจกรรมโดยตรง (Admin Grant)</div>
+        <div class="uc" id="uc-report">เรียกดู/ส่งออกรายงานสรุปผล</div>
+        <div class="uc" id="uc-announce">ประกาศข่าวสารถึงนักศึกษา</div>
+      </div>
+
+      <div class="col" id="col-admin">
+        <div class="col-head">เฉพาะผู้ดูแลระบบ</div>
+        <div class="uc" id="uc-users">จัดการบัญชีผู้ใช้งานและสิทธิ์</div>
+        <div class="uc" id="uc-master">จัดการข้อมูลพื้นฐาน (Master Data)</div>
+        <div class="uc" id="uc-audit">ดูประวัติการดำเนินการ (Audit Log)</div>
+        <div class="uc" id="uc-import">นำเข้าข้อมูลนักศึกษาจำนวนมาก (Excel/CSV)</div>
+      </div>
+    </div>
+
+    <div class="actor student" id="actor-student">
+      <svg class="icon" viewBox="0 0 24 34"><circle class="head" cx="12" cy="6" r="5"/><path class="stick" d="M12,11 L12,22 M12,15 L4,20 M12,15 L20,20 M12,22 L5,33 M12,22 L19,33"/></svg>
+      <div class="label">นักศึกษา</div>
+    </div>
+    <div class="actor coordinator" id="actor-coordinator">
+      <svg class="icon" viewBox="0 0 24 34"><circle class="head" cx="12" cy="6" r="5"/><path class="stick" d="M12,11 L12,22 M12,15 L4,20 M12,15 L20,20 M12,22 L5,33 M12,22 L19,33"/></svg>
+      <div class="label">ผู้รับผิดชอบกิจกรรมกองพัฒนานักศึกษา</div>
+    </div>
+    <div class="actor admin" id="actor-admin">
+      <svg class="icon" viewBox="0 0 24 34"><circle class="head" cx="12" cy="6" r="5"/><path class="stick" d="M12,11 L12,22 M12,15 L4,20 M12,15 L20,20 M12,22 L5,33 M12,22 L19,33"/></svg>
+      <div class="label">ผู้ดูแลระบบ</div>
+    </div>
+
+    <svg class="connectors" id="svg"></svg>
+  </div>
+
+  <div class="legend">
+    <span><i class="ln"></i> ความสัมพันธ์ระหว่าง Actor กับ Use Case (Association)</span>
+    <span><i class="ln dash" style="width:22px;border-top-style:solid;position:relative;"></i><i class="tri" style="margin-left:-4px;"></i> Actor สืบทอดสิทธิ์ (Generalization): ผู้ดูแลระบบมีสิทธิ์ทั้งหมดของผู้รับผิดชอบกิจกรรม</span>
+  </div>
+</div>
+
+<script>
+const assoc = {
+  "actor-student": ["uc-login","uc-profile","uc-browse","uc-checkin","uc-selfreport","uc-late","uc-extcredit","uc-poscredit","uc-progress","uc-pdf","uc-notify","uc-contact"],
+  "actor-coordinator": ["uc-login","uc-create","uc-qr","uc-review","uc-grant","uc-report","uc-announce","uc-notify","uc-contact"],
+  "actor-admin": ["uc-login","uc-users","uc-master","uc-audit","uc-import"],
+};
+
+function positionActors(){
+  // Actors were pinned with guessed CSS percentages (50% of the whole stage,
+  // bottom:0 of the whole stage) that only happened to work if every column
+  // had the same number of use cases. They don't — student has 10, admin
+  // only 4 — so "50%" landed nowhere near the admin column's actual bubbles,
+  // and the coordinator actor got pinned to the very bottom of the entire
+  // page instead of just below its own box. Compute real positions instead.
+  const stage = document.getElementById("stage");
+  const sRect = stage.getBoundingClientRect();
+  const boundary = document.getElementById("boundary").getBoundingClientRect();
+  const colStudent = document.getElementById("col-student").getBoundingClientRect();
+  const colShared = document.getElementById("col-shared").getBoundingClientRect();
+  const colAdmin = document.getElementById("col-admin").getBoundingClientRect();
+  const gap = 26;
+
+  const aStudent = document.getElementById("actor-student");
+  aStudent.style.left = (boundary.left - sRect.left - aStudent.offsetWidth - gap) + "px";
+  aStudent.style.top = (colStudent.top - sRect.top + colStudent.height/2 - aStudent.offsetHeight/2) + "px";
+
+  const aAdmin = document.getElementById("actor-admin");
+  aAdmin.style.left = (boundary.right - sRect.left + gap) + "px";
+  aAdmin.style.top = (colAdmin.top - sRect.top + colAdmin.height/2 - aAdmin.offsetHeight/2) + "px";
+
+  // Coordinator sits just below the boundary box (still outside it, per UML),
+  // centered under its own column — not at the bottom of the whole page.
+  const aCoord = document.getElementById("actor-coordinator");
+  aCoord.style.top = (boundary.bottom - sRect.top + gap) + "px";
+  aCoord.style.left = (colShared.left - sRect.left + colShared.width/2 - aCoord.offsetWidth/2) + "px";
+}
+
+function draw(){
+  positionActors();
+  const stage = document.getElementById("stage");
+  const svg = document.getElementById("svg");
+  const sRect = stage.getBoundingClientRect();
+  svg.innerHTML = `<defs>
+    <marker id="tri" markerWidth="12" markerHeight="10" refX="10" refY="5" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="none" stroke="var(--line)" stroke-width="1.3"/>
+    </marker>
+  </defs>`;
+
+  Object.entries(assoc).forEach(([actorId, ucIds]) => {
+    const aEl = document.getElementById(actorId);
+    const aRect = aEl.getBoundingClientRect();
+    const ax = aRect.left + aRect.width/2 - sRect.left;
+    const ay = aRect.top + aRect.height*0.22 - sRect.top;
+    ucIds.forEach(ucId => {
+      const uEl = document.getElementById(ucId);
+      if (!uEl) return;
+      const uRect = uEl.getBoundingClientRect();
+      const ux = uRect.left + uRect.width/2 - sRect.left;
+      const uy = uRect.top + uRect.height/2 - sRect.top;
+      const p = document.createElementNS("http://www.w3.org/2000/svg","path");
+      p.setAttribute("d", `M${ax},${ay} L${ux},${uy}`);
+      p.setAttribute("class","assoc");
+      svg.appendChild(p);
+    });
+  });
+
+  const admin = document.getElementById("actor-admin").getBoundingClientRect();
+  const coord = document.getElementById("actor-coordinator").getBoundingClientRect();
+  const gx1 = admin.left + admin.width/2 - sRect.left, gy1 = admin.top + admin.height*0.5 - sRect.top;
+  const gx2 = coord.left + coord.width/2 - sRect.left, gy2 = coord.top + coord.height*0.5 - sRect.top;
+  const midY = Math.max(gy1, gy2) + 46;
+  const g = document.createElementNS("http://www.w3.org/2000/svg","path");
+  g.setAttribute("d", `M${gx1},${gy1} L${gx1},${midY} L${gx2},${midY} L${gx2},${gy2}`);
+  g.setAttribute("class","general");
+  g.setAttribute("marker-end","url(#tri)");
+  svg.appendChild(g);
+}
+
+requestAnimationFrame(() => requestAnimationFrame(draw));
+window.addEventListener("resize", () => requestAnimationFrame(draw));
+</script>

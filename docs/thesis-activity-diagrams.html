@@ -1,0 +1,445 @@
+<title>Activity Diagrams (UML Swimlane) — SRRU Check บทที่ 3</title>
+<style>
+  :root{
+    --bg:#fafafa; --ink:#1a1a1a; --line:#1a1a1a; --fill:#ffffff;
+    --lane-bg:#ffffff; --lane-border:#1a1a1a; --muted:#666666; --labelbg:#fafafa;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{ --bg:#141414; --ink:#f0f0f0; --line:#f0f0f0; --fill:#1c1c1c; --lane-bg:#1c1c1c; --lane-border:#f0f0f0; --muted:#aaaaaa; --labelbg:#141414; }
+  }
+  :root[data-theme="dark"]{ --bg:#141414; --ink:#f0f0f0; --line:#f0f0f0; --fill:#1c1c1c; --lane-bg:#1c1c1c; --lane-border:#f0f0f0; --muted:#aaaaaa; --labelbg:#141414; }
+  :root[data-theme="light"]{ --bg:#fafafa; --ink:#1a1a1a; --line:#1a1a1a; --fill:#ffffff; --lane-bg:#ffffff; --lane-border:#1a1a1a; --muted:#666666; --labelbg:#fafafa; }
+
+  * { box-sizing:border-box; }
+  body{ margin:0; background:var(--bg); color:var(--ink); font-family:-apple-system,"Segoe UI","Noto Sans Thai",system-ui,sans-serif; padding:2rem 1.25rem 5rem; }
+  h1{ font-size:1.4rem; font-weight:700; text-align:center; margin:0 0 .25rem; text-wrap:balance; }
+  .sub{ text-align:center; color:var(--muted); font-size:.85rem; margin-bottom:2.5rem; }
+  .wrap{ max-width:1200px; margin:0 auto; }
+  .diagram-title{ font-size:1rem; font-weight:700; margin: 3rem 0 1rem; border-bottom:1px solid var(--lane-border); padding-bottom:.5rem; }
+
+  .diagram{ position:relative; overflow-x:auto; }
+  .lanes{ display:grid; }
+  .lane{ border-left:1.5px solid var(--lane-border); position:relative; }
+  .lane:first-child{ border-left:1.5px solid var(--lane-border); }
+  .lane-header{ text-align:center; font-weight:700; font-size:.8rem; padding:.6rem .3rem; border-bottom:1.5px solid var(--lane-border); position:sticky; top:0; background:var(--bg); }
+
+  .nodes{ display:grid; position:relative; }
+
+  .node{ position:relative; align-self:center; justify-self:center; z-index:2; }
+  .node[data-align="l"]{ justify-self:start; }
+  .node[data-align="r"]{ justify-self:end; }
+  .node.activity{
+    border:1.5px solid var(--line); border-radius:16px; background:var(--fill);
+    padding:.5rem .8rem; font-size:.72rem; text-align:center; min-width:120px; max-width:170px; line-height:1.35;
+  }
+  .node.start{ width:22px; height:22px; border-radius:50%; background:var(--line); }
+  .node.end{ width:24px; height:24px; border-radius:50%; border:2px solid var(--line); display:flex; align-items:center; justify-content:center; }
+  .node.end::after{ content:""; width:12px; height:12px; border-radius:50%; background:var(--line); }
+  .node.decision{
+    width:110px; height:110px; position:relative;
+  }
+  .node.decision .diamond{
+    position:absolute; inset:0; margin:auto; width:66px; height:66px;
+    border:1.5px solid var(--line); background:var(--fill); transform:rotate(45deg);
+  }
+  .node.decision .dtext{
+    position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    text-align:center; font-size:.66rem; padding:0 .4rem; line-height:1.25;
+  }
+  .node.note{
+    border:1.5px solid var(--line); border-radius:4px; background:var(--fill);
+    padding:.45rem .6rem; font-size:.66rem; text-align:left; max-width:170px; line-height:1.3; color:var(--muted);
+  }
+
+  svg.connectors{ position:absolute; inset:0; width:100%; height:100%; pointer-events:none; z-index:1; overflow:visible; }
+  .elabel{ font-size:.62rem; fill:var(--ink); }
+  .elabel-bg{ fill:var(--labelbg); }
+  .eline{ fill:none; stroke:var(--line); stroke-width:1.4; }
+</style>
+
+<h1>Activity Diagram (UML Swimlane) — 9 ระบบงานหลัก</h1>
+<p class="sub">แผนภาพแสดงลำดับขั้นตอนแบบ Swimlane ตามมาตรฐาน UML Activity Diagram · screenshot แต่ละแผนภาพไปใช้แทนภาพที่ 5-13 ในบทที่ 3</p>
+
+<div class="wrap" id="app"></div>
+
+<script>
+const DIAGRAMS = [
+  {
+    title: "ภาพที่ 5 — ระบบตรวจสอบสิทธิ์และการเข้าสู่ระบบ (Login)",
+    lanes: ["ผู้ใช้งาน", "Google", "ระบบ"],
+    rows: 11,
+    nodes: [
+      {id:"s", type:"start", lane:0, row:1},
+      {id:"a1", type:"activity", lane:0, row:2, text:"กดปุ่มเข้าสู่ระบบด้วย Google"},
+      {id:"a2", type:"activity", lane:1, row:3, text:"แสดงหน้ายืนยันตัวตน"},
+      {id:"d1", type:"decision", lane:2, row:4, text:"ยืนยันตัวตน\nสำเร็จ?"},
+      {id:"a3", type:"activity", lane:1, row:4, text:"แสดงข้อความเข้าสู่ระบบไม่สำเร็จ"},
+      {id:"e1", type:"end", lane:1, row:4.5},
+      {id:"d2", type:"decision", lane:2, row:5, text:"อีเมลอยู่ในโดเมน\nมหาวิทยาลัย?"},
+      {id:"a4", type:"activity", lane:1, row:5, text:"แสดงข้อความอนุญาตเฉพาะอีเมลมหาวิทยาลัย"},
+      {id:"e2", type:"end", lane:1, row:5.5},
+      {id:"d3", type:"decision", lane:2, row:6, text:"บัญชีถูกระงับ?"},
+      {id:"a5", type:"activity", lane:1, row:6, text:"แสดงข้อความบัญชีถูกระงับการใช้งาน"},
+      {id:"e3", type:"end", lane:1, row:6.5},
+      {id:"a6", type:"activity", lane:2, row:7, text:"สร้าง/อัปเดตข้อมูลผู้ใช้งานอัตโนมัติ"},
+      {id:"d4", type:"decision", lane:2, row:8, text:"ตรวจสอบสิทธิ์ Role"},
+      {id:"a7", type:"activity", lane:2, row:9, text:"พาไปหน้า Dashboard ผู้ดูแลระบบ"},
+      {id:"d5", type:"decision", lane:0, row:9, text:"กรอกโปรไฟล์\nครบถ้วนหรือยัง"},
+      {id:"a8", type:"activity", lane:0, row:10, align:"l", text:"พาไปหน้ากรอกข้อมูลโปรไฟล์"},
+      {id:"a9", type:"activity", lane:0, row:10, align:"r", text:"พาไปหน้า Dashboard นักศึกษา"},
+      {id:"e4", type:"end", lane:1, row:11},
+    ],
+    edges: [
+      ["s","a1"],["a1","a2"],["a2","d1"],
+      ["d1","a3",{label:"ไม่สำเร็จ"}],["a3","e1"],
+      ["d1","d2",{label:"สำเร็จ"}],
+      ["d2","a4",{label:"ไม่ใช่"}],["a4","e2"],
+      ["d2","d3",{label:"ใช่"}],
+      ["d3","a5",{label:"ถูกระงับ"}],["a5","e3"],
+      ["d3","a6",{label:"ไม่ถูกระงับ"}],["a6","d4"],
+      ["d4","a7",{label:"admin/super_admin"}],
+      ["d4","d5",{label:"student"}],
+      ["d5","a8",{label:"ยังไม่ครบ"}],
+      ["d5","a9",{label:"ครบแล้ว"}],
+      ["a7","e4"],["a8","e4"],["a9","e4"],
+    ]
+  },
+  {
+    title: "ภาพที่ 6 — ระบบการสร้างและจัดการกิจกรรม",
+    lanes: ["ผู้รับผิดชอบกิจกรรม", "ระบบ", "นักศึกษา"],
+    rows: 10,
+    nodes: [
+      {id:"s", type:"start", lane:0, row:1},
+      {id:"a1", type:"activity", lane:0, row:2, text:"เปิดฟอร์มสร้างกิจกรรมใหม่"},
+      {id:"a2", type:"activity", lane:0, row:3, text:"กรอกชื่อ รายละเอียด ระดับ หมวดหมู่ ลักษณะกิจกรรม วันเวลา"},
+      {id:"a3", type:"activity", lane:0, row:4, text:"ปักหมุดสถานที่และกำหนดรัศมีพื้นที่เช็คชื่อ"},
+      {id:"d1", type:"decision", lane:1, row:5, text:"ข้อมูลครบถ้วน\nถูกต้องหรือไม่"},
+      {id:"a4", type:"activity", lane:1, row:6, text:"บันทึกกิจกรรมลงฐานข้อมูล"},
+      {id:"a5", type:"activity", lane:1, row:7, text:"สร้างรหัสกิจกรรมและรหัสลับสำหรับ QR Code"},
+      {id:"d2", type:"decision", lane:1, row:8, text:"สถานะเปิดรับ\nสมัครหรือไม่"},
+      {id:"a6", type:"activity", lane:1, row:9, text:"แจ้งเตือนนักศึกษาที่มีสิทธิ์เข้าร่วม"},
+      {id:"a7", type:"activity", lane:2, row:9, text:"ได้รับการแจ้งเตือน"},
+      {id:"e1", type:"end", lane:2, row:9, align:"r"},
+      {id:"a8", type:"activity", lane:1, row:10, text:"บันทึกเป็นฉบับร่าง"},
+      {id:"e2", type:"end", lane:1, row:10, align:"r"},
+    ],
+    edges: [
+      ["s","a1"],["a1","a2"],["a2","a3"],["a3","d1"],
+      ["d1","a2",{label:"ไม่ถูกต้อง",side:"l"}],
+      ["d1","a4",{label:"ถูกต้อง"}],["a4","a5"],["a5","d2"],
+      ["d2","a6",{label:"เปิดรับ"}],["a6","a7"],["a7","e1"],
+      ["d2","a8",{label:"ร่าง/ไม่เปิดรับ"}],["a8","e2"],
+    ]
+  },
+  {
+    title: "ภาพที่ 7 — ระบบเรียกดูและเช็คชื่อเข้าร่วมกิจกรรม",
+    lanes: ["นักศึกษา", "ระบบ"],
+    rows: 11,
+    nodes: [
+      {id:"s", type:"start", lane:0, row:1},
+      {id:"a1", type:"activity", lane:0, row:2, text:"เรียกดูรายการกิจกรรมที่มีสิทธิ์เข้าร่วม"},
+      {id:"a2", type:"activity", lane:0, row:3, text:"เลือกกิจกรรมที่ต้องการเข้าร่วม"},
+      {id:"d1", type:"decision", lane:1, row:4, text:"วิธีเช็คชื่อ\nของกิจกรรมนี้"},
+      {id:"a3", type:"activity", lane:0, row:5, text:"สแกน QR Code หน้างาน"},
+      {id:"a8", type:"activity", lane:0, row:5, align:"r", text:"แนบรูปภาพหลักฐาน กรอกรายละเอียด และบันทึกคำร้องรอพิจารณา"},
+      {id:"e5", type:"end", lane:0, row:6},
+      {id:"d2", type:"decision", lane:1, row:6, text:"QR Code ถูกต้อง\nและยังไม่หมดอายุ?"},
+      {id:"e1", type:"end", lane:1, row:6, align:"r"},
+      {id:"a4", type:"activity", lane:1, row:7, text:"ตรวจสอบตำแหน่ง GPS เทียบกับรัศมีที่กำหนด"},
+      {id:"a5", type:"activity", lane:0, row:8, text:"ถ่ายภาพเซลฟียืนยันตัวตน"},
+      {id:"a6", type:"activity", lane:1, row:9, text:"บันทึกผลการเช็คชื่อ"},
+      {id:"d3", type:"decision", lane:1, row:10, text:"อยู่ในรัศมีและ\nเงื่อนไขครบถ้วน?"},
+      {id:"a7", type:"activity", lane:1, row:11, text:"สถานะ: อนุมัติอัตโนมัติ"},
+      {id:"e2", type:"end", lane:1, row:11, align:"r"},
+      {id:"e3", type:"end", lane:1, row:10, align:"r"},
+    ],
+    edges: [
+      ["s","a1"],["a1","a2"],["a2","d1"],
+      ["d1","a3",{label:"สแกน QR + GPS + เซลฟี"}],["a3","d2"],
+      ["d1","a8",{label:"รายงานตนเอง"}],["a8","e5"],
+      ["d2","e1",{label:"ไม่ถูกต้อง"}],
+      ["d2","a4",{label:"ถูกต้อง"}],["a4","a5"],["a5","a6"],["a6","d3"],
+      ["d3","a7",{label:"ครบถ้วน"}],["a7","e2"],
+      ["d3","e3",{label:"ไม่ครบ/น่าสงสัย"}],
+    ]
+  },
+  {
+    title: "ภาพที่ 8 — ระบบยื่นคำขอเช็คชื่อย้อนหลัง",
+    lanes: ["นักศึกษา", "ระบบ"],
+    rows: 7,
+    nodes: [
+      {id:"s", type:"start", lane:0, row:1},
+      {id:"a1", type:"activity", lane:0, row:2, text:"พบว่าพลาดการเช็คชื่อในช่วงเวลาที่กำหนด"},
+      {id:"a2", type:"activity", lane:0, row:3, text:"เปิดหน้ารายละเอียดกิจกรรม กดขอเช็คชื่อย้อนหลัง"},
+      {id:"d1", type:"decision", lane:1, row:4, text:"กิจกรรมนี้อนุญาต\nให้ขอย้อนหลังหรือไม่"},
+      {id:"e1", type:"end", lane:1, row:4, align:"r"},
+      {id:"d2", type:"decision", lane:1, row:5, text:"มีคำร้องเดิม\nที่ยังไม่พิจารณาหรือไม่"},
+      {id:"e2", type:"end", lane:1, row:5, align:"r"},
+      {id:"a3", type:"activity", lane:0, row:6, text:"กรอกเหตุผลและแนบรูปภาพหลักฐาน"},
+      {id:"a4", type:"activity", lane:1, row:7, text:"บันทึกคำร้อง สถานะ: รอพิจารณา"},
+      {id:"e3", type:"end", lane:1, row:7, align:"r"},
+    ],
+    edges: [
+      ["s","a1"],["a1","a2"],["a2","d1"],
+      ["d1","e1",{label:"ไม่อนุญาต"}],
+      ["d1","d2",{label:"อนุญาต"}],
+      ["d2","e2",{label:"มี"}],
+      ["d2","a3",{label:"ไม่มี"}],["a3","a4"],["a4","e3"],
+    ]
+  },
+  {
+    title: "ภาพที่ 9 — ระบบยื่นคำร้องขอเทียบโอนชั่วโมงกิจกรรมภายนอก",
+    lanes: ["นักศึกษา", "ระบบ"],
+    rows: 6,
+    nodes: [
+      {id:"s", type:"start", lane:0, row:1},
+      {id:"a1", type:"activity", lane:0, row:2, text:"เข้าร่วมกิจกรรมภายนอกมหาวิทยาลัย"},
+      {id:"a2", type:"activity", lane:0, row:3, text:"กรอกชื่อกิจกรรม หน่วยงาน วันที่ หมวดหมู่ จำนวนชั่วโมงที่ขอ"},
+      {id:"a3", type:"activity", lane:0, row:4, text:"แนบรูปภาพหลักฐานการเข้าร่วม"},
+      {id:"d1", type:"decision", lane:1, row:5, text:"ชั่วโมงสะสมรวมปีนี้\nเกิน 10 ชม.?"},
+      {id:"e1", type:"end", lane:1, row:5, align:"r"},
+      {id:"a4", type:"activity", lane:1, row:6, text:"บันทึกคำร้อง สถานะ: รอพิจารณา"},
+      {id:"e2", type:"end", lane:1, row:6, align:"r"},
+    ],
+    edges: [
+      ["s","a1"],["a1","a2"],["a2","a3"],["a3","d1"],
+      ["d1","e1",{label:"เกินโควตา"}],
+      ["d1","a4",{label:"ไม่เกิน"}],["a4","e2"],
+    ]
+  },
+  {
+    title: "ภาพที่ 10 — ระบบยื่นคำร้องขอเทียบโอนชั่วโมงตำแหน่ง",
+    lanes: ["นักศึกษา", "ระบบ"],
+    rows: 6,
+    nodes: [
+      {id:"s", type:"start", lane:0, row:1},
+      {id:"a1", type:"activity", lane:0, row:2, text:"ดำรงตำแหน่งในองค์กรนักศึกษา"},
+      {id:"a2", type:"activity", lane:0, row:3, text:"เลือกตำแหน่งที่ดำรงและปีการศึกษา"},
+      {id:"a3", type:"activity", lane:1, row:4, text:"แสดงจำนวนชั่วโมงมาตรฐานของตำแหน่งนั้นโดยอัตโนมัติ"},
+      {id:"a4", type:"activity", lane:0, row:5, text:"แนบหลักฐานการดำรงตำแหน่ง"},
+      {id:"a5", type:"activity", lane:1, row:6, text:"บันทึกคำร้อง สถานะ: รอพิจารณา"},
+      {id:"e1", type:"end", lane:1, row:6, align:"r"},
+    ],
+    edges: [
+      ["s","a1"],["a1","a2"],["a2","a3"],["a3","a4"],["a4","a5"],["a5","e1"],
+    ]
+  },
+  {
+    title: "ภาพที่ 11 — ระบบการพิจารณาอนุมัติคำร้องต่าง ๆ",
+    lanes: ["ผู้รับผิดชอบกิจกรรม", "ระบบ"],
+    rows: 8,
+    nodes: [
+      {id:"s", type:"start", lane:0, row:1},
+      {id:"a1", type:"activity", lane:0, row:2, text:"เปิดรายการรอตรวจสอบ"},
+      {id:"a2", type:"activity", lane:0, row:3, text:"ตรวจสอบหลักฐานตามประเภทคำร้อง (เช็คชื่อ Flagged / เช็คชื่อย้อนหลัง / เทียบโอนภายนอก / เทียบโอนตำแหน่ง)"},
+      {id:"d1", type:"decision", lane:0, row:4, text:"ตัดสินใจ"},
+      {id:"a6", type:"activity", lane:1, row:5, text:"อัปเดตสถานะเป็นอนุมัติ บวกชั่วโมงเข้ายอดสะสม"},
+      {id:"a7", type:"activity", lane:1, row:6, text:"แจ้งเตือนผลการอนุมัติให้นักศึกษาทราบ"},
+      {id:"e1", type:"end", lane:1, row:6, align:"r"},
+      {id:"a8", type:"activity", lane:0, row:7, text:"อัปเดตสถานะเป็นปฏิเสธพร้อมระบุเหตุผล"},
+      {id:"a9", type:"activity", lane:1, row:8, text:"แจ้งเตือนผลการปฏิเสธให้นักศึกษาทราบ"},
+      {id:"e2", type:"end", lane:1, row:8, align:"r"},
+    ],
+    edges: [
+      ["s","a1"],["a1","a2"],["a2","d1"],
+      ["d1","a6",{label:"อนุมัติ"}],["a6","a7"],["a7","e1"],
+      ["d1","a8",{label:"ปฏิเสธ",side:"l"}],["a8","a9"],["a9","e2"],
+    ]
+  },
+  {
+    title: "ภาพที่ 12 — ระบบสร้างเอกสารสรุปผลกิจกรรม",
+    lanes: ["นักศึกษา", "ระบบ"],
+    rows: 9,
+    nodes: [
+      {id:"s", type:"start", lane:0, row:1},
+      {id:"a1", type:"activity", lane:0, row:2, text:"กดดาวน์โหลดเอกสารสรุปประวัติกิจกรรม"},
+      {id:"a2", type:"activity", lane:1, row:3, text:"ดึงข้อมูลการเช็คชื่อที่ได้รับอนุมัติแล้วทั้งหมด"},
+      {id:"a3", type:"activity", lane:1, row:4, text:"ดึงข้อมูลกิจกรรมภายนอกที่ได้รับอนุมัติแล้ว"},
+      {id:"a4", type:"activity", lane:1, row:5, text:"ดึงข้อมูลการเทียบโอนชั่วโมงที่ได้รับอนุมัติแล้ว"},
+      {id:"a5", type:"activity", lane:1, row:6, text:"รวมและเรียงลำดับตามวันที่เข้าร่วม"},
+      {id:"a6", type:"activity", lane:1, row:7, text:"สร้างไฟล์เอกสารสรุปรูปแบบ PDF"},
+      {id:"a7", type:"activity", lane:0, row:8, text:"ดาวน์โหลดไฟล์ PDF"},
+      {id:"e1", type:"end", lane:0, row:9},
+    ],
+    edges: [
+      ["s","a1"],["a1","a2"],["a2","a3"],["a3","a4"],["a4","a5"],["a5","a6"],["a6","a7"],["a7","e1"],
+    ]
+  },
+  {
+    title: "ภาพที่ 13 — ระบบเทียบโอนชั่วโมงกิจกรรมโดยตรง (Admin Grant)",
+    lanes: ["ผู้รับผิดชอบกิจกรรม", "ระบบ"],
+    rows: 8,
+    nodes: [
+      {id:"s", type:"start", lane:0, row:1},
+      {id:"a1", type:"activity", lane:0, row:2, text:"ค้นหานักศึกษาด้วยรหัสนักศึกษา"},
+      {id:"d1", type:"decision", lane:1, row:3, text:"พบข้อมูล\nนักศึกษาหรือไม่"},
+      {id:"e1", type:"end", lane:1, row:3, align:"r"},
+      {id:"a2", type:"activity", lane:0, row:4, text:"เลือกตำแหน่งที่นักศึกษาดำรงและปีการศึกษา"},
+      {id:"a3", type:"activity", lane:1, row:5, text:"แสดงจำนวนชั่วโมงมาตรฐานของตำแหน่งนั้นโดยอัตโนมัติ"},
+      {id:"d2", type:"decision", lane:0, row:6, text:"ยืนยัน\nการเทียบโอน"},
+      {id:"e2", type:"end", lane:0, row:6, align:"r"},
+      {id:"a4", type:"activity", lane:1, row:7, text:"บันทึกประวัติการเทียบโอน สถานะ: อนุมัติทันที"},
+      {id:"a5", type:"activity", lane:1, row:8, text:"บวกจำนวนชั่วโมงเข้ายอดสะสมของนักศึกษา"},
+      {id:"e3", type:"end", lane:1, row:8, align:"r"},
+    ],
+    edges: [
+      ["s","a1"],["a1","d1"],
+      ["d1","e1",{label:"ไม่พบ"}],
+      ["d1","a2",{label:"พบ"}],["a2","a3"],["a3","d2"],
+      ["d2","e2",{label:"ยกเลิก"}],
+      ["d2","a4",{label:"ยืนยัน"}],["a4","a5"],["a5","e3"],
+    ]
+  },
+];
+
+function el(tag, cls, parent){
+  const e = document.createElement(tag);
+  if (cls) e.className = cls;
+  if (parent) parent.appendChild(e);
+  return e;
+}
+
+function renderDiagram(container, def){
+  el("div", "diagram-title", container).textContent = def.title;
+  const rowH = 112;
+  const diagram = el("div", "diagram", container);
+  diagram.style.height = (rowH * (def.rows + 1) + 40) + "px";
+
+  const lanes = el("div", "lanes", diagram);
+  lanes.style.position = "absolute";
+  lanes.style.inset = "0";
+  lanes.style.gridTemplateColumns = `repeat(${def.lanes.length}, 1fr)`;
+  def.lanes.forEach(name => {
+    const lane = el("div", "lane", lanes);
+    el("div", "lane-header", lane).textContent = name;
+  });
+
+  const nodesLayer = el("div", "nodes", diagram);
+  nodesLayer.style.position = "absolute";
+  nodesLayer.style.inset = "0";
+  nodesLayer.style.gridTemplateColumns = `repeat(${def.lanes.length}, 1fr)`;
+  nodesLayer.style.gridTemplateRows = `40px repeat(${def.rows*2 + 2}, ${rowH/2}px)`;
+
+  const byId = {};
+  def.nodes.forEach(n => {
+    const wrap = el("div", `node ${n.type}`, nodesLayer);
+    wrap.style.gridColumn = (n.lane+1);
+    wrap.style.gridRow = `${Math.round(n.row*2)+2} / span 2`;
+    wrap.id = "n_"+n.id;
+    if (n.align) wrap.dataset.align = n.align;
+    if (n.type === "activity" || n.type === "note") wrap.textContent = n.text;
+    if (n.type === "decision"){
+      el("div","diamond",wrap);
+      const t = el("div","dtext",wrap); t.textContent = n.text;
+    }
+    byId[n.id] = { el: wrap, row: n.row, lane: n.lane };
+  });
+
+  const svg = document.createElementNS("http://www.w3.org/2000/svg","svg");
+  svg.setAttribute("class","connectors");
+  diagram.appendChild(svg);
+  const markerId = "arrow_"+Math.random().toString(36).slice(2);
+  svg.innerHTML = `<defs><marker id="${markerId}" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 z" fill="var(--line)"/></marker></defs>`;
+
+  // Index edges sharing the same source/target so their turn points can be
+  // staggered — without this, two branches leaving the same decision (or
+  // converging into the same node) compute identical turn coordinates and
+  // draw exactly on top of each other.
+  const outCount = {}, inCount = {};
+  const edgeMeta = def.edges.map(([fromId, toId, opts]) => {
+    const outIdx = outCount[fromId] || 0; outCount[fromId] = outIdx + 1;
+    const inIdx = inCount[toId] || 0; inCount[toId] = inIdx + 1;
+    return { fromId, toId, opts: opts || {}, outIdx, inIdx };
+  });
+
+  requestAnimationFrame(() => {
+    const dRect = diagram.getBoundingClientRect();
+    edgeMeta.forEach(({fromId, toId, opts, outIdx, inIdx}) => {
+      const fromN = byId[fromId], toN = byId[toId];
+      const fr = fromN.el.getBoundingClientRect(), tr = toN.el.getBoundingClientRect();
+      const sameRow = fromN.row === toN.row;
+      const sameLane = fromN.lane === toN.lane;
+      const stagger = 16;
+      let path, labelX, labelY;
+
+      if (sameRow){
+        // Same swimlane row: source and target sit side by side (same lane,
+        // via an align offset, or adjacent lanes) — connect the facing
+        // sides at the row's shared vertical center instead of bottom-to-top,
+        // since bottom-to-top geometry assumes a top-down flow that doesn't
+        // apply here.
+        const midY = (fr.top + fr.bottom)/2 - dRect.top;
+        const goingRight = (fr.left + fr.width/2) < (tr.left + tr.width/2);
+        const fx = (goingRight ? fr.right : fr.left) - dRect.left;
+        const tx = (goingRight ? tr.left : tr.right) - dRect.left;
+        path = `M${fx},${midY} L${tx},${midY}`;
+        labelX = (fx+tx)/2;
+        labelY = midY - 8;
+      } else {
+        const fx = fr.left + fr.width/2 - dRect.left, fy = fr.bottom - dRect.top;
+        const tx = tr.left + tr.width/2 - dRect.left;
+        const ty = tr.top - dRect.top;
+        const forward = toN.row > fromN.row;
+        if (Math.abs(fx-tx) < 2){
+          if (forward){
+            const rowGap = toN.row - fromN.row;
+            if (rowGap > 1){
+              // Non-adjacent same-lane transition: another node sits centered
+              // in this lane between source and target, so a straight vertical
+              // line would run directly through it. Bow out to the side instead.
+              const side = (opts.side === "l" ? -1 : 1) * (72 + outIdx*stagger);
+              const sx = fx + side;
+              path = `M${fx},${fy} L${fx},${fy+16} L${sx},${fy+16} L${sx},${ty-16} L${tx},${ty-16} L${tx},${ty}`;
+              labelX = sx; labelY = fy+12;
+            } else {
+              path = `M${fx},${fy} L${tx},${ty}`; labelX = fx; labelY = fy+18+outIdx*14;
+            }
+          }
+          else {
+            const side = (opts.side === "l" ? -1 : 1) * (60 + outIdx*stagger);
+            path = `M${fx},${fy} L${fx+side},${fy+18} L${fx+side},${ty-18} L${tx},${ty-18} L${tx},${ty}`;
+            labelX = fx+side; labelY = fy+14;
+          }
+        } else {
+          if (forward){
+            // Small, tightly-clamped offset: a large turnY here can drift into
+            // the next row's node when the source's own row is nearly full-height
+            // (e.g. a decision diamond), clipping straight through it.
+            const turnY = fy + 10 + outIdx*9;
+            path = `M${fx},${fy} L${fx},${turnY} L${tx},${turnY} L${tx},${ty}`;
+            labelX = fx; labelY = fy + 18 + outIdx*14;
+          } else {
+            const side = (opts.side === "l" ? -1 : 1) * (40 + outIdx*stagger);
+            const outX = fx + side;
+            path = `M${fx},${fy} L${fx},${fy+20} L${outX},${fy+20} L${outX},${ty-20} L${tx},${ty-20} L${tx},${ty}`;
+            labelX = fx + (opts.side==="l"?-60:60); labelY = fy+22-5;
+          }
+        }
+      }
+
+      const p = document.createElementNS("http://www.w3.org/2000/svg","path");
+      p.setAttribute("d", path);
+      p.setAttribute("class","eline");
+      p.setAttribute("marker-end", `url(#${markerId})`);
+      svg.appendChild(p);
+
+      if (opts.label){
+        const t = document.createElementNS("http://www.w3.org/2000/svg","text");
+        t.setAttribute("x", labelX + (opts.labelDx||14)); t.setAttribute("y", labelY);
+        t.setAttribute("class","elabel");
+        t.textContent = "["+opts.label+"]";
+        svg.appendChild(t);
+        const bbox_est = opts.label.length*6.2+10;
+        const bg = document.createElementNS("http://www.w3.org/2000/svg","rect");
+        bg.setAttribute("x", labelX-3); bg.setAttribute("y", labelY-11);
+        bg.setAttribute("width", bbox_est); bg.setAttribute("height", 14);
+        bg.setAttribute("class","elabel-bg");
+        svg.insertBefore(bg, t);
+      }
+    });
+  });
+}
+
+const app = document.getElementById("app");
+DIAGRAMS.forEach(def => renderDiagram(app, def));
+</script>

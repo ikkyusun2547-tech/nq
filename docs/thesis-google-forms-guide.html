@@ -1,0 +1,311 @@
+<title>คู่มือสร้าง Google Forms — SRRU Check</title>
+<style>
+  :root{
+    --bg:#faf8f5; --ink:#1f1b16; --muted:#6b6255; --card:#ffffff; --card-border:#e8e2d8;
+    --accent:#b5601f; --accent-ink:#ffffff; --copy-bg:#fbf1e4; --copy-border:#e3c99a;
+    --step-bg:#f3efe8; --mono:#3d3527;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{ --bg:#17140f; --ink:#f2ede4; --muted:#a99d89; --card:#211c15; --card-border:#3a3226;
+      --accent:#e08a3e; --accent-ink:#17140f; --copy-bg:#2a2115; --copy-border:#5a4426; --step-bg:#221d16; --mono:#e8dcc6; }
+  }
+  :root[data-theme="dark"]{ --bg:#17140f; --ink:#f2ede4; --muted:#a99d89; --card:#211c15; --card-border:#3a3226;
+    --accent:#e08a3e; --accent-ink:#17140f; --copy-bg:#2a2115; --copy-border:#5a4426; --step-bg:#221d16; --mono:#e8dcc6; }
+  :root[data-theme="light"]{ --bg:#faf8f5; --ink:#1f1b16; --muted:#6b6255; --card:#ffffff; --card-border:#e8e2d8;
+    --accent:#b5601f; --accent-ink:#ffffff; --copy-bg:#fbf1e4; --copy-border:#e3c99a; --step-bg:#f3efe8; --mono:#3d3527; }
+
+  * { box-sizing:border-box; }
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:"Noto Sans Thai","Segoe UI",-apple-system,system-ui,sans-serif;
+    line-height:1.6; padding:0 0 6rem;
+  }
+  .hero{ max-width:760px; margin:0 auto; padding:3rem 1.5rem 1.5rem; text-align:center; }
+  .hero h1{ font-size:1.7rem; font-weight:800; margin:0 0 .5rem; text-wrap:balance; }
+  .hero p{ color:var(--muted); font-size:.95rem; max-width:560px; margin:0 auto; }
+
+  .overview{
+    max-width:760px; margin:2rem auto; padding:0 1.5rem;
+    display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:.75rem;
+  }
+  .ov-step{
+    background:var(--card); border:1px solid var(--card-border); border-radius:12px;
+    padding:1rem .9rem; text-align:center;
+  }
+  .ov-step .n{
+    width:28px; height:28px; border-radius:50%; background:var(--accent); color:var(--accent-ink);
+    display:flex; align-items:center; justify-content:center; font-weight:800; font-size:.85rem;
+    margin:0 auto .5rem;
+  }
+  .ov-step .t{ font-size:.78rem; font-weight:700; }
+
+  .wrap{ max-width:760px; margin:0 auto; padding:0 1.5rem; display:flex; flex-direction:column; gap:1.5rem; }
+
+  .formhead{
+    margin-top:2.5rem; padding:1.25rem 1.4rem; border-radius:14px;
+    background:linear-gradient(135deg, var(--accent), color-mix(in srgb, var(--accent) 60%, var(--ink)));
+    color:var(--accent-ink);
+  }
+  .formhead .tag{ font-size:.7rem; font-weight:800; letter-spacing:.06em; text-transform:uppercase; opacity:.85; }
+  .formhead h2{ margin:.2rem 0 0; font-size:1.25rem; font-weight:800; }
+
+  .section{
+    background:var(--card); border:1px solid var(--card-border); border-radius:14px; padding:1.3rem 1.4rem;
+  }
+  .section > .stitle{
+    display:flex; align-items:center; gap:.6rem; font-weight:800; font-size:.95rem; margin-bottom:1rem;
+  }
+  .section > .stitle .badge{
+    flex-shrink:0; width:24px; height:24px; border-radius:7px; background:var(--step-bg); color:var(--accent);
+    display:flex; align-items:center; justify-content:center; font-size:.78rem; font-weight:800;
+  }
+
+  .qblock{ margin-bottom:1.2rem; padding-bottom:1.2rem; border-bottom:1px dashed var(--card-border); }
+  .qblock:last-child{ margin-bottom:0; padding-bottom:0; border-bottom:none; }
+  .qmeta{ display:flex; flex-wrap:wrap; gap:.4rem; align-items:center; margin-bottom:.5rem; }
+  .qtype{
+    font-size:.66rem; font-weight:800; text-transform:uppercase; letter-spacing:.04em;
+    background:var(--step-bg); color:var(--muted); padding:.2rem .55rem; border-radius:999px;
+  }
+  .qlabel{ font-size:.72rem; color:var(--muted); }
+
+  .copybox{
+    background:var(--copy-bg); border:1px solid var(--copy-border); border-radius:10px;
+    padding:.7rem .9rem; font-family:"SF Mono",ui-monospace,Menlo,Consolas,monospace;
+    font-size:.86rem; color:var(--mono); white-space:pre-wrap; line-height:1.55;
+  }
+  .copybox + .copybox{ margin-top:.5rem; }
+  .copylabel{ font-size:.66rem; font-weight:700; color:var(--accent); margin-bottom:.3rem; display:block; }
+
+  .options{ display:flex; flex-wrap:wrap; gap:.4rem; margin-top:.5rem; }
+  .opt{ background:var(--step-bg); border:1px solid var(--card-border); border-radius:999px; padding:.25rem .7rem; font-size:.78rem; }
+
+  .tip{
+    background:var(--step-bg); border-left:3px solid var(--accent); border-radius:0 10px 10px 0;
+    padding:.7rem .9rem; font-size:.82rem; margin-top:.6rem; color:var(--ink);
+  }
+  .tip b{ color:var(--accent); }
+
+  .steplist{ display:flex; flex-direction:column; gap:.6rem; }
+  .steplist li{ margin-left:1.1rem; padding-left:.3rem; }
+
+  .final{
+    background:var(--card); border:1px solid var(--card-border); border-radius:14px; padding:1.3rem 1.4rem; margin-top:1rem;
+  }
+  .final h2{ font-size:1.05rem; margin:0 0 .8rem; }
+  .final ol{ margin:0; padding-left:1.3rem; display:flex; flex-direction:column; gap:.7rem; font-size:.9rem; }
+  .final ol b{ color:var(--accent); }
+
+  @media (max-width:520px){ .hero h1{ font-size:1.4rem; } }
+</style>
+
+<div class="hero">
+  <h1>คู่มือสร้าง Google Forms<br>สำหรับเก็บข้อมูลวิจัย SRRU Check</h1>
+  <p>ทำตามทีละขั้นตอน คัดลอกข้อความในกล่องสีส้มไปวางใน Google Forms ได้เลย ไม่ต้องคิดคำถามเอง</p>
+</div>
+
+<div class="overview">
+  <div class="ov-step"><div class="n">1</div><div class="t">สร้างฟอร์มใน Google Forms</div></div>
+  <div class="ov-step"><div class="n">2</div><div class="t">คัดลอกคำถามไปวาง</div></div>
+  <div class="ov-step"><div class="n">3</div><div class="t">ส่งลิงก์ให้ผู้ตอบ</div></div>
+  <div class="ov-step"><div class="n">4</div><div class="t">ดึงข้อมูลเป็น Sheets</div></div>
+</div>
+
+<div class="wrap">
+
+  <div class="tip">🔗 เริ่มต้น: เปิด <b>forms.google.com</b> → กด <b>"ว่างเปล่า" (Blank)</b> เพื่อสร้างฟอร์มใหม่ 1 ฟอร์มต่อ 1 ชุดด้านล่างนี้ (สร้าง 2 ฟอร์มแยกกัน)</div>
+
+  <!-- ============ FORM 1 ============ -->
+  <div class="formhead">
+    <div class="tag">ฟอร์มที่ 1 · ผู้เชี่ยวชาญ 5 ท่าน</div>
+    <h2>แบบประเมินประสิทธิภาพระบบเว็บแอปพลิเคชัน</h2>
+  </div>
+
+  <div class="section">
+    <div class="stitle"><span class="badge">A</span> ตั้งชื่อและคำอธิบายฟอร์ม</div>
+    <span class="copylabel">ชื่อฟอร์ม (คลิก "แบบฟอร์มไม่มีชื่อ" ด้านบน)</span>
+    <div class="copybox">แบบประเมินประสิทธิภาพระบบเว็บแอปพลิเคชัน SRRU Check</div>
+    <span class="copylabel" style="margin-top:.6rem;display:block">คำอธิบาย (ช่องใต้ชื่อฟอร์ม)</span>
+    <div class="copybox">แบบประเมินนี้จัดทำขึ้นเพื่อประเมินประสิทธิภาพของระบบเว็บแอปพลิเคชันเพื่อการบริหารจัดการและตรวจสอบผลการดำเนินกิจกรรมนักศึกษา มหาวิทยาลัยราชภัฏสุรินทร์ โปรดประเมินตามความคิดเห็นของท่านมากที่สุด (5 = มากที่สุด, 1 = น้อยที่สุด)</div>
+  </div>
+
+  <div class="section">
+    <div class="stitle"><span class="badge">B</span> ตอนที่ 1 — ข้อมูลทั่วไปของผู้เชี่ยวชาญ</div>
+    <div class="qmeta"><span class="qlabel">กด "เพิ่มส่วน" (ไอคอนเส้นคู่) แล้วตั้งชื่อส่วนนี้ว่า "ตอนที่ 1 ข้อมูลทั่วไปของผู้เชี่ยวชาญ"</span></div>
+
+    <div class="qblock">
+      <div class="qmeta"><span class="qtype">Multiple choice</span></div>
+      <div class="copybox">ตำแหน่ง/ความเชี่ยวชาญ</div>
+      <div class="options">
+        <span class="opt">นักวิเคราะห์ระบบ</span><span class="opt">นักพัฒนาซอฟต์แวร์</span>
+        <span class="opt">ผู้ดูแลระบบฐานข้อมูล</span><span class="opt">อาจารย์ผู้สอนด้านคอมพิวเตอร์</span>
+        <span class="opt">+ เปิด "เพิ่มตัวเลือกอื่นๆ"</span>
+      </div>
+    </div>
+
+    <div class="qblock">
+      <div class="qmeta"><span class="qtype">Short answer</span></div>
+      <div class="copybox">ประสบการณ์การทำงานด้านเทคโนโลยีสารสนเทศ (ปี)</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="stitle"><span class="badge">C</span> ตอนที่ 2 — การประเมินประสิทธิภาพของระบบ</div>
+    <div class="tip">ใช้ประเภทคำถาม <b>"Multiple choice grid"</b> (ตารางหลายตัวเลือก) — คอลัมน์ (Columns) ใส่ <b>5, 4, 3, 2, 1</b> ทุกตาราง แล้วเปิด <b>"ต้องกรอกคำตอบในแต่ละแถว"</b> สร้างทั้งหมด 4 ตาราง ดังนี้</div>
+
+    <div class="qblock">
+      <div class="qmeta"><span class="qtype">Grid 1 · หัวข้อตาราง</span></div>
+      <div class="copybox">1. ด้านการทำงานของระบบ (Functional Requirement)</div>
+      <div class="qmeta" style="margin-top:.5rem"><span class="qlabel">แถว (Rows) — 1 บรรทัดต่อ 1 แถว</span></div>
+      <div class="copybox">ระบบสามารถตรวจสอบสิทธิ์และแยกการแสดงผลตามกลุ่มผู้ใช้งานได้ถูกต้อง
+ระบบสามารถสร้างกิจกรรม กำหนดโควตา และสร้าง QR Code ได้
+ระบบสามารถบันทึกการเช็คชื่อเข้าร่วมกิจกรรมด้วย QR Code ร่วมกับ GPS และเซลฟีได้อย่างสมบูรณ์
+ระบบสามารถเทียบโอนและแยกแยะเงื่อนไขชั่วโมงกิจกรรม (ภาคปกติ/พิเศษ) ได้</div>
+    </div>
+
+    <div class="qblock">
+      <div class="qmeta"><span class="qtype">Grid 2 · หัวข้อตาราง</span></div>
+      <div class="copybox">2. ด้านความถูกต้องของระบบ (Accuracy)</div>
+      <div class="qmeta" style="margin-top:.5rem"><span class="qlabel">แถว</span></div>
+      <div class="copybox">ความถูกต้องของการบันทึกข้อมูลลงฐานข้อมูลและการเรียกดูข้อมูลย้อนหลัง
+ความถูกต้องในการคำนวณและสรุปยอดชั่วโมงกิจกรรมสะสมของนักศึกษา
+ความถูกต้องของการแสดงผลลัพธ์การอนุมัติและการสร้างเอกสารสรุปผลกิจกรรม (PDF)</div>
+    </div>
+
+    <div class="qblock">
+      <div class="qmeta"><span class="qtype">Grid 3 · หัวข้อตาราง</span></div>
+      <div class="copybox">3. ด้านความง่ายในการใช้งาน (Usability)</div>
+      <div class="qmeta" style="margin-top:.5rem"><span class="qlabel">แถว</span></div>
+      <div class="copybox">การออกแบบส่วนติดต่อผู้ใช้งาน (User Interface) มีความเหมาะสม เข้าใจง่าย
+ลำดับขั้นตอนการทำงานของระบบมีความต่อเนื่อง ไม่ซับซ้อน
+ระบบมีการแจ้งเตือน (Error Message / Success Message) ที่ชัดเจน</div>
+    </div>
+
+    <div class="qblock">
+      <div class="qmeta"><span class="qtype">Grid 4 · หัวข้อตาราง</span></div>
+      <div class="copybox">4. ด้านความปลอดภัยของข้อมูล (Security)</div>
+      <div class="qmeta" style="margin-top:.5rem"><span class="qlabel">แถว</span></div>
+      <div class="copybox">ระบบมีการป้องกันการเข้าถึงข้อมูลจากผู้ที่ไม่มีสิทธิ์ได้อย่างรัดกุม
+ระบบมีการยืนยันตัวตนผ่านบัญชี Google ของมหาวิทยาลัยและจำกัดเฉพาะโดเมนที่กำหนดได้อย่างรัดกุม</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="stitle"><span class="badge">D</span> ตอนที่ 3 — ข้อเสนอแนะเพิ่มเติม</div>
+    <div class="qblock">
+      <div class="qmeta"><span class="qtype">Paragraph · ไม่บังคับตอบ</span></div>
+      <div class="copybox">ข้อเสนอแนะเพิ่มเติม (ถ้ามี)</div>
+    </div>
+  </div>
+
+  <!-- ============ FORM 2 ============ -->
+  <div class="formhead">
+    <div class="tag">ฟอร์มที่ 2 · กลุ่มตัวอย่างผู้ใช้งาน 28 คน</div>
+    <h2>แบบสอบถามความพึงพอใจต่อระบบ</h2>
+  </div>
+
+  <div class="tip">⚠️ สร้างเป็น<b>ฟอร์มใหม่แยกต่างหาก</b> อย่ารวมกับฟอร์มที่ 1</div>
+
+  <div class="section">
+    <div class="stitle"><span class="badge">A</span> ตั้งชื่อและคำอธิบายฟอร์ม</div>
+    <span class="copylabel">ชื่อฟอร์ม</span>
+    <div class="copybox">แบบสอบถามความพึงพอใจต่อระบบ SRRU Check</div>
+    <span class="copylabel" style="margin-top:.6rem;display:block">คำอธิบาย</span>
+    <div class="copybox">แบบสอบถามนี้มีวัตถุประสงค์เพื่อประเมินความพึงพอใจในการใช้งานเว็บแอปพลิเคชันบริหารจัดการกิจกรรมนักศึกษา มหาวิทยาลัยราชภัฏสุรินทร์ โปรดตอบตามความเป็นจริงมากที่สุด (5 = มากที่สุด, 1 = น้อยที่สุด)</div>
+  </div>
+
+  <div class="section">
+    <div class="stitle"><span class="badge">B</span> ตอนที่ 1 — ข้อมูลทั่วไปของผู้ตอบแบบสอบถาม</div>
+
+    <div class="qblock">
+      <div class="qmeta"><span class="qtype">Multiple choice</span></div>
+      <div class="copybox">บทบาท</div>
+      <div class="options">
+        <span class="opt">นักศึกษา</span><span class="opt">อาจารย์ประจำกองพัฒนานักศึกษา</span><span class="opt">ผู้แทนสภานักศึกษา</span>
+      </div>
+      <div class="tip">💡 กดจุด 3 จุดมุมขวาล่างของคำถามนี้ → <b>"ไปยังส่วนตามคำตอบ"</b> (Go to section based on answer): ตอบ "นักศึกษา" → ไปส่วน C (คณะ/สาขา) ตอบอย่างอื่น → ข้ามไปส่วน D เลย จะได้ไม่บังคับอาจารย์/สภานักศึกษาตอบคำถามที่ไม่เกี่ยวกับตัวเอง</div>
+    </div>
+
+    <div class="qblock">
+      <div class="qmeta"><span class="qtype">Multiple choice</span></div>
+      <div class="copybox">เพศ</div>
+      <div class="options"><span class="opt">ชาย</span><span class="opt">หญิง</span><span class="opt">+ เปิด "เพิ่มตัวเลือกอื่นๆ"</span></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="stitle"><span class="badge">C</span> ส่วนใหม่: "ข้อมูลเพิ่มเติม (เฉพาะผู้ตอบที่เป็นนักศึกษา)"</div>
+
+    <div class="qblock">
+      <div class="qmeta"><span class="qtype">Short answer</span></div>
+      <div class="copybox">คณะ</div>
+    </div>
+    <div class="qblock">
+      <div class="qmeta"><span class="qtype">Short answer</span></div>
+      <div class="copybox">สาขาวิชา</div>
+    </div>
+    <div class="qblock">
+      <div class="qmeta"><span class="qtype">Multiple choice</span></div>
+      <div class="copybox">ชั้นปีที่ศึกษา</div>
+      <div class="options"><span class="opt">ปี 1</span><span class="opt">ปี 2</span><span class="opt">ปี 3</span><span class="opt">ปี 4</span><span class="opt">+ เพิ่มตัวเลือกอื่นๆ</span></div>
+    </div>
+    <div class="qblock">
+      <div class="qmeta"><span class="qtype">Multiple choice</span></div>
+      <div class="copybox">ประเภทนักศึกษา</div>
+      <div class="options"><span class="opt">ภาคปกติ (เป้าหมาย 100 ชม.)</span><span class="opt">ภาคพิเศษ (เป้าหมาย 50 ชม.)</span></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="stitle"><span class="badge">D</span> ตอนที่ 2 — ความพึงพอใจที่มีต่อการใช้งานระบบ</div>
+    <div class="tip">ใช้ <b>"Multiple choice grid"</b> เหมือนฟอร์มที่ 1 (คอลัมน์ = 5, 4, 3, 2, 1) สร้าง 3 ตาราง</div>
+
+    <div class="qblock">
+      <div class="qmeta"><span class="qtype">Grid 1 · หัวข้อตาราง</span></div>
+      <div class="copybox">1. ด้านการออกแบบและการแสดงผล (User Interface)</div>
+      <div class="qmeta" style="margin-top:.5rem"><span class="qlabel">แถว</span></div>
+      <div class="copybox">รูปแบบหน้าจอมีความสวยงาม ทันสมัย และอ่านข้อมูลได้ง่าย
+การจัดวางเมนูและปุ่มคำสั่งต่าง ๆ มีความเป็นระเบียบและค้นหาง่าย
+ระบบสามารถแสดงผลบนโทรศัพท์มือถือและคอมพิวเตอร์ได้อย่างเหมาะสม</div>
+    </div>
+
+    <div class="qblock">
+      <div class="qmeta"><span class="qtype">Grid 2 · หัวข้อตาราง</span></div>
+      <div class="copybox">2. ด้านขั้นตอนการใช้งาน (Process)</div>
+      <div class="qmeta" style="margin-top:.5rem"><span class="qlabel">แถว</span></div>
+      <div class="copybox">ขั้นตอนการเข้าสู่ระบบด้วยบัญชี Google มีความสะดวกและรวดเร็ว
+การค้นหากิจกรรมที่สนใจและการเข้าร่วมกิจกรรมทำได้ง่าย
+ความสะดวกในการเช็คชื่อหน้างานผ่านการสแกน QR Code และถ่ายภาพยืนยันตัวตน
+ความง่ายในการยื่นคำขอเช็คชื่อย้อนหลังผ่านระบบ (กรณีพลาดเช็คชื่อ)</div>
+    </div>
+
+    <div class="qblock">
+      <div class="qmeta"><span class="qtype">Grid 3 · หัวข้อตาราง</span></div>
+      <div class="copybox">3. ด้านประโยชน์ที่ได้รับ (Benefits)</div>
+      <div class="qmeta" style="margin-top:.5rem"><span class="qlabel">แถว</span></div>
+      <div class="copybox">ระบบช่วยให้นักศึกษาสามารถตรวจสอบชั่วโมงสะสมของตนเองได้แบบเรียลไทม์
+ระบบช่วยลดความผิดพลาดและป้องกันข้อมูลชั่วโมงกิจกรรมสูญหาย
+การดาวน์โหลดเอกสารสรุปผลกิจกรรมแบบ PDF ผ่านระบบมีความสะดวกมากกว่าการขอเอกสารแบบเดิม
+ภาพรวมท่านมีความพึงพอใจต่อระบบเว็บแอปพลิเคชันนี้ในระดับใด</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="stitle"><span class="badge">E</span> ตอนที่ 3 — ข้อเสนอแนะเพิ่มเติม</div>
+    <div class="qblock">
+      <div class="qmeta"><span class="qtype">Paragraph · ไม่บังคับตอบ</span></div>
+      <div class="copybox">ข้อเสนอแนะเพิ่มเติมเพื่อการพัฒนาระบบ (ถ้ามี)</div>
+    </div>
+  </div>
+
+  <!-- ============ AFTER ============ -->
+  <div class="final">
+    <h2>🚀 หลังสร้างฟอร์มเสร็จทั้ง 2 ฟอร์ม</h2>
+    <ol>
+      <li><b>ส่งลิงก์:</b> กด "ส่ง" (Send) มุมขวาบน → ไอคอนลิงก์ 🔗 → กด "ย่อ URL" ให้ได้ลิงก์สั้น → ส่งฟอร์มที่ 1 ให้ผู้เชี่ยวชาญ 5 ท่าน และฟอร์มที่ 2 ให้กลุ่มตัวอย่าง 28 คน (หลังให้ทดลองใช้เว็บ SRRU Check จริงก่อน)</li>
+      <li><b>ดึงคำตอบเป็นตาราง:</b> เปิดฟอร์ม → แท็บ "การตอบกลับ" (Responses) → กดไอคอน Sheets สีเขียวมุมขวาบน → ได้ตารางรวมคำตอบทั้งหมดอัตโนมัติ ไม่ต้องคีย์เอง</li>
+      <li><b>คำนวณผล:</b> ในตาราง Sheets ใช้สูตร <code>=AVERAGE(ช่วงคอลัมน์)</code> และ <code>=STDEV.S(ช่วงคอลัมน์)</code> ตามขั้นตอนที่อธิบายไว้ในบทที่ 4 หัวข้อ 4.2 และ 4.3 ของเอกสารหลัก</li>
+    </ol>
+  </div>
+
+</div>
