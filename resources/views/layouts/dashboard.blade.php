@@ -90,18 +90,21 @@
     @if ($isAdmin)
         <div x-data="{ sidebarOpen: false }">
             <!-- Mobile-only slim top bar: sidebar is an off-canvas drawer below lg -->
-            <div class="sticky top-0 z-40 {{ $fullscreenChat ? 'hidden' : 'flex' }} min-h-14 items-center justify-between gap-2 bg-brand-purple-950 px-4 py-2 shadow-soft-lg lg:hidden">
+            <div class="sticky top-0 z-40 {{ $fullscreenChat ? 'hidden' : 'flex' }} min-h-14 items-center gap-1 bg-brand-purple-950 px-4 py-2 shadow-soft-lg lg:hidden">
                 <button @click="sidebarOpen = true" class="shrink-0 rounded-lg p-2 text-violet-200/70 hover:bg-white/5 hover:text-white" aria-label="{{ __('เมนู') }}">
                     <svg class="h-5.5 w-5.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M4 6h16M4 12h16M4 18h16"/></svg>
                 </button>
                 <a href="{{ route('admin.dashboard') }}" class="flex min-w-0 items-center gap-2">
-                    <img src="{{ asset('images/logo.png') }}" alt="SRRU" class="h-7 w-7 shrink-0 object-contain">
+                    <img src="{{ asset('images/logo.png') }}" alt="SRRU" class="h-9 w-9 shrink-0 object-contain">
                     <span class="min-w-0">
                         <span class="block text-sm font-semibold leading-tight text-white">SRRU Check</span>
-                        <span class="block text-[0.65rem] leading-snug text-white/70">{{ __('ระบบเช็คกิจกรรมนักศึกษา มหาวิทยาลัยราชภัฏสุรินทร์') }}</span>
+                        <span class="block text-[0.65rem] leading-snug text-white/70">{{ __('ระบบเช็คกิจกรรมนักศึกษา') }}</span>
+                        <span class="block text-[0.65rem] leading-snug text-white/70">{{ __('มหาวิทยาลัยราชภัฏสุรินทร์') }}</span>
                     </span>
                 </a>
-                @include('partials.notification-bell')
+                <div class="ml-auto">
+                    @include('partials.notification-bell')
+                </div>
             </div>
 
             <!-- Mobile drawer scrim -->
@@ -131,7 +134,8 @@
                         <img src="{{ asset('images/logo.png') }}" alt="SRRU" class="h-14 w-14 shrink-0 object-contain drop-shadow">
                         <span class="min-w-0">
                             <span class="block text-xl font-bold leading-tight text-white">SRRU Check</span>
-                            <span class="mt-1 block text-xs leading-snug text-white/70">{{ __('ระบบเช็คกิจกรรมนักศึกษา มหาวิทยาลัยราชภัฏสุรินทร์') }}</span>
+                            <span class="mt-1 block text-xs leading-snug text-white/70">{{ __('ระบบเช็คกิจกรรมนักศึกษา') }}</span>
+                            <span class="block text-xs leading-snug text-white/70">{{ __('มหาวิทยาลัยราชภัฏสุรินทร์') }}</span>
                         </span>
                     </a>
                     <button @click="sidebarOpen = false" class="shrink-0 rounded-lg p-1.5 text-violet-200/70 hover:bg-white/5 hover:text-white lg:hidden" aria-label="{{ __('ปิดเมนู') }}">

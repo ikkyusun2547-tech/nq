@@ -24,7 +24,7 @@
     ];
 @endphp
 
-<div class="mx-auto max-w-6xl">
+<div class="mx-auto max-w-[90rem]">
     <x-brand-header :title="__('ประวัติการตรวจสอบและการดำเนินการ')" :eyebrow="__('กองพัฒนานักศึกษา')">
         <x-slot:actions>
             <span class="inline-flex items-center gap-1.5 rounded-xl bg-brand-green-500/20 px-4 py-2 text-sm font-medium text-brand-green-100 shadow-soft ring-1 ring-brand-green-300/30 backdrop-blur">

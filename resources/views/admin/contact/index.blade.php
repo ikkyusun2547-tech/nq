@@ -10,7 +10,7 @@
     $statusLabel = ['open' => __('เปิดอยู่'), 'closed' => __('ปิดแล้ว')];
 @endphp
 
-<div class="mx-auto max-w-7xl">
+<div class="mx-auto max-w-[90rem]">
     <x-brand-header :title="__('ข้อความจากนักศึกษา')" :eyebrow="__('กองพัฒนานักศึกษา')" />
 
     <div class="mb-4 mt-4 flex flex-wrap gap-2 text-sm">

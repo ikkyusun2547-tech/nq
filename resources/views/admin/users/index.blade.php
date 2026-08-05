@@ -17,7 +17,7 @@
     $statusLabel = ['active' => __('ใช้งานปกติ'), 'banned' => __('ระงับการใช้งาน')];
 @endphp
 
-<div class="mx-auto max-w-7xl">
+<div class="mx-auto max-w-[90rem]">
     <x-brand-header :title="__('จัดการผู้ใช้งานและสิทธิ์')" :eyebrow="__('กองพัฒนานักศึกษา')">
         <x-slot:actions>
             <span class="rounded-xl bg-white/10 px-4 py-2 text-sm font-medium text-white shadow-soft ring-1 ring-white/15 backdrop-blur">

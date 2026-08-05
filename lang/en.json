@@ -528,6 +528,7 @@
     "ระบบกิจกรรมนักศึกษา": "the Student Activity System",
     "ระบบตรวจพบว่าตำแหน่ง GPS หรือรูปเซลฟีตอนเช็คชื่อไม่ตรงตามเงื่อนไขที่กำหนด เจ้าหน้าที่จะตรวจสอบและอนุมัติหรือปฏิเสธอีกครั้ง ดูสถานะได้ที่:href_history": "The system detected that the GPS location or selfie at check-in didn't meet the requirements. Staff will review and approve or reject it again — check the status at:href_history",
     "ระบบตรวจพบว่าอาจใช้เครื่องร่วมกับผู้อื่น": "The system detected this device may be shared with someone else",
+    "ระบบเช็คกิจกรรมนักศึกษา": "Student Activity Check-in System",
     "ระบบเช็คกิจกรรมนักศึกษา มหาวิทยาลัยราชภัฏสุรินทร์": "Student Activity Check-in System, Surindra Rajabhat University",
     "ระบบเช็คชื่อกิจกรรมนักศึกษา SRRU": "SRRU Student Activity Check-In System",
     "ระบุปีการศึกษา": "Specify academic year",

@@ -114,7 +114,39 @@
         </div>
     </div>
 
-    <div class="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
+    @if (auth()->user()->role === 'super_admin')
+        <div class="mt-4 rounded-2xl bg-brand-purple-50/70 p-5 shadow-soft ring-1 ring-brand-purple-100 dark:bg-brand-purple-500/10 dark:ring-brand-purple-500/20">
+            <div class="mb-3 flex items-center gap-2">
+                <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-brand-purple-600 text-sm font-bold text-white">+</span>
+                <h2 class="text-sm font-semibold text-brand-purple-900 dark:text-brand-purple-300">{{ __('เพิ่มชั่วโมงเทียบโอนตำแหน่งให้นักศึกษาคนนี้โดยตรง (Admin สูงสุด)') }}</h2>
+            </div>
+            <form method="POST" action="{{ route('admin.credit-transfers.grant', $student) }}" enctype="multipart/form-data" class="space-y-3">
+                @csrf
+                <div class="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+                    <x-premium-select name="position" :options="$positionLabels" :selected="old('position')" placeholder="{{ __('-- เลือกตำแหน่ง --') }}" />
+                    <x-premium-select name="activity_category" :options="$categoryOptions" :selected="old('activity_category')" placeholder="{{ __('-- เลือกหมวดหมู่ --') }}" />
+                </div>
+
+                <div class="grid grid-cols-1 gap-2.5 sm:grid-cols-3">
+                    <input type="number" name="academic_year" value="{{ old('academic_year', $currentAcademicYear) }}" required
+                        placeholder="{{ __('ปีการศึกษา') }}"
+                        class="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm shadow-soft transition-all duration-200 focus:border-brand-purple-500 focus:outline-none focus:ring-4 focus:ring-brand-purple-500/10 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100">
+                    <input type="number" name="hours_approved" value="{{ old('hours_approved') }}" min="0" max="200"
+                        placeholder="{{ __('ชั่วโมง (ค่ามาตรฐานตามตำแหน่ง)') }}"
+                        class="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm shadow-soft transition-all duration-200 focus:border-brand-purple-500 focus:outline-none focus:ring-4 focus:ring-brand-purple-500/10 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100">
+                    <input type="file" name="proof_image" accept=".jpg,.jpeg,.png,.pdf"
+                        class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-500 shadow-soft file:mr-2 file:rounded-lg file:border-0 file:bg-brand-purple-50 file:px-2.5 file:py-1.5 file:text-xs file:font-medium file:text-brand-purple-700 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-400">
+                </div>
+                <p class="text-xs text-slate-400 dark:text-slate-500">{{ __('เว้นว่างช่องชั่วโมง = ใช้ชั่วโมงมาตรฐานของตำแหน่งที่เลือก') }}</p>
+
+                <x-confirm-submit tone="purple" :message="__('ยืนยันเพิ่มชั่วโมงเทียบโอนตำแหน่งให้นักศึกษาคนนี้?')" :label="__('เพิ่มชั่วโมง')"
+                    class="rounded-lg bg-gradient-to-r from-brand-purple-600 to-brand-purple-500 px-3.5 py-2 text-xs font-semibold text-white shadow-soft transition-all duration-200 hover:shadow-lg">{{ __('เพิ่มชั่วโมง') }}</x-confirm-submit>
+            </form>
+        </div>
+    @endif
+
+    <h2 class="mb-2 mt-6 text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">{{ __('ภาพรวมชั่วโมงกิจกรรม') }}</h2>
+    <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <div class="space-y-5 rounded-2xl glass-card p-5 shadow-soft">
             <div>
                 <div class="mb-1.5 flex items-baseline justify-between text-sm">
@@ -160,7 +192,8 @@
         </div>
     </div>
 
-    <div class="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
+    <h2 class="mb-2 mt-6 text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">{{ __('ประวัติและคำร้องล่าสุด') }}</h2>
+    <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <div class="rounded-2xl glass-card p-5 shadow-soft">
             <h2 class="mb-3 text-sm font-semibold text-slate-900 dark:text-slate-100">{{ __('ประวัติเช็คชื่อล่าสุด') }}</h2>
             <div class="space-y-2.5">
@@ -234,34 +267,6 @@
 
         <div class="rounded-2xl glass-card p-5 shadow-soft">
             <h2 class="mb-3 text-sm font-semibold text-slate-900 dark:text-slate-100">{{ __('คำร้องเทียบโอนตำแหน่งล่าสุด') }}</h2>
-
-            @if (auth()->user()->role === 'super_admin')
-                <form method="POST" action="{{ route('admin.credit-transfers.grant', $student) }}" enctype="multipart/form-data"
-                    class="mb-4 space-y-3 rounded-xl bg-white/60 p-3.5 shadow-soft dark:bg-slate-800/60">
-                    @csrf
-                    <p class="text-xs font-medium text-slate-500 dark:text-slate-400">{{ __('เพิ่มชั่วโมงเทียบโอนตำแหน่งให้นักศึกษาคนนี้โดยตรง (Admin สูงสุด)') }}</p>
-
-                    <div class="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
-                        <x-premium-select name="position" :options="$positionLabels" :selected="old('position')" placeholder="{{ __('-- เลือกตำแหน่ง --') }}" />
-                        <x-premium-select name="activity_category" :options="$categoryOptions" :selected="old('activity_category')" placeholder="{{ __('-- เลือกหมวดหมู่ --') }}" />
-                    </div>
-
-                    <div class="grid grid-cols-1 gap-2.5 sm:grid-cols-3">
-                        <input type="number" name="academic_year" value="{{ old('academic_year', $currentAcademicYear) }}" required
-                            placeholder="{{ __('ปีการศึกษา') }}"
-                            class="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm shadow-soft transition-all duration-200 focus:border-brand-purple-500 focus:outline-none focus:ring-4 focus:ring-brand-purple-500/10 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100">
-                        <input type="number" name="hours_approved" value="{{ old('hours_approved') }}" min="0" max="200"
-                            placeholder="{{ __('ชั่วโมง (ค่ามาตรฐานตามตำแหน่ง)') }}"
-                            class="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm shadow-soft transition-all duration-200 focus:border-brand-purple-500 focus:outline-none focus:ring-4 focus:ring-brand-purple-500/10 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100">
-                        <input type="file" name="proof_image" accept=".jpg,.jpeg,.png,.pdf"
-                            class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-500 shadow-soft file:mr-2 file:rounded-lg file:border-0 file:bg-brand-purple-50 file:px-2.5 file:py-1.5 file:text-xs file:font-medium file:text-brand-purple-700 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-400">
-                    </div>
-                    <p class="text-xs text-slate-400 dark:text-slate-500">{{ __('เว้นว่างช่องชั่วโมง = ใช้ชั่วโมงมาตรฐานของตำแหน่งที่เลือก') }}</p>
-
-                    <x-confirm-submit tone="purple" :message="__('ยืนยันเพิ่มชั่วโมงเทียบโอนตำแหน่งให้นักศึกษาคนนี้?')" :label="__('เพิ่มชั่วโมง')"
-                        class="rounded-lg bg-gradient-to-r from-brand-purple-600 to-brand-purple-500 px-3.5 py-2 text-xs font-semibold text-white shadow-soft transition-all duration-200 hover:shadow-lg">{{ __('เพิ่มชั่วโมง') }}</x-confirm-submit>
-                </form>
-            @endif
 
             <div class="space-y-2.5">
                 @forelse ($creditTransfers as $req)

@@ -13,7 +13,7 @@
     $enrollmentOptions = ['enrolled' => __('กำลังศึกษา'), 'graduated' => __('จบการศึกษาแล้ว'), 'all' => __('ทั้งหมด')];
 @endphp
 
-<div class="mx-auto max-w-7xl">
+<div class="mx-auto max-w-[90rem]">
     <x-brand-header :title="__('ข้อมูลนักศึกษาในระบบ')" :eyebrow="__('กองพัฒนานักศึกษา')">
         <x-slot:actions>
             <span class="rounded-xl bg-white/10 px-4 py-2 text-sm font-medium text-white shadow-soft ring-1 ring-white/15 backdrop-blur">
@@ -307,6 +307,7 @@
                         <x-sortable-th field="student_id" :label="__('รหัสนักศึกษา')" />
                         <th class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">{{ __('คณะ / สาขา') }}</th>
                         <x-sortable-th field="year_level" :label="__('ชั้นปี')" />
+                        <x-sortable-th field="hours" :label="__('ชั่วโมงสะสม')" />
                         <x-sortable-th field="program_type" :label="__('ภาค')" />
                         <th class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">{{ __('สถานะ') }}</th>
                         <th class="whitespace-nowrap px-4 py-3"></th>
@@ -334,6 +335,33 @@
                                 @endif
                             </td>
                             <td class="whitespace-nowrap px-4 py-3 text-slate-500 dark:text-slate-400">{{ $student->year_level ? __('ปี :year', ['year' => $student->year_level]) : '-' }}</td>
+                            <td class="whitespace-nowrap px-4 py-3">
+                                @php
+                                    $progress = $progressByStudent[$student->id] ?? null;
+                                    $hoursPct = $progress && $progress['required_hours'] > 0
+                                        ? min(100, round($progress['total_hours'] / $progress['required_hours'] * 100))
+                                        : 0;
+                                @endphp
+                                @if ($progress)
+                                    <div class="min-w-[6.5rem]">
+                                        <span @class([
+                                            'font-medium',
+                                            'text-brand-green-600 dark:text-brand-green-400' => $progress['is_cleared'],
+                                            'text-slate-600 dark:text-slate-300' => ! $progress['is_cleared'],
+                                        ])>{{ $progress['total_hours'] }}</span>
+                                        <span class="text-slate-300 dark:text-slate-600">/ {{ $progress['required_hours'] }} {{ __('ชม.') }}</span>
+                                        <div class="mt-1 h-1.5 w-12 overflow-hidden rounded-full bg-brand-purple-50 dark:bg-brand-purple-500/10">
+                                            <div @class([
+                                                'h-full rounded-full',
+                                                'bg-brand-green-500' => $progress['is_cleared'],
+                                                'bg-gradient-to-r from-brand-purple-500 to-brand-green-400' => ! $progress['is_cleared'],
+                                            ]) style="width: {{ $hoursPct }}%"></div>
+                                        </div>
+                                    </div>
+                                @else
+                                    <span class="text-slate-400 dark:text-slate-500">-</span>
+                                @endif
+                            </td>
                             <td class="whitespace-nowrap px-4 py-3 text-slate-500 dark:text-slate-400">{{ $programLabel[$student->program_type] ?? '-' }}</td>
                             <td class="whitespace-nowrap px-4 py-3">
                                 <span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium {{ $statusBadge[$student->account_status] ?? 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400' }}">
@@ -353,7 +381,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="{{ $canBulkAct ? 8 : 7 }}" class="px-4 py-8 text-center text-slate-400 dark:text-slate-500">{{ __('ไม่พบนักศึกษาที่ตรงกับเงื่อนไข') }}</td>
+                            <td colspan="{{ $canBulkAct ? 9 : 8 }}" class="px-4 py-8 text-center text-slate-400 dark:text-slate-500">{{ __('ไม่พบนักศึกษาที่ตรงกับเงื่อนไข') }}</td>
                         </tr>
                     @endforelse
                 </tbody>

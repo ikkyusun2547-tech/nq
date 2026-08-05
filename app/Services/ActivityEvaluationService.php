@@ -218,7 +218,7 @@ class ActivityEvaluationService
      *     required_activities: int, required_hours: int, is_cleared: bool,
      * }>
      */
-    private function bulkProgress(Collection $students): Collection
+    public function bulkProgress(Collection $students): Collection
     {
         $studentIds = $students->pluck('id');
 

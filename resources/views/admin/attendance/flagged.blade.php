@@ -17,7 +17,7 @@
 @endphp
 
 <div
-    class="mx-auto max-w-7xl"
+    class="mx-auto max-w-[90rem]"
     x-data="{
         showModal: false,
         rejecting: false,
