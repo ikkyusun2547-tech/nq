@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\ActivityCalendarController;
 use App\Http\Controllers\Admin\ActivityController;
 use App\Http\Controllers\Admin\ActivityParticipationReportController;
 use App\Http\Controllers\Admin\AnnouncementController;
@@ -28,6 +29,7 @@ use App\Http\Controllers\Auth\DemoLoginController;
 use App\Http\Controllers\Auth\GoogleAuthController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileSetupController;
+use App\Http\Controllers\Student\ActivityCalendarController as StudentActivityCalendarController;
 use App\Http\Controllers\Student\ActivityController as StudentActivityController;
 use App\Http\Controllers\Student\ActivityHistoryController;
 use App\Http\Controllers\Student\CheckInController;
@@ -133,6 +135,7 @@ Route::middleware(['auth', 'srru.email'])->group(function () {
         Route::get('/activity-history', [ActivityHistoryController::class, 'index'])->name('activity-history.index');
 
         Route::get('/activities', [StudentActivityController::class, 'index'])->name('activities.index');
+        Route::get('/activities/calendar', [StudentActivityCalendarController::class, 'index'])->name('activities.calendar');
         Route::get('/activities/{activity}', [StudentActivityController::class, 'show'])->name('activities.show');
 
         Route::get('/checkin', [CheckInController::class, 'show'])->name('checkin.show');
@@ -199,6 +202,7 @@ Route::middleware(['auth', 'srru.email'])->group(function () {
         Route::get('/students/import/template', [StudentImportController::class, 'template'])->name('students.import.template');
         Route::get('/students/{student}', [StudentController::class, 'show'])->name('students.show');
 
+        Route::get('/activities/calendar', [ActivityCalendarController::class, 'index'])->name('activities.calendar');
         Route::resource('activities', ActivityController::class)->except(['show']);
 
         Route::get('/activities/{activity}/qr-display', [AttendanceController::class, 'qrDisplay'])->name('attendance.qr-display');

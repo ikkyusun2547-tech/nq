@@ -46,9 +46,12 @@
 <div class="mx-auto max-w-6xl">
     <x-brand-header eyebrow="{{ __('กองพัฒนานักศึกษา') }}" :title="$pageTitle">
         <x-slot:actions>
-            <span class="rounded-xl bg-white/10 px-4 py-2 text-sm font-medium text-white shadow-soft ring-1 ring-white/15 backdrop-blur">
-                {{ __(':count กิจกรรม', ['count' => $activities->total()]) }}
-            </span>
+            <div class="flex flex-wrap items-center gap-2">
+                @include('partials.activity-view-toggle', ['listRoute' => 'activities.index', 'calendarRoute' => 'activities.calendar', 'active' => 'list'])
+                <span class="rounded-xl bg-white/10 px-4 py-2 text-sm font-medium text-white shadow-soft ring-1 ring-white/15 backdrop-blur">
+                    {{ __(':count กิจกรรม', ['count' => $activities->total()]) }}
+                </span>
+            </div>
         </x-slot:actions>
     </x-brand-header>
 

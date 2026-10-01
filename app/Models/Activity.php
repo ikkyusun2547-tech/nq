@@ -96,6 +96,34 @@ class Activity extends Model
             ->withTimestamps();
     }
 
+    /**
+     * Activities that run at any point within [$from, $to] — including
+     * multi-day ones that started before or end after the range.
+     */
+    public function scopeOverlapping($query, \DateTimeInterface $from, \DateTimeInterface $to)
+    {
+        return $query->where('start_at', '<=', $to)->where('end_at', '>=', $from);
+    }
+
+    /**
+     * Pre-filled "add to Google Calendar" link. Times are stored as Thai
+     * wall-clock time, so they're sent as floating local times pinned to
+     * Asia/Bangkok via ctz rather than converted to UTC.
+     */
+    public function googleCalendarUrl(): string
+    {
+        $details = trim(\Illuminate\Support\Str::limit((string) $this->description, 500)."\n\n".route('activities.show', $this));
+
+        return 'https://calendar.google.com/calendar/render?'.http_build_query([
+            'action' => 'TEMPLATE',
+            'text' => $this->title,
+            'dates' => $this->start_at->format('Ymd\THis').'/'.$this->end_at->format('Ymd\THis'),
+            'ctz' => 'Asia/Bangkok',
+            'details' => $details,
+            'location' => (string) $this->location_name,
+        ]);
+    }
+
     public function isOpenToEveryone(): bool
     {
         return $this->restrictions()->doesntExist();

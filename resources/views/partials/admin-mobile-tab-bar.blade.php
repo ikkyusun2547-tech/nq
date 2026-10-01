@@ -9,7 +9,7 @@
     // falls back to the dashboard, since none of those have a more specific
     // "list" above them.
     $adminBackRoute = match (true) {
-        request()->routeIs('admin.activities.create', 'admin.activities.edit', 'admin.attendance.index') => 'admin.activities.index',
+        request()->routeIs('admin.activities.create', 'admin.activities.edit', 'admin.activities.calendar', 'admin.attendance.index') => 'admin.activities.index',
         request()->routeIs('admin.announcements.create') => 'admin.announcements.index',
         request()->routeIs('admin.credit-transfer-positions.create', 'admin.credit-transfer-positions.edit') => 'admin.credit-transfer-positions.index',
         request()->routeIs('admin.faculties.create', 'admin.faculties.edit') => 'admin.faculties.index',
