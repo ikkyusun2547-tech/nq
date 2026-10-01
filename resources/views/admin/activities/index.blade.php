@@ -399,6 +399,9 @@
                         <td class="whitespace-nowrap px-4 py-3 text-right space-x-3">
                             <a href="{{ route('admin.attendance.qr-display', $activity) }}" class="font-medium text-brand-green-600 transition-colors hover:text-brand-green-800 dark:text-brand-green-400 dark:hover:text-brand-green-300">{{ __('แสดง QR') }}</a>
                             <a href="{{ route('admin.attendance.index', $activity) }}" class="font-medium text-brand-purple-600 transition-colors hover:text-brand-purple-800 dark:text-brand-purple-400 dark:hover:text-brand-purple-300">{{ __('หน้างาน') }}</a>
+                            @if ($activity->status === 'closed')
+                                <a href="{{ route('admin.activities.survey-results', $activity) }}" class="font-medium text-amber-600 transition-colors hover:text-amber-800 dark:text-amber-400 dark:hover:text-amber-300">{{ __('ผลประเมิน') }}</a>
+                            @endif
                             <a href="{{ route('admin.activities.edit', $activity) }}" class="font-medium text-slate-500 transition-colors hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200">{{ __('แก้ไข') }}</a>
                             <form method="POST" action="{{ route('admin.activities.duplicate', $activity) }}" class="inline">
                                 @csrf

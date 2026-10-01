@@ -7,6 +7,7 @@ use App\Models\Activity;
 use App\Models\Faculty;
 use App\Models\LateCheckInRequest;
 use App\Services\AcademicYearCalculator;
+use App\Services\ActivitySurvey;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 
@@ -118,6 +119,7 @@ class ActivityController extends Controller
         return view('student.activities.index', compact('activities', 'checkedInActivityIds', 'academicYears', 'academicYear', 'faculties', 'statusGroup'));
     }
 
+
     /**
      * Full detail page a card in the browsable feed links through to, since
      * the card itself only surfaces a handful of at-a-glance fields.
@@ -133,6 +135,14 @@ class ActivityController extends Controller
             ->where('activity_id', $activity->id)
             ->value('status');
 
-        return view('student.activities.show', compact('activity', 'checkedIn', 'lateCheckInStatus'));
+        // 'pending' | 'done' | null (nothing to evaluate)
+        $survey = app(ActivitySurvey::class);
+        $surveyState = match (true) {
+            ! $survey->hasEnded($activity) || ! $survey->attended($user, $activity) => null,
+            $survey->hasSubmitted($user, $activity) => 'done',
+            default => 'pending',
+        };
+
+        return view('student.activities.show', compact('activity', 'checkedIn', 'lateCheckInStatus', 'surveyState'));
     }
 }

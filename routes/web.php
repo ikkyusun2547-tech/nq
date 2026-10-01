@@ -21,6 +21,9 @@ use App\Http\Controllers\Admin\ParticipationReportController;
 use App\Http\Controllers\Admin\ReportsController;
 use App\Http\Controllers\Admin\RequestStatsReportController;
 use App\Http\Controllers\Admin\SettingsController;
+use App\Http\Controllers\Admin\SurveyQuestionController;
+use App\Http\Controllers\Admin\SurveyReportController;
+use App\Http\Controllers\Admin\ActivitySurveyResultController;
 use App\Http\Controllers\Admin\StudentController;
 use App\Http\Controllers\Admin\StudentImportController;
 use App\Http\Controllers\Admin\UserManagementController;
@@ -32,6 +35,7 @@ use App\Http\Controllers\ProfileSetupController;
 use App\Http\Controllers\Student\ActivityCalendarController as StudentActivityCalendarController;
 use App\Http\Controllers\Student\ActivityController as StudentActivityController;
 use App\Http\Controllers\Student\ActivityHistoryController;
+use App\Http\Controllers\Student\ActivitySurveyController;
 use App\Http\Controllers\Student\CheckInController;
 use App\Http\Controllers\Student\ContactController;
 use App\Http\Controllers\Student\CreditTransferController;
@@ -151,6 +155,9 @@ Route::middleware(['auth', 'srru.email'])->group(function () {
         Route::get('/activities/{activity}/self-checkin', [SelfCheckInController::class, 'show'])->name('self-checkin.show');
         Route::post('/activities/{activity}/self-checkin', [SelfCheckInController::class, 'store'])->name('self-checkin.store');
 
+        Route::get('/activities/{activity}/survey', [ActivitySurveyController::class, 'show'])->name('activity-survey.show');
+        Route::post('/activities/{activity}/survey', [ActivitySurveyController::class, 'store'])->name('activity-survey.store');
+
         Route::get('/activities/{activity}/late-checkin', [LateCheckInController::class, 'show'])->name('late-checkin.show');
         Route::post('/activities/{activity}/late-checkin', [LateCheckInController::class, 'store'])->name('late-checkin.store');
 
@@ -209,6 +216,8 @@ Route::middleware(['auth', 'srru.email'])->group(function () {
         Route::get('/activities/{activity}/qr-fragment', [AttendanceController::class, 'qrFragment'])->name('attendance.qr-fragment');
         Route::get('/activities/{activity}/qr-print', [AttendanceController::class, 'qrPrint'])->name('attendance.qr-print');
         Route::get('/activities/{activity}/attendance', [AttendanceController::class, 'index'])->name('attendance.index');
+        Route::get('/activities/{activity}/survey-results', [ActivitySurveyResultController::class, 'show'])->name('activities.survey-results');
+        Route::get('/activities/{activity}/survey-results/export', [ActivitySurveyResultController::class, 'export'])->name('activities.survey-results.export');
         Route::post('/activities/{activity}/attendance/bulk-approve', [AttendanceController::class, 'bulkApprove'])->name('attendance.bulk-approve');
         Route::get('/activities/{activity}/attendance/export', [AttendanceController::class, 'exportExcel'])->name('attendance.export');
         Route::get('/activities/{activity}/attendance/missing-export', [AttendanceController::class, 'exportMissingExcel'])->name('attendance.missing-export');
@@ -256,6 +265,8 @@ Route::middleware(['auth', 'srru.email'])->group(function () {
 
         Route::get('/reports/request-stats', [RequestStatsReportController::class, 'index'])->name('reports.request-stats');
 
+        Route::get('/reports/survey', [SurveyReportController::class, 'index'])->name('reports.survey');
+
         Route::get('/audit-log', [AuditLogController::class, 'index'])->name('audit-log.index');
 
         Route::post('/activities/{activity}/duplicate', [ActivityController::class, 'duplicate'])->name('activities.duplicate');
@@ -280,6 +291,9 @@ Route::middleware(['auth', 'srru.email'])->group(function () {
             Route::delete('/majors/{major}', [MajorController::class, 'destroy'])->name('majors.destroy');
 
             Route::resource('credit-transfer-positions', CreditTransferPositionController::class)->except(['show']);
+
+            Route::get('/survey-questions', [SurveyQuestionController::class, 'index'])->name('survey-questions.index');
+            Route::put('/survey-questions/{surveyQuestion}', [SurveyQuestionController::class, 'update'])->name('survey-questions.update');
 
             Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
             Route::get('/settings/create', [SettingsController::class, 'create'])->name('settings.create');
