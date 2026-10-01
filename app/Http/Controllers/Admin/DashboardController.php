@@ -13,7 +13,9 @@ use App\Models\LateCheckInRequest;
 use App\Models\User;
 use App\Services\AcademicYearCalculator;
 use App\Services\ActivityEvaluationService;
+use App\Services\AdminReviewInbox;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
@@ -23,7 +25,7 @@ class DashboardController extends Controller
     {
     }
 
-    public function index(Request $request)
+    public function index(Request $request, AdminReviewInbox $inbox)
     {
         // Same "default to current year, explicit 'all years' respected" rule
         // as the activity lists. Only activity/hours-based figures below are
@@ -87,21 +89,23 @@ class DashboardController extends Controller
                 return $activity;
             });
 
-        $pendingRequests = ExternalActivityRequest::with('user')
-            ->where('status', 'pending')
-            ->latest('created_at')
-            ->limit(5)
-            ->get();
-
         $recentActivity = $this->recentReviewActivity();
+
+        $todayActivities = Activity::where('status', '!=', 'cancelled')
+            ->where('start_at', '<=', now()->endOfDay())
+            ->where('end_at', '>=', now()->startOfDay())
+            ->withCount('attendances')
+            ->orderBy('start_at')
+            ->get();
 
         return view('admin.dashboard', [
             'stats' => $stats,
+            'inbox' => $inbox->build(),
+            'todayActivities' => $todayActivities,
             'categoryHours' => $categoryHours,
             'monthlyTrend' => $monthlyTrend,
             'facultyParticipation' => $facultyParticipation,
             'upcomingActivities' => $upcomingActivities,
-            'pendingRequests' => $pendingRequests,
             'recentActivity' => $recentActivity,
             'academicYear' => $academicYear,
             'academicYears' => $academicYears,
@@ -248,9 +252,14 @@ class DashboardController extends Controller
             $monthCount = 12;
         }
 
+        // strftime on SQLite (the test database), DATE_FORMAT on MySQL.
+        $yearMonth = DB::connection()->getDriverName() === 'sqlite'
+            ? "strftime('%Y-%m', checkin_time)"
+            : "DATE_FORMAT(checkin_time, '%Y-%m')";
+
         $counts = Attendance::query()
             ->whereBetween('checkin_time', [$start, $end])
-            ->selectRaw("DATE_FORMAT(checkin_time, '%Y-%m') as ym, count(*) as total")
+            ->selectRaw("{$yearMonth} as ym, count(*) as total")
             ->groupBy('ym')
             ->pluck('total', 'ym');
 

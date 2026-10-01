@@ -2,9 +2,16 @@
 
 @section('content')
 <div class="mx-auto max-w-md" x-data="checkinApp()" x-init="init()">
-    <x-brand-header :title="__('เช็คชื่อเข้าร่วมกิจกรรม')" />
+    <x-brand-header :title="__('เช็คชื่อเข้าร่วมกิจกรรม')">
+        <x-slot:actions>
+            <a href="{{ route('checkin-guide') }}" class="inline-flex items-center gap-1.5 rounded-full border border-slate-200 px-3.5 py-2 text-sm font-medium text-slate-700 transition-colors hover:border-brand-purple-300 hover:text-brand-purple-700 dark:border-slate-700 dark:text-slate-200 dark:hover:text-brand-purple-300">
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z"/></svg>
+                {{ __('วิธีเช็คชื่อ') }}
+            </a>
+        </x-slot:actions>
+    </x-brand-header>
 
-    <div class="overflow-hidden rounded-3xl glass-card shadow-soft-lg">
+    <div class="overflow-hidden rounded-3xl glass-card">
         <!-- Step indicator -->
         <div class="px-5 py-4">
             <x-step-indicator :steps="[__('สแกน QR'), __('ถ่ายเซลฟี'), __('ยืนยัน')]" current="stepIndex" />
@@ -36,7 +43,7 @@
                     <p class="mb-5 text-sm text-gray-500 dark:text-slate-400">{{ __('ถ่ายภาพเซลฟีเพื่อยืนยันตัวตน (ใช้กล้องหน้าเท่านั้น)') }}</p>
                     <button
                         type="button" @click="$refs.fileInput.click()"
-                        class="w-full rounded-xl bg-brand-green-500 px-4 py-3 text-sm font-semibold text-brand-purple-950 shadow-soft transition-all duration-300 hover:-translate-y-0.5 hover:bg-brand-green-400 hover:shadow-lg"
+                        class="w-full rounded-xl bg-brand-purple-700 px-4 py-3 text-sm font-semibold text-white shadow-soft transition-all duration-300 hover:bg-brand-purple-800"
                     >
                         {{ __('เปิดกล้องเพื่อถ่ายเซลฟี') }}
                     </button>
@@ -68,7 +75,7 @@
                     </div>
                     <p class="text-base font-semibold text-gray-900 dark:text-slate-100" x-text="resultStatus === 'auto_approved' ? '{{ __('เช็คชื่อสำเร็จ') }}' : '{{ __('ส่งคำขอสำเร็จ') }}'"></p>
                     <p class="mt-1 text-sm text-gray-500 dark:text-slate-400" x-text="resultMessage"></p>
-                    <a href="{{ route('dashboard') }}" class="mt-5 block w-full rounded-xl bg-brand-purple-700 px-4 py-3 text-sm font-semibold text-white shadow-soft transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg">{{ __('กลับหน้าแดชบอร์ด') }}</a>
+                    <a href="{{ route('dashboard') }}" class="mt-5 block w-full rounded-xl bg-brand-purple-700 px-4 py-3 text-sm font-semibold text-white shadow-soft transition-all duration-300">{{ __('กลับหน้าแดชบอร์ด') }}</a>
                 </div>
             </template>
 
@@ -79,7 +86,7 @@
                     </div>
                     <p class="text-base font-semibold text-red-600 dark:text-red-400">{{ __('เกิดข้อผิดพลาด') }}</p>
                     <p class="mt-1 text-sm text-gray-500 dark:text-slate-400" x-text="resultMessage"></p>
-                    <button @click="resetToScan()" class="mt-5 block w-full rounded-xl bg-brand-purple-700 px-4 py-3 text-sm font-semibold text-white shadow-soft transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg">{{ __('สแกนใหม่อีกครั้ง') }}</button>
+                    <button @click="resetToScan()" class="mt-5 block w-full rounded-xl bg-brand-purple-700 px-4 py-3 text-sm font-semibold text-white shadow-soft transition-all duration-300">{{ __('สแกนใหม่อีกครั้ง') }}</button>
                 </div>
             </template>
         </div>

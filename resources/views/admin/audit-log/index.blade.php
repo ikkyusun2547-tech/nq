@@ -27,29 +27,29 @@
 <div class="mx-auto max-w-[90rem]">
     <x-brand-header :title="__('ประวัติการตรวจสอบและการดำเนินการ')" :eyebrow="__('กองพัฒนานักศึกษา')">
         <x-slot:actions>
-            <span class="inline-flex items-center gap-1.5 rounded-xl bg-brand-green-500/20 px-4 py-2 text-sm font-medium text-brand-green-100 shadow-soft ring-1 ring-brand-green-300/30 backdrop-blur">
+            <span class="inline-flex items-center gap-1.5 rounded-full bg-brand-green-50 px-3.5 py-1.5 text-sm font-semibold text-brand-green-800 ring-1 ring-brand-green-200 dark:bg-brand-green-500/15 dark:text-brand-green-300 dark:ring-brand-green-500/30">
                 <svg class="h-3.5 w-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
                 {{ __('อนุมัติ :count', ['count' => number_format($actionCounts['approved'])]) }}
             </span>
-            <span class="inline-flex items-center gap-1.5 rounded-xl bg-red-500/20 px-4 py-2 text-sm font-medium text-red-100 shadow-soft ring-1 ring-red-300/30 backdrop-blur">
+            <span class="inline-flex items-center gap-1.5 rounded-full bg-rose-50 px-3.5 py-1.5 text-sm font-semibold text-rose-800 ring-1 ring-rose-200 dark:bg-rose-500/15 dark:text-rose-300 dark:ring-rose-500/30">
                 <svg class="h-3.5 w-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
                 {{ __('ปฏิเสธ :count', ['count' => number_format($actionCounts['rejected'])]) }}
             </span>
         </x-slot:actions>
     </x-brand-header>
 
-    <form method="GET" action="{{ route('admin.audit-log.index') }}" class="mb-4 mt-4 max-w-xs">
+    <form method="GET" action="{{ route('admin.audit-log.index') }}" class="mb-5 mt-1">
         @php $reviewerOptions = $reviewers->mapWithKeys(fn ($u) => [$u->id => $u->name_thai ?? $u->name])->all(); @endphp
-        <x-premium-select
+        <x-premium-select variant="chip"
             name="reviewer_id" :options="$reviewerOptions" :selected="request('reviewer_id')"
-            placeholder="{{ __('-- ผู้ตรวจสอบทั้งหมด --') }}" autosubmit
+            placeholder="{{ __('ผู้ตรวจสอบทั้งหมด') }}" autosubmit
         />
     </form>
 
-    <div class="overflow-x-auto rounded-2xl glass-card shadow-soft">
+    <div class="overflow-x-auto rounded-3xl glass-card">
         <table class="min-w-full text-sm">
             <thead>
-                <tr class="border-b border-brand-purple-100 dark:border-brand-purple-500/20">
+                <tr class="border-b border-slate-100 dark:border-slate-800">
                     <x-sortable-th field="reviewed_at" :label="__('เวลา')" />
                     <x-sortable-th field="reviewer_name" :label="__('ผู้ตรวจสอบ')" />
                     <th class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">{{ __('การกระทำ') }}</th>
@@ -61,9 +61,7 @@
             <tbody>
                 @forelse ($entries as $entry)
                     <tr @class([
-                        'border-b border-slate-100 dark:border-slate-800 transition-colors last:border-0 hover:bg-brand-purple-50/40 dark:hover:bg-slate-800/60',
-                        'bg-white dark:bg-slate-900' => $loop->even,
-                        'bg-slate-50/50 dark:bg-slate-800/40' => $loop->odd,
+                        'border-b border-slate-100 dark:border-slate-800 transition-colors last:border-0 hover:bg-slate-50 dark:hover:bg-slate-800/60',
                     ])>
                         <td class="whitespace-nowrap px-4 py-3 text-slate-500 dark:text-slate-400">{{ $entry->reviewed_at?->translatedFormat('d M Y H:i') ?? '-' }}</td>
                         <td class="whitespace-nowrap px-4 py-3 text-slate-700 dark:text-slate-300">{{ $entry->reviewer_name ?? '-' }}</td>

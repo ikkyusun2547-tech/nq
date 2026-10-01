@@ -13,7 +13,7 @@
 <div class="mx-auto max-w-md">
     <x-brand-header :title="__('ขอเช็คชื่อย้อนหลัง')" />
 
-    <div class="rounded-3xl glass-card p-5 shadow-soft-lg sm:p-6">
+    <div class="rounded-3xl glass-card p-5 sm:p-6">
         <div class="flex items-start justify-between gap-2">
             <div>
                 <h2 class="font-semibold text-slate-900 dark:text-slate-100">{{ $activity->title }}</h2>
@@ -86,7 +86,7 @@
                 <textarea
                     name="reason" rows="3" maxlength="500" required
                     placeholder="{{ __('เช่น ลืมสแกน QR, มือถือแบตหมดตอนจะสแกน') }}"
-                    class="w-full resize-none rounded-2xl border bg-white px-3.5 py-2.5 text-sm text-slate-700 placeholder:text-slate-400 shadow-soft transition-all duration-200 focus:outline-none focus:ring-4 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 @error('reason') border-red-400 focus:border-red-500 focus:ring-red-500/10 dark:border-red-500/70 @else border-slate-200 focus:border-brand-purple-500 focus:ring-brand-purple-500/10 dark:border-slate-600 @enderror"
+                    class="w-full resize-none rounded-2xl border bg-white px-3.5 py-2.5 text-sm text-slate-700 placeholder:text-slate-400 transition-all duration-200 focus:outline-none focus:ring-4 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 @error('reason') border-red-400 focus:border-red-500 focus:ring-red-500/10 dark:border-red-500/70 @else border-slate-200 focus:border-brand-purple-500 focus:ring-brand-purple-500/10 dark:border-slate-600 @enderror"
                 >{{ old('reason') }}</textarea>
             </div>
 
@@ -121,7 +121,7 @@
                 </div>
             </div>
 
-            <button type="submit" class="w-full rounded-xl bg-brand-green-500 px-4 py-3 text-sm font-semibold text-brand-purple-950 shadow-soft transition-all duration-300 hover:-translate-y-0.5 hover:bg-brand-green-400 hover:shadow-lg">
+            <button type="submit" class="w-full rounded-xl bg-brand-purple-700 px-4 py-3 text-sm font-semibold text-white shadow-soft transition-all duration-300 hover:bg-brand-purple-800">
                 {{ $existingRequest ? __('ส่งคำร้องใหม่อีกครั้ง') : __('ส่งคำร้อง') }}
             </button>
         </form>

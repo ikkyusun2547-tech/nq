@@ -5,7 +5,7 @@
     'requiredHours',
 ])
 
-<div class="flex items-center rounded-2xl glass-card p-5 shadow-soft">
+<div class="flex items-center rounded-3xl glass-card p-5">
     <div class="flex-1">
         <x-progress-ring :value="$activities" :target="$requiredActivities" :label="__('กิจกรรม')" color="#7C3AED" track="rgb(124 58 237 / 0.12)" />
     </div>

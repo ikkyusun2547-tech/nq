@@ -42,7 +42,7 @@ class ActivityDetailScreen extends StatelessWidget {
 
   static const _statusLabels = {
     'draft': 'ยังไม่เปิด',
-    'open': 'เปิดรับสมัคร',
+    'open': 'เปิดลงทะเบียน',
     'ongoing': 'กำลังดำเนินการ',
     'full': 'เต็มแล้ว',
     'closed': 'จบไปแล้ว',

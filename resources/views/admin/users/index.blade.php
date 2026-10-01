@@ -20,7 +20,7 @@
 <div class="mx-auto max-w-[90rem]">
     <x-brand-header :title="__('จัดการผู้ใช้งานและสิทธิ์')" :eyebrow="__('กองพัฒนานักศึกษา')">
         <x-slot:actions>
-            <span class="rounded-xl bg-white/10 px-4 py-2 text-sm font-medium text-white shadow-soft ring-1 ring-white/15 backdrop-blur">
+            <span class="rounded-full bg-slate-100 px-3.5 py-1.5 text-sm font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-300">
                 {{ __('ทั้งหมด :count คน', ['count' => $users->total()]) }}
             </span>
         </x-slot:actions>
@@ -32,14 +32,14 @@
         @foreach ($roleTabs as $value => $label)
             <a href="{{ route('admin.users.index', array_merge(request()->only(['search']), ['role' => $value])) }}"
                 @class([
-                    'inline-flex shrink-0 snap-start items-center gap-1.5 rounded-full px-3.5 py-1.5 font-medium transition-all duration-200',
-                    'bg-gradient-to-r from-brand-purple-600 to-brand-purple-500 text-white shadow-soft' => $role === $value,
-                    'bg-white text-slate-500 shadow-soft ring-1 ring-slate-200 hover:-translate-y-0.5 hover:text-brand-purple-600 dark:bg-slate-900 dark:text-slate-400 dark:ring-slate-700 dark:hover:text-brand-purple-400' => $role !== $value,
+                    'inline-flex h-9 shrink-0 snap-start items-center gap-1.5 rounded-full border px-3.5 transition-colors',
+                    'border-brand-purple-200 bg-brand-purple-50 font-semibold text-brand-purple-800 dark:border-brand-purple-500/30 dark:bg-brand-purple-500/15 dark:text-brand-purple-200' => $role === $value,
+                    'border-slate-200 bg-white text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800' => $role !== $value,
                 ])>
                 {{ $label }}
                 <span @class([
                     'rounded-full px-1.5 py-0.5 text-[0.68rem] font-semibold tabular-nums',
-                    'bg-white/20' => $role === $value,
+                    'bg-brand-purple-100 text-brand-purple-800 dark:bg-brand-purple-500/25 dark:text-brand-purple-100' => $role === $value,
                     'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400' => $role !== $value,
                 ])>{{ number_format($roleCounts[$value] ?? 0) }}</span>
             </a>
@@ -58,21 +58,21 @@
                 </span>
                 <input
                     type="text" name="search" value="{{ request('search') }}" placeholder="{{ __('ค้นหาชื่อ, อีเมล หรือรหัสนักศึกษา') }}"
-                    class="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-3.5 text-sm text-slate-700 placeholder:text-slate-400 shadow-soft transition-all duration-200 focus:border-brand-purple-500 focus:outline-none focus:ring-4 focus:ring-brand-purple-500/10 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500"
+                    class="h-11 w-full rounded-full border border-slate-200 bg-white pl-11 pr-4 text-sm text-slate-900 transition placeholder:text-slate-400 focus:border-brand-purple-400 focus:outline-none focus:ring-4 focus:ring-brand-purple-500/15 dark:border-slate-700 dark:bg-slate-900 dark:text-white dark:placeholder:text-slate-500"
                 >
             </div>
             <button type="submit"
-                class="flex shrink-0 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-brand-purple-600 to-brand-purple-500 px-4 py-2.5 text-sm font-semibold text-white shadow-soft transition-all duration-300 hover:-translate-y-0.5 hover:from-brand-purple-500 hover:to-brand-purple-400 hover:shadow-lg active:scale-[0.99] sm:px-6">
+                class="flex h-11 shrink-0 items-center justify-center gap-2 rounded-full bg-brand-purple-700 px-4 text-sm font-semibold text-white transition-all duration-300 active:scale-[0.99] sm:px-6 hover:bg-brand-purple-800">
                 <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
                 <span class="hidden sm:inline">{{ __('ค้นหา') }}</span>
             </button>
         </div>
     </form>
 
-    <div class="overflow-x-auto rounded-2xl glass-card shadow-soft">
+    <div class="overflow-x-auto rounded-3xl glass-card">
         <table class="min-w-full text-sm">
             <thead>
-                <tr class="border-b border-brand-purple-100 dark:border-brand-purple-500/20">
+                <tr class="border-b border-slate-100 dark:border-slate-800">
                     <x-sortable-th field="name" :label="__('ชื่อ-นามสกุล')" />
                     <x-sortable-th field="email" :label="__('อีเมล')" />
                     <th class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">{{ __('สิทธิ์') }}</th>
@@ -83,9 +83,7 @@
             <tbody>
                 @forelse ($users as $user)
                     <tr @class([
-                        'border-b border-slate-100 dark:border-slate-800 transition-colors last:border-0 hover:bg-brand-purple-50/40 dark:hover:bg-slate-800/60',
-                        'bg-white dark:bg-slate-900' => $loop->even,
-                        'bg-slate-50/50 dark:bg-slate-800/40' => $loop->odd,
+                        'border-b border-slate-100 dark:border-slate-800 transition-colors last:border-0 hover:bg-slate-50 dark:hover:bg-slate-800/60',
                     ])>
                         <td class="whitespace-nowrap px-4 py-3 font-medium text-slate-900 dark:text-slate-100">
                             {{ $user->name_thai ?? $user->name }}

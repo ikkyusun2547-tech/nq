@@ -15,7 +15,7 @@
         'ethics' => ['label' => __('คุณธรรมจริยธรรม'), 'bar' => 'bg-fuchsia-400 dark:bg-fuchsia-600', 'dot' => 'bg-fuchsia-400 dark:bg-fuchsia-600'],
     ];
     $statusBadge = [
-        'open' => ['label' => __('เปิดรับสมัคร'), 'class' => 'bg-brand-green-50 text-brand-green-700 dark:bg-brand-green-500/10 dark:text-brand-green-400'],
+        'open' => ['label' => __('เปิดลงทะเบียน'), 'class' => 'bg-brand-green-50 text-brand-green-700 dark:bg-brand-green-500/10 dark:text-brand-green-400'],
         'ongoing' => ['label' => __('กำลังดำเนินการ'), 'class' => 'bg-brand-purple-50 text-brand-purple-700 dark:bg-brand-purple-500/10 dark:text-brand-purple-400'],
         'draft' => ['label' => __('ร่าง'), 'class' => 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'],
     ];
@@ -69,111 +69,216 @@
     // matching the sidebar shell's restrained, low-color-noise language.
     // Kept local to this page rather than changed on the shared
     // x-section-card component, which every other admin page still uses.
-    $cardClass = 'rounded-xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900';
+    $cardClass = 'rounded-3xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900';
 @endphp
-<div class="mx-auto max-w-[90rem]" x-data="{ trendHover: null }">
-    <x-brand-header :title="__('แผงควบคุมกองพัฒนานักศึกษา')" :subtitle="__('มหาวิทยาลัยราชภัฏสุรินทร์')" decorated />
-
-    <form method="GET" action="{{ route('admin.dashboard') }}" class="mb-4 flex flex-wrap items-center gap-3 sm:mb-6">
-        @php $academicYearOptions = $academicYears->mapWithKeys(fn ($y) => [$y => __('ปีการศึกษา :year', ['year' => $y])])->all(); @endphp
-        <div class="w-full max-w-xs">
-            <x-premium-select
-                name="academic_year" :options="$academicYearOptions" :selected="$academicYear"
-                placeholder="{{ __('-- ทุกปีการศึกษา --') }}" autosubmit
-            />
-        </div>
-        <span class="inline-flex items-center gap-1.5 rounded-full bg-brand-purple-50 px-3 py-1.5 text-xs font-medium text-brand-purple-700 dark:bg-brand-purple-500/10 dark:text-brand-purple-400">
-            <svg class="h-3.5 w-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-            {{ __('ข้อมูล ณ วันที่ :date', ['date' => now()->translatedFormat('d M Y H:i')]) }}
-        </span>
-    </form>
-
-    <!-- KPI band -->
+<div class="mx-auto max-w-[90rem]" x-data="{ trendHover: null, inboxTab: 'all' }">
     @php
-        // Each card's icon carries its own hue (validated with the dataviz
-        // skill's scripts/validate_palette.js, --pairs all, since any two
-        // cards in this grid can sit side by side) so cards stay tellable
-        // apart at a glance — but the card chrome itself is neutral
-        // (border + gray icon well) rather than a tinted fill, so the color
-        // reads as a small identity accent instead of decoration.
-        $overviewCards = [
-            ['label' => __('นักศึกษาทั้งหมด'), 'value' => $stats['total_students'], 'icon' => 'M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z', 'iconColor' => 'text-brand-purple-600 dark:text-brand-purple-400', 'wellColor' => 'bg-brand-purple-50 dark:bg-brand-purple-500/10'],
-            ['label' => __('กิจกรรมที่เปิดอยู่'), 'value' => $stats['open_activities'], 'suffix' => __('/ :total ทั้งหมด', ['total' => $stats['total_activities']]), 'icon' => 'M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5', 'href' => route('admin.activities.index'), 'iconColor' => 'text-sky-600 dark:text-sky-400', 'wellColor' => 'bg-sky-50 dark:bg-sky-500/10'],
-            ['label' => __('เช็คชื่อเดือนนี้'), 'value' => $stats['checkins_this_month'], 'delta' => $checkinDelta, 'icon' => 'M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z', 'iconColor' => 'text-brand-green-600 dark:text-brand-green-400', 'wellColor' => 'bg-brand-green-50 dark:bg-brand-green-500/10'],
-            ['label' => __('นักศึกษาปี 4 พร้อมจบ'), 'value' => $stats['graduating_cleared'], 'suffix' => __('/ :total คน', ['total' => $stats['total_year4_students']]), 'icon' => 'M4.26 10.147a60.436 60.436 0 00-.491 6.347A48.627 48.627 0 0112 20.904a48.627 48.627 0 018.232-4.41 60.46 60.46 0 00-.491-6.347m-15.482 0a50.57 50.57 0 00-2.658-.813A59.905 59.905 0 0112 3.493a59.902 59.902 0 0110.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.697 50.697 0 0112 13.489a50.702 50.702 0 017.74-3.342M6.75 15a.75.75 0 100-1.5.75.75 0 000 1.5zm0 0v-3.675A55.378 55.378 0 0112 8.443m-7.007 11.55A5.981 5.981 0 006.75 15.75v-1.5', 'href' => route('admin.reports.clearance', ['year' => 4]), 'iconColor' => 'text-teal-600 dark:text-teal-400', 'wellColor' => 'bg-teal-50 dark:bg-teal-500/10'],
+        $hour = (int) now()->format('G');
+        $greeting = $hour < 12 ? __('สวัสดีตอนเช้า') : ($hour < 17 ? __('สวัสดีตอนบ่าย') : __('สวัสดีตอนเย็น'));
+        $inboxTotal = array_sum($inbox['counts']);
+        // The inbox shows at most this many rows per tab so a busy day doesn't
+        // push the rest of the dashboard far down; the full queues are a click away.
+        $inboxLimit = 5;
+        $inboxSeen = [];
+        $inboxTypes = [
+            'flagged' => ['label' => __('ติดธง'), 'long' => __('เช็คชื่อติดธงแดง'), 'url' => route('admin.attendance.flagged'), 'well' => 'bg-amber-50 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300', 'icon' => 'M3 3v1.5M3 21v-6m0 0l2.77-.693a9 9 0 016.208.682l.108.054a9 9 0 006.086.71l3.114-.732a48.524 48.524 0 01-.005-10.499l-3.11.732a9 9 0 01-6.085-.711l-.108-.054a9 9 0 00-6.208-.682L3 4.5M3 15V4.5'],
+            'external' => ['label' => __('กิจกรรมภายนอก'), 'long' => __('คำร้องกิจกรรมภายนอก'), 'url' => route('admin.external-activities.index'), 'well' => 'bg-sky-50 text-sky-700 dark:bg-sky-500/15 dark:text-sky-300', 'icon' => 'M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418'],
+            'late' => ['label' => __('ย้อนหลัง'), 'long' => __('เช็คชื่อย้อนหลัง'), 'url' => route('admin.late-checkins.index'), 'well' => 'bg-teal-50 text-teal-700 dark:bg-teal-500/15 dark:text-teal-300', 'icon' => 'M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z'],
+            'credit' => ['label' => __('เทียบโอน'), 'long' => __('เทียบโอนตำแหน่ง'), 'url' => route('admin.credit-transfers.index'), 'well' => 'bg-brand-purple-50 text-brand-purple-700 dark:bg-brand-purple-500/15 dark:text-brand-purple-300', 'icon' => 'M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5'],
         ];
-
-        $actionCards = [
-            ['label' => __('การเช็คชื่อติดธงแดง'), 'value' => $stats['flagged_attendances'], 'icon' => 'M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z', 'href' => route('admin.attendance.flagged'), 'urgent' => $stats['flagged_attendances'] > 0, 'iconColor' => 'text-red-600 dark:text-red-400', 'wellColor' => 'bg-red-50 dark:bg-red-500/10', 'accentBorder' => 'border-l-red-500', 'pulseDot' => 'bg-red-500'],
-            ['label' => __('คำร้องภายนอกรออนุมัติ'), 'value' => $stats['pending_external_requests'], 'icon' => 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z', 'href' => route('admin.external-activities.index'), 'urgent' => $stats['pending_external_requests'] > 0, 'iconColor' => 'text-amber-600 dark:text-amber-400', 'wellColor' => 'bg-amber-50 dark:bg-amber-500/10', 'accentBorder' => 'border-l-amber-500', 'pulseDot' => 'bg-amber-500'],
-            ['label' => __('เทียบโอนตำแหน่งรออนุมัติ'), 'value' => $stats['pending_credit_transfers'], 'icon' => 'M4.5 6.75h15m-15 0A2.25 2.25 0 002.25 9v6a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 15V9a2.25 2.25 0 00-2.25-2.25m-15 0V5.25A2.25 2.25 0 016.75 3h10.5a2.25 2.25 0 012.25 2.25v1.5m-15 0h15', 'href' => route('admin.credit-transfers.index'), 'urgent' => $stats['pending_credit_transfers'] > 0, 'iconColor' => 'text-cyan-600 dark:text-cyan-400', 'wellColor' => 'bg-cyan-50 dark:bg-cyan-500/10', 'accentBorder' => 'border-l-cyan-600', 'pulseDot' => 'bg-cyan-600'],
+        $timelineStatus = [
+            'ongoing' => ['label' => __('กำลังดำเนินการ'), 'class' => 'text-brand-purple-700 dark:text-brand-purple-300'],
+            'open' => ['label' => __('เปิดลงทะเบียน'), 'class' => 'text-brand-green-700 dark:text-brand-green-300'],
+            'full' => ['label' => __('เต็มแล้ว'), 'class' => 'text-amber-700 dark:text-amber-300'],
+            'draft' => ['label' => __('ร่าง · ยังไม่เผยแพร่'), 'class' => 'text-slate-500 dark:text-slate-400'],
+            'closed' => ['label' => __('ปิดกิจกรรม'), 'class' => 'text-slate-500 dark:text-slate-400'],
         ];
-
-        $totalPending = $stats['flagged_attendances'] + $stats['pending_external_requests'] + $stats['pending_credit_transfers'];
+        $kpis = [
+            ['label' => __('นักศึกษาในระบบ'), 'value' => number_format($stats['total_students']), 'href' => route('admin.students.index')],
+            ['label' => __('กิจกรรมที่เปิดอยู่'), 'value' => number_format($stats['open_activities']), 'suffix' => __('/ :total ทั้งหมด', ['total' => $stats['total_activities']]), 'href' => route('admin.activities.index')],
+            ['label' => __('เช็คชื่อเดือนนี้'), 'value' => number_format($stats['checkins_this_month']), 'delta' => $checkinDelta],
+            ['label' => __('ปี 4 ผ่านเกณฑ์'), 'value' => $clearedPct.'%', 'suffix' => __(':cleared / :total คน', ['cleared' => $stats['graduating_cleared'], 'total' => $stats['total_year4_students']]), 'href' => route('admin.reports.clearance', ['year' => 4]), 'tone' => 'text-brand-green-700 dark:text-brand-green-300'],
+        ];
     @endphp
 
-    <p class="mb-3 mt-6 px-1 text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">{{ __('ภาพรวมระบบ') }}</p>
-    <div class="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        @foreach ($overviewCards as $card)
-            @php
-                $tag = isset($card['href']) ? 'a' : 'div';
-                $hrefAttr = isset($card['href']) ? 'href="'.$card['href'].'"' : '';
-            @endphp
-            <{{ $tag }} {!! $hrefAttr !!}
-                class="rounded-xl border border-slate-200 bg-white p-4 transition dark:border-slate-800 dark:bg-slate-900 {{ isset($card['href']) ? 'hover:border-slate-300 dark:hover:border-slate-700' : '' }}">
-                <div class="flex items-center justify-between">
-                    <span class="flex h-9 w-9 items-center justify-center rounded-lg {{ $card['wellColor'] }}">
-                        <svg class="h-[1.1rem] w-[1.1rem] {{ $card['iconColor'] }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="{{ $card['icon'] }}"/></svg>
-                    </span>
-                    @if (isset($card['delta']))
+    {{-- Greeting --}}
+    <div class="mb-6 flex flex-wrap items-end justify-between gap-4">
+        <div>
+            <p class="text-sm text-slate-500 dark:text-slate-400">{{ now()->translatedFormat('l j F') }} {{ app()->getLocale() === 'th' ? now()->year + 543 : now()->year }}</p>
+            @php $me = auth()->user(); @endphp
+            <p class="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-slate-600 dark:text-slate-400">
+                <span>{{ $greeting }}, <span class="font-display text-xl text-slate-900 dark:text-white">{{ $me->name_thai ?? $me->name }}</span></span>
+                <span @class([
+                    'rounded-full px-2.5 py-0.5 text-xs font-semibold',
+                    'bg-brand-purple-700 text-white dark:bg-brand-purple-600' => $me->role === 'super_admin',
+                    'bg-brand-purple-50 text-brand-purple-700 dark:bg-brand-purple-500/15 dark:text-brand-purple-300' => $me->role !== 'super_admin',
+                ])>{{ $me->role === 'super_admin' ? __('Admin สูงสุด') : __('Admin') }}</span>
+            </p>
+            <h1 class="mt-1 font-display text-[1.65rem] leading-snug text-slate-900 dark:text-white sm:text-3xl">
+                @if ($inboxTotal > 0)
+                    {{ __('มี') }} <span class="text-brand-purple-700 dark:text-brand-purple-300">{{ __(':count รายการ', ['count' => $inboxTotal]) }}</span> {{ __('รอคุณตรวจ') }}
+                @else
+                    {{ __('ไม่มีงานค้างตรวจ') }}
+                @endif
+            </h1>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+            <form method="GET" action="{{ route('admin.dashboard') }}" class="w-56">
+                @php $academicYearOptions = $academicYears->mapWithKeys(fn ($y) => [$y => __('ปีการศึกษา :year', ['year' => $y])])->all(); @endphp
+                <x-premium-select name="academic_year" :options="$academicYearOptions" :selected="$academicYear" placeholder="{{ __('-- ทุกปีการศึกษา --') }}" autosubmit />
+            </form>
+            <a href="{{ route('admin.activities.create') }}" class="inline-flex h-11 items-center gap-2 rounded-xl bg-brand-purple-700 px-4 text-sm font-semibold text-white shadow-[0_8px_18px_rgb(109_40_217/0.22)] transition hover:bg-brand-purple-800">
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+                {{ __('สร้างกิจกรรม') }}
+            </a>
+        </div>
+    </div>
+
+    {{-- KPIs --}}
+    <div class="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        @foreach ($kpis as $kpi)
+            @php $tag = isset($kpi['href']) ? 'a' : 'div'; @endphp
+            <{{ $tag }} @if (isset($kpi['href'])) href="{{ $kpi['href'] }}" @endif
+                class="rounded-3xl border border-slate-200 bg-white p-4 transition dark:border-slate-800 dark:bg-slate-900 sm:p-5 {{ isset($kpi['href']) ? 'hover:border-brand-purple-300 dark:hover:border-brand-purple-500/40' : '' }}">
+                <div class="flex items-center justify-between gap-2">
+                    <p class="text-xs text-slate-500 dark:text-slate-400 sm:text-sm">{{ $kpi['label'] }}</p>
+                    @if (isset($kpi['delta']) && $kpi['delta'] !== null)
                         <span @class([
-                            'inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[0.68rem] font-semibold tabular-nums',
-                            'bg-brand-green-50 text-brand-green-700 dark:bg-brand-green-500/10 dark:text-brand-green-400' => $card['delta'] >= 0,
-                            'bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400' => $card['delta'] < 0,
-                        ])>
-                            <svg class="h-2.5 w-2.5 shrink-0 {{ $card['delta'] < 0 ? 'rotate-180' : '' }}" fill="currentColor" viewBox="0 0 20 20"><path d="M10 3l6 8h-4v6H8v-6H4l6-8z"/></svg>
-                            {{ $card['delta'] >= 0 ? '+' : '' }}{{ $card['delta'] }}%
-                        </span>
+                            'rounded-full px-1.5 py-0.5 text-[0.68rem] font-semibold tabular-nums',
+                            'bg-brand-green-50 text-brand-green-700 dark:bg-brand-green-500/10 dark:text-brand-green-300' => $kpi['delta'] >= 0,
+                            'bg-rose-50 text-rose-700 dark:bg-rose-500/10 dark:text-rose-300' => $kpi['delta'] < 0,
+                        ])>{{ $kpi['delta'] >= 0 ? '+' : '' }}{{ $kpi['delta'] }}%</span>
                     @endif
                 </div>
-                <p class="mt-3 text-2xl font-semibold text-slate-900 dark:text-slate-100">{{ number_format($card['value']) }}<span class="text-xs font-normal text-slate-400 dark:text-slate-500">{{ $card['suffix'] ?? '' }}</span></p>
-                <p class="mt-0.5 text-xs font-medium text-slate-500 dark:text-slate-400">{{ $card['label'] }}</p>
+                <p class="mt-1.5 font-display text-2xl tabular-nums sm:text-[1.75rem] {{ $kpi['tone'] ?? 'text-slate-900 dark:text-white' }}">{{ $kpi['value'] }}</p>
+                @isset($kpi['suffix'])
+                    <p class="text-xs text-slate-500 dark:text-slate-400">{{ $kpi['suffix'] }}</p>
+                @endisset
             </{{ $tag }}>
         @endforeach
     </div>
 
-    <div class="mb-3 mt-8 flex items-center justify-between px-1">
-        <p class="text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">{{ __('รอดำเนินการ') }}</p>
-        @if ($totalPending > 0)
-            <span class="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-[0.68rem] font-semibold text-amber-700 dark:bg-amber-500/10 dark:text-amber-400">
-                {{ __('รวม :count รายการ', ['count' => $totalPending]) }}
-            </span>
-        @else
-            <span class="inline-flex items-center gap-1 rounded-full bg-brand-green-50 px-2 py-0.5 text-[0.68rem] font-semibold text-brand-green-700 dark:bg-brand-green-500/10 dark:text-brand-green-400">
-                {{ __('ไม่มีรายการค้าง') }}
-            </span>
-        @endif
-    </div>
-    <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        @foreach ($actionCards as $card)
-            <a href="{{ $card['href'] }}"
-                class="rounded-xl border border-l-2 border-slate-200 bg-white p-4 transition hover:border-slate-300 dark:border-slate-800 dark:bg-slate-900 dark:hover:border-slate-700 {{ ($card['urgent'] ?? false) ? $card['accentBorder'] : '' }}">
-                <div class="flex items-center justify-between">
-                    <span class="flex h-9 w-9 items-center justify-center rounded-lg {{ $card['wellColor'] }}">
-                        <svg class="h-[1.1rem] w-[1.1rem] {{ $card['iconColor'] }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="{{ $card['icon'] }}"/></svg>
-                    </span>
-                    @if ($card['urgent'] ?? false)
-                        <span class="relative flex h-2 w-2">
-                            <span class="absolute inline-flex h-full w-full animate-ping rounded-full {{ $card['pulseDot'] }} opacity-75"></span>
-                            <span class="relative inline-flex h-2 w-2 rounded-full {{ $card['pulseDot'] }}"></span>
+    {{-- Inbox + today --}}
+    <div class="mt-6 grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
+        <section aria-label="{{ __('รายการรอตรวจ') }}" class="rounded-3xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
+            <div class="px-5 pt-5">
+                <h2 class="font-display text-lg text-slate-900 dark:text-white">{{ __('รายการรอตรวจ') }}</h2>
+                <div role="tablist" class="mt-3 flex flex-wrap gap-x-5 gap-y-1 border-b border-slate-100 text-sm dark:border-slate-800">
+                    <button type="button" role="tab" @click="inboxTab = 'all'" :aria-selected="inboxTab === 'all'"
+                        class="-mb-px shrink-0 border-b-2 pb-2.5 transition-colors"
+                        :class="inboxTab === 'all' ? 'border-brand-purple-700 font-semibold text-brand-purple-700 dark:border-brand-purple-400 dark:text-brand-purple-300' : 'border-transparent text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white'">
+                        {{ __('ทั้งหมด') }} <span class="text-xs">{{ $inboxTotal }}</span>
+                    </button>
+                    @foreach ($inboxTypes as $key => $type)
+                        <button type="button" role="tab" @click="inboxTab = '{{ $key }}'" :aria-selected="inboxTab === '{{ $key }}'"
+                            class="-mb-px shrink-0 border-b-2 pb-2.5 transition-colors"
+                            :class="inboxTab === '{{ $key }}' ? 'border-brand-purple-700 font-semibold text-brand-purple-700 dark:border-brand-purple-400 dark:text-brand-purple-300' : 'border-transparent text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white'">
+                            {{ $type['label'] }} <span class="text-xs">{{ $inbox['counts'][$key] }}</span>
+                        </button>
+                    @endforeach
+                </div>
+            </div>
+
+            <div class="p-2">
+                @forelse ($inbox['items'] as $item)
+                    @php
+                        $type = $inboxTypes[$item->type];
+                        $typeIdx = $inboxSeen[$item->type] = ($inboxSeen[$item->type] ?? -1) + 1;
+                        $inAll = $loop->index < $inboxLimit;
+                        $inType = $typeIdx < $inboxLimit;
+                    @endphp
+                    <div x-show="{{ $inAll ? "inboxTab === 'all'" : 'false' }} || {{ $inType ? "inboxTab === '{$item->type}'" : 'false' }}" @if (! $inAll) x-cloak @endif
+                        class="flex items-center gap-3 rounded-2xl px-3 py-3 transition hover:bg-slate-50 dark:hover:bg-slate-800/60 sm:gap-4">
+                        <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl {{ $type['well'] }}" title="{{ $type['long'] }}">
+                            <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $type['icon'] }}"/></svg>
                         </span>
+                        <span class="min-w-0 flex-1">
+                            <span class="block truncate text-sm text-slate-900 dark:text-white">
+                                <span class="font-semibold">{{ $item->student?->name_thai ?? $item->student?->name ?? '-' }}</span>
+                                <span class="text-slate-500 dark:text-slate-400">· {{ $type['long'] }}</span>
+                            </span>
+                            <span class="block truncate text-xs text-slate-500 dark:text-slate-400">
+                                {{ $item->title }}@if ($item->detail) · {{ $item->detail }}@endif · {{ $item->at?->diffForHumans() }}
+                            </span>
+                        </span>
+                        <a href="{{ $item->url }}" class="shrink-0 rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-700 transition hover:border-brand-purple-300 hover:text-brand-purple-700 dark:border-slate-700 dark:text-slate-200 dark:hover:border-brand-purple-500/40 dark:hover:text-brand-purple-300">{{ __('ตรวจสอบ') }}</a>
+                    </div>
+                @empty
+                    <div class="px-3 py-10 text-center">
+                        <p class="text-sm font-semibold text-slate-900 dark:text-white">{{ __('เคลียร์ครบแล้ว') }}</p>
+                        <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">{{ __('ไม่มีคำร้องหรือการเช็คชื่อที่รอตรวจสอบ') }}</p>
+                    </div>
+                @endforelse
+
+                @if ($inboxTotal > $inboxLimit)
+                    <div x-show="inboxTab === 'all'" class="mt-1 flex flex-wrap items-center gap-2 border-t border-slate-100 px-3 pb-1 pt-3 text-xs dark:border-slate-800">
+                        <span class="text-slate-500 dark:text-slate-400">{{ __('แสดง :shown จาก :total รายการ · ตรวจต่อที่', ['shown' => $inboxLimit, 'total' => $inboxTotal]) }}</span>
+                        @foreach ($inboxTypes as $key => $type)
+                            @if ($inbox['counts'][$key] > 0)
+                                <a href="{{ $type['url'] }}" class="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 font-medium text-slate-700 transition-colors hover:bg-brand-purple-50 hover:text-brand-purple-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-brand-purple-500/15 dark:hover:text-brand-purple-300">
+                                    {{ $type['label'] }} <span class="text-slate-500 dark:text-slate-400">{{ $inbox['counts'][$key] }}</span>
+                                </a>
+                            @endif
+                        @endforeach
+                    </div>
+                @endif
+
+                @foreach ($inboxTypes as $key => $type)
+                    @if ($inbox['counts'][$key] > 0)
+                        <a x-show="inboxTab === '{{ $key }}'" x-cloak href="{{ $type['url'] }}" class="block px-3 py-2.5 text-sm font-semibold text-brand-purple-700 hover:underline dark:text-brand-purple-300">{{ __('ดูทั้งหมด :count รายการ', ['count' => $inbox['counts'][$key]]) }} →</a>
+                    @endif
+                @endforeach
+            </div>
+        </section>
+
+        <aside class="flex flex-col gap-6">
+            <section aria-label="{{ __('วันนี้') }}" class="rounded-3xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900">
+                <div class="flex items-center justify-between">
+                    <h2 class="font-display text-lg text-slate-900 dark:text-white">{{ __('วันนี้') }}</h2>
+                    <a href="{{ route('admin.activities.calendar') }}" class="text-sm font-medium text-brand-purple-700 hover:underline dark:text-brand-purple-300">{{ __('ปฏิทิน') }}</a>
+                </div>
+                <div class="mt-3 space-y-1">
+                    @forelse ($todayActivities->take($inboxLimit) as $activity)
+                        @php $live = $activity->start_at->isPast() && $activity->end_at->isFuture() && in_array($activity->status, ['open', 'ongoing'], true); @endphp
+                        <a href="{{ route('admin.attendance.index', $activity) }}"
+                            class="grid grid-cols-[3rem_minmax(0,1fr)] gap-3 rounded-2xl py-2.5 pr-3 transition {{ $live ? 'bg-brand-purple-50 dark:bg-brand-purple-500/10' : 'hover:bg-slate-50 dark:hover:bg-slate-800/60' }}">
+                            <span class="text-right text-sm tabular-nums {{ $live ? 'font-semibold text-brand-purple-700 dark:text-brand-purple-300' : 'text-slate-500 dark:text-slate-400' }}">{{ $activity->start_at->isToday() ? $activity->start_at->format('H:i') : __('ต่อเนื่อง') }}</span>
+                            <span class="min-w-0">
+                                <span class="block truncate text-sm font-medium text-slate-900 dark:text-white">{{ $activity->title }}</span>
+                                <span class="block truncate text-xs {{ $timelineStatus[$activity->status]['class'] ?? 'text-slate-500' }}">
+                                    {{ $live ? '● ' : '' }}{{ $timelineStatus[$activity->status]['label'] ?? $activity->status }} · {{ __('เช็คชื่อแล้ว :count คน', ['count' => $activity->attendances_count]) }}
+                                </span>
+                            </span>
+                        </a>
+                    @empty
+                        <p class="py-6 text-center text-sm text-slate-500 dark:text-slate-400">{{ __('ไม่มีกิจกรรมวันนี้') }}</p>
+                    @endforelse
+                    @if ($todayActivities->count() > $inboxLimit)
+                        <a href="{{ route('admin.activities.calendar') }}" class="block pt-2 text-center text-xs font-medium text-brand-purple-700 hover:underline dark:text-brand-purple-300">{{ __('ดูอีก :count กิจกรรมในปฏิทิน', ['count' => $todayActivities->count() - $inboxLimit]) }} →</a>
                     @endif
                 </div>
-                <p class="mt-3 text-2xl font-semibold text-slate-900 dark:text-slate-100">{{ number_format($card['value']) }}</p>
-                <p class="mt-0.5 text-xs font-medium text-slate-500 dark:text-slate-400">{{ $card['label'] }}</p>
-            </a>
-        @endforeach
+            </section>
+
+            <section aria-label="{{ __('ทางลัด') }}" class="rounded-3xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900">
+                <h2 class="font-display text-lg text-slate-900 dark:text-white">{{ __('ทางลัด') }}</h2>
+                <div class="mt-2 divide-y divide-slate-100 dark:divide-slate-800">
+                    @foreach ([
+                        [route('admin.announcements.create'), __('ส่งประกาศถึงนักศึกษา')],
+                        [route('admin.reports.clearance', ['year' => 4]), __('รายชื่อปี 4 ผ่านเกณฑ์ (PDF)')],
+                        [route('admin.students.import.create'), __('นำเข้ารายชื่อนักศึกษา')],
+                        [route('admin.contact.index'), __('ข้อความจากนักศึกษา')],
+                    ] as [$href, $label])
+                        <a href="{{ $href }}" class="flex items-center justify-between py-3 text-sm text-slate-700 hover:text-brand-purple-700 dark:text-slate-300 dark:hover:text-brand-purple-300">
+                            {{ $label }}
+                            <svg class="h-4 w-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
+                        </a>
+                    @endforeach
+                </div>
+            </section>
+        </aside>
     </div>
+
+    <h2 class="mb-3 mt-10 font-display text-lg text-slate-900 dark:text-white">{{ __('ภาพรวมกิจกรรม') }} <span class="text-sm font-normal text-slate-500 dark:text-slate-400">· {{ $academicYearScopeLabel }}</span></h2>
 
     <!-- Success overview: clearance ring + category distribution -->
     <div class="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-5">
@@ -395,58 +500,5 @@
         </div>
     </div>
 
-    @if ($pendingRequests->isNotEmpty())
-        <div class="{{ $cardClass }} mt-6">
-            <div class="mb-4 flex items-center gap-2">
-                <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-purple-50 text-brand-purple-600 dark:bg-brand-purple-500/10 dark:text-brand-purple-400">
-                    <svg class="h-4.5 w-4.5" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                </span>
-                <h2 class="flex-1 text-sm font-semibold text-slate-900 dark:text-slate-100">{{ __('คำร้องกิจกรรมภายนอกล่าสุด') }}</h2>
-                <a href="{{ route('admin.external-activities.index') }}" class="text-xs font-medium text-brand-purple-600 hover:underline dark:text-brand-purple-400">{{ __('ดูทั้งหมด') }} &rarr;</a>
-            </div>
-            <div class="divide-y divide-gray-100 dark:divide-slate-800">
-                @foreach ($pendingRequests as $request)
-                    <a href="{{ route('admin.external-activities.index') }}" class="flex items-center gap-3 py-2.5 first:pt-0 last:pb-0 hover:opacity-80">
-                        <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand-purple-50 text-xs font-semibold text-brand-purple-700 dark:bg-brand-purple-500/10 dark:text-brand-purple-400">
-                            {{ mb_substr($request->user->name_thai ?? $request->user->name, 0, 1) }}
-                        </span>
-                        <div class="min-w-0 flex-1">
-                            <p class="truncate text-sm font-medium text-gray-900 dark:text-slate-100">{{ $request->title }}</p>
-                            <p class="truncate text-xs text-gray-400 dark:text-slate-500">{{ $request->user->name_thai ?? $request->user->name }} &middot; {{ $request->organization }}</p>
-                        </div>
-                        <span class="shrink-0 text-xs tabular-nums font-medium text-amber-600 dark:text-amber-400">{{ __(':hours ชม.', ['hours' => $request->hours_requested]) }}</span>
-                    </a>
-                @endforeach
-            </div>
-        </div>
-    @endif
-
-    <!-- Quick actions -->
-    <p class="mb-3 mt-8 px-1 text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">{{ __('ทางลัด') }}</p>
-    <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 xl:grid-cols-4">
-        @php
-            $quickActions = [
-                ['route' => 'admin.activities.index', 'label' => __('จัดการกิจกรรม'), 'desc' => __('สร้าง/แก้ไขกิจกรรม กำหนดสิทธิ์ผู้เข้าร่วม'), 'icon' => 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4', 'iconColor' => 'text-brand-green-600 dark:text-brand-green-400', 'wellColor' => 'bg-brand-green-50 dark:bg-brand-green-500/10'],
-                ['route' => 'admin.external-activities.index', 'label' => __('คำร้องกิจกรรมภายนอก'), 'desc' => __('ตรวจสอบและอนุมัติ/ปฏิเสธคำร้อง'), 'icon' => 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z', 'iconColor' => 'text-brand-purple-600 dark:text-brand-purple-400', 'wellColor' => 'bg-brand-purple-50 dark:bg-brand-purple-500/10'],
-                ['route' => 'admin.credit-transfers.index', 'label' => __('เทียบโอนชั่วโมงจากตำแหน่ง'), 'desc' => __('ตรวจสอบ อนุมัติ และให้เครดิตชั่วโมง'), 'icon' => 'M4.5 6.75h15m-15 0A2.25 2.25 0 002.25 9v6a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 15V9a2.25 2.25 0 00-2.25-2.25m-15 0V5.25A2.25 2.25 0 016.75 3h10.5a2.25 2.25 0 012.25 2.25v1.5m-15 0h15', 'iconColor' => 'text-cyan-600 dark:text-cyan-400', 'wellColor' => 'bg-cyan-50 dark:bg-cyan-500/10'],
-                ['route' => 'admin.late-checkins.index', 'label' => __('เช็คชื่อย้อนหลัง'), 'desc' => __('ตรวจสอบคำร้องขอเช็คชื่อย้อนหลัง'), 'icon' => 'M12 6v6l4 2M21 12a9 9 0 11-18 0 9 9 0 0118 0z', 'iconColor' => 'text-sky-600 dark:text-sky-400', 'wellColor' => 'bg-sky-50 dark:bg-sky-500/10'],
-                ['route' => 'admin.students.index', 'label' => __('ข้อมูลนักศึกษา'), 'desc' => __('ค้นหา/กรอง ดูรายบุคคล'), 'icon' => 'M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z', 'iconColor' => 'text-brand-purple-600 dark:text-brand-purple-400', 'wellColor' => 'bg-brand-purple-50 dark:bg-brand-purple-500/10'],
-                ['route' => 'admin.announcements.create', 'label' => __('ส่งประกาศ'), 'desc' => __('แจ้งเตือนนักศึกษาทั้งหมดหรือกลุ่มที่เลือก'), 'icon' => 'M10.34 15.84c-.688-.06-1.386-.09-2.09-.09H7.5a4.5 4.5 0 110-9h.75c.704 0 1.402-.03 2.09-.09m0 9.18c2.31.192 4.594.591 6.81 1.17a48.11 48.11 0 003.65-8.35 48.11 48.11 0 00-3.65-8.35 48.51 48.51 0 00-6.81 1.17m0 6.42a48.517 48.517 0 010-6.42', 'iconColor' => 'text-amber-600 dark:text-amber-400', 'wellColor' => 'bg-amber-50 dark:bg-amber-500/10'],
-                ['route' => 'admin.reports.index', 'label' => __('รายงาน'), 'desc' => __('เกณฑ์การจบ, รายคณะ, หมวดหมู่กิจกรรม, สถิติคำร้อง'), 'icon' => 'M12 4v16m8-8H4', 'iconColor' => 'text-brand-green-600 dark:text-brand-green-400', 'wellColor' => 'bg-brand-green-50 dark:bg-brand-green-500/10'],
-            ];
-            if (auth()->user()->role === 'super_admin') {
-                $quickActions[] = ['route' => 'admin.users.index', 'label' => __('ผู้ใช้งานและสิทธิ์'), 'desc' => __('เลื่อน/ลดสิทธิ์แอดมิน ระงับบัญชี'), 'icon' => 'M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z', 'iconColor' => 'text-slate-600 dark:text-slate-300', 'wellColor' => 'bg-slate-100 dark:bg-slate-800'];
-            }
-        @endphp
-        @foreach ($quickActions as $action)
-            <a href="{{ route($action['route']) }}" class="group rounded-xl border border-slate-200 bg-white p-5 transition hover:border-slate-300 hover:shadow-soft dark:border-slate-800 dark:bg-slate-900 dark:hover:border-slate-700">
-                <span class="flex h-10 w-10 items-center justify-center rounded-lg {{ $action['wellColor'] }} transition group-hover:scale-105">
-                    <svg class="h-5 w-5 {{ $action['iconColor'] }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="{{ $action['icon'] }}"/></svg>
-                </span>
-                <p class="mt-3 font-medium text-gray-900 dark:text-slate-100">{{ $action['label'] }}</p>
-                <p class="mt-1 text-sm text-gray-400 dark:text-slate-500">{{ $action['desc'] }}</p>
-            </a>
-        @endforeach
-    </div>
 </div>
 @endsection

@@ -15,7 +15,7 @@ class ActivityCreated extends BaseNotification
         return [
             'icon' => 'external',
             'title_key' => 'มีกิจกรรมใหม่ที่คุณมีสิทธิ์เข้าร่วม',
-            'body_key' => 'กิจกรรมใหม่ ":title" เปิดรับสมัครแล้ว',
+            'body_key' => 'กิจกรรมใหม่ ":title" เปิดลงทะเบียนแล้ว',
             'body_params' => ['title' => $this->activity->title],
             'url' => route('activities.index'),
         ];

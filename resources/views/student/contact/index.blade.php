@@ -13,7 +13,7 @@
     <x-brand-header eyebrow="{{ __('กองพัฒนานักศึกษา') }}" :title="__('ข้อความถึงเจ้าหน้าที่')">
         <x-slot:actions>
             <a href="{{ route('contact.create') }}"
-                class="inline-flex items-center gap-1.5 rounded-xl bg-brand-green-500 px-4 py-2.5 text-sm font-semibold text-brand-purple-950 shadow-soft transition-all duration-300 hover:-translate-y-0.5 hover:bg-brand-green-400 hover:shadow-lg">
+                class="inline-flex items-center gap-1.5 rounded-xl bg-brand-purple-700 px-4 py-2.5 text-sm font-semibold text-white shadow-soft transition-all duration-300 hover:bg-brand-purple-800">
                 <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
                 {{ __('ข้อความใหม่') }}
             </a>
@@ -23,7 +23,7 @@
     <div class="space-y-2.5">
         @forelse ($threads as $thread)
             <a href="{{ route('contact.show', $thread) }}"
-                class="flex items-start justify-between gap-3 rounded-2xl glass-card p-4 shadow-soft transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg">
+                class="flex items-start justify-between gap-3 rounded-3xl glass-card p-4 transition-all duration-200">
                 <div class="min-w-0 flex-1">
                     <div class="flex items-center gap-2">
                         @if ($thread->student_unread)
@@ -40,7 +40,7 @@
                 </span>
             </a>
         @empty
-            <div class="rounded-2xl glass-card p-8 text-center shadow-soft">
+            <div class="rounded-3xl glass-card p-8 text-center">
                 <p class="text-sm text-slate-400 dark:text-slate-500">{{ __('ยังไม่มีข้อความถึงเจ้าหน้าที่') }}</p>
             </div>
         @endforelse

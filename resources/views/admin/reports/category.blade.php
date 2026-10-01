@@ -24,7 +24,7 @@
         <p class="mt-0.5 text-2xl font-bold text-brand-purple-800 dark:text-brand-purple-300">{{ number_format($totalHours) }} <span class="text-sm font-normal text-brand-purple-600 dark:text-brand-purple-400">{{ __('ชั่วโมง') }}</span></p>
     </div>
 
-    <div class="rounded-2xl glass-card p-5 shadow-soft">
+    <div class="rounded-3xl glass-card p-5">
         <div class="space-y-5">
             @foreach ($categoryHours as $key => $hours)
                 @php

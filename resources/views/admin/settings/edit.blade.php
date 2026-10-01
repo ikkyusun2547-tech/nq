@@ -22,7 +22,7 @@
 
         <div class="flex gap-3">
             <button type="submit"
-                class="flex-1 rounded-xl bg-gradient-to-r from-brand-purple-600 to-brand-purple-500 px-4 py-2.5 text-sm font-semibold text-white shadow-soft transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg">
+                class="flex-1 rounded-xl bg-brand-purple-700 px-4 py-2.5 text-sm font-semibold text-white shadow-soft transition-all duration-300 hover:bg-brand-purple-800">
                 {{ __('บันทึกเกณฑ์') }}
             </button>
         </div>

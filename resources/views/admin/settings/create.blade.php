@@ -17,17 +17,17 @@
     <form method="POST" action="{{ route('admin.settings.store') }}" class="space-y-5">
         @csrf
 
-        <div class="rounded-2xl glass-card p-5 shadow-soft">
+        <div class="rounded-3xl glass-card p-5">
             <label class="mb-1.5 block text-xs font-medium text-slate-500 dark:text-slate-400">{{ __('ปีการศึกษาที่เข้า (ปี พ.ศ.)') }}</label>
             <input type="number" name="enrollment_year" value="{{ old('enrollment_year') }}" min="2500" max="2600" placeholder="{{ __('ระบุปีการศึกษา') }}" required
-                class="w-full max-w-xs rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm shadow-soft transition-all duration-200 focus:border-brand-purple-500 focus:outline-none focus:ring-4 focus:ring-brand-purple-500/10 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100">
+                class="w-full max-w-xs rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm transition-all duration-200 focus:border-brand-purple-500 focus:outline-none focus:ring-4 focus:ring-brand-purple-500/10 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100">
             <p class="mt-1.5 text-xs text-slate-400 dark:text-slate-500">{{ __('นักศึกษาที่มีปีที่เข้าศึกษาตรงกับปีนี้จะใช้เกณฑ์ชุดนี้ตลอดทั้งหลักสูตร') }}</p>
         </div>
 
         @include('admin.settings._criteria-fields')
 
         <button type="submit"
-            class="w-full rounded-xl bg-gradient-to-r from-brand-purple-600 to-brand-purple-500 px-4 py-2.5 text-sm font-semibold text-white shadow-soft transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg">
+            class="w-full rounded-xl bg-brand-purple-700 px-4 py-2.5 text-sm font-semibold text-white shadow-soft transition-all duration-300 hover:bg-brand-purple-800">
             {{ __('บันทึกเกณฑ์') }}
         </button>
     </form>

@@ -4,7 +4,7 @@
 <div class="mx-auto max-w-md">
     <x-brand-header :title="__('เช็คชื่อแบบรายงานตนเอง')" />
 
-    <div class="rounded-3xl glass-card p-5 shadow-soft-lg sm:p-6">
+    <div class="rounded-3xl glass-card p-5 sm:p-6">
         <h2 class="font-semibold text-slate-900 dark:text-slate-100">{{ $activity->title }}</h2>
         @if ($activity->location_name)
             <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">{{ $activity->location_name }}</p>
@@ -67,7 +67,7 @@
                     </div>
                 </div>
 
-                <button type="submit" class="w-full rounded-xl bg-brand-green-500 px-4 py-3 text-sm font-semibold text-brand-purple-950 shadow-soft transition-all duration-300 hover:-translate-y-0.5 hover:bg-brand-green-400 hover:shadow-lg">
+                <button type="submit" class="w-full rounded-xl bg-brand-purple-700 px-4 py-3 text-sm font-semibold text-white shadow-soft transition-all duration-300 hover:bg-brand-purple-800">
                     {{ __('ส่งหลักฐานเพื่อเช็คชื่อ') }}
                 </button>
                 <p class="text-center text-xs text-slate-400 dark:text-slate-500">{{ __('การเช็คชื่อแบบนี้ต้องรอเจ้าหน้าที่ตรวจสอบก่อนจึงจะได้รับชั่วโมงกิจกรรม') }}</p>

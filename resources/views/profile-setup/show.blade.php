@@ -30,8 +30,6 @@
 >
     <!-- Left: branding panel (desktop only) -->
     <div class="relative hidden overflow-hidden brand-gradient p-12 lg:col-span-2 lg:flex lg:flex-col lg:justify-between">
-        <div class="pointer-events-none absolute -left-24 -top-24 h-80 w-80 rounded-full bg-white/10 blur-3xl"></div>
-        <div class="pointer-events-none absolute -bottom-32 -right-16 h-80 w-80 rounded-full bg-brand-green-500/10 blur-3xl"></div>
 
         <div class="relative flex items-center gap-5">
             <img src="{{ asset('images/logo.png') }}" alt="SRRU" class="h-24 w-24 object-contain drop-shadow-lg">
@@ -66,9 +64,7 @@
     <div class="flex items-center justify-center bg-slate-50 px-4 py-10 dark:bg-slate-950 lg:col-span-3 lg:px-16">
         <div class="w-full max-w-lg">
             <!-- Mobile/tablet branding banner -->
-            <div class="relative mb-6 overflow-hidden rounded-3xl brand-gradient p-6 shadow-soft-lg lg:hidden">
-                <div class="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-white/10 blur-2xl"></div>
-                <div class="pointer-events-none absolute -bottom-14 -left-6 h-40 w-40 rounded-full bg-brand-green-500/10 blur-2xl"></div>
+            <div class="relative mb-6 overflow-hidden rounded-3xl brand-gradient p-6 lg:hidden">
 
                 <div class="relative flex items-center gap-3">
                     <img src="{{ asset('images/logo.png') }}" alt="SRRU" class="h-14 w-14 object-contain drop-shadow-lg">
@@ -129,7 +125,7 @@
                                 </span>
                                 <input
                                     type="text" name="first_name" value="{{ old('first_name', $firstName) }}" required
-                                    class="w-full rounded-xl border bg-white py-2.5 pl-10 pr-3.5 text-sm text-slate-700 placeholder:text-slate-400 shadow-soft transition-all duration-200 focus:outline-none focus:ring-4 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 @error('first_name') border-red-400 focus:border-red-500 focus:ring-red-500/10 dark:border-red-500/70 @else border-slate-200 focus:border-brand-purple-500 focus:ring-brand-purple-500/10 dark:border-slate-600 @enderror"
+                                    class="w-full rounded-xl border bg-white py-2.5 pl-10 pr-3.5 text-sm text-slate-700 placeholder:text-slate-400 transition-all duration-200 focus:outline-none focus:ring-4 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 @error('first_name') border-red-400 focus:border-red-500 focus:ring-red-500/10 dark:border-red-500/70 @else border-slate-200 focus:border-brand-purple-500 focus:ring-brand-purple-500/10 dark:border-slate-600 @enderror"
                                     placeholder="{{ __('กรอกชื่อ') }}"
                                 >
                             </div>
@@ -140,7 +136,7 @@
                         <label class="mb-2 block text-sm font-medium text-slate-600 dark:text-slate-400">{{ __('นามสกุล') }}</label>
                         <input
                             type="text" name="last_name" value="{{ old('last_name', $lastName) }}" required
-                            class="w-full rounded-xl border bg-white px-3.5 py-2.5 text-sm text-slate-700 placeholder:text-slate-400 shadow-soft transition-all duration-200 focus:outline-none focus:ring-4 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 @error('last_name') border-red-400 focus:border-red-500 focus:ring-red-500/10 dark:border-red-500/70 @else border-slate-200 focus:border-brand-purple-500 focus:ring-brand-purple-500/10 dark:border-slate-600 @enderror"
+                            class="w-full rounded-xl border bg-white px-3.5 py-2.5 text-sm text-slate-700 placeholder:text-slate-400 transition-all duration-200 focus:outline-none focus:ring-4 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 @error('last_name') border-red-400 focus:border-red-500 focus:ring-red-500/10 dark:border-red-500/70 @else border-slate-200 focus:border-brand-purple-500 focus:ring-brand-purple-500/10 dark:border-slate-600 @enderror"
                             placeholder="{{ __('กรอกนามสกุล') }}"
                         >
                     </div>
@@ -154,7 +150,7 @@
                             <input
                                 type="text" name="student_id" value="{{ old('student_id', $user->student_id) }}" required
                                 inputmode="numeric" pattern="\d{11}" maxlength="11"
-                                class="w-full rounded-xl border bg-white py-2.5 pl-10 pr-3.5 text-sm tracking-wide text-slate-700 placeholder:text-slate-400 shadow-soft transition-all duration-200 focus:outline-none focus:ring-4 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 @error('student_id') border-red-400 focus:border-red-500 focus:ring-red-500/10 dark:border-red-500/70 @else border-slate-200 focus:border-brand-purple-500 focus:ring-brand-purple-500/10 dark:border-slate-600 @enderror"
+                                class="w-full rounded-xl border bg-white py-2.5 pl-10 pr-3.5 text-sm tracking-wide text-slate-700 placeholder:text-slate-400 transition-all duration-200 focus:outline-none focus:ring-4 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 @error('student_id') border-red-400 focus:border-red-500 focus:ring-red-500/10 dark:border-red-500/70 @else border-slate-200 focus:border-brand-purple-500 focus:ring-brand-purple-500/10 dark:border-slate-600 @enderror"
                                 placeholder="{{ __('รหัส 11 หลัก') }}"
                             >
                         </div>
@@ -178,7 +174,7 @@
                                 <input
                                     type="number" name="enrollment_year" value="{{ old('enrollment_year', $user->enrollment_year) }}" required
                                     min="2540" max="{{ date('Y') + 543 }}"
-                                    class="w-full rounded-xl border bg-white py-2.5 pl-10 pr-3.5 text-sm text-slate-700 placeholder:text-slate-400 shadow-soft transition-all duration-200 focus:outline-none focus:ring-4 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 @error('enrollment_year') border-red-400 focus:border-red-500 focus:ring-red-500/10 dark:border-red-500/70 @else border-slate-200 focus:border-brand-purple-500 focus:ring-brand-purple-500/10 dark:border-slate-600 @enderror"
+                                    class="w-full rounded-xl border bg-white py-2.5 pl-10 pr-3.5 text-sm text-slate-700 placeholder:text-slate-400 transition-all duration-200 focus:outline-none focus:ring-4 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 @error('enrollment_year') border-red-400 focus:border-red-500 focus:ring-red-500/10 dark:border-red-500/70 @else border-slate-200 focus:border-brand-purple-500 focus:ring-brand-purple-500/10 dark:border-slate-600 @enderror"
                                     placeholder="{{ __('เช่น :year', ['year' => date('Y') + 543]) }}"
                                 >
                             </div>
@@ -248,7 +244,7 @@
 
                 <button
                     type="submit"
-                    class="flex w-full items-center justify-center gap-2 rounded-xl bg-brand-green-500 px-4 py-2.5 text-sm font-semibold text-brand-purple-950 shadow-soft transition-all duration-300 hover:-translate-y-0.5 hover:bg-brand-green-400 hover:shadow-lg active:scale-[0.99]"
+                    class="flex w-full items-center justify-center gap-2 rounded-xl bg-brand-purple-700 px-4 py-2.5 text-sm font-semibold text-white shadow-soft transition-all duration-300 hover:bg-brand-purple-800 active:scale-[0.99]"
                 >
                     {{ $user->hasCompletedProfile() ? __('บันทึกการเปลี่ยนแปลง') : __('บันทึกและเข้าใช้งานระบบ') }}
                     <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>

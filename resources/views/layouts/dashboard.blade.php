@@ -7,6 +7,7 @@
     <title>{{ $title ?? __('ระบบเช็คชื่อกิจกรรมนักศึกษา SRRU') }}</title>
     <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}">
     @include('partials.pwa-head')
+    @include('partials.fonts')
     <script>
         if (localStorage.theme === 'dark' || (! ('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
             document.documentElement.classList.add('dark');
@@ -16,318 +17,278 @@
 </head>
 <body class="min-h-dvh bg-slate-50 text-slate-900 antialiased dark:bg-slate-950 dark:text-slate-100">
     @php
-        $isAdmin = auth()->user()?->isAdmin();
-        $isSuperAdmin = auth()->user()?->role === 'super_admin';
+        $user = auth()->user();
+        $isAdmin = $user?->isAdmin();
+        $isSuperAdmin = $user?->role === 'super_admin';
+        $displayName = $user?->name_thai ?? $user?->name;
+        $initials = mb_substr(preg_replace('/^(นาย|นางสาว|นาง)/u', '', (string) $displayName), 0, 2);
+
         // Opt-in per page (set by the contact chat views) — hides the
         // surrounding nav chrome on phone-width screens so the thread reads
-        // as a real full-screen conversation (Messenger-style) instead of a
-        // small card embedded in the usual dashboard shell. Desktop is
-        // untouched either way — there's room for the chat alongside the
-        // normal nav/sidebar there.
+        // as a real full-screen conversation instead of a card embedded in
+        // the usual shell. Desktop is untouched either way.
         $fullscreenChat = $fullscreenChat ?? false;
-
-        // Flat list for the student top nav (unchanged from before).
-        $navItems = $isAdmin
-            ? [
-                ['route' => 'admin.dashboard', 'label' => __('แดชบอร์ด')],
-                ['route' => 'admin.activities.index', 'label' => __('กิจกรรม')],
-                ['route' => 'admin.attendance.flagged', 'label' => __('เช็คชื่อติดธงแดง')],
-                ['route' => 'admin.external-activities.index', 'label' => __('คำร้องภายนอก')],
-                ['route' => 'admin.credit-transfers.index', 'label' => __('เทียบโอนตำแหน่ง')],
-                ['route' => 'admin.late-checkins.index', 'label' => __('เช็คชื่อย้อนหลัง')],
-                ['route' => 'admin.students.index', 'label' => __('นักศึกษา')],
-            ]
-            : [
-                ['route' => 'dashboard', 'label' => __('แดชบอร์ด')],
-                ['route' => 'activities.index', 'label' => __('กิจกรรม')],
-                ['route' => 'checkin.show', 'label' => __('เช็คด้วย QR Code')],
-                ['route' => 'hour-requests.index', 'label' => __('ขอชั่วโมง')],
-                ['route' => 'contact.index', 'label' => __('ติดต่อเรา')],
-                ['route' => 'profile.show', 'label' => __('โปรไฟล์')],
-            ];
 
         // Computed once per page load — this queue isn't polled like the
         // notification bell, it just reflects state as of this request.
         $adminContactUnreadCount = $isAdmin ? \App\Models\ContactThread::where('admin_unread', true)->count() : 0;
+        $adminReviewCounts = $isAdmin ? \App\Services\AdminReviewInbox::counts() : [];
+        $adminAttentionCount = array_sum($adminReviewCounts) + $adminContactUnreadCount;
+        $studentAttention = (! $isAdmin && $user) ? \App\Services\StudentAttention::counts($user) : ['requests' => 0, 'activities' => 0, 'contact' => 0];
+        $studentAttentionCount = array_sum($studentAttention);
 
-        // Grouped, icon-labelled list for the admin sidebar — a sidebar has
-        // room to just list everything, so (unlike the old top nav) nothing
-        // needs to be tucked behind a "เพิ่มเติม" dropdown.
-        $sidebarGroups = $isAdmin ? [
-            [
-                'label' => __('ภาพรวม'),
-                'items' => [
-                    ['route' => 'admin.dashboard', 'label' => __('แดชบอร์ด'), 'icon' => 'M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75'],
-                ],
-            ],
-            [
-                'label' => __('การดำเนินงาน'),
-                'items' => [
-                    ['route' => 'admin.activities.index', 'label' => __('กิจกรรม'), 'icon' => 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4'],
-                    ['route' => 'admin.attendance.flagged', 'label' => __('เช็คชื่อติดธงแดง'), 'icon' => 'M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z'],
-                    ['route' => 'admin.external-activities.index', 'label' => __('คำร้องภายนอก'), 'icon' => 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z'],
-                    ['route' => 'admin.credit-transfers.index', 'label' => __('เทียบโอนตำแหน่ง'), 'icon' => 'M4.5 6.75h15m-15 0A2.25 2.25 0 002.25 9v6a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 15V9a2.25 2.25 0 00-2.25-2.25m-15 0V5.25A2.25 2.25 0 016.75 3h10.5a2.25 2.25 0 012.25 2.25v1.5m-15 0h15'],
-                    ['route' => 'admin.late-checkins.index', 'label' => __('เช็คชื่อย้อนหลัง'), 'icon' => 'M12 6v6l4 2M21 12a9 9 0 11-18 0 9 9 0 0118 0z'],
-                    ['route' => 'admin.students.index', 'label' => __('นักศึกษา'), 'icon' => 'M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z'],
-                    ['route' => 'admin.contact.index', 'label' => __('ข้อความจากนักศึกษา'), 'icon' => 'M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z', 'badge' => $adminContactUnreadCount],
-                ],
-            ],
-            [
-                'label' => __('ระบบ'),
-                'items' => array_filter([
-                    ['route' => 'admin.reports.index', 'label' => __('รายงาน'), 'icon' => 'M3 17l6-6 4 4 8-8M21 7v6h-6'],
-                    ['route' => 'admin.audit-log.index', 'label' => __('ประวัติการตรวจสอบ'), 'icon' => 'M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25z'],
-                    ['route' => 'admin.announcements.create', 'label' => __('ส่งประกาศ'), 'icon' => 'M10.34 15.84c-.688-.06-1.386-.09-2.09-.09H7.5a4.5 4.5 0 110-9h.75c.704 0 1.402-.03 2.09-.09m0 9.18c2.31.192 4.594.591 6.81 1.17a48.11 48.11 0 003.65-8.35 48.11 48.11 0 00-3.65-8.35 48.51 48.51 0 00-6.81 1.17m0 6.42a48.517 48.517 0 010-6.42'],
-                    $isSuperAdmin ? ['route' => 'admin.faculties.index', 'label' => __('คณะ/สาขา'), 'icon' => 'M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21'] : null,
-                    $isSuperAdmin ? ['route' => 'admin.users.index', 'label' => __('ผู้ใช้งานและสิทธิ์'), 'icon' => 'M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z'] : null,
-                    $isSuperAdmin ? ['route' => 'admin.settings.index', 'label' => __('เกณฑ์การจบการศึกษา'), 'icon' => 'M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z'] : null,
-                    $isSuperAdmin ? ['route' => 'admin.credit-transfer-positions.index', 'label' => __('ตำแหน่งเทียบโอนชั่วโมง'), 'icon' => 'M15 9h3.75M15 12h3.75M15 15h3.75M4.5 19.5h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5zm6-10.125a1.875 1.875 0 11-3.75 0 1.875 1.875 0 013.75 0zm1.294 6.336a6.721 6.721 0 01-3.17.789 6.721 6.721 0 01-3.168-.789 3.376 3.376 0 016.338 0z'] : null,
-                ]),
-            ],
-        ] : [];
+        // One list drives the desktop top bar and the mobile menu sheet.
+        // An item with 'children' renders as a dropdown; 'active' is the
+        // routeIs() pattern(s) that should highlight it.
+        $navItems = $isAdmin
+            ? [
+                ['route' => 'admin.dashboard', 'label' => __('แดชบอร์ด'), 'active' => ['admin.dashboard']],
+                ['route' => 'admin.activities.index', 'label' => __('กิจกรรม'), 'active' => ['admin.activities.*', 'admin.attendance.index', 'admin.attendance.qr-*']],
+                ['label' => __('คำร้อง'), 'badge' => $adminAttentionCount, 'children' => [
+                    ['route' => 'admin.attendance.flagged', 'label' => __('เช็คชื่อติดธงแดง'), 'active' => ['admin.attendance.flagged'], 'badge' => $adminReviewCounts['flagged'] ?? 0],
+                    ['route' => 'admin.external-activities.index', 'label' => __('คำร้องกิจกรรมภายนอก'), 'active' => ['admin.external-activities.*'], 'badge' => $adminReviewCounts['external'] ?? 0],
+                    ['route' => 'admin.credit-transfers.index', 'label' => __('เทียบโอนตำแหน่ง'), 'active' => ['admin.credit-transfers.*'], 'badge' => $adminReviewCounts['credit'] ?? 0],
+                    ['route' => 'admin.late-checkins.index', 'label' => __('เช็คชื่อย้อนหลัง'), 'active' => ['admin.late-checkins.*'], 'badge' => $adminReviewCounts['late'] ?? 0],
+                    ['route' => 'admin.contact.index', 'label' => __('ข้อความจากนักศึกษา'), 'active' => ['admin.contact.*'], 'badge' => $adminContactUnreadCount],
+                ]],
+                ['route' => 'admin.students.index', 'label' => __('นักศึกษา'), 'active' => ['admin.students.*']],
+                ['route' => 'admin.reports.index', 'label' => __('รายงาน'), 'active' => ['admin.reports.*']],
+                ['label' => __('ระบบ'), 'children' => array_values(array_filter([
+                    ['route' => 'admin.announcements.create', 'label' => __('ส่งประกาศ'), 'active' => ['admin.announcements.*']],
+                    ['route' => 'admin.audit-log.index', 'label' => __('ประวัติการตรวจสอบ'), 'active' => ['admin.audit-log.*']],
+                    $isSuperAdmin ? ['route' => 'admin.users.index', 'label' => __('ผู้ใช้งานและสิทธิ์'), 'active' => ['admin.users.*']] : null,
+                    $isSuperAdmin ? ['route' => 'admin.faculties.index', 'label' => __('คณะ/สาขา'), 'active' => ['admin.faculties.*', 'admin.majors.*']] : null,
+                    $isSuperAdmin ? ['route' => 'admin.settings.index', 'label' => __('เกณฑ์การจบการศึกษา'), 'active' => ['admin.settings.*']] : null,
+                    $isSuperAdmin ? ['route' => 'admin.credit-transfer-positions.index', 'label' => __('ตำแหน่งเทียบโอนชั่วโมง'), 'active' => ['admin.credit-transfer-positions.*']] : null,
+                ]))],
+            ]
+            : [
+                ['route' => 'dashboard', 'label' => __('วันนี้'), 'active' => ['dashboard', 'activity-history.*']],
+                ['route' => 'activities.index', 'label' => __('กิจกรรม'), 'active' => ['activities.*', 'self-checkin.*', 'late-checkin.*'], 'badge' => $studentAttention['activities']],
+                ['route' => 'checkin.show', 'label' => __('เช็คชื่อ'), 'active' => ['checkin.*']],
+                ['route' => 'hour-requests.index', 'label' => __('คำร้อง'), 'active' => ['hour-requests.*', 'external-activities.*', 'credit-transfers.*'], 'badge' => $studentAttention['requests']],
+                ['route' => 'contact.index', 'label' => __('ติดต่อเรา'), 'active' => ['contact.*'], 'badge' => $studentAttention['contact']],
+                ['route' => 'checkin-guide', 'label' => __('คู่มือ'), 'active' => ['checkin-guide']],
+            ];
+
+        $isActive = fn (array $item) => isset($item['children'])
+            ? collect($item['children'])->contains(fn ($child) => request()->routeIs(...$child['active']))
+            : request()->routeIs(...$item['active']);
+        $homeRoute = $isAdmin ? 'admin.dashboard' : 'dashboard';
     @endphp
 
-    @if ($isAdmin)
-        <div x-data="{ sidebarOpen: false }">
-            <!-- Mobile-only slim top bar: sidebar is an off-canvas drawer below lg -->
-            <div class="sticky top-0 z-40 {{ $fullscreenChat ? 'hidden' : 'flex' }} min-h-14 items-center gap-1 bg-brand-purple-950 px-4 py-2 shadow-soft-lg lg:hidden">
-                <button @click="sidebarOpen = true" class="shrink-0 rounded-lg p-2 text-violet-200/70 hover:bg-white/5 hover:text-white" aria-label="{{ __('เมนู') }}">
-                    <svg class="h-5.5 w-5.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M4 6h16M4 12h16M4 18h16"/></svg>
-                </button>
-                <a href="{{ route('admin.dashboard') }}" class="flex min-w-0 items-center gap-2">
-                    <img src="{{ asset('images/logo.png') }}" alt="SRRU" class="h-9 w-9 shrink-0 object-contain">
-                    <span class="min-w-0">
-                        <span class="block text-sm font-semibold leading-tight text-white">SRRU Check</span>
-                        <span class="block text-[0.65rem] leading-snug text-white/70">{{ __('ระบบเช็คกิจกรรมนักศึกษา') }}</span>
-                        <span class="block text-[0.65rem] leading-snug text-white/70">{{ __('มหาวิทยาลัยราชภัฏสุรินทร์') }}</span>
-                    </span>
-                </a>
-                <div class="ml-auto">
-                    @include('partials.notification-bell')
-                </div>
-            </div>
+    <header
+        x-data="{ menuOpen: false }"
+        @keydown.escape.window="menuOpen = false"
+        class="{{ $fullscreenChat ? 'hidden md:block' : '' }} sticky top-0 z-40 border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950"
+    >
+        <div class="mx-auto flex h-16 max-w-[90rem] items-center gap-6 px-4 sm:px-6">
+            <a href="{{ route($homeRoute) }}" class="flex shrink-0 items-center gap-2.5">
+                <img src="{{ asset('images/logo.png') }}" alt="" class="h-9 w-9 object-contain">
+                <span class="leading-tight">
+                    <span class="block font-display text-[1.05rem] font-semibold text-slate-900 dark:text-white">SRRU Check</span>
+                    <span class="hidden text-[0.7rem] text-slate-500 dark:text-slate-400 sm:block">{{ __('มหาวิทยาลัยราชภัฏสุรินทร์') }}</span>
+                </span>
+            </a>
 
-            <!-- Mobile drawer scrim -->
-            <div x-show="sidebarOpen" x-cloak x-transition.opacity @click="sidebarOpen = false"
-                class="fixed inset-0 z-40 bg-slate-950/40 lg:hidden"></div>
-
-            <!-- Always fixed (viewport-relative, never in document flow) at every
-                 breakpoint, so it never scrolls with the page — position:sticky
-                 was tried first but a sticky element only stays pinned for as
-                 long as its own box is tall enough to still overlap the
-                 viewport; once the page scrolled past this aside's own
-                 (shorter-than-100vh) content height it started scrolling away
-                 like a normal block. fixed has no such caveat. Always in the
-                 DOM (not x-show'd) so lg:!translate-x-0 can force it on-screen
-                 on desktop purely with CSS — an x-show tied to a JS
-                 window-width check would need a resize listener to stay correct
-                 and still flashes wrong on first paint. Brand purple-950 chrome
-                 (unaffected by the light/dark toggle) matches the rest of the
-                 app's nav — only the main content area follows the theme toggle. -->
-            <aside
-                :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'"
-                class="fixed inset-y-0 left-0 z-50 flex h-dvh w-64 shrink-0 flex-col overflow-hidden bg-brand-purple-950 shadow-soft-lg transition-transform duration-200 ease-out -translate-x-full lg:!translate-x-0"
-            >
-
-                <div class="relative flex shrink-0 items-center justify-between gap-2 border-b border-white/10 px-4 py-5">
-                    <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3 overflow-hidden">
-                        <img src="{{ asset('images/logo.png') }}" alt="SRRU" class="h-14 w-14 shrink-0 object-contain drop-shadow">
-                        <span class="min-w-0">
-                            <span class="block text-xl font-bold leading-tight text-white">SRRU Check</span>
-                            <span class="mt-1 block text-xs leading-snug text-white/70">{{ __('ระบบเช็คกิจกรรมนักศึกษา') }}</span>
-                            <span class="block text-xs leading-snug text-white/70">{{ __('มหาวิทยาลัยราชภัฏสุรินทร์') }}</span>
-                        </span>
-                    </a>
-                    <button @click="sidebarOpen = false" class="shrink-0 rounded-lg p-1.5 text-violet-200/70 hover:bg-white/5 hover:text-white lg:hidden" aria-label="{{ __('ปิดเมนู') }}">
-                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M6 18L18 6M6 6l12 12"/></svg>
-                    </button>
-                </div>
-
-                <nav class="relative flex-1 space-y-5 overflow-y-auto px-3 py-4">
-                    @foreach ($sidebarGroups as $group)
-                        <div>
-                            <p class="mb-1.5 px-2.5 text-[0.68rem] font-semibold uppercase tracking-wide text-violet-300/50">{{ $group['label'] }}</p>
-                            <div class="space-y-0.5">
-                                @foreach ($group['items'] as $item)
-                                    @php $active = request()->routeIs($item['route'].'*'); @endphp
-                                    <a href="{{ route($item['route']) }}"
+            {{-- Desktop navigation --}}
+            <nav aria-label="{{ __('เมนูหลัก') }}" class="hidden h-full items-stretch gap-1 lg:flex">
+                @foreach ($navItems as $item)
+                    @php $active = $isActive($item); @endphp
+                    @isset($item['children'])
+                        <div class="relative flex" x-data="{ open: false }" @click.outside="open = false" @keydown.escape="open = false">
+                            <button type="button" @click="open = ! open" :aria-expanded="open"
+                                @class([
+                                    'flex items-center gap-1 border-b-2 px-3 text-sm transition-colors',
+                                    'border-brand-purple-700 font-semibold text-brand-purple-700 dark:border-brand-purple-400 dark:text-brand-purple-300' => $active,
+                                    'border-transparent text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white' => ! $active,
+                                ])>
+                                {{ $item['label'] }}
+                                @if (! empty($item['badge']))
+                                    <span class="-mt-2.5 h-2 w-2 rounded-full bg-rose-500 ring-2 ring-white dark:ring-slate-950" aria-label="{{ __('มีรายการใหม่') }}"></span>
+                                @endif
+                                <svg class="h-3.5 w-3.5 transition-transform" :class="open && 'rotate-180'" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
+                            </button>
+                            <div x-show="open" x-cloak x-transition.opacity.duration.150ms
+                                class="absolute left-0 top-full z-50 mt-1 w-60 rounded-2xl border border-slate-200 bg-white p-1.5 shadow-soft-lg dark:border-slate-800 dark:bg-slate-900">
+                                @foreach ($item['children'] as $child)
+                                    @php $childActive = request()->routeIs(...$child['active']); @endphp
+                                    <a href="{{ route($child['route']) }}"
                                         @class([
-                                            'flex items-center gap-2.5 rounded-lg border-l-2 px-2.5 py-2 text-sm font-medium transition-all duration-200',
-                                            'border-brand-green-400 bg-brand-green-500/15 text-brand-green-400' => $active,
-                                            'border-transparent text-violet-200/70 hover:translate-x-0.5 hover:bg-white/5 hover:text-white' => ! $active,
+                                            'flex items-center justify-between rounded-xl px-3 py-2.5 text-sm transition-colors',
+                                            'bg-brand-purple-50 font-semibold text-brand-purple-700 dark:bg-brand-purple-500/15 dark:text-brand-purple-300' => $childActive,
+                                            'text-slate-700 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800' => ! $childActive,
                                         ])>
-                                        <svg class="h-[1.1rem] w-[1.1rem] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="{{ $item['icon'] }}"/></svg>
-                                        <span class="min-w-0 flex-1 truncate">{{ $item['label'] }}</span>
-                                        @if (! empty($item['badge']))
-                                            <span class="shrink-0 rounded-full bg-brand-green-500 px-1.5 py-0.5 text-[0.65rem] font-semibold text-brand-purple-950">{{ $item['badge'] }}</span>
+                                        {{ $child['label'] }}
+                                        @if (! empty($child['badge']))
+                                            <span class="rounded-full bg-rose-500 px-1.5 py-0.5 text-[0.65rem] font-semibold text-white">{{ $child['badge'] }}</span>
                                         @endif
                                     </a>
                                 @endforeach
                             </div>
                         </div>
-                    @endforeach
-                </nav>
-
-                <div class="relative shrink-0 border-t border-white/10 p-3">
-                    <div class="flex items-center gap-2 px-1 pb-2">
-                        @include('partials.locale-switch')
-                        @include('partials.theme-toggle')
-                        @include('partials.notification-bell', ['align' => 'left'])
-                    </div>
-                    <div class="flex items-center gap-2.5 rounded-lg px-2 py-2">
-                        <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-brand-purple-400 to-brand-green-500 text-xs font-semibold text-white">
-                            {{ mb_substr(auth()->user()->name_thai ?? auth()->user()->name, 0, 1) }}
-                        </span>
-                        <span class="min-w-0 flex-1 truncate text-sm text-violet-200/70">{{ auth()->user()->name_thai ?? auth()->user()->name }}</span>
-                        <form method="POST" action="{{ route('logout') }}">
-                            @csrf
-                            <button class="rounded-lg p-1.5 text-violet-200/70 transition-colors hover:bg-white/5 hover:text-white" title="{{ __('ออกจากระบบ') }}">
-                                <svg class="h-4.5 w-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75"/></svg>
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            </aside>
-
-            <!-- lg:pl-64 compensates for the sidebar now being fixed (out of
-                 flow) instead of participating in a flex layout — without it,
-                 content would render underneath the sidebar at desktop widths. -->
-            <div class="min-w-0 lg:pl-64">
-                <main class="mx-auto max-w-[90rem] {{ $fullscreenChat ? 'p-0 lg:px-6 lg:py-8' : 'px-4 py-6 pb-20 sm:px-6 sm:py-8 lg:pb-8' }}">
-                    @if (session('status'))
-                        <div class="mb-4 rounded-xl bg-brand-green-50 px-4 py-3 text-sm text-brand-green-700 ring-1 ring-brand-green-100 dark:bg-brand-green-500/10 dark:text-brand-green-400 dark:ring-brand-green-500/20">
-                            {{ session('status') }}
-                        </div>
-                    @endif
-
-                    @if (session('error'))
-                        <div class="mb-4 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700 ring-1 ring-red-100 dark:bg-red-500/10 dark:text-red-400 dark:ring-red-500/20">
-                            {{ session('error') }}
-                        </div>
-                    @endif
-
-                    @yield('content')
-                </main>
-            </div>
-
-            @unless ($fullscreenChat)
-                @include('partials.admin-mobile-tab-bar')
-            @endunless
-        </div>
-    @else
-        <nav class="{{ $fullscreenChat ? 'hidden md:block' : '' }} sticky top-0 z-40 bg-brand-purple-950 shadow-soft-lg" x-data="{ mobileOpen: false }" @click.outside="mobileOpen = false">
-            <div class="mx-auto max-w-[90rem] px-4 sm:px-6">
-                <div class="flex min-h-16 items-center justify-between gap-4 py-2">
-                    <a href="{{ route('dashboard') }}" class="flex min-w-0 items-center gap-2.5 md:shrink-0">
-                        <img src="{{ asset('images/logo.png') }}" alt="SRRU" class="h-11 w-11 shrink-0 object-contain drop-shadow">
-                        <span class="min-w-0">
-                            <span class="block whitespace-nowrap text-sm font-semibold leading-tight text-white">SRRU Check</span>
-                            {{-- Visible+wrapping below md (real phones, and a shrunk desktop
-                                 window collapses into this same hamburger-menu mobile layout
-                                 right at md, so this switches in lockstep). Hidden from md up
-                                 to lg — that's exactly the range where the nav-items row is
-                                 already competing hard for space (a pre-existing near-overflow
-                                 there), so showing this text mid-md-lg squeezed the logo block
-                                 down to nothing. Reappears at lg+ once there's room again,
-                                 same single-line look as before. --}}
-                            <span class="block text-xs leading-snug text-white/70 md:hidden lg:block lg:whitespace-nowrap">{{ __('ระบบเช็คกิจกรรมนักศึกษา มหาวิทยาลัยราชภัฏสุรินทร์') }}</span>
-                        </span>
-                    </a>
-
-                    <div class="hidden flex-1 items-center justify-center gap-1 md:flex">
-                        @foreach ($navItems as $item)
-                            <a href="{{ route($item['route']) }}"
-                                @class([
-                                    'whitespace-nowrap rounded-lg px-2.5 py-2 text-sm font-medium transition-all duration-200 lg:px-3.5',
-                                    'bg-brand-green-500/15 text-brand-green-400' => request()->routeIs($item['route'].'*'),
-                                    'text-violet-200/70 hover:bg-white/5 hover:text-white' => ! request()->routeIs($item['route'].'*'),
-                                ])>
-                                {{ $item['label'] }}
-                            </a>
-                        @endforeach
-                    </div>
-
-                    <div class="hidden shrink-0 items-center gap-3 md:flex">
-                        @include('partials.notification-bell')
-                        @include('partials.theme-toggle')
-                        @include('partials.locale-switch')
-                        <span class="hidden whitespace-nowrap text-sm text-violet-200/70 lg:block">{{ auth()->user()->name_thai ?? auth()->user()->name }}</span>
-                        <form method="POST" action="{{ route('logout') }}">
-                            @csrf
-                            <button class="whitespace-nowrap rounded-lg px-3 py-1.5 text-sm font-medium text-violet-200/70 transition-colors hover:bg-white/5 hover:text-white">
-                                {{ __('ออกจากระบบ') }}
-                            </button>
-                        </form>
-                    </div>
-
-                    <div class="flex items-center gap-1 md:hidden">
-                        @include('partials.notification-bell')
-                    </div>
-
-                    <button @click="mobileOpen = ! mobileOpen" class="rounded-lg p-2 text-violet-200/70 hover:bg-white/5 hover:text-white md:hidden" aria-label="{{ __('เมนู') }}">
-                        <svg x-show="! mobileOpen" class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
-                        <svg x-show="mobileOpen" x-cloak class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                    </button>
-                </div>
-            </div>
-
-            <div x-show="mobileOpen" x-cloak class="border-t border-white/10 md:hidden">
-                <!-- Secondary path to every destination, including ones the
-                     bottom tab bar has no room for (เช็คด้วย QR Code,
-                     ติดต่อเรา) — the tab bar only surfaces the 4 most-used
-                     ones, so anything not there still needs a way in. -->
-                <div class="space-y-0.5 px-2 pt-3">
-                    @foreach ($navItems as $item)
-                        <a href="{{ route($item['route']) }}"
+                    @else
+                        <a href="{{ route($item['route']) }}" @if ($active) aria-current="page" @endif
                             @class([
-                                'block rounded-lg px-3 py-2 text-sm font-medium transition-colors duration-200',
-                                'bg-brand-green-500/15 text-brand-green-400' => request()->routeIs($item['route'].'*'),
-                                'text-violet-200/70 hover:bg-white/5 hover:text-white' => ! request()->routeIs($item['route'].'*'),
+                                'flex items-center gap-1 border-b-2 px-3 text-sm transition-colors',
+                                'border-brand-purple-700 font-semibold text-brand-purple-700 dark:border-brand-purple-400 dark:text-brand-purple-300' => $active,
+                                'border-transparent text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white' => ! $active,
                             ])>
                             {{ $item['label'] }}
+                            @if (! empty($item['badge']))
+                                <span class="-mt-2.5 h-2 w-2 rounded-full bg-rose-500 ring-2 ring-white dark:ring-slate-950" aria-label="{{ __('มีรายการใหม่') }}"></span>
+                            @endif
                         </a>
-                    @endforeach
+                    @endisset
+                @endforeach
+            </nav>
+
+            <div class="ml-auto flex items-center gap-1.5">
+                @include('partials.notification-bell')
+                <div class="hidden items-center gap-1.5 lg:flex">
+                    @include('partials.theme-toggle')
+                    @include('partials.locale-switch')
                 </div>
 
-                <div class="space-y-1 px-4 py-3">
-                    <div class="flex items-center justify-between">
-                        <span class="text-sm text-violet-200/70">{{ auth()->user()->name_thai ?? auth()->user()->name }}</span>
-                        <div class="flex items-center gap-3">
+                {{-- Account menu (desktop) --}}
+                <div class="relative hidden lg:block" x-data="{ open: false }" @click.outside="open = false" @keydown.escape="open = false">
+                    <button type="button" @click="open = ! open" :aria-expanded="open" aria-label="{{ __('บัญชีของฉัน') }}"
+                        class="ml-1 flex h-9 w-9 items-center justify-center rounded-full bg-brand-purple-50 text-xs font-semibold text-brand-purple-700 ring-1 ring-brand-purple-100 transition hover:ring-brand-purple-300 dark:bg-brand-purple-500/15 dark:text-brand-purple-300 dark:ring-brand-purple-500/20">
+                        {{ $initials }}
+                    </button>
+                    <div x-show="open" x-cloak x-transition.opacity.duration.150ms
+                        class="absolute right-0 top-full z-50 mt-2 w-64 rounded-2xl border border-slate-200 bg-white p-1.5 shadow-soft-lg dark:border-slate-800 dark:bg-slate-900">
+                        <div class="px-3 py-2.5">
+                            <p class="truncate text-sm font-semibold text-slate-900 dark:text-white">{{ $displayName }}</p>
+                            <p class="truncate text-xs text-slate-500 dark:text-slate-400">{{ $user?->email }}</p>
+                        </div>
+                        @unless ($isAdmin)
+                            <a href="{{ route('profile.show') }}" class="block rounded-xl px-3 py-2.5 text-sm text-slate-700 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800">{{ __('โปรไฟล์') }}</a>
+                        @endunless
+                        @if ($isAdmin)
+                        <a href="{{ route('checkin-guide') }}" class="block rounded-xl px-3 py-2.5 text-sm text-slate-700 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800">{{ __('วิธีเช็คชื่อ') }}</a>
+                        @endif
+
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+                            <button class="w-full rounded-xl px-3 py-2.5 text-left text-sm text-rose-600 hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-500/10">{{ __('ออกจากระบบ') }}</button>
+                        </form>
+                    </div>
+                </div>
+
+                {{-- Mobile menu trigger --}}
+                <button type="button" @click="menuOpen = true" class="relative flex h-9 w-9 items-center justify-center rounded-xl text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800 lg:hidden" aria-label="{{ __('เมนู') }}">
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"/></svg>
+                    @if (($isAdmin ? $adminAttentionCount : $studentAttentionCount) > 0)
+                        <span class="absolute right-1 top-1 h-2 w-2 rounded-full bg-rose-500 ring-2 ring-white dark:ring-slate-950" aria-label="{{ __('มีรายการใหม่') }}"></span>
+                    @endif
+                </button>
+            </div>
+        </div>
+
+        {{-- Mobile menu sheet: every destination, including the ones the
+             bottom bar has no room for. --}}
+        <template x-teleport="body">
+            <div x-show="menuOpen" x-cloak class="fixed inset-0 z-50 lg:hidden">
+                <div x-show="menuOpen" x-transition.opacity @click="menuOpen = false" class="absolute inset-0 bg-slate-950/40"></div>
+                <div x-show="menuOpen"
+                    x-transition:enter="transition ease-out duration-200" x-transition:enter-start="translate-x-full" x-transition:enter-end="translate-x-0"
+                    x-transition:leave="transition ease-in duration-150" x-transition:leave-start="translate-x-0" x-transition:leave-end="translate-x-full"
+                    class="absolute inset-y-0 right-0 flex w-[min(20rem,88vw)] flex-col bg-white shadow-soft-lg dark:bg-slate-900">
+                    <div class="flex items-center gap-3 border-b border-slate-200 px-4 py-4 dark:border-slate-800">
+                        <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand-purple-50 text-sm font-semibold text-brand-purple-700 dark:bg-brand-purple-500/15 dark:text-brand-purple-300">{{ $initials }}</span>
+                        <span class="min-w-0 flex-1">
+                            <span class="block truncate text-sm font-semibold">{{ $displayName }}</span>
+                            <span class="block truncate text-xs text-slate-500 dark:text-slate-400">{{ $user?->email }}</span>
+                        </span>
+                        <button type="button" @click="menuOpen = false" class="flex h-9 w-9 items-center justify-center rounded-xl text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800" aria-label="{{ __('ปิดเมนู') }}">
+                            <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                        </button>
+                    </div>
+                    <nav aria-label="{{ __('เมนูหลัก') }}" class="flex-1 space-y-1 overflow-y-auto p-3">
+                        @foreach ($navItems as $item)
+                            @isset($item['children'])
+                                <p class="px-3 pb-1 pt-3 text-xs font-semibold text-slate-500 dark:text-slate-400">{{ $item['label'] }}</p>
+                                @foreach ($item['children'] as $child)
+                                    @php $childActive = request()->routeIs(...$child['active']); @endphp
+                                    <a href="{{ route($child['route']) }}"
+                                        @class([
+                                            'flex items-center justify-between rounded-xl px-3 py-2.5 text-sm',
+                                            'bg-brand-purple-50 font-semibold text-brand-purple-700 dark:bg-brand-purple-500/15 dark:text-brand-purple-300' => $childActive,
+                                            'text-slate-700 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800' => ! $childActive,
+                                        ])>
+                                        {{ $child['label'] }}
+                                        @if (! empty($child['badge']))
+                                            <span class="rounded-full bg-rose-500 px-1.5 py-0.5 text-[0.65rem] font-semibold text-white">{{ $child['badge'] }}</span>
+                                        @endif
+                                    </a>
+                                @endforeach
+                            @else
+                                @php $active = $isActive($item); @endphp
+                                <a href="{{ route($item['route']) }}"
+                                    @class([
+                                        'flex items-center justify-between rounded-xl px-3 py-2.5 text-sm',
+                                        'bg-brand-purple-50 font-semibold text-brand-purple-700 dark:bg-brand-purple-500/15 dark:text-brand-purple-300' => $active,
+                                        'text-slate-700 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800' => ! $active,
+                                    ])>
+                                    {{ $item['label'] }}
+                                    @if (! empty($item['badge']))
+                                        <span class="rounded-full bg-rose-500 px-1.5 py-0.5 text-[0.65rem] font-semibold text-white">{{ $item['badge'] }}</span>
+                                    @endif
+                                </a>
+                            @endisset
+                        @endforeach
+                        @unless ($isAdmin)
+                            <a href="{{ route('profile.show') }}" class="block rounded-xl px-3 py-2.5 text-sm text-slate-700 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800">{{ __('โปรไฟล์') }}</a>
+                        @endunless
+                        @if ($isAdmin)
+                        <a href="{{ route('checkin-guide') }}" class="block rounded-xl px-3 py-2.5 text-sm text-slate-700 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800">{{ __('วิธีเช็คชื่อ') }}</a>
+                        @endif
+
+                    </nav>
+                    <div class="flex items-center justify-between gap-2 border-t border-slate-200 p-4 dark:border-slate-800">
+                        <div class="flex items-center gap-1.5">
                             @include('partials.theme-toggle')
                             @include('partials.locale-switch')
-                            <form method="POST" action="{{ route('logout') }}">
-                                @csrf
-                                <button class="text-sm font-medium text-violet-200/70 hover:text-white">{{ __('ออกจากระบบ') }}</button>
-                            </form>
                         </div>
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+                            <button class="rounded-xl px-3 py-2 text-sm font-medium text-rose-600 hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-500/10">{{ __('ออกจากระบบ') }}</button>
+                        </form>
                     </div>
                 </div>
             </div>
-        </nav>
+        </template>
+    </header>
 
-        <main class="mx-auto max-w-[90rem] {{ $fullscreenChat ? 'p-0 md:px-6 md:py-8' : 'px-4 py-6 pb-20 sm:px-6 sm:py-8 md:pb-8' }}">
-            @if (session('status'))
-                <div class="mb-4 rounded-xl bg-brand-green-50 px-4 py-3 text-sm text-brand-green-700 ring-1 ring-brand-green-100 dark:bg-brand-green-500/10 dark:text-brand-green-400 dark:ring-brand-green-500/20">
-                    {{ session('status') }}
-                </div>
-            @endif
+    <main class="mx-auto max-w-[90rem] {{ $fullscreenChat ? 'p-0 md:px-6 md:py-8' : 'px-4 py-6 pb-28 sm:px-6 sm:py-8 lg:pb-10' }}">
+        @if (session('status'))
+            <div role="status" class="mb-5 flex items-start gap-2.5 rounded-2xl border border-brand-green-100 bg-brand-green-50 px-4 py-3 text-sm text-brand-green-800 dark:border-brand-green-500/20 dark:bg-brand-green-500/10 dark:text-brand-green-300">
+                <svg class="mt-0.5 h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                {{ session('status') }}
+            </div>
+        @endif
 
-            @if (session('error'))
-                <div class="mb-4 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700 ring-1 ring-red-100 dark:bg-red-500/10 dark:text-red-400 dark:ring-red-500/20">
-                    {{ session('error') }}
-                </div>
-            @endif
+        @if (session('error'))
+            <div role="alert" class="mb-5 flex items-start gap-2.5 rounded-2xl border border-rose-100 bg-rose-50 px-4 py-3 text-sm text-rose-700 dark:border-rose-500/20 dark:bg-rose-500/10 dark:text-rose-300">
+                <svg class="mt-0.5 h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"/></svg>
+                {{ session('error') }}
+            </div>
+        @endif
 
-            @yield('content')
-        </main>
+        @yield('content')
+    </main>
 
-        @unless ($fullscreenChat)
+    @unless ($fullscreenChat)
+        @if ($isAdmin)
+            @include('partials.admin-mobile-tab-bar')
+        @else
             @include('partials.mobile-tab-bar')
             @if (config('services.srru.pwa_install_prompt_enabled'))
                 @include('partials.pwa-install-banner')
             @endif
-        @endunless
-    @endif
+        @endif
+    @endunless
 
     @include('partials.push-notification-banner')
 

@@ -30,7 +30,7 @@
             <div class="mt-2.5 flex items-center gap-3">
                 <button
                     type="button" x-show="platform !== 'ios' && ! showManualHelp" @click="install()"
-                    class="rounded-lg bg-brand-green-500 px-3.5 py-1.5 text-xs font-semibold text-brand-purple-950 shadow-soft transition-all duration-200 hover:-translate-y-0.5 hover:bg-brand-green-400"
+                    class="rounded-lg bg-brand-purple-700 px-3.5 py-1.5 text-xs font-semibold text-white shadow-soft transition-all duration-200 hover:bg-brand-purple-800"
                 >
                     {{ __('ติดตั้ง') }}
                 </button>

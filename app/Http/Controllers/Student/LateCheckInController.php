@@ -8,12 +8,14 @@ use App\Models\Activity;
 use App\Models\Attendance;
 use App\Models\LateCheckInRequest;
 use App\Models\User;
+use App\Services\StudentAttention;
 
 class LateCheckInController extends Controller
 {
     public function show(Activity $activity)
     {
         $this->ensureActivityAllowsLateRequest($activity);
+        StudentAttention::markSeen(request()->user(), 'activities');
 
         $existingRequest = LateCheckInRequest::where('user_id', request()->user()->id)
             ->where('activity_id', $activity->id)

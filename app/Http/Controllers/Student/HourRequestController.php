@@ -6,12 +6,16 @@ use App\Http\Controllers\Controller;
 use App\Models\CreditTransferRequest;
 use App\Models\ExternalActivityRequest;
 use App\Services\AcademicYearCalculator;
+use App\Services\StudentAttention;
 use Illuminate\Http\Request;
 
 class HourRequestController extends Controller
 {
     public function index(Request $request)
     {
+        // This page shows every external/credit-transfer result — clears the nav dot.
+        StudentAttention::markSeen($request->user(), 'requests');
+
         $activeTab = old('_tab', $request->query('tab') === 'credit' ? 'credit' : 'external');
         $activeTab = in_array($activeTab, ['external', 'credit'], true) ? $activeTab : 'external';
 

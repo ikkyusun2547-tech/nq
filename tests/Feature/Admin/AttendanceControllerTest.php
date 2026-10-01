@@ -67,6 +67,21 @@ class AttendanceControllerTest extends TestCase
         $response->assertViewHas('checkedInCount', 2);
     }
 
+    public function test_flagged_rows_get_inline_approve_and_reject_while_approved_rows_do_not(): void
+    {
+        $activity = Activity::factory()->create();
+        $ok = Attendance::factory()->for($activity)->create();
+        $flagged = Attendance::factory()->for($activity)->flagged()->create();
+
+        $response = $this->actingAs($this->admin())->get(route('admin.attendance.index', $activity))->assertOk();
+
+        $this->assertSame(1, (int) $response->viewData('statusCounts')['flagged']);
+        $response->assertSee(route('admin.attendance.approve', $flagged), false)
+            ->assertSee(route('admin.attendance.reject', $flagged), false)
+            ->assertDontSee(route('admin.attendance.approve', $ok), false)
+            ->assertDontSee('อนุมัติที่ถูกต้อง');
+    }
+
     public function test_the_attendance_matrix_filters_by_status(): void
     {
         $activity = Activity::factory()->create();

@@ -60,11 +60,11 @@
     <!-- External activities tab -->
     <div x-show="tab === 'external'" x-cloak>
         <button @click="showExternalForm = ! showExternalForm"
-            class="mb-4 w-full rounded-2xl bg-brand-green-500 p-4 text-sm font-semibold text-brand-purple-950 shadow-soft transition-all duration-300 hover:-translate-y-0.5 hover:bg-brand-green-400 hover:shadow-lg"
+            class="mb-4 w-full rounded-2xl bg-brand-purple-700 p-4 text-sm font-semibold text-white shadow-soft transition-all duration-300 hover:bg-brand-purple-800"
             x-text="showExternalForm ? '{{ __('ปิดฟอร์ม') }}' : '+ {{ __('ยื่นคำร้องกิจกรรมภายนอก') }}'">
         </button>
 
-        <div x-show="showExternalForm" x-cloak class="mb-6 rounded-3xl glass-card p-5 shadow-soft-lg">
+        <div x-show="showExternalForm" x-cloak class="mb-6 rounded-3xl glass-card p-5">
             <p class="mb-4 rounded-xl bg-brand-purple-50 px-4 py-3 text-xs text-brand-purple-700 shadow-soft ring-1 ring-brand-purple-100 dark:bg-brand-purple-500/10 dark:text-brand-purple-400 dark:ring-brand-purple-500/20">
                 {{ __('เหลือโควตาคำร้องกิจกรรมภายนอก') }}
                 <span class="font-semibold">{{ $hoursRemaining }}</span> / {{ \App\Models\ExternalActivityRequest::ANNUAL_HOUR_CAP }}
@@ -137,7 +137,7 @@
                         >
                     </div>
                 </div>
-                <button type="submit" class="w-full rounded-xl bg-brand-green-500 px-4 py-3 text-sm font-semibold text-brand-purple-950 shadow-soft transition-all duration-300 hover:-translate-y-0.5 hover:bg-brand-green-400 hover:shadow-lg">
+                <button type="submit" class="w-full rounded-xl bg-brand-purple-700 px-4 py-3 text-sm font-semibold text-white shadow-soft transition-all duration-300 hover:bg-brand-purple-800">
                     {{ __('ส่งคำร้อง') }}
                 </button>
             </form>
@@ -145,7 +145,7 @@
 
         <div class="space-y-3">
             @forelse ($externalRequests as $req)
-                <div class="rounded-2xl glass-card p-4 shadow-soft transition-all duration-200 hover:-translate-y-0.5 hover:shadow-soft-lg">
+                <div class="rounded-3xl glass-card p-4 transition-all duration-200">
                     <div class="flex items-start justify-between gap-2">
                         <div>
                             <p class="text-sm font-medium text-slate-900 dark:text-slate-100">{{ $req->title }}</p>
@@ -193,11 +193,11 @@
     <!-- Credit transfer tab -->
     <div x-show="tab === 'credit'" x-cloak>
         <button @click="showCreditForm = ! showCreditForm"
-            class="mb-4 w-full rounded-2xl bg-brand-green-500 p-4 text-sm font-semibold text-brand-purple-950 shadow-soft transition-all duration-300 hover:-translate-y-0.5 hover:bg-brand-green-400 hover:shadow-lg"
+            class="mb-4 w-full rounded-2xl bg-brand-purple-700 p-4 text-sm font-semibold text-white shadow-soft transition-all duration-300 hover:bg-brand-purple-800"
             x-text="showCreditForm ? '{{ __('ปิดฟอร์ม') }}' : '+ {{ __('ยื่นคำร้องเทียบโอนชั่วโมง') }}'">
         </button>
 
-        <div x-show="showCreditForm" x-cloak class="mb-6 rounded-3xl glass-card p-5 shadow-soft-lg">
+        <div x-show="showCreditForm" x-cloak class="mb-6 rounded-3xl glass-card p-5">
             <p class="mb-4 rounded-xl bg-brand-purple-50 px-4 py-3 text-xs text-brand-purple-700 shadow-soft ring-1 ring-brand-purple-100 dark:bg-brand-purple-500/10 dark:text-brand-purple-400 dark:ring-brand-purple-500/20">
                 {{ __('สำหรับนักศึกษาที่ดำรงตำแหน่งผู้นำนักศึกษาตามข้อ 14 ของประกาศฯ ขอเทียบโอนชั่วโมงกิจกรรมได้ 1 ครั้งต่อปีการศึกษา') }}
             </p>
@@ -260,7 +260,7 @@
                         >
                     </div>
                 </div>
-                <button type="submit" class="w-full rounded-xl bg-brand-green-500 px-4 py-3 text-sm font-semibold text-brand-purple-950 shadow-soft transition-all duration-300 hover:-translate-y-0.5 hover:bg-brand-green-400 hover:shadow-lg">
+                <button type="submit" class="w-full rounded-xl bg-brand-purple-700 px-4 py-3 text-sm font-semibold text-white shadow-soft transition-all duration-300 hover:bg-brand-purple-800">
                     {{ __('ส่งคำร้อง') }}
                 </button>
             </form>
@@ -268,7 +268,7 @@
 
         <div class="space-y-3">
             @forelse ($creditRequests as $req)
-                <div class="rounded-2xl glass-card p-4 shadow-soft transition-all duration-200 hover:-translate-y-0.5 hover:shadow-soft-lg">
+                <div class="rounded-3xl glass-card p-4 transition-all duration-200">
                     <div class="flex items-start justify-between gap-2">
                         <div>
                             <p class="text-sm font-medium text-slate-900 dark:text-slate-100">{{ $positionLabelsPlain[$req->position] }}</p>

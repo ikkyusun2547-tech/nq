@@ -27,7 +27,7 @@
             <div class="mt-2.5 flex items-center gap-3">
                 <button
                     type="button" @click="enable()" :disabled="loading"
-                    class="rounded-lg bg-brand-green-500 px-3.5 py-1.5 text-xs font-semibold text-brand-purple-950 shadow-soft transition-all duration-200 hover:-translate-y-0.5 hover:bg-brand-green-400 disabled:pointer-events-none disabled:opacity-60"
+                    class="rounded-lg bg-brand-purple-700 px-3.5 py-1.5 text-xs font-semibold text-white shadow-soft transition-all duration-200 hover:bg-brand-purple-800 disabled:pointer-events-none disabled:opacity-60"
                 >
                     <span x-show="! loading">{{ __('เปิดใช้งาน') }}</span>
                     <span x-show="loading">{{ __('กำลังเปิดใช้งาน...') }}</span>

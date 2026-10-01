@@ -28,25 +28,25 @@
 @endphp
 
 {{--
-    Admin's chrome (slim top bar + sidebar) is purple everywhere, unlike the
-    student shell where only the top strip is — so this matches that
-    language (brand-purple-950 bg, brand-green active state) rather than
-    reusing the student tab bar's white background verbatim.
-
     Only 2 real destinations plus a "ย้อนกลับ" action: admin has far more
-    sections than a 4-item bar can hold (see the sidebar), so this isn't
-    trying to be a full nav replacement — just quick access to the two
-    most-visited pages, with the hamburger menu still the way to reach
-    everything else. "ย้อนกลับ" covers the common case of drilling into a
-    specific activity's attendance/detail page and needing to step back out.
+    sections than a bottom bar can hold, so this isn't a full nav
+    replacement — just quick access to the two most-visited pages, with the
+    header's menu sheet still the way to reach everything else. "ย้อนกลับ"
+    covers drilling into an activity's attendance/detail page and needing
+    to step back out.
 --}}
-<nav class="fixed inset-x-0 bottom-0 z-40 rounded-t-3xl bg-brand-purple-950 px-2 pt-2 shadow-soft-lg lg:hidden">
-    <div class="flex items-stretch justify-between gap-1 pb-[env(safe-area-inset-bottom)]">
+<nav aria-label="{{ __('เมนูลัด') }}" class="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950 lg:hidden">
+    <div class="mx-auto flex max-w-md items-stretch justify-between gap-1 px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
         @foreach ($adminTabItems as $item)
             @php $active = request()->routeIs($item['route'].'*'); @endphp
-            <a href="{{ route($item['route']) }}" class="flex flex-1 flex-col items-center gap-1 rounded-2xl px-2 py-2 transition-colors duration-200 {{ $active ? 'bg-brand-green-500/15' : '' }}">
-                <svg class="h-5 w-5 shrink-0 {{ $active ? 'text-brand-green-400' : 'text-violet-200/60' }}" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $item['icon'] }}"/></svg>
-                <span class="text-[11px] font-medium {{ $active ? 'text-brand-green-400' : 'text-violet-200/60' }}">{{ $item['label'] }}</span>
+            <a href="{{ route($item['route']) }}" @if ($active) aria-current="page" @endif
+                @class([
+                    'flex flex-1 flex-col items-center gap-0.5 pt-2.5 text-[11px] transition-colors',
+                    'font-semibold text-brand-purple-700 dark:text-brand-purple-300' => $active,
+                    'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white' => ! $active,
+                ])>
+                <svg class="h-[1.4rem] w-[1.4rem] shrink-0" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $item['icon'] }}"/></svg>
+                {{ $item['label'] }}
             </a>
         @endforeach
 
@@ -55,9 +55,9 @@
              regardless of how the admin arrived (direct link, refresh,
              bookmark, ...), unlike history.back() which depends on
              whatever happens to be in this tab's history. --}}
-        <a href="{{ route($adminBackRoute) }}" class="flex flex-1 flex-col items-center gap-1 rounded-2xl px-2 py-2 text-violet-200/60 transition-colors duration-200">
-            <svg class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"/></svg>
-            <span class="text-[11px] font-medium">{{ __('ย้อนกลับ') }}</span>
+        <a href="{{ route($adminBackRoute) }}" class="flex flex-1 flex-col items-center gap-0.5 pt-2.5 text-[11px] text-slate-500 transition-colors hover:text-slate-800 dark:text-slate-400 dark:hover:text-white">
+            <svg class="h-[1.4rem] w-[1.4rem] shrink-0" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"/></svg>
+            {{ __('ย้อนกลับ') }}
         </a>
     </div>
 </nav>

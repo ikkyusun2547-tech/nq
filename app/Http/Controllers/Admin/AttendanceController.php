@@ -120,13 +120,18 @@ class AttendanceController extends Controller
 
         $requiredCount = $activity->eligibleStudentsCount();
         $checkedInCount = $activity->attendances()->count();
+        // Unfiltered totals per status for the summary tiles (the list itself may be filtered).
+        $statusCounts = $activity->attendances()
+            ->selectRaw('status, COUNT(*) as total')
+            ->groupBy('status')
+            ->pluck('total', 'status');
         $missingStudents = $activity->missingStudentsQuery()
             ->with(['faculty', 'major'])
             ->orderBy('student_id')
             ->get();
 
         return view('admin.attendance.index', compact(
-            'activity', 'attendances', 'faculties', 'requiredCount', 'checkedInCount', 'missingStudents'
+            'activity', 'attendances', 'faculties', 'requiredCount', 'checkedInCount', 'missingStudents', 'statusCounts'
         ));
     }
 

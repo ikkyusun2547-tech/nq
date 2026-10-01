@@ -30,7 +30,7 @@
     <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
         @foreach ($typeMeta as $key => $meta)
             @php $s = $stats[$key]; @endphp
-            <div class="rounded-2xl glass-card p-5 shadow-soft">
+            <div class="rounded-3xl glass-card p-5">
                 <div class="mb-4 flex items-center gap-3">
                     <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl {{ $meta['well'] }}">
                         <svg class="h-5 w-5 {{ $meta['text'] }}" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $meta['icon'] }}"/></svg>

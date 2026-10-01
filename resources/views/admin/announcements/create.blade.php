@@ -5,7 +5,7 @@
     <x-brand-header :title="__('ส่งประกาศถึงนักศึกษา')" :eyebrow="__('กองพัฒนานักศึกษา')" :subtitle="__('ข้อความจะไปแสดงในศูนย์การแจ้งเตือนและ push notification ของนักศึกษาที่ตรงเงื่อนไข')">
         <x-slot:actions>
             <a href="{{ route('admin.announcements.index') }}"
-                class="flex shrink-0 items-center gap-1.5 rounded-xl bg-white/10 px-3 py-2 text-xs font-medium text-white shadow-soft ring-1 ring-white/15 backdrop-blur transition-colors hover:bg-white/15">
+                class="flex shrink-0 items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700 transition hover:border-brand-purple-300 hover:text-brand-purple-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:border-brand-purple-500/40 dark:hover:text-brand-purple-300">
                 <svg class="h-3.5 w-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                 {{ __('ประวัติ') }}
             </a>
@@ -22,21 +22,21 @@
         </div>
     @endif
 
-    <form method="POST" action="{{ route('admin.announcements.store') }}" class="space-y-4 rounded-2xl glass-card p-5 shadow-soft">
+    <form method="POST" action="{{ route('admin.announcements.store') }}" class="space-y-4 rounded-3xl glass-card p-5">
         @csrf
 
         <div>
             <label class="mb-1.5 block text-xs font-medium text-slate-500 dark:text-slate-400">{{ __('หัวข้อ') }}</label>
             <input type="text" name="subject" value="{{ old('subject') }}" required maxlength="255"
                 placeholder="{{ __('ระบุหัวข้อประกาศ') }}"
-                class="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm shadow-soft transition-all duration-200 focus:border-brand-purple-500 focus:outline-none focus:ring-4 focus:ring-brand-purple-500/10 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100">
+                class="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm transition-all duration-200 focus:border-brand-purple-500 focus:outline-none focus:ring-4 focus:ring-brand-purple-500/10 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100">
         </div>
 
         <div>
             <label class="mb-1.5 block text-xs font-medium text-slate-500 dark:text-slate-400">{{ __('เนื้อหา') }}</label>
             <textarea name="body" rows="5" required maxlength="2000"
                 placeholder="{{ __('รายละเอียดประกาศ') }}"
-                class="w-full resize-none rounded-2xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm shadow-soft transition-all duration-200 focus:border-brand-purple-500 focus:outline-none focus:ring-4 focus:ring-brand-purple-500/10 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100">{{ old('body') }}</textarea>
+                class="w-full resize-none rounded-2xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm transition-all duration-200 focus:border-brand-purple-500 focus:outline-none focus:ring-4 focus:ring-brand-purple-500/10 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100">{{ old('body') }}</textarea>
         </div>
 
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -53,7 +53,7 @@
         </div>
 
         <x-confirm-submit tone="purple" :message="__('ยืนยันส่งประกาศนี้?')" :label="__('ส่งประกาศ')"
-            class="w-full rounded-xl bg-gradient-to-r from-brand-purple-600 to-brand-purple-500 px-4 py-2.5 text-sm font-semibold text-white shadow-soft transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg">
+            class="w-full rounded-xl bg-brand-purple-700 px-4 py-2.5 text-sm font-semibold text-white shadow-soft transition-all duration-300 hover:bg-brand-purple-800">
             {{ __('ส่งประกาศ') }}
         </x-confirm-submit>
     </form>

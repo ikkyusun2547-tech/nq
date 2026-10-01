@@ -7,6 +7,7 @@ use App\Models\Activity;
 use App\Models\Faculty;
 use App\Models\LateCheckInRequest;
 use App\Services\AcademicYearCalculator;
+use App\Services\StudentAttention;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 
@@ -36,6 +37,11 @@ class ActivityController extends Controller
         $user = $request->user();
         $statusGroup = $request->input('status_group', 'open');
         $statusGroup = array_key_exists($statusGroup, self::STATUS_GROUPS) ? $statusGroup : 'open';
+
+        // Late check-in results live on the "ended" tab — opening it clears the nav dot.
+        if ($statusGroup === 'ended') {
+            StudentAttention::markSeen($user, 'activities');
+        }
 
         $academicYears = Activity::query()
             ->whereNotNull('academic_year')
@@ -122,7 +128,14 @@ class ActivityController extends Controller
             ->whereIn('activity_id', $activities->pluck('id'))
             ->pluck('activity_id');
 
-        return view('student.activities.index', compact('activities', 'checkedInActivityIds', 'academicYears', 'academicYear', 'faculties', 'statusGroup'));
+        // Latest late check-in request status per activity on this page, so a
+        // missed activity's card can offer "ขอเช็คชื่อย้อนหลัง" (or show it's pending).
+        $lateRequestStatuses = LateCheckInRequest::where('user_id', $user->id)
+            ->whereIn('activity_id', $activities->pluck('id'))
+            ->orderBy('id')
+            ->pluck('status', 'activity_id');
+
+        return view('student.activities.index', compact('activities', 'checkedInActivityIds', 'lateRequestStatuses', 'academicYears', 'academicYear', 'faculties', 'statusGroup'));
     }
 
     /**

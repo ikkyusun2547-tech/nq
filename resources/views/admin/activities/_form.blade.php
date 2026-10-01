@@ -8,7 +8,7 @@
     ];
     $statusLabels = [
         'draft' => __('ร่าง'),
-        'open' => __('เปิดรับสมัคร'),
+        'open' => __('เปิดลงทะเบียน'),
         'full' => __('เต็มแล้ว'),
         'ongoing' => __('กำลังดำเนินการ'),
         'closed' => __('ปิดกิจกรรม'),
@@ -32,17 +32,19 @@
     }"
     x-init="lockCredit()"
 >
-    <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+    <section class="rounded-3xl glass-card p-5 sm:p-6">
+        <h2 class="mb-5 flex items-center gap-2.5 font-display text-lg text-slate-900 dark:text-white"><span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-brand-purple-50 text-sm font-semibold text-brand-purple-700 dark:bg-brand-purple-500/15 dark:text-brand-purple-300">1</span>{{ __('ข้อมูลกิจกรรม') }}</h2>
+        <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
         <div class="md:col-span-2">
             <label class="mb-1 block text-sm font-medium text-slate-600 dark:text-slate-400">{{ __('ชื่อกิจกรรม') }}</label>
             <input type="text" name="title" value="{{ old('title', $activity->title ?? '') }}" required
-                class="w-full rounded-2xl border bg-white px-3.5 py-2.5 text-sm text-slate-700 placeholder:text-slate-400 shadow-soft transition-all duration-200 focus:outline-none focus:ring-4 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 @error('title') border-red-400 focus:border-red-500 focus:ring-red-500/10 dark:border-red-500/70 @else border-slate-300 focus:border-brand-purple-500 focus:ring-brand-purple-500/10 dark:border-slate-600 @enderror">
+                class="w-full rounded-2xl border bg-white px-3.5 py-2.5 text-sm text-slate-700 placeholder:text-slate-400 transition-all duration-200 focus:outline-none focus:ring-4 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 @error('title') border-red-400 focus:border-red-500 focus:ring-red-500/10 dark:border-red-500/70 @else border-slate-300 focus:border-brand-purple-500 focus:ring-brand-purple-500/10 dark:border-slate-600 @enderror">
         </div>
 
         <div class="md:col-span-2">
             <label class="mb-1 block text-sm font-medium text-slate-600 dark:text-slate-400">{{ __('รายละเอียดกิจกรรม') }}</label>
             <textarea name="description" rows="3"
-                class="w-full rounded-2xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-700 placeholder:text-slate-400 shadow-soft transition-all duration-200 focus:border-brand-purple-500 focus:outline-none focus:ring-4 focus:ring-brand-purple-500/10 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500">{{ old('description', $activity->description ?? '') }}</textarea>
+                class="w-full rounded-2xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-700 placeholder:text-slate-400 transition-all duration-200 focus:border-brand-purple-500 focus:outline-none focus:ring-4 focus:ring-brand-purple-500/10 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500">{{ old('description', $activity->description ?? '') }}</textarea>
         </div>
 
         <div class="md:col-span-2">
@@ -57,14 +59,20 @@
         <div>
             <label class="mb-1 block text-sm font-medium text-slate-600 dark:text-slate-400">{{ __('หน่วยงานผู้จัด') }}</label>
             <input type="text" name="organizer_name" value="{{ old('organizer_name', $activity->organizer_name ?? '') }}"
-                class="w-full rounded-2xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-700 placeholder:text-slate-400 shadow-soft transition-all duration-200 focus:border-brand-purple-500 focus:outline-none focus:ring-4 focus:ring-brand-purple-500/10 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500">
+                class="w-full rounded-2xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-700 placeholder:text-slate-400 transition-all duration-200 focus:border-brand-purple-500 focus:outline-none focus:ring-4 focus:ring-brand-purple-500/10 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500">
         </div>
 
         <div>
             <label class="mb-1 block text-sm font-medium text-slate-600 dark:text-slate-400">{{ __('การแต่งกาย') }}</label>
             <input type="text" name="dress_code" value="{{ old('dress_code', $activity->dress_code ?? '') }}"
-                class="w-full rounded-2xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-700 placeholder:text-slate-400 shadow-soft transition-all duration-200 focus:border-brand-purple-500 focus:outline-none focus:ring-4 focus:ring-brand-purple-500/10 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500">
+                class="w-full rounded-2xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-700 placeholder:text-slate-400 transition-all duration-200 focus:border-brand-purple-500 focus:outline-none focus:ring-4 focus:ring-brand-purple-500/10 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500">
         </div>
+        </div>
+    </section>
+
+    <section class="mt-6 rounded-3xl glass-card p-5 sm:p-6">
+        <h2 class="mb-5 flex items-center gap-2.5 font-display text-lg text-slate-900 dark:text-white"><span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-brand-purple-50 text-sm font-semibold text-brand-purple-700 dark:bg-brand-purple-500/15 dark:text-brand-purple-300">2</span>{{ __('ประเภท ชั่วโมง และสถานะ') }}</h2>
+        <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
 
         <div>
             <label class="mb-1 block text-sm font-medium text-slate-600 dark:text-slate-400">{{ __('ระดับกิจกรรม') }}</label>
@@ -90,7 +98,7 @@
             @endphp
             <input type="number" name="academic_year" value="{{ old('academic_year', $activity->academic_year ?? $currentAcademicYear) }}" required
                 min="2540" max="{{ date('Y') + 544 }}"
-                class="w-full rounded-2xl border bg-white px-3.5 py-2.5 text-sm text-slate-700 placeholder:text-slate-400 shadow-soft transition-all duration-200 focus:outline-none focus:ring-4 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 @error('academic_year') border-red-400 focus:border-red-500 focus:ring-red-500/10 dark:border-red-500/70 @else border-slate-300 focus:border-brand-purple-500 focus:ring-brand-purple-500/10 dark:border-slate-600 @enderror">
+                class="w-full rounded-2xl border bg-white px-3.5 py-2.5 text-sm text-slate-700 placeholder:text-slate-400 transition-all duration-200 focus:outline-none focus:ring-4 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 @error('academic_year') border-red-400 focus:border-red-500 focus:ring-red-500/10 dark:border-red-500/70 @else border-slate-300 focus:border-brand-purple-500 focus:ring-brand-purple-500/10 dark:border-slate-600 @enderror">
         </div>
 
         <div>
@@ -105,15 +113,15 @@
         <div class="md:col-span-2">
             <label class="mb-2 block text-sm font-medium text-slate-600 dark:text-slate-400">{{ __('ลักษณะกิจกรรม') }}</label>
             <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
-                <label class="flex cursor-pointer items-center gap-2 rounded-xl border border-slate-200 bg-slate-50/50 px-3 py-2.5 text-sm shadow-soft transition-all duration-200 has-[:checked]:border-brand-purple-500 has-[:checked]:bg-brand-purple-50 has-[:checked]:text-brand-purple-700 dark:border-slate-700 dark:bg-slate-800/40 dark:has-[:checked]:bg-brand-purple-500/10 dark:has-[:checked]:text-brand-purple-400">
+                <label class="flex cursor-pointer items-center gap-2 rounded-xl border border-slate-200 bg-slate-50/50 px-3 py-2.5 text-sm transition-all duration-200 has-[:checked]:border-brand-purple-500 has-[:checked]:bg-brand-purple-50 has-[:checked]:text-brand-purple-700 dark:border-slate-700 dark:bg-slate-800/40 dark:has-[:checked]:bg-brand-purple-500/10 dark:has-[:checked]:text-brand-purple-400">
                     <input type="radio" name="activity_type" value="core" x-model="activityType" @change="lockCredit()" class="text-brand-purple-600 focus:ring-brand-purple-500">
                     {{ __('บังคับแกน') }}
                 </label>
-                <label class="flex cursor-pointer items-center gap-2 rounded-xl border border-slate-200 bg-slate-50/50 px-3 py-2.5 text-sm shadow-soft transition-all duration-200 has-[:checked]:border-brand-purple-500 has-[:checked]:bg-brand-purple-50 has-[:checked]:text-brand-purple-700 dark:border-slate-700 dark:bg-slate-800/40 dark:has-[:checked]:bg-brand-purple-500/10 dark:has-[:checked]:text-brand-purple-400">
+                <label class="flex cursor-pointer items-center gap-2 rounded-xl border border-slate-200 bg-slate-50/50 px-3 py-2.5 text-sm transition-all duration-200 has-[:checked]:border-brand-purple-500 has-[:checked]:bg-brand-purple-50 has-[:checked]:text-brand-purple-700 dark:border-slate-700 dark:bg-slate-800/40 dark:has-[:checked]:bg-brand-purple-500/10 dark:has-[:checked]:text-brand-purple-400">
                     <input type="radio" name="activity_type" value="elective" x-model="activityType" @change="lockCredit()" class="text-brand-purple-600 focus:ring-brand-purple-500">
                     {{ __('บังคับเลือก') }}
                 </label>
-                <label class="flex cursor-pointer items-start gap-2 rounded-xl border border-slate-200 bg-slate-50/50 px-3 py-2.5 text-sm shadow-soft transition-all duration-200 has-[:checked]:border-brand-purple-500 has-[:checked]:bg-brand-purple-50 has-[:checked]:text-brand-purple-700 dark:border-slate-700 dark:bg-slate-800/40 dark:has-[:checked]:bg-brand-purple-500/10 dark:has-[:checked]:text-brand-purple-400">
+                <label class="flex cursor-pointer items-start gap-2 rounded-xl border border-slate-200 bg-slate-50/50 px-3 py-2.5 text-sm transition-all duration-200 has-[:checked]:border-brand-purple-500 has-[:checked]:bg-brand-purple-50 has-[:checked]:text-brand-purple-700 dark:border-slate-700 dark:bg-slate-800/40 dark:has-[:checked]:bg-brand-purple-500/10 dark:has-[:checked]:text-brand-purple-400">
                     <input type="radio" name="activity_type" value="practice" x-model="activityType" @change="lockCredit()" class="mt-0.5 text-brand-purple-600 focus:ring-brand-purple-500">
                     <span>
                         <span class="block">{{ __('กิจกรรมซ้อม/เตรียมงาน') }}</span>
@@ -129,7 +137,7 @@
                 type="number" name="credit_hours" x-model.number="creditHours" :readonly="activityType === 'core'"
                 :class="activityType === 'core' ? 'bg-slate-100 text-slate-400 dark:bg-slate-800 dark:text-slate-500' : ''"
                 min="1" max="100" required
-                class="w-full rounded-2xl border bg-white px-3.5 py-2.5 text-sm text-slate-700 placeholder:text-slate-400 shadow-soft transition-all duration-200 focus:outline-none focus:ring-4 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 @error('credit_hours') border-red-400 focus:border-red-500 focus:ring-red-500/10 dark:border-red-500/70 @else border-slate-300 focus:border-brand-purple-500 focus:ring-brand-purple-500/10 dark:border-slate-600 @enderror"
+                class="w-full rounded-2xl border bg-white px-3.5 py-2.5 text-sm text-slate-700 placeholder:text-slate-400 transition-all duration-200 focus:outline-none focus:ring-4 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 @error('credit_hours') border-red-400 focus:border-red-500 focus:ring-red-500/10 dark:border-red-500/70 @else border-slate-300 focus:border-brand-purple-500 focus:ring-brand-purple-500/10 dark:border-slate-600 @enderror"
             >
             <p class="mt-1 text-xs text-slate-400 dark:text-slate-500" x-show="activityType === 'core'">{{ __('กิจกรรมบังคับแกนถูกกำหนดไว้ที่ :hours ชั่วโมงตามเกณฑ์สถาบัน', ['hours' => 5]) }}</p>
         </div>
@@ -137,7 +145,7 @@
         <div>
             <label class="mb-1 block text-sm font-medium text-slate-600 dark:text-slate-400">{{ __('จำนวนรับ (คน) — เว้นว่างหากไม่จำกัด') }}</label>
             <input type="number" name="capacity" value="{{ old('capacity', $activity->capacity ?? '') }}" min="1"
-                class="w-full rounded-2xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-700 placeholder:text-slate-400 shadow-soft transition-all duration-200 focus:border-brand-purple-500 focus:outline-none focus:ring-4 focus:ring-brand-purple-500/10 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500">
+                class="w-full rounded-2xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-700 placeholder:text-slate-400 transition-all duration-200 focus:border-brand-purple-500 focus:outline-none focus:ring-4 focus:ring-brand-purple-500/10 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500">
         </div>
 
         <div>
@@ -147,13 +155,19 @@
                 :selected="old('status', $activity->status ?? 'draft')"
             />
         </div>
+        </div>
+    </section>
+
+    <section class="mt-6 rounded-3xl glass-card p-5 sm:p-6">
+        <h2 class="mb-5 flex items-center gap-2.5 font-display text-lg text-slate-900 dark:text-white"><span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-brand-purple-50 text-sm font-semibold text-brand-purple-700 dark:bg-brand-purple-500/15 dark:text-brand-purple-300">3</span>{{ __('วันและเวลา') }}</h2>
+        <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
 
         <div>
             <label class="mb-1 block text-sm font-medium text-slate-600 dark:text-slate-400">{{ __('วันเวลาเริ่มกิจกรรม') }}</label>
             <div class="relative">
                 <input type="text" name="start_at" autocomplete="off"
                     value="{{ old('start_at', isset($activity->start_at) ? $activity->start_at->format('Y-m-d H:i') : '') }}" required
-                    class="js-datetime-picker w-full rounded-2xl border bg-white px-3.5 py-2.5 pr-9 text-sm text-slate-700 placeholder:text-slate-400 shadow-soft transition-all duration-200 focus:outline-none focus:ring-4 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 @error('start_at') border-red-400 focus:border-red-500 focus:ring-red-500/10 dark:border-red-500/70 @else border-slate-300 focus:border-brand-purple-500 focus:ring-brand-purple-500/10 dark:border-slate-600 @enderror">
+                    class="js-datetime-picker w-full rounded-2xl border bg-white px-3.5 py-2.5 pr-9 text-sm text-slate-700 placeholder:text-slate-400 transition-all duration-200 focus:outline-none focus:ring-4 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 @error('start_at') border-red-400 focus:border-red-500 focus:ring-red-500/10 dark:border-red-500/70 @else border-slate-300 focus:border-brand-purple-500 focus:ring-brand-purple-500/10 dark:border-slate-600 @enderror">
                 <span class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3.5 text-slate-400 dark:text-slate-500">
                     <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
                 </span>
@@ -165,25 +179,26 @@
             <div class="relative">
                 <input type="text" name="end_at" autocomplete="off"
                     value="{{ old('end_at', isset($activity->end_at) ? $activity->end_at->format('Y-m-d H:i') : '') }}" required
-                    class="js-datetime-picker w-full rounded-2xl border bg-white px-3.5 py-2.5 pr-9 text-sm text-slate-700 placeholder:text-slate-400 shadow-soft transition-all duration-200 focus:outline-none focus:ring-4 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 @error('end_at') border-red-400 focus:border-red-500 focus:ring-red-500/10 dark:border-red-500/70 @else border-slate-300 focus:border-brand-purple-500 focus:ring-brand-purple-500/10 dark:border-slate-600 @enderror">
+                    class="js-datetime-picker w-full rounded-2xl border bg-white px-3.5 py-2.5 pr-9 text-sm text-slate-700 placeholder:text-slate-400 transition-all duration-200 focus:outline-none focus:ring-4 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 @error('end_at') border-red-400 focus:border-red-500 focus:ring-red-500/10 dark:border-red-500/70 @else border-slate-300 focus:border-brand-purple-500 focus:ring-brand-purple-500/10 dark:border-slate-600 @enderror">
                 <span class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3.5 text-slate-400 dark:text-slate-500">
                     <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
                 </span>
             </div>
         </div>
-    </div>
+        </div>
+    </section>
 
-    <div class="mt-6 rounded-2xl glass-card p-5 shadow-soft">
-        <label class="mb-2 block text-sm font-medium text-slate-600 dark:text-slate-400">{{ __('วิธีเช็คชื่อ') }}</label>
+    <section class="mt-6 rounded-3xl glass-card p-5 sm:p-6">
+        <h2 class="mb-5 flex items-center gap-2.5 font-display text-lg text-slate-900 dark:text-white"><span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-brand-purple-50 text-sm font-semibold text-brand-purple-700 dark:bg-brand-purple-500/15 dark:text-brand-purple-300">4</span>{{ __('วิธีเช็คชื่อ') }}</h2>
         <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <label class="flex cursor-pointer items-start gap-2 rounded-xl border border-slate-200 bg-slate-50/50 px-3 py-2.5 text-sm shadow-soft transition-all duration-200 has-[:checked]:border-brand-purple-500 has-[:checked]:bg-brand-purple-50 has-[:checked]:text-brand-purple-700 dark:border-slate-700 dark:bg-slate-800/40 dark:has-[:checked]:bg-brand-purple-500/10 dark:has-[:checked]:text-brand-purple-400">
+            <label class="flex cursor-pointer items-start gap-2 rounded-xl border border-slate-200 bg-slate-50/50 px-3 py-2.5 text-sm transition-all duration-200 has-[:checked]:border-brand-purple-500 has-[:checked]:bg-brand-purple-50 has-[:checked]:text-brand-purple-700 dark:border-slate-700 dark:bg-slate-800/40 dark:has-[:checked]:bg-brand-purple-500/10 dark:has-[:checked]:text-brand-purple-400">
                 <input type="radio" name="checkin_method" value="realtime" x-model="checkinMethod" @change="refreshMap()" class="mt-0.5 text-brand-purple-600 focus:ring-brand-purple-500">
                 <span>
                     <span class="block font-medium">{{ __('สแกน QR + GPS + เซลฟี') }}</span>
                     <span class="block text-xs text-slate-400 dark:text-slate-500">{{ __('เช็คชื่อหน้างานแบบเรียลไทม์ (ค่าเริ่มต้น)') }}</span>
                 </span>
             </label>
-            <label class="flex cursor-pointer items-start gap-2 rounded-xl border border-slate-200 bg-slate-50/50 px-3 py-2.5 text-sm shadow-soft transition-all duration-200 has-[:checked]:border-brand-purple-500 has-[:checked]:bg-brand-purple-50 has-[:checked]:text-brand-purple-700 dark:border-slate-700 dark:bg-slate-800/40 dark:has-[:checked]:bg-brand-purple-500/10 dark:has-[:checked]:text-brand-purple-400">
+            <label class="flex cursor-pointer items-start gap-2 rounded-xl border border-slate-200 bg-slate-50/50 px-3 py-2.5 text-sm transition-all duration-200 has-[:checked]:border-brand-purple-500 has-[:checked]:bg-brand-purple-50 has-[:checked]:text-brand-purple-700 dark:border-slate-700 dark:bg-slate-800/40 dark:has-[:checked]:bg-brand-purple-500/10 dark:has-[:checked]:text-brand-purple-400">
                 <input type="radio" name="checkin_method" value="self_report" x-model="checkinMethod" class="mt-0.5 text-brand-purple-600 focus:ring-brand-purple-500">
                 <span>
                     <span class="block font-medium">{{ __('รายงานตนเอง + แนบรูปหลักฐาน') }}</span>
@@ -193,7 +208,7 @@
         </div>
 
         <div x-show="checkinMethod === 'realtime'" x-cloak class="mt-3">
-            <label class="flex cursor-pointer items-start gap-2 rounded-xl border border-slate-200 bg-slate-50/50 px-3 py-2.5 text-sm shadow-soft transition-all duration-200 has-[:checked]:border-brand-purple-500 has-[:checked]:bg-brand-purple-50 dark:border-slate-700 dark:bg-slate-800/40 dark:has-[:checked]:bg-brand-purple-500/10">
+            <label class="flex cursor-pointer items-start gap-2 rounded-xl border border-slate-200 bg-slate-50/50 px-3 py-2.5 text-sm transition-all duration-200 has-[:checked]:border-brand-purple-500 has-[:checked]:bg-brand-purple-50 dark:border-slate-700 dark:bg-slate-800/40 dark:has-[:checked]:bg-brand-purple-500/10">
                 <input type="hidden" name="requires_gps" value="0">
                 <input type="checkbox" name="requires_gps" value="1" x-model="requiresGps" @change="refreshMap()" class="mt-0.5 rounded text-brand-purple-600 focus:ring-brand-purple-500">
                 <span>
@@ -204,7 +219,7 @@
         </div>
 
         <div x-show="checkinMethod === 'self_report'" x-cloak class="mt-3">
-            <label class="flex cursor-pointer items-start gap-2 rounded-xl border border-slate-200 bg-slate-50/50 px-3 py-2.5 text-sm shadow-soft transition-all duration-200 has-[:checked]:border-brand-purple-500 has-[:checked]:bg-brand-purple-50 dark:border-slate-700 dark:bg-slate-800/40 dark:has-[:checked]:bg-brand-purple-500/10">
+            <label class="flex cursor-pointer items-start gap-2 rounded-xl border border-slate-200 bg-slate-50/50 px-3 py-2.5 text-sm transition-all duration-200 has-[:checked]:border-brand-purple-500 has-[:checked]:bg-brand-purple-50 dark:border-slate-700 dark:bg-slate-800/40 dark:has-[:checked]:bg-brand-purple-500/10">
                 <input type="hidden" name="self_report_auto_approve" value="0">
                 <input type="checkbox" name="self_report_auto_approve" value="1"
                     @checked(old('self_report_auto_approve', $activity->self_report_auto_approve ?? false))
@@ -215,12 +230,13 @@
                 </span>
             </label>
         </div>
-    </div>
+    </section>
 
-    <div class="mt-6 rounded-2xl glass-card p-5 shadow-soft">
+    <section class="mt-6 rounded-3xl glass-card p-5 sm:p-6">
+        <h2 class="mb-5 flex items-center gap-2.5 font-display text-lg text-slate-900 dark:text-white"><span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-brand-purple-50 text-sm font-semibold text-brand-purple-700 dark:bg-brand-purple-500/15 dark:text-brand-purple-300">5</span>{{ __('สถานที่') }}</h2>
         <label class="mb-1 block text-sm font-medium text-slate-600 dark:text-slate-400">{{ __('สถานที่จัดกิจกรรม') }}</label>
         <input type="text" name="location_name" value="{{ old('location_name', $activity->location_name ?? '') }}" required
-            class="mb-4 w-full rounded-2xl border bg-white px-3.5 py-2.5 text-sm text-slate-700 placeholder:text-slate-400 shadow-soft transition-all duration-200 focus:outline-none focus:ring-4 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 @error('location_name') border-red-400 focus:border-red-500 focus:ring-red-500/10 dark:border-red-500/70 @else border-slate-300 focus:border-brand-purple-500 focus:ring-brand-purple-500/10 dark:border-slate-600 @enderror">
+            class="mb-4 w-full rounded-2xl border bg-white px-3.5 py-2.5 text-sm text-slate-700 placeholder:text-slate-400 transition-all duration-200 focus:outline-none focus:ring-4 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 @error('location_name') border-red-400 focus:border-red-500 focus:ring-red-500/10 dark:border-red-500/70 @else border-slate-300 focus:border-brand-purple-500 focus:ring-brand-purple-500/10 dark:border-slate-600 @enderror">
 
         <div x-show="checkinMethod === 'realtime' && requiresGps" x-cloak>
             <label class="mb-2 block text-sm font-medium text-slate-600 dark:text-slate-400">{{ __('ปักหมุดสถานที่จัดกิจกรรม (คลิกบนแผนที่)') }}</label>
@@ -242,7 +258,7 @@
                     <label class="mb-1 block text-xs text-slate-400 dark:text-slate-500">{{ __('รัศมีปลอดภัย (เมตร)') }}</label>
                     <input type="number" id="allowed_radius" name="allowed_radius" min="10" max="5000"
                         value="{{ old('allowed_radius', $activity->allowed_radius ?? 100) }}"
-                        class="w-full rounded-2xl border bg-white px-3.5 py-2.5 text-sm text-slate-700 placeholder:text-slate-400 shadow-soft transition-all duration-200 focus:outline-none focus:ring-4 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 @error('allowed_radius') border-red-400 focus:border-red-500 focus:ring-red-500/10 dark:border-red-500/70 @else border-slate-300 focus:border-brand-purple-500 focus:ring-brand-purple-500/10 dark:border-slate-600 @enderror">
+                        class="w-full rounded-2xl border bg-white px-3.5 py-2.5 text-sm text-slate-700 placeholder:text-slate-400 transition-all duration-200 focus:outline-none focus:ring-4 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 @error('allowed_radius') border-red-400 focus:border-red-500 focus:ring-red-500/10 dark:border-red-500/70 @else border-slate-300 focus:border-brand-purple-500 focus:ring-brand-purple-500/10 dark:border-slate-600 @enderror">
                 </div>
             </div>
         </div>
@@ -255,7 +271,7 @@
                     <div class="relative">
                         <input type="text" name="checkin_opens_at" autocomplete="off"
                             value="{{ old('checkin_opens_at', isset($activity->checkin_opens_at) ? $activity->checkin_opens_at->format('Y-m-d H:i') : '') }}"
-                            class="js-datetime-picker w-full rounded-2xl border bg-white px-3.5 py-2.5 pr-9 text-sm text-slate-700 shadow-soft transition-all duration-200 focus:outline-none focus:ring-4 dark:bg-slate-800 dark:text-slate-100 @error('checkin_opens_at') border-red-400 focus:border-red-500 focus:ring-red-500/10 dark:border-red-500/70 @else border-slate-300 focus:border-brand-purple-500 focus:ring-brand-purple-500/10 dark:border-slate-600 @enderror">
+                            class="js-datetime-picker w-full rounded-2xl border bg-white px-3.5 py-2.5 pr-9 text-sm text-slate-700 transition-all duration-200 focus:outline-none focus:ring-4 dark:bg-slate-800 dark:text-slate-100 @error('checkin_opens_at') border-red-400 focus:border-red-500 focus:ring-red-500/10 dark:border-red-500/70 @else border-slate-300 focus:border-brand-purple-500 focus:ring-brand-purple-500/10 dark:border-slate-600 @enderror">
                         <span class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3.5 text-slate-400 dark:text-slate-500">
                             <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
                         </span>
@@ -266,7 +282,7 @@
                     <div class="relative">
                         <input type="text" name="checkin_closes_at" autocomplete="off"
                             value="{{ old('checkin_closes_at', isset($activity->checkin_closes_at) ? $activity->checkin_closes_at->format('Y-m-d H:i') : '') }}"
-                            class="js-datetime-picker w-full rounded-2xl border bg-white px-3.5 py-2.5 pr-9 text-sm text-slate-700 shadow-soft transition-all duration-200 focus:outline-none focus:ring-4 dark:bg-slate-800 dark:text-slate-100 @error('checkin_closes_at') border-red-400 focus:border-red-500 focus:ring-red-500/10 dark:border-red-500/70 @else border-slate-300 focus:border-brand-purple-500 focus:ring-brand-purple-500/10 dark:border-slate-600 @enderror">
+                            class="js-datetime-picker w-full rounded-2xl border bg-white px-3.5 py-2.5 pr-9 text-sm text-slate-700 transition-all duration-200 focus:outline-none focus:ring-4 dark:bg-slate-800 dark:text-slate-100 @error('checkin_closes_at') border-red-400 focus:border-red-500 focus:ring-red-500/10 dark:border-red-500/70 @else border-slate-300 focus:border-brand-purple-500 focus:ring-brand-purple-500/10 dark:border-slate-600 @enderror">
                         <span class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3.5 text-slate-400 dark:text-slate-500">
                             <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
                         </span>
@@ -274,21 +290,21 @@
                 </div>
             </div>
         </div>
-    </div>
+    </section>
 
-    <div class="mt-6 rounded-2xl glass-card p-5 shadow-soft">
-        <h3 class="mb-1 text-sm font-medium text-slate-600 dark:text-slate-400">{{ __('ผู้มีสิทธิ์เข้าร่วม') }}</h3>
+    <section class="mt-6 rounded-3xl glass-card p-5 sm:p-6">
+        <h2 class="mb-1 flex items-center gap-2.5 font-display text-lg text-slate-900 dark:text-white"><span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-brand-purple-50 text-sm font-semibold text-brand-purple-700 dark:bg-brand-purple-500/15 dark:text-brand-purple-300">6</span>{{ __('ผู้มีสิทธิ์เข้าร่วม') }}</h2>
         <p class="mb-3 text-xs text-slate-400 dark:text-slate-500">{{ __('เลือกได้ว่าจะเปิดให้นักศึกษาทุกคนเข้าร่วม หรือจำกัดเฉพาะคณะ/สาขา/ชั้นปีที่ต้องการ') }}</p>
 
         <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <label class="flex cursor-pointer items-start gap-2 rounded-xl border border-slate-200 bg-slate-50/50 px-3 py-2.5 text-sm shadow-soft transition-all duration-200 has-[:checked]:border-brand-purple-500 has-[:checked]:bg-brand-purple-50 has-[:checked]:text-brand-purple-700 dark:border-slate-700 dark:bg-slate-800/40 dark:has-[:checked]:bg-brand-purple-500/10 dark:has-[:checked]:text-brand-purple-400">
+            <label class="flex cursor-pointer items-start gap-2 rounded-xl border border-slate-200 bg-slate-50/50 px-3 py-2.5 text-sm transition-all duration-200 has-[:checked]:border-brand-purple-500 has-[:checked]:bg-brand-purple-50 has-[:checked]:text-brand-purple-700 dark:border-slate-700 dark:bg-slate-800/40 dark:has-[:checked]:bg-brand-purple-500/10 dark:has-[:checked]:text-brand-purple-400">
                 <input type="radio" x-model="eligibilityMode" value="open" @change="clearEligibilityRestrictions()" class="mt-0.5 text-brand-purple-600 focus:ring-brand-purple-500">
                 <span>
                     <span class="block font-medium">{{ __('เปิดให้นักศึกษาทุกคน') }}</span>
                     <span class="block text-xs text-slate-400 dark:text-slate-500">{{ __('ทั้งมหาวิทยาลัย ไม่จำกัดคณะ/สาขา/ชั้นปี (ค่าเริ่มต้น)') }}</span>
                 </span>
             </label>
-            <label class="flex cursor-pointer items-start gap-2 rounded-xl border border-slate-200 bg-slate-50/50 px-3 py-2.5 text-sm shadow-soft transition-all duration-200 has-[:checked]:border-brand-purple-500 has-[:checked]:bg-brand-purple-50 has-[:checked]:text-brand-purple-700 dark:border-slate-700 dark:bg-slate-800/40 dark:has-[:checked]:bg-brand-purple-500/10 dark:has-[:checked]:text-brand-purple-400">
+            <label class="flex cursor-pointer items-start gap-2 rounded-xl border border-slate-200 bg-slate-50/50 px-3 py-2.5 text-sm transition-all duration-200 has-[:checked]:border-brand-purple-500 has-[:checked]:bg-brand-purple-50 has-[:checked]:text-brand-purple-700 dark:border-slate-700 dark:bg-slate-800/40 dark:has-[:checked]:bg-brand-purple-500/10 dark:has-[:checked]:text-brand-purple-400">
                 <input type="radio" x-model="eligibilityMode" value="restricted" class="mt-0.5 text-brand-purple-600 focus:ring-brand-purple-500">
                 <span>
                     <span class="block font-medium">{{ __('จำกัดเฉพาะกลุ่มเป้าหมาย') }}</span>
@@ -310,7 +326,7 @@
                             <button type="button" class="text-slate-400 hover:underline dark:text-slate-500" @click="$refs.facultyList.querySelectorAll('input').forEach(cb => cb.checked = false)">{{ __('ล้าง') }}</button>
                         </div>
                     </div>
-                    <div x-ref="facultyList" class="divide-y divide-slate-100 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-soft dark:divide-slate-700 dark:border-slate-700 dark:bg-slate-800">
+                    <div x-ref="facultyList" class="divide-y divide-slate-100 overflow-hidden rounded-xl border border-slate-200 bg-white dark:divide-slate-700 dark:border-slate-700 dark:bg-slate-800">
                         @foreach ($faculties as $faculty)
                             <label class="flex cursor-pointer items-center gap-2.5 px-3 py-2 text-sm text-slate-600 transition-colors duration-150 has-[:checked]:bg-brand-purple-50 has-[:checked]:font-medium has-[:checked]:text-brand-purple-700 hover:bg-slate-50 dark:text-slate-300 dark:has-[:checked]:bg-brand-purple-500/10 dark:has-[:checked]:text-brand-purple-400 dark:hover:bg-slate-700/50">
                                 <input type="checkbox" name="faculty_ids[]" value="{{ $faculty->id }}"
@@ -333,7 +349,7 @@
                             <button type="button" class="text-slate-400 hover:underline dark:text-slate-500" @click="$refs.yearList.querySelectorAll('input').forEach(cb => cb.checked = false)">{{ __('ล้าง') }}</button>
                         </div>
                     </div>
-                    <div x-ref="yearList" class="divide-y divide-slate-100 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-soft dark:divide-slate-700 dark:border-slate-700 dark:bg-slate-800">
+                    <div x-ref="yearList" class="divide-y divide-slate-100 overflow-hidden rounded-xl border border-slate-200 bg-white dark:divide-slate-700 dark:border-slate-700 dark:bg-slate-800">
                         @foreach ([1, 2, 3, 4] as $year)
                             <label class="flex cursor-pointer items-center gap-2.5 px-3 py-2 text-sm text-slate-600 transition-colors duration-150 has-[:checked]:bg-brand-purple-50 has-[:checked]:font-medium has-[:checked]:text-brand-purple-700 hover:bg-slate-50 dark:text-slate-300 dark:has-[:checked]:bg-brand-purple-500/10 dark:has-[:checked]:text-brand-purple-400 dark:hover:bg-slate-700/50">
                                 <input type="checkbox" name="target_years[]" value="{{ $year }}"
@@ -364,7 +380,7 @@
                 <div x-ref="majorGrid" class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
                     @foreach ($faculties as $faculty)
                         @if ($faculty->majors->isNotEmpty())
-                            <div x-ref="majorCard{{ $faculty->id }}" class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-soft dark:border-slate-700 dark:bg-slate-800">
+                            <div x-ref="majorCard{{ $faculty->id }}" class="overflow-hidden rounded-xl border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-800">
                                 <div class="flex items-center justify-between bg-slate-50 px-3 py-1.5 dark:bg-slate-900/40">
                                     <p class="text-[0.68rem] font-medium text-slate-500 dark:text-slate-400">{{ $faculty->name_th }}</p>
                                     <div class="flex gap-1.5 text-[0.65rem]">
@@ -389,7 +405,7 @@
                 </div>
             </div>
         </div>
-    </div>
+    </section>
 </div>
 
 @push('scripts')

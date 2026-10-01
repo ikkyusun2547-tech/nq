@@ -11,9 +11,9 @@
     'fill' => false,
 ])
 
-<div {{ $attributes->class(['rounded-2xl glass-card shadow-soft', 'flex h-full flex-col' => $fill]) }}>
+<div {{ $attributes->class(['rounded-3xl glass-card', 'flex h-full flex-col' => $fill]) }}>
     <div class="flex items-center gap-3 px-5 pb-3 pt-4">
-        <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] bg-brand-purple-50 text-brand-purple-600 dark:bg-brand-purple-500/10 dark:text-brand-purple-400">
+        <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand-purple-50 text-brand-purple-700 dark:bg-brand-purple-500/15 dark:text-brand-purple-300">
             <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $icon }}"/></svg>
         </span>
         <h2 class="flex-1 text-sm font-semibold text-slate-900 dark:text-slate-100">{{ $title }}</h2>
@@ -21,7 +21,7 @@
             {{ $action }}
         @endisset
     </div>
-    <div @class(['border-t border-brand-purple-100 px-5 pb-5 pt-4 dark:border-slate-700/60', 'flex-1' => $fill])>
+    <div @class(['border-t border-slate-100 px-5 pb-5 pt-4 dark:border-slate-800', 'flex-1' => $fill])>
         <div @class(['space-y-3.5', 'flex h-full flex-col justify-between' => $fill])>
             {{ $slot }}
         </div>

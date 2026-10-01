@@ -14,7 +14,7 @@
         </div>
     @endif
 
-    <div class="mb-5 rounded-2xl glass-card p-5 shadow-soft">
+    <div class="mb-5 rounded-3xl glass-card p-5">
         <h2 class="mb-4 text-sm font-semibold text-slate-900 dark:text-slate-100">{{ __('ข้อมูลคณะ') }}</h2>
         <form method="POST" action="{{ route('admin.faculties.update', $faculty) }}" class="space-y-4">
             @csrf
@@ -23,20 +23,20 @@
                 <div>
                     <label class="mb-1.5 block text-xs font-medium text-slate-500 dark:text-slate-400">{{ __('รหัสคณะ') }}</label>
                     <input type="text" name="code" value="{{ old('code', $faculty->code) }}" required maxlength="10"
-                        class="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm shadow-soft transition-all duration-200 focus:border-brand-purple-500 focus:outline-none focus:ring-4 focus:ring-brand-purple-500/10 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100">
+                        class="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm transition-all duration-200 focus:border-brand-purple-500 focus:outline-none focus:ring-4 focus:ring-brand-purple-500/10 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100">
                 </div>
                 <div class="sm:col-span-2">
                     <label class="mb-1.5 block text-xs font-medium text-slate-500 dark:text-slate-400">{{ __('ชื่อคณะ (ไทย)') }}</label>
                     <input type="text" name="name_th" value="{{ old('name_th', $faculty->name_th) }}" required
-                        class="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm shadow-soft transition-all duration-200 focus:border-brand-purple-500 focus:outline-none focus:ring-4 focus:ring-brand-purple-500/10 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100">
+                        class="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm transition-all duration-200 focus:border-brand-purple-500 focus:outline-none focus:ring-4 focus:ring-brand-purple-500/10 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100">
                 </div>
             </div>
             <div>
                 <label class="mb-1.5 block text-xs font-medium text-slate-500 dark:text-slate-400">{{ __('ชื่อคณะ (อังกฤษ)') }}</label>
                 <input type="text" name="name_en" value="{{ old('name_en', $faculty->name_en) }}"
-                    class="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm shadow-soft transition-all duration-200 focus:border-brand-purple-500 focus:outline-none focus:ring-4 focus:ring-brand-purple-500/10 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100">
+                    class="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm transition-all duration-200 focus:border-brand-purple-500 focus:outline-none focus:ring-4 focus:ring-brand-purple-500/10 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100">
             </div>
-            <button type="submit" class="rounded-xl bg-gradient-to-r from-brand-purple-600 to-brand-purple-500 px-5 py-2.5 text-sm font-semibold text-white shadow-soft transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg">
+            <button type="submit" class="rounded-xl bg-brand-purple-700 px-5 py-2.5 text-sm font-semibold text-white shadow-soft transition-all duration-300 hover:bg-brand-purple-800">
                 {{ __('บันทึก') }}
             </button>
         </form>
@@ -49,7 +49,7 @@
         </form>
     </div>
 
-    <div class="rounded-2xl glass-card p-5 shadow-soft">
+    <div class="rounded-3xl glass-card p-5">
         <div class="mb-4 flex items-center justify-between">
             <h2 class="text-sm font-semibold text-slate-900 dark:text-slate-100">{{ __('สาขาวิชา') }} ({{ $faculty->majors->count() }})</h2>
             <button type="button" @click="addingMajor = ! addingMajor" class="text-xs font-medium text-brand-purple-600 hover:text-brand-purple-800 dark:text-brand-purple-400">
@@ -60,11 +60,11 @@
         <form x-show="addingMajor" x-cloak method="POST" action="{{ route('admin.majors.store', $faculty) }}" class="mb-4 grid grid-cols-1 gap-3 rounded-xl bg-brand-purple-50/50 p-3.5 sm:grid-cols-4 dark:bg-brand-purple-500/5">
             @csrf
             <input type="text" name="code" placeholder="{{ __('รหัสสาขา') }}" required maxlength="20"
-                class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm shadow-soft focus:border-brand-purple-500 focus:outline-none focus:ring-4 focus:ring-brand-purple-500/10 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100">
+                class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm focus:border-brand-purple-500 focus:outline-none focus:ring-4 focus:ring-brand-purple-500/10 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100">
             <input type="text" name="name_th" placeholder="{{ __('ชื่อสาขา (ไทย)') }}" required
-                class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm shadow-soft focus:border-brand-purple-500 focus:outline-none focus:ring-4 focus:ring-brand-purple-500/10 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100">
+                class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm focus:border-brand-purple-500 focus:outline-none focus:ring-4 focus:ring-brand-purple-500/10 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100">
             <input type="text" name="degree_abbr" placeholder="{{ __('วุฒิ เช่น ค.บ.') }}"
-                class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm shadow-soft focus:border-brand-purple-500 focus:outline-none focus:ring-4 focus:ring-brand-purple-500/10 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100">
+                class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm focus:border-brand-purple-500 focus:outline-none focus:ring-4 focus:ring-brand-purple-500/10 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100">
             <button type="submit" class="rounded-xl bg-brand-purple-600 px-3 py-2 text-sm font-semibold text-white shadow-soft transition-colors hover:bg-brand-purple-700">
                 {{ __('เพิ่ม') }}
             </button>
@@ -95,11 +95,11 @@
                         @csrf
                         @method('PUT')
                         <input type="text" name="code" value="{{ $major->code }}" required maxlength="20"
-                            class="rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-sm shadow-soft focus:border-brand-purple-500 focus:outline-none focus:ring-4 focus:ring-brand-purple-500/10 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100">
+                            class="rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-sm focus:border-brand-purple-500 focus:outline-none focus:ring-4 focus:ring-brand-purple-500/10 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100">
                         <input type="text" name="name_th" value="{{ $major->name_th }}" required
-                            class="rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-sm shadow-soft focus:border-brand-purple-500 focus:outline-none focus:ring-4 focus:ring-brand-purple-500/10 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100">
+                            class="rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-sm focus:border-brand-purple-500 focus:outline-none focus:ring-4 focus:ring-brand-purple-500/10 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100">
                         <input type="text" name="degree_abbr" value="{{ $major->degree_abbr }}"
-                            class="rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-sm shadow-soft focus:border-brand-purple-500 focus:outline-none focus:ring-4 focus:ring-brand-purple-500/10 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100">
+                            class="rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-sm focus:border-brand-purple-500 focus:outline-none focus:ring-4 focus:ring-brand-purple-500/10 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100">
                         <div class="flex gap-2">
                             <button type="submit" class="flex-1 rounded-xl bg-brand-purple-600 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-brand-purple-700">{{ __('บันทึก') }}</button>
                             <button type="button" @click="editingMajorId = null" class="flex-1 rounded-xl bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-600 dark:bg-slate-700 dark:text-slate-300">{{ __('ยกเลิก') }}</button>

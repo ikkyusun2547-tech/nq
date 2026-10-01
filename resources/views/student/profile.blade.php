@@ -6,26 +6,24 @@
 @endphp
 
 <div class="mx-auto max-w-md">
-    <x-brand-header :title="$user->name_thai ?? $user->name" :subtitle="$user->email" :decorated="true">
-        <x-slot:actions>
-            <a href="{{ route('profile-setup.show') }}"
-                class="flex shrink-0 items-center gap-1.5 rounded-xl bg-white/10 px-3 py-2 text-xs font-medium text-white shadow-soft ring-1 ring-white/15 backdrop-blur transition-colors hover:bg-white/15">
-                <svg class="h-3.5 w-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487zm0 0L19.5 7.125"/></svg>
-                {{ __('แก้ไข') }}
-            </a>
-        </x-slot:actions>
-        <x-slot:footer>
-            <div class="flex justify-center">
-                <span class="flex h-16 w-16 items-center justify-center overflow-hidden rounded-full bg-white/15 ring-2 ring-white/25">
-                    @if ($user->avatar_url)
-                        <img src="{{ $user->avatar_url }}" alt="" class="h-full w-full object-cover">
-                    @else
-                        <svg class="h-8 w-8 text-white/80" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/></svg>
-                    @endif
-                </span>
-            </div>
-        </x-slot:footer>
-    </x-brand-header>
+    <div class="mb-6 flex items-center gap-4">
+        <span class="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-full bg-brand-purple-50 ring-1 ring-brand-purple-100 dark:bg-brand-purple-500/15 dark:ring-brand-purple-500/20">
+            @if ($user->avatar_url)
+                <img src="{{ $user->avatar_url }}" alt="" class="h-full w-full object-cover">
+            @else
+                <svg class="h-8 w-8 text-brand-purple-700 dark:text-brand-purple-300" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/></svg>
+            @endif
+        </span>
+        <div class="min-w-0 flex-1">
+            <h1 class="truncate font-display text-2xl text-slate-900 dark:text-white">{{ $user->name_thai ?? $user->name }}</h1>
+            <p class="truncate text-sm text-slate-500 dark:text-slate-400">{{ $user->email }}</p>
+        </div>
+        <a href="{{ route('profile-setup.show') }}"
+            class="flex shrink-0 items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition hover:border-brand-purple-300 hover:text-brand-purple-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:border-brand-purple-500/40 dark:hover:text-brand-purple-300">
+            <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487zm0 0L19.5 7.125"/></svg>
+            {{ __('แก้ไข') }}
+        </a>
+    </div>
 
     <div class="flex flex-col gap-4">
         <x-section-card icon="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" :title="__('ข้อมูลส่วนตัว')">

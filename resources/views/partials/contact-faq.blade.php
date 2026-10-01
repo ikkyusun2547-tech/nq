@@ -37,7 +37,7 @@
     ];
 @endphp
 
-<div class="rounded-2xl glass-card p-5 shadow-soft" x-data="{ openFaq: null }">
+<div class="rounded-3xl glass-card p-5" x-data="{ openFaq: null }">
     <h2 class="mb-1 text-sm font-bold text-slate-900 dark:text-slate-100">{{ __('คำถามที่พบบ่อย') }}</h2>
     <div class="divide-y divide-slate-100 dark:divide-slate-800">
         @foreach ($faqs as $i => $faq)

@@ -188,12 +188,12 @@
              one-page exception, hand-rolled rather than reintroducing the
              removed back/leadingBack props on <x-brand-header> itself. --}}
         <a href="{{ route('admin.contact.index') }}" aria-label="{{ __('กลับ') }}"
-            class="absolute left-6 top-6 z-10 flex h-8 w-8 items-center justify-center rounded-full text-white/80 transition-colors hover:bg-white/10 hover:text-white lg:hidden">
+            class="absolute left-2 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full text-slate-600 transition-colors hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800 lg:hidden">
             <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"/></svg>
         </a>
-        <x-brand-header eyebrow="{{ $studentName }} · {{ $thread->student->student_id }}" :title="$thread->subject" class="!mb-0 !rounded-none !pl-14 lg:!mb-6 lg:!rounded-3xl lg:!pl-6">
+        <x-brand-header eyebrow="{{ $studentName }} · {{ $thread->student->student_id }}" :title="$thread->subject" class="!mb-0 border-b border-slate-200 bg-white py-3 pl-14 pr-4 dark:border-slate-800 dark:bg-slate-950 lg:!mb-6 lg:border-0 lg:bg-transparent lg:p-0 lg:dark:bg-transparent">
             <x-slot:actions>
-                <span class="shrink-0 rounded-xl bg-white/10 px-3 py-2 text-xs font-medium text-white shadow-soft ring-1 ring-white/15 backdrop-blur" x-text="statusLabel[status]"></span>
+                <span class="shrink-0 rounded-full bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-300" x-text="statusLabel[status]"></span>
             </x-slot:actions>
         </x-brand-header>
     </div>
@@ -241,7 +241,7 @@
         </div>
     </div>
 
-    <div x-ref="chatCard" class="flex min-h-0 flex-1 flex-col overflow-hidden rounded-none glass-card shadow-none lg:flex-none lg:rounded-2xl lg:shadow-soft-lg">
+    <div x-ref="chatCard" class="flex min-h-0 flex-1 flex-col overflow-hidden rounded-none glass-card lg:flex-none lg:rounded-2xl lg:shadow-soft-lg">
         <div x-ref="scrollBox" class="min-h-0 flex-1 overflow-y-auto bg-slate-50/60 p-4 dark:bg-slate-900/40">
             <template x-for="(message, index) in messages" :key="message.id">
                 <div :class="[
@@ -251,7 +251,7 @@
                     <template x-if="! message.is_mine">
                         <div class="h-7 w-7 shrink-0 overflow-hidden rounded-full ring-1 ring-slate-100 dark:ring-slate-700" :class="showMeta(index) ? '' : 'invisible'">
                             <img x-show="message.sender_avatar" :src="message.sender_avatar" class="h-full w-full object-cover" alt="">
-                            <div x-show="! message.sender_avatar" class="flex h-full w-full items-center justify-center bg-gradient-to-br from-brand-purple-500 to-brand-purple-700 text-[0.65rem] font-semibold text-white" x-text="message.sender_name.charAt(0)"></div>
+                            <div x-show="! message.sender_avatar" class="flex h-full w-full items-center justify-center bg-brand-purple-700 text-[0.65rem] font-semibold text-white" x-text="message.sender_name.charAt(0)"></div>
                         </div>
                     </template>
                     <div class="flex max-w-[75%] flex-col" :class="message.is_mine ? 'items-end' : 'items-start'">
@@ -259,7 +259,7 @@
                             'shadow-soft text-sm',
                             isImageOnly(message) ? 'overflow-hidden rounded-2xl' : 'rounded-2xl px-3.5 py-2',
                             message.is_mine
-                                ? 'bg-gradient-to-r from-brand-purple-600 to-brand-purple-500 text-white'
+                                ? 'bg-brand-purple-700 text-white'
                                 : 'bg-white text-slate-700 ring-1 ring-slate-100 dark:bg-slate-800 dark:text-slate-200 dark:ring-slate-700',
                         ]">
                             <template x-if="message.attachment_url && message.is_image_attachment">
@@ -309,10 +309,10 @@
                 <textarea x-model="body" rows="1" maxlength="2000"
                     @keydown.enter="if (! $event.shiftKey) { $event.preventDefault(); send(); }"
                     placeholder="{{ __('พิมพ์ข้อความ...') }}"
-                    class="max-h-24 flex-1 resize-none rounded-2xl border border-slate-200 bg-white px-3.5 py-2 text-sm shadow-soft transition-all duration-200 focus:border-brand-purple-500 focus:outline-none focus:ring-4 focus:ring-brand-purple-500/10 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"></textarea>
+                    class="max-h-24 flex-1 resize-none rounded-2xl border border-slate-200 bg-white px-3.5 py-2 text-sm transition-all duration-200 focus:border-brand-purple-500 focus:outline-none focus:ring-4 focus:ring-brand-purple-500/10 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"></textarea>
 
                 <button type="submit" :disabled="sending || (! body.trim() && ! attachmentFile)" title="{{ __('ส่งข้อความ') }}"
-                    class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-r from-brand-purple-600 to-brand-purple-500 text-white shadow-soft transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg disabled:pointer-events-none disabled:opacity-40">
+                    class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-purple-700 text-white shadow-soft transition-all duration-300 disabled:pointer-events-none disabled:opacity-40 hover:bg-brand-purple-800">
                     <svg x-show="! sending" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5"/></svg>
                     <svg x-show="sending" x-cloak class="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
                 </button>

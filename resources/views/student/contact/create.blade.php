@@ -37,7 +37,7 @@
     @endif
 
     <form
-        method="POST" action="{{ route('contact.store') }}" enctype="multipart/form-data" class="space-y-4 rounded-2xl glass-card p-5 shadow-soft"
+        method="POST" action="{{ route('contact.store') }}" enctype="multipart/form-data" class="space-y-4 rounded-3xl glass-card p-5"
         x-data="{
             topics: @js($topics),
             subject: @js(old('subject', request('subject', ''))),
@@ -90,14 +90,14 @@
             <label class="mb-1.5 block text-xs font-medium text-slate-500 dark:text-slate-400">{{ __('หัวข้อ') }}</label>
             <input type="text" name="subject" x-model="subject" required maxlength="255"
                 placeholder="{{ __('เช่น สอบถามเรื่องคำร้องที่ถูกปฏิเสธ') }}"
-                class="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm shadow-soft transition-all duration-200 focus:border-brand-purple-500 focus:outline-none focus:ring-4 focus:ring-brand-purple-500/10 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100">
+                class="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm transition-all duration-200 focus:border-brand-purple-500 focus:outline-none focus:ring-4 focus:ring-brand-purple-500/10 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100">
         </div>
 
         <div>
             <label class="mb-1.5 block text-xs font-medium text-slate-500 dark:text-slate-400">{{ __('ข้อความ') }}</label>
             <textarea name="body" rows="6" maxlength="2000"
                 placeholder="{{ __('พิมพ์ข้อความที่ต้องการสอบถาม (หรือแนบไฟล์/รูปภาพอย่างเดียวก็ได้)') }}"
-                class="w-full resize-none rounded-2xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm shadow-soft transition-all duration-200 focus:border-brand-purple-500 focus:outline-none focus:ring-4 focus:ring-brand-purple-500/10 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100">{{ old('body') }}</textarea>
+                class="w-full resize-none rounded-2xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm transition-all duration-200 focus:border-brand-purple-500 focus:outline-none focus:ring-4 focus:ring-brand-purple-500/10 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100">{{ old('body') }}</textarea>
         </div>
 
         <div x-show="attachmentName" class="flex items-center gap-2.5 rounded-xl bg-slate-50 px-3 py-2 dark:bg-slate-800/60">
@@ -121,7 +121,7 @@
                 class="shrink-0 rounded-xl p-2.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-brand-purple-600 dark:text-slate-500 dark:hover:bg-slate-800 dark:hover:text-brand-purple-400">
                 <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3 3 0 1119.5 7.372L8.552 18.32a1.5 1.5 0 01-2.122-2.121l7.81-7.81"/></svg>
             </button>
-            <button type="submit" class="flex-1 rounded-xl bg-gradient-to-r from-brand-purple-600 to-brand-purple-500 px-4 py-2.5 text-sm font-semibold text-white shadow-soft transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg">
+            <button type="submit" class="flex-1 rounded-xl bg-brand-purple-700 px-4 py-2.5 text-sm font-semibold text-white shadow-soft transition-all duration-300 hover:bg-brand-purple-800">
                 {{ __('ส่งข้อความ') }}
             </button>
         </div>

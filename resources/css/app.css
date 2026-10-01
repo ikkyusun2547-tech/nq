@@ -3,7 +3,8 @@
 @source "../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php";
 @source "../../resources/views";
 
-/* Class-based dark mode (toggled via .dark on <html>), not tied to OS preference. */
+/* Class-based dark mode (toggled via .dark on <html>). The first visit
+   follows the device's setting; the theme toggle then remembers a choice. */
 @custom-variant dark (&:where(.dark, .dark *));
 
 /* Lets the browser auto-theme native widgets (checkboxes, date pickers,
@@ -12,13 +13,33 @@
     color-scheme: dark;
 }
 
-/* SRRU premium palette — deep violet (structural) + emerald (accent/action).
-   Matches Tailwind's stock violet/emerald scales so `brand-*` tokens stay
-   swappable in one place without hardcoding hue names across every view. */
+/* Design "C": clean, task-first UI in SRRU purple.
+   - slate-* is re-tuned to purple-tinted neutrals so every existing view
+     (text, borders, dark surfaces) picks up the new look without per-page
+     edits: ink #17141f, muted #5b5670, hairline #ece8f5, page #faf9fd,
+     dark page #0f0d16, dark card #17141f.
+   - brand-purple stays Tailwind's violet scale; 700 (#6d28d9) is the
+     primary. brand-green is kept for success/"checked in" states only. */
 @theme {
+    --font-sans: "Noto Sans Thai", ui-sans-serif, system-ui, sans-serif;
+    --font-display: "Kanit", "Noto Sans Thai", ui-sans-serif, system-ui, sans-serif;
+
+    --color-slate-50: #faf9fd;
+    --color-slate-100: #f3f1f8;
+    --color-slate-200: #ece8f5;
+    --color-slate-300: #d9d4e6;
+    --color-slate-400: #8a849c;
+    --color-slate-500: #6b6680;
+    --color-slate-600: #5b5670;
+    --color-slate-700: #3b3650;
+    --color-slate-800: #2a2635;
+    --color-slate-900: #17141f;
+    --color-slate-950: #0f0d16;
+
     --color-brand-purple-50: #f5f3ff;
     --color-brand-purple-100: #ede9fe;
     --color-brand-purple-200: #ddd6fe;
+    --color-brand-purple-300: #c4b5fd;
     --color-brand-purple-400: #a78bfa;
     --color-brand-purple-500: #8b5cf6;
     --color-brand-purple-600: #7c3aed;
@@ -29,6 +50,7 @@
 
     --color-brand-green-50: #ecfdf5;
     --color-brand-green-100: #d1fae5;
+    --color-brand-green-300: #6ee7b7;
     --color-brand-green-400: #34d399;
     --color-brand-green-500: #10b981;
     --color-brand-green-600: #059669;
@@ -36,49 +58,126 @@
     --color-brand-green-800: #065f46;
 }
 
+@layer base {
+    /* Always reserve the scrollbar's width, so the centered header and page
+       don't shift sideways between long (scrolling) and short pages. */
+    html {
+        scrollbar-gutter: stable;
+    }
+
+    h1, h2, h3, .font-display {
+        font-family: var(--font-display);
+        font-weight: 500;
+    }
+}
+
 [x-cloak] {
     display: none !important;
 }
 
+/* Kept for the few full-bleed brand panels (login, profile setup): a flat
+   SRRU purple instead of the old purple-to-green gradient wash. */
 .brand-gradient {
-    background-image: linear-gradient(135deg, var(--color-brand-purple-950), var(--color-brand-purple-800) 55%, var(--color-brand-green-600));
+    background-color: var(--color-brand-purple-700);
+}
+
+.dark .brand-gradient {
+    background-color: #241a3d;
 }
 
 .brand-gradient-text {
-    background-image: linear-gradient(135deg, var(--color-brand-purple-600), var(--color-brand-green-500));
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
+    color: var(--color-brand-purple-700);
 }
 
-/* Soft, diffuse elevation instead of hard black borders/shadows. */
+.dark .brand-gradient-text {
+    color: var(--color-brand-purple-300);
+}
+
+/* Quiet elevation — hairline borders carry most of the structure now. */
 .shadow-soft {
-    box-shadow: 0 8px 30px rgb(0 0 0 / 0.04);
+    box-shadow: 0 1px 2px rgb(23 20 31 / 0.04);
 }
 
 .shadow-soft-lg {
-    box-shadow: 0 20px 50px rgb(46 16 101 / 0.10);
+    box-shadow: 0 12px 32px rgb(23 20 31 / 0.08);
 }
 
+.dark .shadow-soft {
+    box-shadow: none;
+}
+
+.dark .shadow-soft-lg {
+    box-shadow: 0 16px 40px rgb(0 0 0 / 0.45);
+}
+
+/* Solid cards (no backdrop blur: a backdrop-filter ancestor also traps
+   position:fixed descendants such as modals). */
 .glass-card {
-    background-color: rgb(255 255 255 / 0.7);
-    backdrop-filter: blur(12px);
-    border: 1px solid rgb(139 92 246 / 0.10);
+    background-color: #ffffff;
+    border: 1px solid var(--color-slate-200);
 }
 
 .dark .glass-card {
-    background-color: rgb(30 27 51 / 0.6);
-    border: 1px solid rgb(139 92 246 / 0.15);
+    background-color: var(--color-slate-900);
+    border-color: var(--color-slate-800);
 }
 
 .glow-emerald {
     box-shadow: 0 0 12px rgb(16 185 129 / 0.35);
 }
 
-.dark .shadow-soft {
-    box-shadow: 0 8px 30px rgb(0 0 0 / 0.25);
+/* Page headers used to sit on a dark purple banner, so many pages still
+   style their header chips/buttons as white-on-dark (bg-white/10,
+   text-white, ...). Until each page is redone, remap those inside the new
+   light header so they stay legible. */
+.page-header .bg-white\/10,
+.page-header .bg-white\/5 {
+    background-color: var(--color-slate-100);
 }
 
-.dark .shadow-soft-lg {
-    box-shadow: 0 20px 50px rgb(0 0 0 / 0.35);
+.page-header .hover\:bg-white\/15:hover,
+.page-header .hover\:bg-white\/10:hover {
+    background-color: var(--color-slate-200);
+}
+
+.page-header .ring-white\/15,
+.page-header .ring-white\/10 {
+    --tw-ring-color: var(--color-slate-200);
+}
+
+.page-header .border-white\/10 {
+    border-color: var(--color-slate-200);
+}
+
+.page-header .bg-white\/10.text-white,
+.page-header .bg-white\/5.text-white,
+.page-header .text-white\/80,
+.page-header .text-white\/70,
+.page-header .text-violet-100\/80,
+.page-header .text-violet-200\/70 {
+    color: var(--color-slate-700);
+}
+
+.dark .page-header .bg-white\/10,
+.dark .page-header .bg-white\/5 {
+    background-color: var(--color-slate-800);
+}
+
+.dark .page-header .hover\:bg-white\/15:hover,
+.dark .page-header .hover\:bg-white\/10:hover {
+    background-color: var(--color-slate-700);
+}
+
+.dark .page-header .ring-white\/15,
+.dark .page-header .ring-white\/10 {
+    --tw-ring-color: var(--color-slate-700);
+}
+
+.dark .page-header .bg-white\/10.text-white,
+.dark .page-header .bg-white\/5.text-white,
+.dark .page-header .text-white\/80,
+.dark .page-header .text-white\/70,
+.dark .page-header .text-violet-100\/80,
+.dark .page-header .text-violet-200\/70 {
+    color: var(--color-slate-200);
 }

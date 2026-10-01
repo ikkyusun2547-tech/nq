@@ -7,6 +7,7 @@
     <title>{{ $title ?? __('ระบบเช็คชื่อกิจกรรมนักศึกษา SRRU') }}</title>
     <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}">
     @include('partials.pwa-head')
+    @include('partials.fonts')
     <script>
         if (localStorage.theme === 'dark' || (! ('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
             document.documentElement.classList.add('dark');
@@ -14,7 +15,7 @@
     </script>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="bg-gray-50 text-gray-900 antialiased dark:bg-slate-950 dark:text-slate-100">
+<body class="bg-slate-50 text-slate-900 antialiased dark:bg-slate-950 dark:text-slate-100">
     <div class="min-h-dvh">
         @yield('content')
     </div>

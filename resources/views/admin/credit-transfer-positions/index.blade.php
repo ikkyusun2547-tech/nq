@@ -4,20 +4,20 @@
 <div class="mx-auto max-w-5xl">
     <x-brand-header :title="__('ตำแหน่งเทียบโอนชั่วโมง')" :eyebrow="__('กองพัฒนานักศึกษา')" :subtitle="__('จำนวนชั่วโมงมาตรฐานต่อตำแหน่งที่ใช้ในระบบเทียบโอนตำแหน่ง')">
         <x-slot:actions>
-            <span class="rounded-xl bg-white/10 px-4 py-2 text-sm font-medium text-white shadow-soft ring-1 ring-white/15 backdrop-blur">
+            <span class="rounded-full bg-slate-100 px-3.5 py-1.5 text-sm font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-300">
                 {{ __(':count ตำแหน่ง', ['count' => $positions->count()]) }}
             </span>
             <a href="{{ route('admin.credit-transfer-positions.create') }}"
-                class="rounded-xl bg-white/10 px-4 py-2 text-sm font-medium text-white shadow-soft ring-1 ring-white/15 backdrop-blur transition-all duration-300 hover:-translate-y-0.5 hover:bg-white/15">
+                class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-brand-purple-300 hover:text-brand-purple-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:border-brand-purple-500/40 dark:hover:text-brand-purple-300">
                 {{ __('เพิ่มตำแหน่งใหม่') }}
             </a>
         </x-slot:actions>
     </x-brand-header>
 
-    <div class="overflow-x-auto rounded-2xl glass-card shadow-soft">
+    <div class="overflow-x-auto rounded-3xl glass-card">
         <table class="min-w-full text-sm">
             <thead>
-                <tr class="border-b border-brand-purple-100 dark:border-brand-purple-500/20">
+                <tr class="border-b border-slate-100 dark:border-slate-800">
                     <th class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">{{ __('รหัส') }}</th>
                     <th class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">{{ __('ชื่อตำแหน่ง') }}</th>
                     <th class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">{{ __('ชั่วโมงมาตรฐาน') }}</th>
@@ -28,9 +28,7 @@
             <tbody>
                 @forelse ($positions as $position)
                     <tr @class([
-                        'border-b border-slate-100 dark:border-slate-800 transition-colors last:border-0 hover:bg-brand-purple-50/40 dark:hover:bg-slate-800/60',
-                        'bg-white dark:bg-slate-900' => $loop->even,
-                        'bg-slate-50/50 dark:bg-slate-800/40' => $loop->odd,
+                        'border-b border-slate-100 dark:border-slate-800 transition-colors last:border-0 hover:bg-slate-50 dark:hover:bg-slate-800/60',
                     ])>
                         <td class="whitespace-nowrap px-4 py-3 font-mono text-xs text-slate-500 dark:text-slate-400">{{ $position->key }}</td>
                         <td class="min-w-[14rem] max-w-xs whitespace-normal break-words px-4 py-3 font-medium text-slate-900 dark:text-slate-100">{{ $position->label }}</td>

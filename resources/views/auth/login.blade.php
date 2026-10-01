@@ -1,31 +1,28 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="relative flex min-h-dvh flex-col items-center justify-center overflow-hidden px-4 py-12 brand-gradient">
-    <div class="pointer-events-none absolute -left-24 -top-24 h-72 w-72 rounded-full bg-white/10 blur-3xl"></div>
-    <div class="pointer-events-none absolute -bottom-24 -right-24 h-72 w-72 rounded-full bg-brand-green-500/10 blur-3xl"></div>
-
+<div class="relative flex min-h-dvh flex-col items-center justify-center px-4 py-12">
     <div class="relative mb-4 flex w-full max-w-sm items-center justify-end gap-2">
         @include('partials.theme-toggle')
         @include('partials.locale-switch')
     </div>
 
-    <div class="relative w-full max-w-sm rounded-3xl glass-card p-8 shadow-soft-lg">
+    <div class="relative w-full max-w-sm rounded-3xl glass-card p-8">
         <div class="mb-8 text-center">
-            <img src="{{ asset('images/logo.png') }}" alt="SRRU" class="mx-auto mb-4 h-20 w-20 object-contain drop-shadow">
-            <h1 class="text-lg font-semibold text-slate-900 dark:text-slate-100">SRRU Check</h1>
+            <img src="{{ asset('images/logo.png') }}" alt="SRRU" class="mx-auto mb-4 h-20 w-20 object-contain">
+            <h1 class="font-display text-2xl text-slate-900 dark:text-white">SRRU Check</h1>
             <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">{{ __('มหาวิทยาลัยราชภัฏสุรินทร์') }}</p>
         </div>
 
         @if ($errors->any())
-            <div class="mb-4 rounded-2xl bg-red-50 px-4 py-3 text-sm text-red-700 shadow-soft ring-1 ring-red-100 dark:bg-red-500/10 dark:text-red-400 dark:ring-red-500/20">
+            <div class="mb-4 rounded-2xl bg-red-50 px-4 py-3 text-sm text-red-700 ring-1 ring-red-100 dark:bg-red-500/10 dark:text-red-400 dark:ring-red-500/20">
                 {{ $errors->first() }}
             </div>
         @endif
 
         <a
             href="{{ route('auth.google.redirect') }}"
-            class="flex w-full items-center justify-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 shadow-soft transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg active:scale-[0.99] dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
+            class="flex w-full items-center justify-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 active:scale-[0.99] dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
         >
             <svg class="h-5 w-5" viewBox="0 0 24 24">
                 <path fill="#4285F4" d="M23.49 12.27c0-.79-.07-1.54-.2-2.27H12v4.3h6.47a5.54 5.54 0 0 1-2.4 3.63v3h3.88c2.27-2.09 3.54-5.17 3.54-8.66z"/>
@@ -49,7 +46,7 @@
 
             <a
                 href="{{ route('demo-login.show') }}"
-                class="flex w-full items-center justify-center gap-2 rounded-2xl bg-violet-600 px-4 py-3 text-sm font-medium text-white shadow-soft transition-all duration-300 hover:-translate-y-0.5 hover:bg-violet-700 hover:shadow-lg active:scale-[0.99]"
+                class="flex w-full items-center justify-center gap-2 rounded-2xl bg-brand-purple-700 px-4 py-3 text-sm font-semibold text-white transition hover:bg-brand-purple-800 active:scale-[0.99]"
             >
                 <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 0 1 3 3m3 0a6 6 0 0 1-7.03 5.91c-.47-.08-.97.02-1.3.36L11.25 17.25H9v2.25H6.75v2.25H3v-2.82c0-.6.24-1.17.66-1.6l6.07-6.07c.34-.33.44-.83.36-1.3A6 6 0 1 1 21.75 8.25Z"/>
@@ -63,7 +60,7 @@
         @endif
     </div>
 
-    <p class="relative mt-6 text-center text-xs text-violet-200/70">
+    <p class="relative mt-6 text-center text-xs text-slate-500 dark:text-slate-400">
         {{ __('กองพัฒนานักศึกษา · มหาวิทยาลัยราชภัฏสุรินทร์') }}
     </p>
 </div>

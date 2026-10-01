@@ -4,12 +4,12 @@
 <div class="mx-auto max-w-3xl">
     <x-brand-header :title="__('นำเข้ารายชื่อนักศึกษา')" :eyebrow="__('กองพัฒนานักศึกษา')" />
 
-    <div class="mb-6 rounded-2xl glass-card p-5 shadow-soft">
+    <div class="mb-6 rounded-3xl glass-card p-5">
         <p class="text-sm text-slate-600 dark:text-slate-300">
             {{ __('อัปโหลดไฟล์ Excel/CSV ตามเทมเพลตด้านล่าง ระบบจะสร้างบัญชีนักศึกษาให้อัตโนมัติ (จับคู่ด้วยรหัสนักศึกษาหรืออีเมล) เมื่อนักศึกษาล็อกอินด้วย Google ครั้งแรกด้วยอีเมลที่ตรงกัน จะข้ามขั้นตอนกรอกโปรไฟล์ไปเข้าแดชบอร์ดได้ทันที') }}
         </p>
         <a href="{{ route('admin.students.import.template') }}"
-            class="mt-3 inline-flex items-center gap-2 rounded-xl bg-brand-purple-50 px-4 py-2 text-sm font-semibold text-brand-purple-700 shadow-soft transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg dark:bg-brand-purple-500/10 dark:text-brand-purple-400">
+            class="mt-3 inline-flex items-center gap-2 rounded-xl bg-brand-purple-50 px-4 py-2 text-sm font-semibold text-brand-purple-700 shadow-soft transition-all duration-300 dark:bg-brand-purple-500/10 dark:text-brand-purple-400">
             <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg>
             {{ __('ดาวน์โหลดเทมเพลต') }}
         </a>
@@ -20,7 +20,7 @@
 
     @if (session('import_result'))
         @php $result = session('import_result'); @endphp
-        <div class="mb-6 rounded-2xl glass-card p-5 shadow-soft">
+        <div class="mb-6 rounded-3xl glass-card p-5">
             <h2 class="mb-3 text-sm font-semibold text-slate-900 dark:text-slate-100">{{ __('ผลการนำเข้า') }}</h2>
             <div class="flex flex-wrap gap-3">
                 <span class="rounded-xl bg-brand-green-50 px-4 py-2 text-sm font-medium text-brand-green-700 dark:bg-brand-green-500/10 dark:text-brand-green-400">
@@ -56,7 +56,7 @@
         </div>
     @endif
 
-    <div class="rounded-2xl glass-card p-5 shadow-soft">
+    <div class="rounded-3xl glass-card p-5">
         <form method="POST" action="{{ route('admin.students.import.store') }}" enctype="multipart/form-data" class="space-y-4">
             @csrf
             <div
@@ -72,7 +72,7 @@
                     @change="fileName = $event.target.files[0]?.name ?? ''"
                 >
             </div>
-            <button type="submit" class="w-full rounded-xl bg-brand-green-500 px-4 py-3 text-sm font-semibold text-brand-purple-950 shadow-soft transition-all duration-300 hover:-translate-y-0.5 hover:bg-brand-green-400 hover:shadow-lg">
+            <button type="submit" class="w-full rounded-xl bg-brand-purple-700 px-4 py-3 text-sm font-semibold text-white shadow-soft transition-all duration-300 hover:bg-brand-purple-800">
                 {{ __('นำเข้ารายชื่อ') }}
             </button>
         </form>

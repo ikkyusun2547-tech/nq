@@ -10,32 +10,27 @@
         'red' => [
             'icon_bg' => 'bg-red-50 ring-red-50/50 dark:bg-red-500/10 dark:ring-red-500/5',
             'icon_text' => 'text-red-600 dark:text-red-400',
-            'border' => 'to-red-200/40 dark:to-red-500/20',
-            'button' => 'bg-gradient-to-r from-red-600 to-red-500',
+            'button' => 'bg-red-600 hover:bg-red-700',
         ],
         'green' => [
             'icon_bg' => 'bg-brand-green-50 ring-brand-green-50/50 dark:bg-brand-green-500/10 dark:ring-brand-green-500/5',
             'icon_text' => 'text-brand-green-600 dark:text-brand-green-400',
-            'border' => 'to-brand-green-200/40 dark:to-brand-green-500/20',
-            'button' => 'bg-gradient-to-r from-brand-green-600 to-brand-green-500',
+            'button' => 'bg-brand-green-600 hover:bg-brand-green-700',
         ],
         'purple' => [
             'icon_bg' => 'bg-brand-purple-50 ring-brand-purple-50/50 dark:bg-brand-purple-500/10 dark:ring-brand-purple-500/5',
             'icon_text' => 'text-brand-purple-600 dark:text-brand-purple-400',
-            'border' => 'to-brand-purple-200/40 dark:to-brand-purple-500/20',
-            'button' => 'bg-gradient-to-r from-brand-purple-600 to-brand-purple-500',
+            'button' => 'bg-brand-purple-700 hover:bg-brand-purple-800',
         ],
         'amber' => [
             'icon_bg' => 'bg-amber-50 ring-amber-50/50 dark:bg-amber-500/10 dark:ring-amber-500/5',
             'icon_text' => 'text-amber-600 dark:text-amber-400',
-            'border' => 'to-amber-200/40 dark:to-amber-500/20',
-            'button' => 'bg-gradient-to-r from-amber-600 to-amber-500',
+            'button' => 'bg-amber-600 hover:bg-amber-700',
         ],
         'slate' => [
             'icon_bg' => 'bg-slate-100 ring-slate-100/50 dark:bg-slate-800 dark:ring-slate-800/50',
             'icon_text' => 'text-slate-500 dark:text-slate-400',
-            'border' => 'to-slate-200/60 dark:to-slate-500/20',
-            'button' => 'bg-gradient-to-r from-slate-600 to-slate-500',
+            'button' => 'bg-slate-600 hover:bg-slate-700',
         ],
     ];
     $c = $palette[$tone] ?? $palette['red'];
@@ -57,7 +52,7 @@
 
     <template x-teleport="body">
     <div x-show="open" x-cloak x-transition.opacity
-        class="fixed inset-0 z-50 flex items-center justify-center bg-brand-purple-950/70 p-4 backdrop-blur-sm"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 p-4"
         @keydown.escape.window="open = false">
         <div
             @click.outside="open = false"
@@ -68,9 +63,9 @@
             x-transition:leave="transition ease-in duration-150"
             x-transition:leave-start="opacity-100 scale-100"
             x-transition:leave-end="opacity-0 scale-95"
-            class="w-full max-w-sm rounded-[2rem] bg-gradient-to-br from-white/60 via-white/10 {{ $c['border'] }} p-[1.5px] shadow-soft-lg dark:from-white/10 dark:via-white/5"
+            class="w-full max-w-sm rounded-[2rem] bg-slate-200 p-px shadow-soft-lg dark:bg-slate-800"
         >
-            <div class="rounded-[calc(2rem-1.5px)] bg-white p-7 text-center dark:bg-slate-900">
+            <div class="rounded-[calc(2rem-1px)] bg-white p-7 text-center dark:bg-slate-900">
                 <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full ring-8 {{ $c['icon_bg'] }}">
                     <svg class="h-8 w-8 shrink-0 {{ $c['icon_text'] }}" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.362-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z"/>
@@ -84,7 +79,7 @@
                         {{ __('ยกเลิก') }}
                     </button>
                     <button type="button" @click="open = false; form.requestSubmit()"
-                        class="rounded-xl px-4 py-2.5 text-sm font-semibold text-white shadow-soft transition-all duration-200 hover:shadow-lg active:scale-[0.98] {{ $c['button'] }}">
+                        class="rounded-xl px-4 py-2.5 text-sm font-semibold text-white shadow-soft transition-all duration-200 active:scale-[0.98] {{ $c['button'] }}">
                         {{ $label }}
                     </button>
                 </div>

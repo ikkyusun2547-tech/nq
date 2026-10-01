@@ -6,7 +6,7 @@
     $responseTime = config('services.srru.response_time');
 @endphp
 
-<div class="rounded-2xl glass-card p-5 shadow-soft">
+<div class="rounded-3xl glass-card p-5">
     <h2 class="mb-3.5 text-sm font-bold text-slate-900 dark:text-slate-100">{{ __('ช่องทางติดต่ออื่น') }}</h2>
     <dl class="space-y-3.5 text-sm">
         @if ($officePhone)

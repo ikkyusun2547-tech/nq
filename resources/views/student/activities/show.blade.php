@@ -10,7 +10,7 @@
         'ethics' => ['label' => __('คุณธรรมจริยธรรม'), 'dot' => 'bg-fuchsia-400'],
     ];
     $statusBadge = [
-        'open' => ['label' => __('เปิดรับสมัคร'), 'class' => 'bg-brand-green-500/90 text-white'],
+        'open' => ['label' => __('เปิดลงทะเบียน'), 'class' => 'bg-brand-green-500/90 text-white'],
         'ongoing' => ['label' => __('กำลังดำเนินการ'), 'class' => 'bg-brand-purple-500/90 text-white'],
         'full' => ['label' => __('เต็มแล้ว'), 'class' => 'bg-amber-500/90 text-white'],
         'draft' => ['label' => __('ยังไม่เปิด'), 'class' => 'bg-slate-500/90 text-white'],
@@ -31,8 +31,8 @@
 <div class="mx-auto max-w-3xl">
     <x-brand-header :title="__('รายละเอียดกิจกรรม')" />
 
-    <div class="overflow-hidden rounded-3xl glass-card shadow-soft-lg">
-        <div class="relative aspect-[16/7] w-full overflow-hidden bg-gradient-to-br from-brand-purple-600 to-brand-purple-900">
+    <div class="overflow-hidden rounded-3xl glass-card">
+        <div class="relative aspect-[16/7] w-full overflow-hidden bg-brand-purple-700">
             @if ($activity->banner_url)
                 <img src="{{ asset('storage/'.$activity->banner_url) }}" alt="" class="h-full w-full object-cover">
             @else
@@ -59,7 +59,6 @@
         </div>
 
         <div class="flex">
-            <div class="w-[6px] shrink-0 {{ $categoryMeta[$activity->activity_category]['dot'] ?? 'bg-slate-400' }}"></div>
             <div class="flex-1 p-5 sm:p-7">
                 <div class="mb-3 flex flex-wrap items-center gap-x-3 gap-y-1.5">
                     <span class="inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 dark:text-slate-400">
@@ -167,11 +166,11 @@
                         </div>
                     @elseif (in_array($activity->status, ['open', 'ongoing'], true))
                         @if ($activity->usesSelfReportCheckIn())
-                            <a href="{{ route('self-checkin.show', $activity) }}" class="flex w-full items-center justify-center rounded-xl bg-brand-green-500 px-4 py-3 text-sm font-semibold text-brand-purple-950 shadow-soft transition-all duration-300 hover:-translate-y-0.5 hover:bg-brand-green-400 hover:shadow-lg">
+                            <a href="{{ route('self-checkin.show', $activity) }}" class="flex w-full items-center justify-center rounded-xl bg-brand-purple-700 px-4 py-3 text-sm font-semibold text-white shadow-soft transition-all duration-300 hover:bg-brand-purple-800">
                                 {{ __('ไปเช็คชื่อ') }} &rarr;
                             </a>
                         @else
-                            <a href="{{ route('checkin.show') }}" class="flex w-full items-center justify-center rounded-xl bg-brand-green-500 px-4 py-3 text-sm font-semibold text-brand-purple-950 shadow-soft transition-all duration-300 hover:-translate-y-0.5 hover:bg-brand-green-400 hover:shadow-lg">
+                            <a href="{{ route('checkin.show') }}" class="flex w-full items-center justify-center rounded-xl bg-brand-purple-700 px-4 py-3 text-sm font-semibold text-white shadow-soft transition-all duration-300 hover:bg-brand-purple-800">
                                 {{ __('ไปเช็คชื่อ') }} &rarr;
                             </a>
                         @endif

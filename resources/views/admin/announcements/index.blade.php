@@ -5,17 +5,17 @@
     <x-brand-header :title="__('ประวัติการส่งประกาศ')" :eyebrow="__('กองพัฒนานักศึกษา')">
         <x-slot:actions>
             <a href="{{ route('admin.announcements.create') }}"
-                class="flex shrink-0 items-center gap-1.5 rounded-xl bg-white/10 px-3 py-2 text-xs font-medium text-white shadow-soft ring-1 ring-white/15 backdrop-blur transition-colors hover:bg-white/15">
+                class="flex shrink-0 items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700 transition hover:border-brand-purple-300 hover:text-brand-purple-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:border-brand-purple-500/40 dark:hover:text-brand-purple-300">
                 <svg class="h-3.5 w-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
                 {{ __('ส่งประกาศใหม่') }}
             </a>
         </x-slot:actions>
     </x-brand-header>
 
-    <div class="mt-4 overflow-x-auto rounded-2xl glass-card shadow-soft">
+    <div class="mt-4 overflow-x-auto rounded-3xl glass-card">
         <table class="min-w-full text-sm">
             <thead>
-                <tr class="border-b border-brand-purple-100 dark:border-brand-purple-500/20">
+                <tr class="border-b border-slate-100 dark:border-slate-800">
                     <x-sortable-th field="subject" :label="__('หัวข้อ')" />
                     <th class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">{{ __('ส่งถึง') }}</th>
                     <x-sortable-th field="recipient_count" :label="__('จำนวนผู้รับ')" />
@@ -27,8 +27,6 @@
                 @forelse ($logs as $log)
                     <tr @class([
                         'border-b border-slate-100 last:border-0 dark:border-slate-800',
-                        'bg-white dark:bg-slate-900' => $loop->even,
-                        'bg-slate-50/50 dark:bg-slate-800/40' => $loop->odd,
                     ])>
                         <td class="max-w-xs px-4 py-3">
                             <p class="truncate font-medium text-slate-800 dark:text-slate-100">{{ $log->subject }}</p>

@@ -127,6 +127,9 @@ Route::middleware(['auth', 'srru.email'])->group(function () {
         return $faculty->majors()->orderBy('name_th')->get(['id', 'name_th', 'degree_abbr']);
     })->name('api.majors.by-faculty');
 
+    // Explains every check-in method; open to students and admins alike.
+    Route::view('/check-in-methods', 'guide.check-in-methods')->name('checkin-guide');
+
     Route::middleware('profile.completed')->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'show'])->name('dashboard');
 

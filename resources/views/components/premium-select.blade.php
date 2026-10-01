@@ -19,6 +19,9 @@
     // Raw Alpine boolean expression (string) controlling both the trigger
     // button and the underlying native select, e.g. "! facultyId".
     'disabled' => null,
+    // 'field' (default): full-width form control. 'chip': compact pill for
+    // filter bars — sized to its label, purple-tinted while a value is set.
+    'variant' => 'field',
 ])
 
 @php
@@ -53,7 +56,7 @@
 @endphp
 
 <div
-    class="relative"
+    class="{{ $variant === 'chip' ? 'relative inline-flex' : 'relative' }}"
     x-data="{
         open: false,
         selected: @js($selectedStr),
@@ -81,8 +84,11 @@
             const spaceBelow = window.innerHeight - rect.bottom - margin;
             const spaceAbove = rect.top - margin;
 
-            panel.style.left = rect.left + 'px';
-            panel.style.width = rect.width + 'px';
+            // A chip is narrower than its options, so give the panel a
+            // sensible minimum and keep it on-screen near the right edge.
+            const width = @js($variant === 'chip') ? Math.max(rect.width, 240) : rect.width;
+            panel.style.left = Math.max(margin, Math.min(rect.left, window.innerWidth - width - margin)) + 'px';
+            panel.style.width = width + 'px';
             panel.style.maxHeight = 'none';
             panel.style.top = (rect.bottom + 8) + 'px';
             panel.style.bottom = 'auto';
@@ -198,6 +204,20 @@
         @endforeach
     </select>
 
+    @if ($variant === 'chip')
+    <button
+        x-ref="trigger"
+        type="button" @click="toggleOpen()" aria-haspopup="listbox" :aria-expanded="open"
+        @if ($disabled) :disabled="{{ $disabled }}" @endif
+        class="inline-flex h-9 max-w-[16rem] cursor-pointer items-center gap-1.5 rounded-full border px-3.5 text-sm transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+        :class="selected !== '' && @js($nullable)
+            ? 'border-brand-purple-200 bg-brand-purple-50 font-medium text-brand-purple-800 dark:border-brand-purple-500/30 dark:bg-brand-purple-500/15 dark:text-brand-purple-200'
+            : (open ? 'border-brand-purple-400 bg-white text-slate-900 dark:bg-slate-900 dark:text-white' : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800')"
+    >
+        <span class="truncate" x-text="label"></span>
+        <svg class="h-3.5 w-3.5 shrink-0 opacity-60 transition-transform duration-200" :class="open && 'rotate-180'" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
+    </button>
+    @else
     <button
         x-ref="trigger"
         type="button" @click="toggleOpen()" aria-haspopup="listbox" :aria-expanded="open"
@@ -213,6 +233,7 @@
         <span class="truncate" :class="selected === '' && 'text-slate-400 dark:text-slate-500'" x-text="label"></span>
         <svg class="h-4 w-4 shrink-0 text-slate-400 transition-transform duration-200" :class="open && 'rotate-180'" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
     </button>
+    @endif
 
     <template x-teleport="body">
         <div

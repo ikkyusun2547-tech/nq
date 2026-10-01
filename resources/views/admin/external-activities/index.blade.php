@@ -49,14 +49,14 @@
         @foreach ($tabs as $value => $label)
             <a href="{{ route('admin.external-activities.index', array_merge(request()->only(['search', 'activity_category']), ['status' => $value])) }}"
                 @class([
-                    'inline-flex shrink-0 snap-start items-center gap-1.5 rounded-full px-3.5 py-1.5 font-medium transition-all duration-200',
-                    'bg-gradient-to-r from-brand-purple-600 to-brand-purple-500 text-white shadow-soft' => $status === $value,
-                    'bg-white text-slate-500 shadow-soft ring-1 ring-slate-200 hover:-translate-y-0.5 hover:text-brand-purple-600 dark:bg-slate-900 dark:text-slate-400 dark:ring-slate-700 dark:hover:text-brand-purple-400' => $status !== $value,
+                    'inline-flex h-9 shrink-0 snap-start items-center gap-1.5 rounded-full border px-3.5 transition-colors',
+                    'border-brand-purple-200 bg-brand-purple-50 font-semibold text-brand-purple-800 dark:border-brand-purple-500/30 dark:bg-brand-purple-500/15 dark:text-brand-purple-200' => $status === $value,
+                    'border-slate-200 bg-white text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800' => $status !== $value,
                 ])>
                 {{ $label }}
                 <span @class([
                     'rounded-full px-1.5 py-0.5 text-[0.68rem] font-semibold tabular-nums',
-                    'bg-white/20' => $status === $value,
+                    'bg-brand-purple-100 text-brand-purple-800 dark:bg-brand-purple-500/25 dark:text-brand-purple-100' => $status === $value,
                     'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400' => $status !== $value,
                 ])>{{ number_format($tabCounts[$value] ?? 0) }}</span>
             </a>
@@ -77,28 +77,28 @@
                 </span>
                 <input
                     type="text" name="search" value="{{ request('search') }}" placeholder="{{ __('ค้นหาชื่อนักศึกษา รหัสนักศึกษา หรือชื่อกิจกรรม') }}"
-                    class="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-3.5 text-sm text-slate-700 placeholder:text-slate-400 shadow-soft transition-all duration-200 focus:border-brand-purple-500 focus:outline-none focus:ring-4 focus:ring-brand-purple-500/10 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500"
+                    class="h-11 w-full rounded-full border border-slate-200 bg-white pl-11 pr-4 text-sm text-slate-900 transition placeholder:text-slate-400 focus:border-brand-purple-400 focus:outline-none focus:ring-4 focus:ring-brand-purple-500/15 dark:border-slate-700 dark:bg-slate-900 dark:text-white dark:placeholder:text-slate-500"
                 >
             </div>
 
-            <button type="submit" class="order-2 flex shrink-0 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-brand-purple-600 to-brand-purple-500 px-4 py-2.5 text-sm font-semibold text-white shadow-soft transition-all duration-300 hover:-translate-y-0.5 hover:from-brand-purple-500 hover:to-brand-purple-400 hover:shadow-lg active:scale-[0.99] sm:order-3 sm:px-6">
+            <button type="submit" class="order-2 h-11 flex shrink-0 items-center justify-center gap-2 rounded-full bg-brand-purple-700 px-4 text-sm font-semibold text-white transition-all duration-300 active:scale-[0.99] sm:order-3 sm:px-6 hover:bg-brand-purple-800">
                 <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
                 <span class="hidden sm:inline">{{ __('ค้นหา') }}</span>
             </button>
 
-            <div class="order-3 w-full sm:order-2 sm:w-64">
+            <div class="order-3 sm:order-2">
                 <x-premium-select
-                    name="activity_category" :options="$categoryLabels" :selected="request('activity_category')"
-                    placeholder="{{ __('-- ทุกหมวดหมู่ --') }}" autosubmit
+                    variant="chip" name="activity_category" :options="$categoryLabels" :selected="request('activity_category')"
+                    placeholder="{{ __('ทุกหมวดหมู่') }}" autosubmit
                 />
             </div>
         </div>
     </form>
 
-    <div class="overflow-x-auto rounded-2xl glass-card shadow-soft">
+    <div class="overflow-x-auto rounded-3xl glass-card">
         <table class="min-w-full text-sm">
             <thead>
-                <tr class="border-b border-brand-purple-100 dark:border-brand-purple-500/20">
+                <tr class="border-b border-slate-100 dark:border-slate-800">
                     <x-sortable-th field="name" :label="__('นักศึกษา')" />
                     <th class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">{{ __('คณะ/สาขา') }}</th>
                     <x-sortable-th field="year_level" :label="__('ชั้นปี')" />
@@ -113,8 +113,6 @@
                     <tr
                         @class([
                             'group cursor-pointer border-b border-slate-100 transition-colors duration-150 last:border-0 hover:bg-brand-purple-50/50 dark:border-slate-800 dark:hover:bg-slate-800/60',
-                            'bg-white dark:bg-slate-900' => $loop->even,
-                            'bg-slate-50/50 dark:bg-slate-800/40' => $loop->odd,
                         ])
                         @click="open({{ \Illuminate\Support\Js::from([
                             'id' => $req->id,
@@ -138,7 +136,7 @@
                     >
                         <td class="whitespace-nowrap px-4 py-3">
                             <div class="flex items-center gap-2.5">
-                                <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-brand-purple-500 to-brand-purple-700 text-xs font-semibold text-white shadow-soft">
+                                <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand-purple-700 text-xs font-semibold text-white shadow-soft">
                                     {{ mb_substr($req->user->name_thai ?? $req->user->name, 0, 1) }}
                                 </span>
                                 <div>
@@ -189,19 +187,19 @@
         x-show="showModal" x-cloak
         x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
         x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
-        class="fixed inset-0 z-50 flex items-center justify-center bg-brand-purple-950/70 p-4 backdrop-blur-sm"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 p-4 backdrop-blur-sm"
     >
         <div
             @click.outside="showModal = false" x-show="selected"
             x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 scale-95 translate-y-2" x-transition:enter-end="opacity-100 scale-100 translate-y-0"
-            class="w-full max-w-lg rounded-[2rem] bg-gradient-to-br from-white/60 via-white/10 to-brand-purple-200/40 p-[1.5px] shadow-soft-lg dark:from-white/10 dark:via-white/5 dark:to-brand-purple-500/20"
+            class="w-full max-w-lg rounded-[2rem] bg-slate-200 p-px shadow-soft-lg dark:bg-slate-800"
         >
-            <div class="max-h-[90vh] overflow-y-auto rounded-[calc(2rem-1.5px)] bg-white p-6 dark:bg-slate-900">
+            <div class="max-h-[90vh] overflow-y-auto rounded-[calc(2rem-1px)] bg-white p-6 dark:bg-slate-900">
                 <template x-if="selected">
                     <div>
                         <div class="mb-4 flex items-start justify-between gap-3">
                             <div class="flex items-start gap-3">
-                                <span class="mt-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-brand-purple-500 to-brand-purple-700 text-sm font-semibold text-white shadow-soft" x-text="selected.student_name.charAt(0)"></span>
+                                <span class="mt-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-brand-purple-700 text-sm font-semibold text-white shadow-soft" x-text="selected.student_name.charAt(0)"></span>
                                 <div>
                                     <p class="font-semibold leading-snug text-slate-900 dark:text-slate-100" x-text="selected.title"></p>
                                     <p class="text-xs text-slate-400 dark:text-slate-500" x-text="selected.student_name + ' · ' + selected.student_id"></p>
@@ -274,11 +272,11 @@
                         <template x-if="selected.status === 'pending' && ! rejecting && ! approving">
                             <div class="flex gap-3">
                                 <button @click="approving = true" type="button"
-                                    class="flex-1 rounded-xl bg-gradient-to-r from-brand-green-500 to-brand-green-400 px-4 py-2.5 text-sm font-semibold text-brand-purple-950 shadow-soft transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg">
+                                    class="flex-1 rounded-xl bg-brand-green-600 px-4 py-2.5 text-sm font-semibold text-white shadow-soft transition-all duration-300 hover:bg-brand-green-700">
                                     {{ __('อนุมัติ') }}
                                 </button>
                                 <button @click="rejecting = true" type="button"
-                                    class="flex-1 rounded-xl bg-red-50 px-4 py-2.5 text-sm font-semibold text-red-600 shadow-soft transition-all duration-300 hover:-translate-y-0.5 hover:bg-red-100 hover:shadow-lg dark:bg-red-500/10 dark:text-red-400 dark:hover:bg-red-500/20">
+                                    class="flex-1 rounded-xl bg-red-50 px-4 py-2.5 text-sm font-semibold text-red-600 shadow-soft transition-all duration-300 hover:bg-red-100 dark:bg-red-500/10 dark:text-red-400 dark:hover:bg-red-500/20">
                                     {{ __('ปฏิเสธ') }}
                                 </button>
                             </div>
@@ -290,7 +288,7 @@
                                 <div>
                                     <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">{{ __('จำนวนชั่วโมงที่จะให้เครดิต') }}</label>
                                     <input type="number" name="hours_approved" x-model.number="approveHours" min="0" max="200"
-                                        class="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm shadow-soft transition-all duration-200 focus:border-brand-green-500 focus:outline-none focus:ring-4 focus:ring-brand-green-500/10 dark:border-slate-600 dark:bg-slate-800/60 dark:text-slate-100">
+                                        class="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm transition-all duration-200 focus:border-brand-green-500 focus:outline-none focus:ring-4 focus:ring-brand-green-500/10 dark:border-slate-600 dark:bg-slate-800/60 dark:text-slate-100">
                                     <p class="mt-1 text-xs text-slate-400 dark:text-slate-500" x-show="approveHours != selected.hours_requested" x-text="'{{ __('นักศึกษาขอไว้ ') }}' + selected.hours_requested + ' {{ __('ชม.') }}'"></p>
                                 </div>
                                 <div>
@@ -304,12 +302,12 @@
                                             name="admin_comment" x-model="approveComment" rows="2" maxlength="500"
                                             placeholder="{{ __('เช่น หักชั่วโมงเพราะเข้าร่วมไม่เต็มเวลา') }}"
                                             @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'"
-                                            class="w-full resize-none rounded-2xl border border-slate-200 bg-white py-2.5 pl-10 pr-3.5 text-sm shadow-soft transition-all duration-200 focus:border-brand-green-500 focus:outline-none focus:ring-4 focus:ring-brand-green-500/10 dark:border-slate-600 dark:bg-slate-800/60 dark:text-slate-100 dark:placeholder:text-slate-500"
+                                            class="w-full resize-none rounded-2xl border border-slate-200 bg-white py-2.5 pl-10 pr-3.5 text-sm transition-all duration-200 focus:border-brand-green-500 focus:outline-none focus:ring-4 focus:ring-brand-green-500/10 dark:border-slate-600 dark:bg-slate-800/60 dark:text-slate-100 dark:placeholder:text-slate-500"
                                         ></textarea>
                                     </div>
                                 </div>
                                 <div class="flex gap-3">
-                                    <button type="submit" class="flex-1 rounded-xl bg-gradient-to-r from-brand-green-500 to-brand-green-400 px-4 py-2.5 text-sm font-semibold text-brand-purple-950 shadow-soft transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg">
+                                    <button type="submit" class="flex-1 rounded-xl bg-brand-green-600 px-4 py-2.5 text-sm font-semibold text-white shadow-soft transition-all duration-300 hover:bg-brand-green-700">
                                         {{ __('ยืนยันอนุมัติ') }}
                                     </button>
                                     <button @click="approving = false" type="button" class="flex-1 rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 shadow-soft transition-colors hover:bg-slate-100 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700">
@@ -333,12 +331,12 @@
                                             name="reject_reason" x-model="rejectReason" required rows="3" maxlength="500"
                                             placeholder="{{ __('ระบุเหตุผล เช่น รูปเกียรติบัตรไม่ชัดเจน') }}"
                                             @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'"
-                                            class="w-full resize-none rounded-2xl border border-slate-200 bg-white py-2.5 pl-10 pr-3.5 text-sm shadow-soft transition-all duration-200 focus:border-red-500 focus:outline-none focus:ring-4 focus:ring-red-500/10 dark:border-slate-600 dark:bg-slate-800/60 dark:text-slate-100 dark:placeholder:text-slate-500"
+                                            class="w-full resize-none rounded-2xl border border-slate-200 bg-white py-2.5 pl-10 pr-3.5 text-sm transition-all duration-200 focus:border-red-500 focus:outline-none focus:ring-4 focus:ring-red-500/10 dark:border-slate-600 dark:bg-slate-800/60 dark:text-slate-100 dark:placeholder:text-slate-500"
                                         ></textarea>
                                     </div>
                                 </div>
                                 <div class="flex gap-3">
-                                    <button type="submit" class="flex-1 rounded-xl bg-red-600 px-4 py-2.5 text-sm font-semibold text-white shadow-soft transition-all duration-300 hover:-translate-y-0.5 hover:bg-red-700 hover:shadow-lg">
+                                    <button type="submit" class="flex-1 rounded-xl bg-red-600 px-4 py-2.5 text-sm font-semibold text-white shadow-soft transition-all duration-300 hover:bg-red-700">
                                         {{ __('ยืนยันการปฏิเสธ') }}
                                     </button>
                                     <button @click="rejecting = false" type="button" class="flex-1 rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 shadow-soft transition-colors hover:bg-slate-100 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700">

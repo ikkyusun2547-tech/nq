@@ -63,7 +63,7 @@
         @foreach ($reports as $report)
             @php $c = $colorClasses[$report['color']]; @endphp
             <a href="{{ route($report['route']) }}"
-                class="flex flex-col gap-3 rounded-2xl border {{ $c['border'] }} {{ $c['bg'] }} p-5 shadow-soft transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg">
+                class="flex flex-col gap-3 rounded-2xl border {{ $c['border'] }} {{ $c['bg'] }} p-5 shadow-soft transition-all duration-300">
                 <span class="flex h-11 w-11 items-center justify-center rounded-xl {{ $c['well'] }} text-white shadow-soft">
                     <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="{{ $report['icon'] }}"/></svg>
                 </span>
