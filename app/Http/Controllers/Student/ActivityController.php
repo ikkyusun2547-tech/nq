@@ -77,18 +77,22 @@ class ActivityController extends Controller
             ->withCount('attendances');
 
         if ($statusGroup === 'open') {
-            // The main feed: every non-cancelled activity, but ranked open
-            // first (soonest first), then upcoming drafts (soonest first),
-            // then ended ones (most recently ended first) — rather than the
-            // hard status filter the other two tabs use.
-            $activities = collect(['open', 'upcoming', 'ended'])
-                ->flatMap(function (string $group) use ($baseQuery) {
-                    return $baseQuery()
-                        ->whereIn('status', self::STATUS_GROUPS[$group])
-                        ->orderBy('start_at', $group === 'ended' ? 'desc' : 'asc')
-                        ->get();
-                })
+            // The main feed: everything not yet over, ranked by what the
+            // student should act on first (see feedRank()), soonest first
+            // within each rank. Ended activities live in their own tab.
+            $attendedIds = $user->attendances()->pluck('activity_id')->flip();
+
+            $activities = $baseQuery()
+                ->whereIn('status', ['ongoing', 'open', 'full', 'draft'])
+                ->where('end_at', '>=', now())
+                ->with('restrictions')
+                ->get()
                 ->filter(fn (Activity $activity) => $activity->isEligibleFor($user))
+                ->sortBy(fn (Activity $activity) => sprintf(
+                    '%d-%s',
+                    $this->feedRank($activity, $attendedIds->has($activity->id)),
+                    $activity->start_at->format('YmdHis'),
+                ))
                 ->values();
         } else {
             $activities = $baseQuery()
@@ -119,6 +123,25 @@ class ActivityController extends Controller
         return view('student.activities.index', compact('activities', 'checkedInActivityIds', 'academicYears', 'academicYear', 'faculties', 'statusGroup'));
     }
 
+    /**
+     * Main-feed priority, lowest first:
+     *  1–2. open right now (ongoing ahead of open) — can check in today
+     *  3.   not open yet but aimed at this student's faculty/major/year
+     *  4.   not open yet, open to everyone
+     *  5.   full — can't join, but still worth seeing
+     *  6.   already checked in — nothing left to do
+     */
+    private function feedRank(Activity $activity, bool $attended): int
+    {
+        return match (true) {
+            $attended => 6,
+            $activity->status === 'ongoing' => 1,
+            $activity->status === 'open' => 2,
+            $activity->status === 'full' => 5,
+            $activity->restrictions->isNotEmpty() => 3,
+            default => 4,
+        };
+    }
 
     /**
      * Full detail page a card in the browsable feed links through to, since

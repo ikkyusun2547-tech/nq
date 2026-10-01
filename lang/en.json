@@ -1,5 +1,7 @@
 {
     "การแก้ไขข้อความของคำถามที่มีผู้ตอบแล้วจะเปลี่ยนวิธีอ่านผลเก่าไปด้วย ควรแก้เฉพาะถ้อยคำโดยคงความหมายเดิม": "Rewording an answered question also changes how its past results read — keep the meaning the same.",
+    "สำหรับคุณ": "For You",
+    "กิจกรรมสำหรับคุณ": "Activities for You",
     "ประเมินความพึงพอใจกิจกรรม": "Rate this activity",
     "กิจกรรม \":title\" สิ้นสุดแล้ว ขอเชิญประเมินความพึงพอใจ (ใช้เวลาไม่ถึง 1 นาที และไม่ระบุตัวตน)": "The activity \":title\" has ended. Please rate your satisfaction (takes under a minute and is anonymous).",
     "คุณไม่สามารถประเมินกิจกรรมนี้ได้ หรือประเมินไปแล้ว": "You cannot rate this activity, or you have already rated it.",
