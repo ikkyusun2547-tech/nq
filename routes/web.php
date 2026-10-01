@@ -24,6 +24,7 @@ use App\Http\Controllers\Admin\StudentController;
 use App\Http\Controllers\Admin\StudentImportController;
 use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\Api\DeviceTokenController;
+use App\Http\Controllers\Auth\DemoLoginController;
 use App\Http\Controllers\Auth\GoogleAuthController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileSetupController;
@@ -62,6 +63,9 @@ Route::middleware('guest')->group(function () {
 
     Route::get('/auth/google/redirect', [GoogleAuthController::class, 'redirect'])->name('auth.google.redirect');
     Route::get('/auth/google/callback', [GoogleAuthController::class, 'callback'])->name('auth.google.callback');
+
+    Route::get('/demo-login', [DemoLoginController::class, 'show'])->name('demo-login.show');
+    Route::post('/demo-login', [DemoLoginController::class, 'store'])->middleware('throttle:5,1')->name('demo-login.store');
 });
 
 Route::post('/logout', [GoogleAuthController::class, 'logout'])->middleware('auth')->name('logout');

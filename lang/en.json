@@ -1,4 +1,12 @@
 {
+    "หรือ": "or",
+    "เข้าสู่ระบบแบบทดลอง": "Demo Sign-in",
+    "สำหรับอาจารย์และผู้ประเมินระบบ": "For advisors and system evaluators",
+    "รหัสผ่านทดลอง": "Demo password",
+    "รหัสผ่านทดลองไม่ถูกต้อง": "Incorrect demo password",
+    "รหัสผ่านจะกำหนดว่าเข้าใช้งานในฐานะผู้ดูแลระบบหรือนักศึกษา": "The password decides whether you sign in as an admin or a student",
+    "เข้าสู่ระบบ": "Sign in",
+    "กลับไปเข้าสู่ระบบด้วย Google": "Back to Google sign-in",
     "(ข้าม :count คนที่ไม่เข้าเงื่อนไข)": "(:count skipped — not eligible)",
     "+ เพิ่มสาขา": "+ Add Major",
     "-- ทุกคณะ (แยกดูได้) --": "-- All faculties (view separately) --",

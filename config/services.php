@@ -61,6 +61,14 @@ return [
         'office_address' => env('SRRU_OFFICE_ADDRESS'),
         'office_hours' => env('SRRU_OFFICE_HOURS', 'จันทร์–ศุกร์ 08:30–16:30 น. (ยกเว้นวันหยุดราชการ)'),
         'response_time' => env('SRRU_RESPONSE_TIME', 'โดยปกติตอบกลับภายใน 1–2 วันทำการ'),
+
+        // Passwords for the "เข้าสู่ระบบแบบทดลอง" form (see
+        // Auth\DemoLoginController) used by evaluators who can't sign in
+        // with a university Google account — whichever one is typed decides
+        // which demo account they get. Leave both unset to turn the feature
+        // off entirely (its routes 404), so it's opt-in per deployment.
+        'demo_admin_password' => env('DEMO_ADMIN_PASSWORD'),
+        'demo_student_password' => env('DEMO_STUDENT_PASSWORD'),
     ],
 
 ];

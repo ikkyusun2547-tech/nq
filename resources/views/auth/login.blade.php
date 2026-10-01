@@ -36,9 +36,31 @@
             {{ __('เข้าสู่ระบบด้วยบัญชี Google มหาวิทยาลัย') }}
         </a>
 
-        <p class="mt-6 text-center text-xs text-slate-400 dark:text-slate-500">
+        <p class="mt-3 text-center text-xs text-slate-400 dark:text-slate-500">
             {{ __('ใช้ได้เฉพาะบัญชีอีเมล @ :domain เท่านั้น', ['domain' => config('services.srru.email_domain')]) }}
         </p>
+
+        @if (\App\Http\Controllers\Auth\DemoLoginController::enabled())
+            <div class="my-5 flex items-center gap-3 text-xs text-slate-400 dark:text-slate-500">
+                <span class="h-px flex-1 bg-slate-200 dark:bg-slate-700"></span>
+                {{ __('หรือ') }}
+                <span class="h-px flex-1 bg-slate-200 dark:bg-slate-700"></span>
+            </div>
+
+            <a
+                href="{{ route('demo-login.show') }}"
+                class="flex w-full items-center justify-center gap-2 rounded-2xl bg-violet-600 px-4 py-3 text-sm font-medium text-white shadow-soft transition-all duration-300 hover:-translate-y-0.5 hover:bg-violet-700 hover:shadow-lg active:scale-[0.99]"
+            >
+                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 0 1 3 3m3 0a6 6 0 0 1-7.03 5.91c-.47-.08-.97.02-1.3.36L11.25 17.25H9v2.25H6.75v2.25H3v-2.82c0-.6.24-1.17.66-1.6l6.07-6.07c.34-.33.44-.83.36-1.3A6 6 0 1 1 21.75 8.25Z"/>
+                </svg>
+                {{ __('เข้าสู่ระบบแบบทดลอง') }}
+            </a>
+
+            <p class="mt-3 text-center text-xs text-slate-400 dark:text-slate-500">
+                {{ __('สำหรับอาจารย์และผู้ประเมินระบบ') }}
+            </p>
+        @endif
     </div>
 
     <p class="relative mt-6 text-center text-xs text-violet-200/70">
