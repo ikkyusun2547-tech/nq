@@ -24,11 +24,13 @@
     $initial = collect($groups)->mapWithKeys(fn ($g) => [$g['name'] => (string) ($g['selected'] ?? '')])->all();
 @endphp
 
+{{-- pick(): choosing a parent (e.g. faculty) resets its dependent field (major)
+     to the "all" chip. Keep comments out of x-data itself: it lives in a
+     double-quoted HTML attribute, so a stray double quote ends it early. --}}
 <template x-teleport="body">
     <div x-show="filtersOpen" x-cloak class="fixed inset-0 z-50 sm:hidden" @keydown.escape.window="filtersOpen = false"
         x-data="{
             picked: @js($initial),
-            // Picking a parent (e.g. faculty) resets its dependent field (major) to "all".
             pick(name, value) {
                 this.picked[name] = value;
                 document.querySelectorAll(`input[data-depends='${name}']`).forEach((r) => {
