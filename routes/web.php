@@ -39,6 +39,7 @@ use App\Http\Controllers\Student\LateCheckInController;
 use App\Http\Controllers\Student\ProfileController;
 use App\Http\Controllers\Student\SelfCheckInController;
 use App\Http\Controllers\Student\TranscriptController;
+use App\Models\Activity;
 use App\Models\Faculty;
 use Illuminate\Support\Facades\Route;
 
