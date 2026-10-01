@@ -44,13 +44,18 @@
 {{--
     Wraps a form's submit action behind a styled confirmation modal instead
     of the native browser confirm() popup — drop this in place of the
-    trigger <button>; the trailing "confirm" button inside the modal is a
-    real type="submit" so it submits the *enclosing* <form> exactly like
-    the original button did, no extra JS wiring needed.
+    trigger <button>; the modal's "confirm" button submits the *enclosing*
+    <form> exactly like the original button did.
+
+    The modal is teleported to <body>: left in place, a `fixed` overlay
+    gets trapped inside any ancestor with backdrop-filter (e.g. .glass-card
+    around admin tables) and clipped by its overflow. That moves it out of
+    the <form>, hence submitting via the form captured at init.
 --}}
-<div x-data="{ open: false }" class="contents">
+<div x-data="{ open: false, form: null }" x-init="form = $el.closest('form')" class="contents">
     <button type="button" @click="open = true" {{ $attributes }}>{{ $slot }}</button>
 
+    <template x-teleport="body">
     <div x-show="open" x-cloak x-transition.opacity
         class="fixed inset-0 z-50 flex items-center justify-center bg-brand-purple-950/70 p-4 backdrop-blur-sm"
         @keydown.escape.window="open = false">
@@ -78,7 +83,7 @@
                         class="rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-600 ring-1 ring-slate-200 transition-colors hover:bg-slate-50 dark:text-slate-300 dark:ring-slate-600 dark:hover:bg-slate-800">
                         {{ __('ยกเลิก') }}
                     </button>
-                    <button type="submit"
+                    <button type="button" @click="open = false; form.requestSubmit()"
                         class="rounded-xl px-4 py-2.5 text-sm font-semibold text-white shadow-soft transition-all duration-200 hover:shadow-lg active:scale-[0.98] {{ $c['button'] }}">
                         {{ $label }}
                     </button>
@@ -86,4 +91,5 @@
             </div>
         </div>
     </div>
+    </template>
 </div>
