@@ -118,22 +118,35 @@
             const match = this.options.find(o => ! o.heading && o.value === this.selected);
             return match ? match.label : this.placeholderText;
         },
+        // A <select>'s .value setter is a no-op unless a matching <option>
+        // already exists in the DOM — fine for the normal server-rendered
+        // options, but liveOptions (e.g. majors fetched after a faculty is
+        // picked) never rendered any <option> tags server-side, so without
+        // this the real select the form actually submits stayed blank.
+        syncNative() {
+            const native = this.$refs.native;
+            if (this.selected !== '' && ! native.querySelector(`option[value='${CSS.escape(this.selected)}']`)) {
+                const optionEl = document.createElement('option');
+                optionEl.value = this.selected;
+                native.appendChild(optionEl);
+            }
+            native.value = this.selected;
+        },
+        // Each time a liveOptions list (re)loads: keep a pre-filled value
+        // (e.g. the student's saved major on the edit-profile form) if it's
+        // in the new list — writing it through to the real select, which
+        // is what the form posts — or clear it if it isn't (e.g. the
+        // faculty changed). An empty list means still loading, so wait.
+        applyLiveOptions(list) {
+            this.options = list;
+            if (! list.length) return;
+            if (! list.some(o => ! o.heading && o.value === this.selected)) this.selected = '';
+            this.syncNative();
+        },
         pick(opt) {
             this.selected = opt.value;
             this.open = false;
-
-            // A <select>'s .value setter is a no-op unless a matching
-            // <option> already exists in the DOM — fine for the normal
-            // server-rendered options, but liveOptions (e.g. majors fetched
-            // after a faculty is picked) never rendered any <option> tags
-            // server-side, so the very first pick silently failed to
-            // register on the real select the form actually submits.
-            if (opt.value !== '' && ! this.$refs.native.querySelector(`option[value='${CSS.escape(opt.value)}']`)) {
-                const optionEl = document.createElement('option');
-                optionEl.value = opt.value;
-                this.$refs.native.appendChild(optionEl);
-            }
-            this.$refs.native.value = opt.value;
+            this.syncNative();
 
             @if ($liveSelected)
                 {{ $liveSelected }} = opt.value;
@@ -163,7 +176,7 @@
     @keydown.escape="open = false"
     @click.outside="open = false"
     @if ($liveOptions)
-        x-init="options = {{ $liveOptions }}; $watch('{{ $liveOptions }}', (val) => { options = val; })"
+        x-init="applyLiveOptions({{ $liveOptions }}); $watch('{{ $liveOptions }}', (val) => applyLiveOptions(val))"
     @endif
 >
     {{-- Real <select> stays in the DOM (visually hidden) so the form posts
