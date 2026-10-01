@@ -129,6 +129,7 @@ Route::middleware(['auth', 'srru.email'])->group(function () {
 
     // Explains every check-in method; open to students and admins alike.
     Route::view('/check-in-methods', 'guide.check-in-methods')->name('checkin-guide');
+    Route::view('/install-app', 'guide.install-app')->name('install-guide');
 
     Route::middleware('profile.completed')->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'show'])->name('dashboard');

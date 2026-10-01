@@ -4,6 +4,7 @@
     x-init="$watch('dark', value => {
         document.documentElement.classList.toggle('dark', value);
         localStorage.theme = value ? 'dark' : 'light';
+        window.srruSyncThemeColor?.();
     })"
     @click="dark = ! dark"
     class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"

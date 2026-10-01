@@ -82,7 +82,8 @@
             {{-- This week --}}
             <section aria-label="{{ __('สัปดาห์นี้') }}">
                 <div class="mb-2 flex items-center justify-between">
-                    <h2 class="text-sm font-semibold text-slate-900 dark:text-white">{{ $week->first()['date']->translatedFormat('F') }} {{ $thaiYear($week->first()['date']) }}</h2>
+                    {{-- Today's month, not the Monday's — the strip can start in the previous month. --}}
+                    <h2 class="text-sm font-semibold text-slate-900 dark:text-white">{{ now()->translatedFormat('F') }} {{ $thaiYear(now()) }}</h2>
                     <a href="{{ route('activities.calendar') }}" class="text-sm font-medium text-brand-purple-700 hover:underline dark:text-brand-purple-300">{{ __('ดูปฏิทิน') }}</a>
                 </div>
                 <div class="grid grid-cols-7 gap-1.5">

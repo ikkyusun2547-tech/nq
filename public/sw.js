@@ -7,7 +7,11 @@
 // which is exactly the bug this merge fixes (push messages were arriving
 // at this file with no listener for them, since it used to only handle
 // install/activate/fetch).
-const CACHE_NAME = 'srru-check-static-v1';
+// Bump the version whenever a file under /images/ is replaced in place under
+// the same name (e.g. the app icons): images are served cache-first, so
+// otherwise installed apps keep the old copy forever. activate() below
+// deletes every cache that isn't this one.
+const CACHE_NAME = 'srru-check-static-v2';
 const STATIC_PATH_PREFIXES = ['/build/', '/images/'];
 
 self.addEventListener('install', (event) => {

@@ -194,6 +194,18 @@ class DashboardControllerTest extends TestCase
             ->assertSee('+3 ชม.');
     }
 
+    public function test_the_week_strip_is_labelled_with_the_current_month(): void
+    {
+        // Friday 2 Oct 2026: the Monday-to-Sunday strip starts on 28 Sep.
+        $this->travelTo(\Illuminate\Support\Carbon::create(2026, 10, 2, 9));
+        app()->setLocale('th');
+
+        $this->actingAs($this->student())->get(route('dashboard'))
+            ->assertOk()
+            ->assertSee('ตุลาคม 2569')
+            ->assertDontSee('กันยายน 2569');
+    }
+
     public function test_a_next_activity_tomorrow_reads_tomorrow(): void
     {
         $this->travelTo(now()->setTime(9, 0));

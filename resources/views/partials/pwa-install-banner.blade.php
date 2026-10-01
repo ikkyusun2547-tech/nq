@@ -34,6 +34,9 @@
                 >
                     {{ __('ติดตั้ง') }}
                 </button>
+                @auth
+                    <a href="{{ route('install-guide') }}" x-show="platform === 'ios' || showManualHelp" class="text-xs font-semibold text-brand-purple-700 hover:underline dark:text-brand-purple-300">{{ __('ดูวิธีติดตั้ง') }}</a>
+                @endauth
                 <button type="button" @click="dismiss()" class="text-xs font-medium text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300">
                     {{ __('ไม่ใช่ตอนนี้') }}
                 </button>
@@ -78,9 +81,10 @@
                 // great — the button already on screen just starts working.
                 this.visible = true;
 
-                window.addEventListener('beforeinstallprompt', (e) => {
-                    e.preventDefault();
-                    this.deferredPrompt = e;
+                // pwa-head may already have caught the browser's prompt.
+                this.deferredPrompt = window.srruInstallPrompt;
+                window.addEventListener('srru-install-available', () => {
+                    this.deferredPrompt = window.srruInstallPrompt;
                     this.showManualHelp = false;
                 });
 
@@ -104,6 +108,7 @@
                 this.deferredPrompt.prompt();
                 const { outcome } = await this.deferredPrompt.userChoice;
                 this.deferredPrompt = null;
+                window.srruInstallPrompt = null;
                 this.visible = false;
 
                 if (outcome === 'accepted') {

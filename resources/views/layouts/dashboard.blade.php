@@ -68,7 +68,10 @@
                 ['route' => 'checkin.show', 'label' => __('เช็คชื่อ'), 'active' => ['checkin.*']],
                 ['route' => 'hour-requests.index', 'label' => __('คำร้อง'), 'active' => ['hour-requests.*', 'external-activities.*', 'credit-transfers.*'], 'badge' => $studentAttention['requests']],
                 ['route' => 'contact.index', 'label' => __('ติดต่อเรา'), 'active' => ['contact.*'], 'badge' => $studentAttention['contact']],
-                ['route' => 'checkin-guide', 'label' => __('คู่มือ'), 'active' => ['checkin-guide']],
+                ['label' => __('คู่มือ'), 'children' => [
+                    ['route' => 'checkin-guide', 'label' => __('วิธีเช็คชื่อกิจกรรม'), 'active' => ['checkin-guide']],
+                    ['route' => 'install-guide', 'label' => __('วิธีติดตั้งแอป'), 'active' => ['install-guide']],
+                ]],
             ];
 
         $isActive = fn (array $item) => isset($item['children'])

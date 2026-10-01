@@ -40,6 +40,29 @@ class CheckInGuideTest extends TestCase
             ->assertDontSee(route('checkin.show'), false);
     }
 
+    public function test_the_install_guide_page_covers_each_platform_and_is_in_the_menu(): void
+    {
+        $student = User::factory()->create([
+            'role' => 'student',
+            'email' => 'stu'.uniqid().'@srru.ac.th',
+            'faculty_id' => Faculty::factory(),
+            'student_id' => '12345678901',
+            'year_level' => 2,
+            'program_type' => 'normal',
+        ]);
+
+        $this->actingAs($student)->get(route('install-guide'))
+            ->assertOk()
+            ->assertSee('<title>ระบบเช็คชื่อกิจกรรมนักศึกษา SRRU</title>', false)
+            ->assertSeeInOrder(['วิธีติดตั้งแอป', 'ติดตั้ง SRRU Check เป็นแอป', 'Android', 'iPhone / iPad', 'คอมพิวเตอร์'])
+            ->assertSee('เพิ่มไปยังหน้าจอโฮม');
+
+        // Both guides hang off the "คู่มือ" menu.
+        $this->actingAs($student)->get(route('dashboard'))
+            ->assertSee(route('checkin-guide'), false)
+            ->assertSee(route('install-guide'), false);
+    }
+
     public function test_guests_are_sent_to_log_in(): void
     {
         $this->get(route('checkin-guide'))->assertRedirect();

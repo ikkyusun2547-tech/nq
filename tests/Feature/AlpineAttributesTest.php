@@ -57,6 +57,8 @@ class AlpineAttributesTest extends TestCase
             [$admin, route('admin.students.index')],
             [$admin, route('admin.attendance.index', $activity)],
             [$student, route('activities.index')],
+            [$student, route('checkin-guide')],
+            [$student, route('install-guide')],
         ];
 
         foreach ($pages as [$user, $url]) {

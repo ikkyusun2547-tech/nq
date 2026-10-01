@@ -1,68 +1,73 @@
+{{--
+    Default paginator for the whole app (every ->links()).
+    Phones get a compact "‹ หน้า 2 / 5 ›"; wider screens get the full row of
+    page numbers in one pill-shaped group.
+--}}
 @if ($paginator->hasPages())
-    <nav role="navigation" aria-label="{{ __('Pagination Navigation') }}" class="flex flex-col items-center justify-between gap-3 sm:flex-row">
+    @php
+        $btn = 'flex h-9 min-w-9 shrink-0 items-center justify-center rounded-full px-2 text-sm transition-colors';
+        $idle = 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white';
+        $off = 'cursor-default text-slate-300 dark:text-slate-600';
+        $chevronLeft = 'M15.75 19.5L8.25 12l7.5-7.5';
+        $chevronRight = 'M8.25 4.5l7.5 7.5-7.5 7.5';
+    @endphp
+    <nav role="navigation" aria-label="{{ __('การแบ่งหน้า') }}" class="flex flex-col items-center justify-between gap-3 sm:flex-row">
         <p class="text-sm text-slate-500 dark:text-slate-400">
-            {!! __('Showing') !!}
             @if ($paginator->firstItem())
-                <span class="font-semibold text-slate-700 dark:text-slate-200">{{ $paginator->firstItem() }}</span>
-                {!! __('to') !!}
-                <span class="font-semibold text-slate-700 dark:text-slate-200">{{ $paginator->lastItem() }}</span>
+                {{ __('แสดง') }}
+                <span class="font-semibold text-slate-800 dark:text-slate-100">{{ number_format($paginator->firstItem()) }}–{{ number_format($paginator->lastItem()) }}</span>
+                {{ __('จากทั้งหมด') }}
+                <span class="font-semibold text-slate-800 dark:text-slate-100">{{ number_format($paginator->total()) }}</span>
+                {{ __('รายการ') }}
             @else
-                {{ $paginator->count() }}
+                {{ __('ทั้งหมด :total รายการ', ['total' => number_format($paginator->total())]) }}
             @endif
-            {!! __('of') !!}
-            <span class="font-semibold text-slate-700 dark:text-slate-200">{{ $paginator->total() }}</span>
-            {!! __('results') !!}
         </p>
 
-        <div class="flex items-center gap-1.5">
-            {{-- Previous Page Link --}}
+        <div class="flex items-center gap-0.5 rounded-full border border-slate-200 bg-white p-1 dark:border-slate-800 dark:bg-slate-900">
+            {{-- Previous --}}
             @if ($paginator->onFirstPage())
-                <span aria-disabled="true" aria-label="{{ __('pagination.previous') }}"
-                    class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-slate-300 dark:text-slate-600">
-                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"/></svg>
+                <span aria-disabled="true" aria-label="{{ __('หน้าก่อนหน้า') }}" class="{{ $btn }} {{ $off }}">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $chevronLeft }}"/></svg>
                 </span>
             @else
-                <a href="{{ $paginator->previousPageUrl() }}" rel="prev" aria-label="{{ __('pagination.previous') }}"
-                    class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-slate-500 shadow-soft transition-colors hover:bg-brand-purple-50 hover:text-brand-purple-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-brand-purple-400">
-                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"/></svg>
+                <a href="{{ $paginator->previousPageUrl() }}" rel="prev" aria-label="{{ __('หน้าก่อนหน้า') }}" class="{{ $btn }} {{ $idle }}">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $chevronLeft }}"/></svg>
                 </a>
             @endif
 
-            {{-- Pagination Elements --}}
-            @foreach ($elements as $element)
-                {{-- "Three Dots" Separator --}}
-                @if (is_string($element))
-                    <span class="flex h-9 w-9 shrink-0 items-center justify-center text-sm text-slate-400 dark:text-slate-500">{{ $element }}</span>
-                @endif
+            {{-- Phones: just "page X / Y" --}}
+            <span class="px-3 text-sm text-slate-600 dark:text-slate-300 sm:hidden">
+                {{ __('หน้า') }} <span class="font-semibold text-slate-900 dark:text-white">{{ $paginator->currentPage() }}</span> / {{ $paginator->lastPage() }}
+            </span>
 
-                {{-- Array Of Links --}}
-                @if (is_array($element))
-                    @foreach ($element as $page => $url)
-                        @if ($page == $paginator->currentPage())
-                            <span aria-current="page"
-                                class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-purple-700 text-sm font-semibold text-white shadow-soft">
-                                {{ $page }}
-                            </span>
-                        @else
-                            <a href="{{ $url }}" aria-label="{{ __('Go to page :page', ['page' => $page]) }}"
-                                class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm font-medium text-slate-500 transition-colors hover:bg-brand-purple-50 hover:text-brand-purple-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-brand-purple-400">
-                                {{ $page }}
-                            </a>
-                        @endif
-                    @endforeach
-                @endif
-            @endforeach
+            {{-- Wider screens: page numbers --}}
+            <span class="hidden items-center gap-0.5 sm:flex">
+                @foreach ($elements as $element)
+                    @if (is_string($element))
+                        <span class="{{ $btn }} {{ $off }}">…</span>
+                    @endif
 
-            {{-- Next Page Link --}}
+                    @if (is_array($element))
+                        @foreach ($element as $page => $url)
+                            @if ($page == $paginator->currentPage())
+                                <span aria-current="page" class="{{ $btn }} bg-brand-purple-700 font-semibold text-white dark:bg-brand-purple-600">{{ $page }}</span>
+                            @else
+                                <a href="{{ $url }}" aria-label="{{ __('ไปหน้า :page', ['page' => $page]) }}" class="{{ $btn }} {{ $idle }}">{{ $page }}</a>
+                            @endif
+                        @endforeach
+                    @endif
+                @endforeach
+            </span>
+
+            {{-- Next --}}
             @if ($paginator->hasMorePages())
-                <a href="{{ $paginator->nextPageUrl() }}" rel="next" aria-label="{{ __('pagination.next') }}"
-                    class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-slate-500 shadow-soft transition-colors hover:bg-brand-purple-50 hover:text-brand-purple-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-brand-purple-400">
-                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
+                <a href="{{ $paginator->nextPageUrl() }}" rel="next" aria-label="{{ __('หน้าถัดไป') }}" class="{{ $btn }} {{ $idle }}">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $chevronRight }}"/></svg>
                 </a>
             @else
-                <span aria-disabled="true" aria-label="{{ __('pagination.next') }}"
-                    class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-slate-300 dark:text-slate-600">
-                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
+                <span aria-disabled="true" aria-label="{{ __('หน้าถัดไป') }}" class="{{ $btn }} {{ $off }}">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $chevronRight }}"/></svg>
                 </span>
             @endif
         </div>
