@@ -153,8 +153,10 @@
                 {{-- Account menu (desktop) --}}
                 <div class="relative hidden lg:block" x-data="{ open: false }" @click.outside="open = false" @keydown.escape="open = false">
                     <button type="button" @click="open = ! open" :aria-expanded="open" aria-label="{{ __('บัญชีของฉัน') }}"
-                        class="ml-1 flex h-9 w-9 items-center justify-center rounded-full bg-brand-purple-50 text-xs font-semibold text-brand-purple-700 ring-1 ring-brand-purple-100 transition hover:ring-brand-purple-300 dark:bg-brand-purple-500/15 dark:text-brand-purple-300 dark:ring-brand-purple-500/20">
+                        class="relative ml-1 flex h-9 w-9 items-center justify-center overflow-hidden rounded-full bg-brand-purple-50 text-xs font-semibold text-brand-purple-700 ring-1 ring-brand-purple-100 transition hover:ring-brand-purple-300 dark:bg-brand-purple-500/15 dark:text-brand-purple-300 dark:ring-brand-purple-500/20">
+                        {{-- Google profile photo when there is one; the initials underneath show if it's missing or fails to load. --}}
                         {{ $initials }}
+                        @if ($user?->avatar_url)<img src="{{ $user->avatar_url }}" alt="" referrerpolicy="no-referrer" onerror="this.remove()" class="absolute inset-0 h-full w-full object-cover">@endif
                     </button>
                     <div x-show="open" x-cloak x-transition.opacity.duration.150ms
                         class="absolute right-0 top-full z-50 mt-2 w-64 rounded-2xl border border-slate-200 bg-white p-1.5 shadow-soft-lg dark:border-slate-800 dark:bg-slate-900">
@@ -196,7 +198,7 @@
                     x-transition:leave="transition ease-in duration-150" x-transition:leave-start="translate-x-0" x-transition:leave-end="translate-x-full"
                     class="absolute inset-y-0 right-0 flex w-[min(20rem,88vw)] flex-col bg-white shadow-soft-lg dark:bg-slate-900">
                     <div class="flex items-center gap-3 border-b border-slate-200 px-4 py-4 dark:border-slate-800">
-                        <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand-purple-50 text-sm font-semibold text-brand-purple-700 dark:bg-brand-purple-500/15 dark:text-brand-purple-300">{{ $initials }}</span>
+                        <span class="relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-brand-purple-50 text-sm font-semibold text-brand-purple-700 dark:bg-brand-purple-500/15 dark:text-brand-purple-300">{{ $initials }}@if ($user?->avatar_url)<img src="{{ $user->avatar_url }}" alt="" referrerpolicy="no-referrer" onerror="this.remove()" class="absolute inset-0 h-full w-full object-cover">@endif</span>
                         <span class="min-w-0 flex-1">
                             <span class="block truncate text-sm font-semibold">{{ $displayName }}</span>
                             <span class="block truncate text-xs text-slate-500 dark:text-slate-400">{{ $user?->email }}</span>

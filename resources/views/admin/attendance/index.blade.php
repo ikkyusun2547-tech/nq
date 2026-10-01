@@ -322,11 +322,11 @@
                         </span>
                         <input
                             type="text" x-model="missingSearch" placeholder="{{ __('ค้นหาในรายชื่อนี้') }}"
-                            class="w-full rounded-xl border border-slate-200 bg-slate-50/50 py-2 pl-9 pr-3 text-sm transition-all duration-200 focus:border-amber-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-amber-500/10 dark:border-slate-600 dark:bg-slate-800/60 dark:text-slate-100"
+                            class="w-full rounded-xl border border-slate-200 bg-slate-50/50 py-2 pl-9 pr-3 text-sm transition-all duration-200 focus:border-brand-purple-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-brand-purple-500/10 dark:border-slate-600 dark:bg-slate-800/60 dark:text-slate-100"
                         >
                     </div>
                     <a href="{{ route('admin.attendance.missing-export', $activity) }}"
-                        class="flex shrink-0 items-center gap-1.5 rounded-xl bg-amber-400 px-3.5 py-2 text-sm font-semibold text-slate-900 shadow-soft transition-all duration-300 hover:bg-amber-400">
+                        class="flex shrink-0 items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-sm font-medium text-slate-700 transition-colors hover:border-brand-purple-300 hover:text-brand-purple-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:text-brand-purple-300">
                         <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg>
                         Excel
                     </a>
@@ -336,10 +336,10 @@
                     @forelse ($missingStudents as $student)
                         <div
                             x-show="missingSearch === '' || {{ Illuminate\Support\Js::from(strtolower(($student->name_thai ?? $student->name).' '.$student->student_id)) }}.includes(missingSearch.toLowerCase())"
-                            class="flex items-center justify-between gap-3 rounded-xl px-3.5 py-2.5 transition-colors hover:bg-amber-50/60 dark:hover:bg-slate-800/60"
+                            class="flex items-center justify-between gap-3 rounded-xl px-3.5 py-2.5 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/60"
                         >
                             <div class="flex items-center gap-2.5 min-w-0">
-                                <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-amber-400 text-xs font-semibold text-slate-900 shadow-soft">
+                                <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand-purple-50 text-xs font-semibold text-brand-purple-700 dark:bg-brand-purple-500/15 dark:text-brand-purple-300">
                                     {{ mb_substr($student->name_thai ?? $student->name, 0, 1) }}
                                 </span>
                                 <div class="min-w-0">

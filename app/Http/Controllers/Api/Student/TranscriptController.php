@@ -8,7 +8,6 @@ use App\Models\CreditTransferPosition;
 use App\Models\CreditTransferRequest;
 use App\Models\ExternalActivityRequest;
 use App\Services\ActivityEvaluationService;
-use App\Support\PdfGradientRenderer;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 
@@ -28,12 +27,6 @@ class TranscriptController extends Controller
         'sports' => '#fbbf24',
         'volunteer' => '#8b5cf6',
         'ethics' => '#e879f9',
-    ];
-
-    private const HEADER_GRADIENT_STOPS = [
-        [0.0, [0x2e, 0x10, 0x65]],
-        [0.55, [0x5b, 0x21, 0xb6]],
-        [1.0, [0x05, 0x96, 0x69]],
     ];
 
     public function download(Request $request, ActivityEvaluationService $evaluator)
@@ -88,7 +81,6 @@ class TranscriptController extends Controller
             'items' => $items,
             'categoryLabels' => self::CATEGORY_LABELS,
             'categoryColors' => self::CATEGORY_COLORS,
-            'headerGradient' => PdfGradientRenderer::headerGradientDataUri(self::HEADER_GRADIENT_STOPS),
             'generatedAt' => now(),
         ])->setPaper('a4', 'portrait');
 

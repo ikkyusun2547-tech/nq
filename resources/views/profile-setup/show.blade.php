@@ -2,14 +2,26 @@
 
 @section('content')
 @php
+    $isEdit = $user->hasCompletedProfile();
     $features = [
-        __('เช็คชื่อกิจกรรมด้วย QR + GPS + เซลฟี ยืนยันตัวตน'),
-        __('ติดตามความคืบหน้าชั่วโมงกิจกรรมแบบเรียลไทม์'),
-        __('ยื่นคำร้องเทียบกิจกรรมภายนอกได้ในระบบเดียว'),
+        [__('เช็คชื่อด้วย QR'), 'M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 013.75 9.375v-4.5zM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5zM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0113.5 9.375v-4.5z'],
+        [__('ดูชั่วโมงสะสมได้ทันที'), 'M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z'],
+        [__('ยื่นคำร้องในระบบเดียว'), 'M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z'],
     ];
+    $input = fn (string $field) => 'h-11 w-full rounded-xl border bg-white px-3.5 text-sm text-slate-900 placeholder:text-slate-400 transition focus:outline-none focus:ring-4 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500 '
+        .($errors->has($field)
+            ? 'border-red-400 focus:border-red-500 focus:ring-red-500/10 dark:border-red-500/70'
+            : 'border-slate-200 focus:border-brand-purple-500 focus:ring-brand-purple-500/10 dark:border-slate-700');
+    // Tappable option chips (radio inside a label), shared by prefix / year / program.
+    $chip = 'flex h-11 cursor-pointer items-center justify-center rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 transition-colors hover:border-brand-purple-300 has-[:checked]:border-brand-purple-600 has-[:checked]:bg-brand-purple-600 has-[:checked]:font-semibold has-[:checked]:text-white has-[:focus-visible]:ring-4 has-[:focus-visible]:ring-brand-purple-500/20 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:has-[:checked]:border-brand-purple-500 dark:has-[:checked]:bg-brand-purple-600';
+    $label = 'mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300';
+    $section = 'rounded-3xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900 sm:p-7';
+    $prefix = old('title_prefix', $namePrefix);
+    $yearLevel = (string) old('year_level', $user->year_level);
+    $programType = old('program_type', $user->program_type);
 @endphp
-<div
-    class="grid min-h-dvh grid-cols-1 lg:grid-cols-5"
+
+<div class="min-h-dvh bg-slate-50 dark:bg-slate-950"
     x-data="{
         facultyId: '{{ old('faculty_id', $user->faculty_id) }}',
         majorId: '{{ old('major_id', $user->major_id) }}',
@@ -28,189 +40,127 @@
     }"
     x-init="loadMajors()"
 >
-    <!-- Left: branding panel (desktop only) -->
-    <div class="relative hidden overflow-hidden brand-gradient p-12 lg:col-span-2 lg:flex lg:flex-col lg:justify-between">
+    {{-- Top bar --}}
+    <header class="border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950">
+        <div class="mx-auto flex h-16 max-w-3xl items-center justify-between px-4 sm:px-6">
+            <span class="flex items-center gap-2.5">
+                <img src="{{ asset('images/logo.png') }}" alt="" class="h-9 w-9 object-contain">
+                <span class="leading-tight">
+                    <span class="block font-display text-[1.05rem] font-semibold text-slate-900 dark:text-white">SRRU Check</span>
+                    <span class="block text-[0.7rem] text-slate-500 dark:text-slate-400">{{ __('มหาวิทยาลัยราชภัฏสุรินทร์') }}</span>
+                </span>
+            </span>
+            <div class="flex items-center gap-1.5">
+                @include('partials.theme-toggle')
+                @include('partials.locale-switch')
+            </div>
+        </div>
+    </header>
 
-        <div class="relative flex items-center gap-5">
-            <img src="{{ asset('images/logo.png') }}" alt="SRRU" class="h-24 w-24 object-contain drop-shadow-lg">
-            <span class="text-3xl font-extrabold tracking-wide text-white">SRRU Check</span>
+    <div class="mx-auto max-w-3xl px-4 pb-32 pt-8 sm:px-6 sm:pt-10">
+        {{-- Heading --}}
+        <p class="text-sm font-semibold text-brand-purple-700 dark:text-brand-purple-300">{{ $isEdit ? __('แก้ไขข้อมูลโปรไฟล์') : __('ขั้นตอนสุดท้ายก่อนใช้งาน') }}</p>
+        <h1 class="mt-1 font-display text-3xl text-slate-900 dark:text-white sm:text-4xl">
+            {{ $isEdit ? __('แก้ไขข้อมูลนักศึกษา') : __('ยินดีต้อนรับสู่ SRRU Check') }}
+        </h1>
+        <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">
+            @if ($isEdit)
+                {{ __('ปรับข้อมูลให้ตรงกับปัจจุบัน ระบบใช้ข้อมูลนี้คำนวณสิทธิ์เข้าร่วมกิจกรรม') }}
+            @else
+                {{ __('กรอกข้อมูลอีกนิดเดียว เพื่อเริ่มเช็คชื่อและสะสมชั่วโมงกิจกรรม') }}
+            @endif
+
+        </p>
+
+        {{-- Which Google account is signed in, so a student on a shared device notices a wrong account. --}}
+        <div class="mt-4 inline-flex max-w-full items-center gap-3 rounded-2xl border border-slate-200 bg-white py-2.5 pl-3 pr-4 dark:border-slate-800 dark:bg-slate-900">
+            <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-purple-50 text-brand-purple-700 dark:bg-brand-purple-500/15 dark:text-brand-purple-300">
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"/></svg>
+            </span>
+            <span class="min-w-0">
+                <span class="block text-xs text-slate-500 dark:text-slate-400">{{ __('เข้าสู่ระบบด้วยอีเมล') }}</span>
+                <span class="block truncate text-[0.95rem] font-semibold text-slate-900 dark:text-white">{{ $user->email }}</span>
+            </span>
         </div>
 
-        <div class="relative">
-            <p class="text-xs font-medium uppercase tracking-[0.2em] text-violet-200/70">{{ __('ขั้นตอนสุดท้ายก่อนใช้งาน') }}</p>
-            <h1 class="mt-3 text-3xl font-bold leading-tight text-white">
-                {{ __('ยินดีต้อนรับสู่') }}<br>{{ __('ระบบกิจกรรมนักศึกษา') }}
-            </h1>
-            <p class="mt-4 max-w-sm text-sm leading-relaxed text-violet-100/70">
-                {{ __('กรอกข้อมูลโปรไฟล์ให้ครบถ้วน เพื่อเริ่มสะสมชั่วโมงกิจกรรมและใช้งานระบบเช็คชื่อได้ทันที') }}
-            </p>
-
-            <ul class="mt-8 space-y-3.5">
-                @foreach ($features as $feature)
-                    <li class="flex items-start gap-3 text-sm text-violet-100/90">
-                        <span class="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-brand-green-500/20 text-brand-green-400">
-                            <svg class="h-3 w-3" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+        @unless ($isEdit)
+            <ul class="mt-5 grid grid-cols-1 gap-2 sm:grid-cols-3">
+                @foreach ($features as [$text, $icon])
+                    <li class="flex items-center gap-2.5 whitespace-nowrap rounded-2xl bg-white px-3.5 py-3 text-sm text-slate-700 ring-1 ring-slate-200 dark:bg-slate-900 dark:text-slate-300 dark:ring-slate-800">
+                        <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-brand-purple-50 text-brand-purple-700 dark:bg-brand-purple-500/15 dark:text-brand-purple-300">
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $icon }}"/></svg>
                         </span>
-                        {{ $feature }}
+                        {{ $text }}
                     </li>
                 @endforeach
             </ul>
-        </div>
+        @endunless
 
-        <p class="relative text-xs text-violet-200/50">{{ __('กองพัฒนานักศึกษา · มหาวิทยาลัยราชภัฏสุรินทร์') }}</p>
-    </div>
-
-    <!-- Right: form panel -->
-    <div class="flex items-center justify-center bg-slate-50 px-4 py-10 dark:bg-slate-950 lg:col-span-3 lg:px-16">
-        <div class="w-full max-w-lg">
-            <!-- Mobile/tablet branding banner -->
-            <div class="relative mb-6 overflow-hidden rounded-3xl brand-gradient p-6 lg:hidden">
-
-                <div class="relative flex items-center gap-3">
-                    <img src="{{ asset('images/logo.png') }}" alt="SRRU" class="h-14 w-14 object-contain drop-shadow-lg">
-                    <span class="text-xl font-extrabold tracking-wide text-white">SRRU Check</span>
-                </div>
-
-                <p class="relative mt-4 text-xs font-medium uppercase tracking-wider text-violet-200/70">{{ $user->hasCompletedProfile() ? __('แก้ไขข้อมูลโปรไฟล์') : __('ขั้นตอนสุดท้ายก่อนใช้งาน') }}</p>
-                <h1 class="relative mt-1 text-lg font-bold text-white">{{ $user->hasCompletedProfile() ? __('แก้ไขข้อมูลโปรไฟล์นักศึกษา') : __('กรอกข้อมูลโปรไฟล์นักศึกษา') }}</h1>
-
-                <ul class="relative mt-4 space-y-2">
-                    @foreach ($features as $feature)
-                        <li class="flex items-start gap-2 text-xs text-violet-100/90">
-                            <span class="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-brand-green-500/20 text-brand-green-400">
-                                <svg class="h-2.5 w-2.5" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
-                            </span>
-                            {{ $feature }}
-                        </li>
+        @if ($errors->any())
+            <div class="mt-6 rounded-2xl bg-red-50 px-4 py-3 text-sm text-red-700 ring-1 ring-red-100 dark:bg-red-500/10 dark:text-red-400 dark:ring-red-500/20">
+                <ul class="list-inside list-disc space-y-1">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
                     @endforeach
                 </ul>
             </div>
-            <h1 class="mb-6 hidden text-2xl font-bold text-slate-900 dark:text-slate-100 lg:block">{{ $user->hasCompletedProfile() ? __('แก้ไขข้อมูลโปรไฟล์นักศึกษา') : __('กรอกข้อมูลโปรไฟล์นักศึกษา') }}</h1>
+        @endif
 
-            @if ($errors->any())
-                <div class="mb-4 rounded-2xl bg-red-50 px-4 py-3 text-sm text-red-700 shadow-soft ring-1 ring-red-100 dark:bg-red-500/10 dark:text-red-400 dark:ring-red-500/20">
-                    <ul class="list-inside list-disc space-y-1">
-                        @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-            @endif
+        <form id="profile-form" method="POST" action="{{ route('profile-setup.store') }}" class="mt-6 space-y-4">
+            @csrf
 
-            <form method="POST" action="{{ route('profile-setup.store') }}" class="space-y-8">
-                @csrf
-
-                <!-- Section: personal info -->
-                <div class="space-y-5">
-                    <div class="flex items-center gap-2.5">
-                        <span class="flex h-6 w-6 items-center justify-center rounded-full bg-brand-purple-600 text-xs font-bold text-white">1</span>
-                        <p class="text-sm font-semibold text-slate-900 dark:text-slate-100">{{ __('ข้อมูลส่วนตัว') }}</p>
-                    </div>
-
-                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                        <div>
-                            <label class="mb-2 block text-sm font-medium text-slate-600 dark:text-slate-400">{{ __('คำนำหน้าชื่อ') }}</label>
-                            <x-premium-select
-                                name="title_prefix" required
-                                :options="['นาย' => 'นาย', 'นาง' => 'นาง', 'นางสาว' => 'นางสาว']"
-                                :selected="old('title_prefix', $namePrefix)"
-                                placeholder="{{ __('เลือก') }}"
-                            />
-                        </div>
-                        <div class="sm:col-span-2">
-                            <label class="mb-2 block text-sm font-medium text-slate-600 dark:text-slate-400">{{ __('ชื่อ') }}</label>
-                            <div class="relative">
-                                <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400 dark:text-slate-500">
-                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.964 0a9 9 0 10-11.964 0m11.964 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                                </span>
-                                <input
-                                    type="text" name="first_name" value="{{ old('first_name', $firstName) }}" required
-                                    class="w-full rounded-xl border bg-white py-2.5 pl-10 pr-3.5 text-sm text-slate-700 placeholder:text-slate-400 transition-all duration-200 focus:outline-none focus:ring-4 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 @error('first_name') border-red-400 focus:border-red-500 focus:ring-red-500/10 dark:border-red-500/70 @else border-slate-200 focus:border-brand-purple-500 focus:ring-brand-purple-500/10 dark:border-slate-600 @enderror"
-                                    placeholder="{{ __('กรอกชื่อ') }}"
-                                >
-                            </div>
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="mb-2 block text-sm font-medium text-slate-600 dark:text-slate-400">{{ __('นามสกุล') }}</label>
-                        <input
-                            type="text" name="last_name" value="{{ old('last_name', $lastName) }}" required
-                            class="w-full rounded-xl border bg-white px-3.5 py-2.5 text-sm text-slate-700 placeholder:text-slate-400 transition-all duration-200 focus:outline-none focus:ring-4 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 @error('last_name') border-red-400 focus:border-red-500 focus:ring-red-500/10 dark:border-red-500/70 @else border-slate-200 focus:border-brand-purple-500 focus:ring-brand-purple-500/10 dark:border-slate-600 @enderror"
-                            placeholder="{{ __('กรอกนามสกุล') }}"
-                        >
-                    </div>
-
-                    <div>
-                        <label class="mb-2 block text-sm font-medium text-slate-600 dark:text-slate-400">{{ __('รหัสนักศึกษา') }}</label>
-                        <div class="relative">
-                            <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400 dark:text-slate-500">
-                                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0018.75 4.5H5.25A2.25 2.25 0 003 6.75v10.5A2.25 2.25 0 005.25 19.5z"/></svg>
-                            </span>
-                            <input
-                                type="text" name="student_id" value="{{ old('student_id', $user->student_id) }}" required
-                                inputmode="numeric" pattern="\d{11}" maxlength="11"
-                                class="w-full rounded-xl border bg-white py-2.5 pl-10 pr-3.5 text-sm tracking-wide text-slate-700 placeholder:text-slate-400 transition-all duration-200 focus:outline-none focus:ring-4 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 @error('student_id') border-red-400 focus:border-red-500 focus:ring-red-500/10 dark:border-red-500/70 @else border-slate-200 focus:border-brand-purple-500 focus:ring-brand-purple-500/10 dark:border-slate-600 @enderror"
-                                placeholder="{{ __('รหัส 11 หลัก') }}"
-                            >
-                        </div>
-                    </div>
+            {{-- 1. Personal --}}
+            <section class="{{ $section }}">
+                <div class="mb-5 flex items-center gap-3">
+                    <span class="flex h-8 w-8 items-center justify-center rounded-full bg-brand-purple-700 text-sm font-semibold text-white">1</span>
+                    <h2 class="font-display text-lg text-slate-900 dark:text-white">{{ __('ข้อมูลส่วนตัว') }}</h2>
                 </div>
 
-                <!-- Section: academic info -->
-                <div class="space-y-5">
-                    <div class="flex items-center gap-2.5">
-                        <span class="flex h-6 w-6 items-center justify-center rounded-full bg-brand-purple-600 text-xs font-bold text-white">2</span>
-                        <p class="text-sm font-semibold text-slate-900 dark:text-slate-100">{{ __('ข้อมูลการศึกษา') }}</p>
-                    </div>
+                <div class="space-y-4">
+                    <fieldset>
+                        <legend class="{{ $label }}">{{ __('คำนำหน้าชื่อ') }}</legend>
+                        <div class="grid grid-cols-3 gap-2 @error('title_prefix') rounded-xl ring-2 ring-red-400 @enderror">
+                            @foreach (['นาย', 'นาง', 'นางสาว'] as $option)
+                                <label class="{{ $chip }}">
+                                    <input type="radio" name="title_prefix" value="{{ $option }}" required class="sr-only" @checked($prefix === $option)>
+                                    {{ $option }}
+                                </label>
+                            @endforeach
+                        </div>
+                    </fieldset>
 
                     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                         <div>
-                            <label class="mb-2 block text-sm font-medium text-slate-600 dark:text-slate-400">{{ __('ปีที่เข้าศึกษา (พ.ศ.)') }}</label>
-                            <div class="relative">
-                                <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400 dark:text-slate-500">
-                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"/></svg>
-                                </span>
-                                <input
-                                    type="number" name="enrollment_year" value="{{ old('enrollment_year', $user->enrollment_year) }}" required
-                                    min="2540" max="{{ date('Y') + 543 }}"
-                                    class="w-full rounded-xl border bg-white py-2.5 pl-10 pr-3.5 text-sm text-slate-700 placeholder:text-slate-400 transition-all duration-200 focus:outline-none focus:ring-4 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 @error('enrollment_year') border-red-400 focus:border-red-500 focus:ring-red-500/10 dark:border-red-500/70 @else border-slate-200 focus:border-brand-purple-500 focus:ring-brand-purple-500/10 dark:border-slate-600 @enderror"
-                                    placeholder="{{ __('เช่น :year', ['year' => date('Y') + 543]) }}"
-                                >
-                            </div>
+                            <label for="first_name" class="{{ $label }}">{{ __('ชื่อ') }}</label>
+                            <input id="first_name" type="text" name="first_name" value="{{ old('first_name', $firstName) }}" required autocomplete="given-name"
+                                class="{{ $input('first_name') }}" placeholder="{{ __('กรอกชื่อ') }}">
                         </div>
-
                         <div>
-                            <label class="mb-2 block text-sm font-medium text-slate-600 dark:text-slate-400">{{ __('ชั้นปีปัจจุบัน') }}</label>
-                            <x-premium-select
-                                name="year_level" required
-                                :options="collect([1, 2, 3, 4])->mapWithKeys(fn ($year) => [$year => __('ชั้นปีที่ :year', ['year' => $year])])->all()"
-                                :selected="old('year_level', $user->year_level)"
-                                placeholder="{{ __('เลือกชั้นปี') }}"
-                            >
-                                <x-slot:icon>
-                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.26 10.147a60.436 60.436 0 00-.491 6.347A48.627 48.627 0 0112 20.904a48.627 48.627 0 018.232-4.41 60.46 60.46 0 00-.491-6.347M4.26 10.147a48.474 48.474 0 017.748-3.909m0 0a48.94 48.94 0 013.98 0M4.26 10.147L2.16 8.42m9.828-2.182a48.94 48.94 0 013.98 0m0 0l2.09-1.727m-2.09 1.727l2.09 1.727M4.26 10.147L2.16 11.874m17.68-1.727l2.1 1.727"/></svg>
-                                </x-slot:icon>
-                            </x-premium-select>
+                            <label for="last_name" class="{{ $label }}">{{ __('นามสกุล') }}</label>
+                            <input id="last_name" type="text" name="last_name" value="{{ old('last_name', $lastName) }}" required autocomplete="family-name"
+                                class="{{ $input('last_name') }}" placeholder="{{ __('กรอกนามสกุล') }}">
                         </div>
                     </div>
 
                     <div>
-                        <label class="mb-2 block text-sm font-medium text-slate-600 dark:text-slate-400">{{ __('ประเภทหลักสูตร') }}</label>
-                        <div class="grid grid-cols-2 gap-2.5 @error('program_type') rounded-xl ring-2 ring-red-400 @enderror">
-                            <label class="flex cursor-pointer items-center justify-center rounded-xl border border-slate-200 bg-white px-2 py-2.5 text-sm shadow-soft transition-all duration-200 has-[:checked]:border-brand-purple-500 has-[:checked]:bg-brand-purple-50 has-[:checked]:text-brand-purple-700 has-[:checked]:shadow-none has-[:focus-visible]:ring-4 has-[:focus-visible]:ring-brand-purple-500/10 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:has-[:checked]:bg-brand-purple-500/10 dark:has-[:checked]:text-brand-purple-400 dark:has-[:focus-visible]:ring-brand-purple-500/20">
-                                <input type="radio" name="program_type" value="normal" required class="sr-only" @checked(old('program_type', $user->program_type) === 'normal')>
-                                {{ __('ภาคปกติ') }}
-                            </label>
-                            <label class="flex cursor-pointer items-center justify-center rounded-xl border border-slate-200 bg-white px-2 py-2.5 text-sm shadow-soft transition-all duration-200 has-[:checked]:border-brand-purple-500 has-[:checked]:bg-brand-purple-50 has-[:checked]:text-brand-purple-700 has-[:checked]:shadow-none has-[:focus-visible]:ring-4 has-[:focus-visible]:ring-brand-purple-500/10 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:has-[:checked]:bg-brand-purple-500/10 dark:has-[:checked]:text-brand-purple-400 dark:has-[:focus-visible]:ring-brand-purple-500/20">
-                                <input type="radio" name="program_type" value="special" required class="sr-only" @checked(old('program_type', $user->program_type) === 'special')>
-                                {{ __('กศ.บป.') }}
-                            </label>
-                        </div>
+                        <label for="student_id" class="{{ $label }}">{{ __('รหัสนักศึกษา') }}</label>
+                        <input id="student_id" type="text" name="student_id" value="{{ old('student_id', $user->student_id) }}" required
+                            inputmode="numeric" pattern="\d{11}" maxlength="11"
+                            class="{{ $input('student_id') }} font-mono tracking-wider" placeholder="{{ __('รหัส 11 หลัก') }}">
                     </div>
+                </div>
+            </section>
 
+            {{-- 2. Academic --}}
+            <section class="{{ $section }}">
+                <div class="mb-5 flex items-center gap-3">
+                    <span class="flex h-8 w-8 items-center justify-center rounded-full bg-brand-purple-700 text-sm font-semibold text-white">2</span>
+                    <h2 class="font-display text-lg text-slate-900 dark:text-white">{{ __('ข้อมูลการศึกษา') }}</h2>
+                </div>
+
+                <div class="space-y-4">
                     <div>
-                        <label class="mb-2 block text-sm font-medium text-slate-600 dark:text-slate-400">{{ __('คณะ') }}</label>
+                        <label class="{{ $label }}">{{ __('คณะ') }}</label>
                         <x-premium-select
                             name="faculty_id" required
                             :options="$faculties->pluck('name_th', 'id')->all()"
@@ -218,48 +168,77 @@
                             placeholder="{{ __('เลือกคณะ') }}"
                             liveSelected="facultyId"
                             @change="majorId = ''; loadMajors()"
-                        >
-                            <x-slot:icon>
-                                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 21V9.75l8.25-4.5 8.25 4.5V21M8.25 21v-6h7.5v6M3 21h18"/></svg>
-                            </x-slot:icon>
-                        </x-premium-select>
+                        />
                     </div>
 
                     <div>
-                        <label class="mb-2 block text-sm font-medium text-slate-600 dark:text-slate-400">{{ __('สาขาวิชา') }}</label>
+                        <label class="{{ $label }}">{{ __('สาขาวิชา') }}</label>
                         <x-premium-select
                             name="major_id" required
                             :selected="old('major_id', $user->major_id)"
-                            placeholder="{{ __('เลือกสาขาวิชา') }}"
+                            placeholder="{{ __('เลือกคณะก่อน แล้วเลือกสาขาวิชา') }}"
                             liveOptions="majorOptions"
                             liveSelected="majorId"
                             disabled="! facultyId || loadingMajors"
-                        >
-                            <x-slot:icon>
-                                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25"/></svg>
-                            </x-slot:icon>
-                        </x-premium-select>
+                        />
+                    </div>
+
+                    <fieldset>
+                        <legend class="{{ $label }}">{{ __('ชั้นปีปัจจุบัน') }}</legend>
+                        <div class="grid grid-cols-4 gap-2 @error('year_level') rounded-xl ring-2 ring-red-400 @enderror">
+                            @foreach ([1, 2, 3, 4] as $year)
+                                <label class="{{ $chip }}">
+                                    <input type="radio" name="year_level" value="{{ $year }}" required class="sr-only" @checked($yearLevel === (string) $year)>
+                                    {{ __('ปี :year', ['year' => $year]) }}
+                                </label>
+                            @endforeach
+                        </div>
+                    </fieldset>
+
+                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        <div>
+                            <label for="enrollment_year" class="{{ $label }}">{{ __('ปีที่เข้าศึกษา (พ.ศ.)') }}</label>
+                            <input id="enrollment_year" type="number" name="enrollment_year" value="{{ old('enrollment_year', $user->enrollment_year) }}" required
+                                min="2540" max="{{ date('Y') + 543 }}"
+                                class="{{ $input('enrollment_year') }}" placeholder="{{ __('เช่น :year', ['year' => date('Y') + 543]) }}">
+                        </div>
+                        <fieldset>
+                            <legend class="{{ $label }}">{{ __('ประเภทหลักสูตร') }}</legend>
+                            <div class="grid grid-cols-2 gap-2 @error('program_type') rounded-xl ring-2 ring-red-400 @enderror">
+                                <label class="{{ $chip }}">
+                                    <input type="radio" name="program_type" value="normal" required class="sr-only" @checked($programType === 'normal')>
+                                    {{ __('ภาคปกติ') }}
+                                </label>
+                                <label class="{{ $chip }}">
+                                    <input type="radio" name="program_type" value="special" required class="sr-only" @checked($programType === 'special')>
+                                    {{ __('กศ.บป.') }}
+                                </label>
+                            </div>
+                        </fieldset>
                     </div>
                 </div>
+            </section>
 
-                <button
-                    type="submit"
-                    class="flex w-full items-center justify-center gap-2 rounded-xl bg-brand-purple-700 px-4 py-2.5 text-sm font-semibold text-white shadow-soft transition-all duration-300 hover:bg-brand-purple-800 active:scale-[0.99]"
-                >
-                    {{ $user->hasCompletedProfile() ? __('บันทึกการเปลี่ยนแปลง') : __('บันทึกและเข้าใช้งานระบบ') }}
-                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
-                </button>
+            <p class="flex items-center justify-center gap-1.5 pt-2 text-center text-xs text-slate-500 dark:text-slate-400">
+                <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/></svg>
+                {{ __('ข้อมูลของคุณจะถูกเก็บเป็นความลับตามนโยบายของมหาวิทยาลัย') }}
+            </p>
+        </form>
+    </div>
 
-                @if ($user->hasCompletedProfile())
-                    <a href="{{ route('profile.show') }}" class="block text-center text-sm font-medium text-brand-purple-600 hover:text-brand-purple-800 dark:text-brand-purple-400 dark:hover:text-brand-purple-300">
-                        {{ __('ยกเลิกและกลับไปหน้าโปรไฟล์') }}
-                    </a>
-                @endif
-
-                <p class="text-center text-xs text-slate-400 dark:text-slate-500">
-                    {{ __('ข้อมูลของคุณจะถูกเก็บเป็นความลับตามนโยบายของมหาวิทยาลัย') }}
-                </p>
-            </form>
+    {{-- Sticky save bar --}}
+    <div class="fixed inset-x-0 bottom-0 z-30 border-t border-slate-200 bg-white/95 dark:border-slate-800 dark:bg-slate-950/95">
+        <div class="mx-auto flex max-w-3xl items-center gap-3 px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:px-6">
+            @if ($isEdit)
+                <a href="{{ route('profile.show') }}" class="flex h-12 flex-1 items-center justify-center rounded-2xl border border-slate-200 text-sm font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-900 sm:flex-none sm:px-6">
+                    {{ __('ยกเลิก') }}
+                </a>
+            @endif
+            <button type="submit" form="profile-form"
+                class="flex h-12 flex-[2] items-center justify-center gap-2 rounded-2xl bg-brand-purple-700 text-[0.95rem] font-semibold text-white transition-colors hover:bg-brand-purple-800 sm:ml-auto sm:flex-none sm:px-8">
+                {{ $isEdit ? __('บันทึกการเปลี่ยนแปลง') : __('บันทึกและเริ่มใช้งาน') }}
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
+            </button>
         </div>
     </div>
 </div>
