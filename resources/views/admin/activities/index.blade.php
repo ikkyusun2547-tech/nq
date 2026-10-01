@@ -152,7 +152,8 @@
                 'dots' => collect($statusChipColor)->map(fn ($c) => $c['dot'])->all()],
             ['name' => 'academic_year', 'label' => __('ปีการศึกษา'), 'all' => __('ทุกปี'), 'options' => $academicYears->mapWithKeys(fn ($y) => [$y => (string) $y])->all(), 'selected' => $academicYear],
             ['name' => 'semester', 'label' => __('ภาคเรียน'), 'all' => __('ทุกภาคเรียน'), 'options' => $semesterShort, 'selected' => request('semester')],
-        ]" />    </form>
+        ]" />
+    </form>
 
     <div class="mt-4 overflow-x-auto rounded-3xl glass-card">
         <table class="min-w-full text-sm">
@@ -168,7 +169,19 @@
                 </tr>
             </thead>
             <tbody>
+                @php
+                    // Group headings for the default "needs attention first" order (see ActivityController::listGroup()).
+                    $groupLabels = [1 => __('ต้องตรวจสอบ'), 2 => __('กำลังจัด / วันนี้'), 3 => __('ใกล้ถึง'), 4 => __('ร่าง · ยังไม่เผยแพร่'), 5 => __('จบแล้ว'), 6 => __('ถูกยกเลิก')];
+                    $groupTone = [1 => 'text-amber-700 dark:text-amber-300', 2 => 'text-brand-purple-700 dark:text-brand-purple-300'];
+                    $lastGroup = null;
+                @endphp
                 @forelse ($activities as $activity)
+                    @if (isset($activity->list_group) && $activity->list_group !== $lastGroup)
+                        @php $lastGroup = $activity->list_group; @endphp
+                        <tr class="border-b border-slate-100 bg-slate-50/70 dark:border-slate-800 dark:bg-slate-800/30">
+                            <td colspan="7" class="px-4 py-2 text-xs font-semibold {{ $groupTone[$lastGroup] ?? 'text-slate-500 dark:text-slate-400' }}">{{ $groupLabels[$lastGroup] }}</td>
+                        </tr>
+                    @endif
                     <tr @class([
                         'border-b border-slate-100 transition-colors last:border-0 hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-800/60',
                     ])>

@@ -241,8 +241,8 @@
                     @forelse ($todayActivities->take($inboxLimit) as $activity)
                         @php $live = $activity->start_at->isPast() && $activity->end_at->isFuture() && in_array($activity->status, ['open', 'ongoing'], true); @endphp
                         <a href="{{ route('admin.attendance.index', $activity) }}"
-                            class="grid grid-cols-[3rem_minmax(0,1fr)] gap-3 rounded-2xl py-2.5 pr-3 transition {{ $live ? 'bg-brand-purple-50 dark:bg-brand-purple-500/10' : 'hover:bg-slate-50 dark:hover:bg-slate-800/60' }}">
-                            <span class="text-right text-sm tabular-nums {{ $live ? 'font-semibold text-brand-purple-700 dark:text-brand-purple-300' : 'text-slate-500 dark:text-slate-400' }}">{{ $activity->start_at->isToday() ? $activity->start_at->format('H:i') : __('ต่อเนื่อง') }}</span>
+                            class="grid grid-cols-[4.25rem_minmax(0,1fr)] gap-3 rounded-2xl px-3 py-2.5 transition {{ $live ? 'bg-brand-purple-50 dark:bg-brand-purple-500/10' : 'hover:bg-slate-50 dark:hover:bg-slate-800/60' }}">
+                            <span class="whitespace-nowrap text-sm tabular-nums {{ $live ? 'font-semibold text-brand-purple-700 dark:text-brand-purple-300' : 'text-slate-500 dark:text-slate-400' }}">{{ $activity->start_at->isToday() ? $activity->start_at->format('H:i') : __('ต่อเนื่อง') }}</span>
                             <span class="min-w-0">
                                 <span class="block truncate text-sm font-medium text-slate-900 dark:text-white">{{ $activity->title }}</span>
                                 <span class="block truncate text-xs {{ $timelineStatus[$activity->status]['class'] ?? 'text-slate-500' }}">

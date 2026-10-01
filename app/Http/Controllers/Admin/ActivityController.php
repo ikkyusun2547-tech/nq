@@ -71,10 +71,16 @@ class ActivityController extends Controller
             ->when(
                 $sortColumn,
                 fn ($query) => $query->orderBy($sortColumn, $sortDir),
-                fn ($query) => $query->latest('start_at')
+                fn ($query) => $this->orderByWhatNeedsAttention($query)
             )
             ->paginate(20)
             ->withQueryString();
+
+        if (! $sortColumn) {
+            $activities->getCollection()->each(
+                fn (Activity $activity) => $activity->list_group = self::listGroup($activity)
+            );
+        }
 
         // Not eager-loadable via withCount() since eligibility depends on
         // per-activity restriction rows rather than a simple relationship,
@@ -101,6 +107,64 @@ class ActivityController extends Controller
             ->pluck('total', 'status');
 
         return view('admin.activities.index', compact('activities', 'academicYears', 'academicYear', 'statusCounts'));
+    }
+
+    /**
+     * Default list order — what the admin has to act on first:
+     * 1 has check-ins / late requests waiting for review, 2 happening now or
+     * today, 3 coming up (open/full), 4 draft, 5 ended, 6 cancelled.
+     * Groups 1–4 run soonest first; ended and cancelled run latest first.
+     * listGroup() mirrors the same rules in PHP for the group dividers.
+     */
+    private function orderByWhatNeedsAttention($query)
+    {
+        $now = now()->toDateTimeString();
+        $todayStart = now()->startOfDay()->toDateTimeString();
+        $todayEnd = now()->endOfDay()->toDateTimeString();
+
+        $group = "CASE
+            WHEN activities.status = 'cancelled' THEN 6
+            WHEN EXISTS (SELECT 1 FROM attendances a WHERE a.activity_id = activities.id AND a.status = 'flagged')
+              OR EXISTS (SELECT 1 FROM late_check_in_requests l WHERE l.activity_id = activities.id AND l.status = 'pending') THEN 1
+            WHEN activities.status = 'ongoing'
+              OR (activities.status IN ('open', 'full') AND activities.start_at <= ? AND activities.end_at >= ?)
+              OR (activities.status IN ('open', 'full') AND activities.start_at BETWEEN ? AND ?) THEN 2
+            WHEN activities.status IN ('open', 'full') AND activities.end_at >= ? THEN 3
+            WHEN activities.status = 'draft' THEN 4
+            ELSE 5
+        END";
+        $bindings = [$now, $now, $todayStart, $todayEnd, $now];
+
+        return $query
+            ->orderByRaw("$group ASC", $bindings)
+            // Soonest first inside groups 1–4 (NULL for 5–6 so they fall through to the next key).
+            ->orderByRaw("CASE WHEN ($group) <= 4 THEN activities.start_at END ASC", $bindings)
+            ->orderByDesc('activities.start_at');
+    }
+
+    /**
+     * Same grouping as orderByWhatNeedsAttention(), for an already-loaded row
+     * (expects the flagged_count / pending_late_checkin_count withCount columns).
+     */
+    public static function listGroup(Activity $activity): int
+    {
+        if ($activity->status === 'cancelled') {
+            return 6;
+        }
+        if (($activity->flagged_count ?? 0) > 0 || ($activity->pending_late_checkin_count ?? 0) > 0) {
+            return 1;
+        }
+        $openish = in_array($activity->status, ['open', 'full'], true);
+        if ($activity->status === 'ongoing'
+            || ($openish && $activity->start_at->lte(now()) && $activity->end_at->gte(now()))
+            || ($openish && $activity->start_at->isToday())) {
+            return 2;
+        }
+        if ($openish && $activity->end_at->gte(now())) {
+            return 3;
+        }
+
+        return $activity->status === 'draft' ? 4 : 5;
     }
 
     /**
