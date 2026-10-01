@@ -77,22 +77,25 @@ class ActivityController extends Controller
             ->withCount('attendances');
 
         if ($statusGroup === 'open') {
-            // The main feed: everything not yet over, ranked by what the
-            // student should act on first (see feedRank()), soonest first
-            // within each rank. Ended activities live in their own tab.
+            // The main feed: every non-cancelled activity the student is
+            // eligible for, ranked by what they should act on first (see
+            // feedRank()) — soonest first within each rank, except ended
+            // ones at the bottom, which go most recently ended first.
             $attendedIds = $user->attendances()->pluck('activity_id')->flip();
 
             $activities = $baseQuery()
-                ->whereIn('status', ['ongoing', 'open', 'full', 'draft'])
-                ->where('end_at', '>=', now())
+                ->where('status', '!=', 'cancelled')
                 ->with('restrictions')
                 ->get()
                 ->filter(fn (Activity $activity) => $activity->isEligibleFor($user))
-                ->sortBy(fn (Activity $activity) => sprintf(
-                    '%d-%s',
-                    $this->feedRank($activity, $attendedIds->has($activity->id)),
-                    $activity->start_at->format('YmdHis'),
-                ))
+                ->sortBy(function (Activity $activity) use ($attendedIds) {
+                    $rank = $this->feedRank($activity, $attendedIds->has($activity->id));
+                    $when = $rank === 7
+                        ? 99991231235959 - (int) $activity->end_at->format('YmdHis')
+                        : (int) $activity->start_at->format('YmdHis');
+
+                    return sprintf('%d-%014d', $rank, $when);
+                })
                 ->values();
         } else {
             $activities = $baseQuery()
@@ -130,10 +133,12 @@ class ActivityController extends Controller
      *  4.   not open yet, open to everyone
      *  5.   full — can't join, but still worth seeing
      *  6.   already checked in — nothing left to do
+     *  7.   ended (closed, or past its end time but not auto-closed yet)
      */
     private function feedRank(Activity $activity, bool $attended): int
     {
         return match (true) {
+            $activity->status === 'closed' || $activity->end_at->isPast() => 7,
             $attended => 6,
             $activity->status === 'ongoing' => 1,
             $activity->status === 'open' => 2,

@@ -63,19 +63,24 @@ class ActivityFeedOrderTest extends TestCase
             ]);
     }
 
-    public function test_the_main_feed_leaves_out_ended_cancelled_and_overdue_activities(): void
+    public function test_ended_activities_come_last_most_recent_first_and_cancelled_ones_are_hidden(): void
     {
         $student = $this->student();
-        $this->activity('Closed Activity', 'closed', -3);
-        $this->activity('Cancelled Activity', 'cancelled', 2);
+        $this->activity('Older Closed Activity', 'closed', -5);
         $this->activity('Overdue Open Activity', 'open', -2);
-        $this->activity('Visible Activity', 'open', 1);
+        $this->activity('Cancelled Activity', 'cancelled', 2);
+        $attended = $this->activity('Attended Activity', 'open', 1);
+        Attendance::factory()->create(['user_id' => $student->id, 'activity_id' => $attended->id]);
+        $this->activity('Open Activity', 'open', 3);
 
         $this->actingAs($student)->get(route('activities.index'))
             ->assertOk()
-            ->assertSee('Visible Activity')
-            ->assertDontSee('Closed Activity')
-            ->assertDontSee('Cancelled Activity')
-            ->assertDontSee('Overdue Open Activity');
+            ->assertSeeInOrder([
+                'Open Activity',
+                'Attended Activity',
+                'Overdue Open Activity',
+                'Older Closed Activity',
+            ])
+            ->assertDontSee('Cancelled Activity');
     }
 }
