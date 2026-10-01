@@ -69,6 +69,48 @@
         font-family: var(--font-display);
         font-weight: 500;
     }
+
+    /* Scrollbars: a thin, rounded, purple-grey capsule on a transparent
+       track that darkens on hover — the page's and every scrolling box's.
+       Chromium/Safari use the ::-webkit-scrollbar rules (they allow the
+       inset capsule); Firefox, which doesn't support those, gets the
+       standard thin + colour properties instead. Phones keep their own
+       overlay scrollbars either way. */
+    :root {
+        --scroll-thumb: #d4cee3;
+        --scroll-thumb-hover: #a99fc2;
+    }
+    .dark {
+        --scroll-thumb: #3b3549;
+        --scroll-thumb-hover: #5b5370;
+    }
+    ::-webkit-scrollbar {
+        width: 12px;
+        height: 12px;
+    }
+    ::-webkit-scrollbar-track,
+    ::-webkit-scrollbar-corner {
+        background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+        background-color: var(--scroll-thumb);
+        background-clip: padding-box;
+        border: 3px solid transparent; /* inset the capsule from the edge */
+        border-radius: 9999px;
+        min-height: 40px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+        background-color: var(--scroll-thumb-hover);
+    }
+    ::-webkit-scrollbar-thumb:active {
+        background-color: var(--color-brand-purple-500);
+    }
+    @supports not selector(::-webkit-scrollbar) {
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: var(--scroll-thumb) transparent;
+        }
+    }
 }
 
 [x-cloak] {
@@ -180,4 +222,45 @@
 .dark .page-header .text-violet-100\/80,
 .dark .page-header .text-violet-200\/70 {
     color: var(--color-slate-200);
+}
+
+/* Loading feedback (resources/js/loading-feedback.js): the thin bar along the
+   top edge while the next page loads, and the spinner a pressed submit
+   button shows until the response arrives. */
+.srru-progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 70;
+    height: 3px;
+    width: 0;
+    opacity: 0;
+    pointer-events: none;
+    border-radius: 0 9999px 9999px 0;
+    background: linear-gradient(90deg, var(--color-brand-purple-500), var(--color-brand-purple-700));
+    box-shadow: 0 0 10px rgb(124 58 237 / 0.45);
+}
+.srru-busy {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    cursor: progress !important;
+    opacity: 0.85;
+}
+.srru-spinner {
+    width: 1em;
+    height: 1em;
+    flex-shrink: 0;
+    border-radius: 9999px;
+    border: 2px solid currentColor;
+    border-right-color: transparent;
+    animation: srru-spin 0.7s linear infinite;
+}
+@keyframes srru-spin {
+    to { transform: rotate(360deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+    .srru-spinner { animation-duration: 1.6s; }
+    .srru-progress { transition: none !important; }
 }

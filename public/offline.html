@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#ffffff">
+    <title>ไม่มีการเชื่อมต่อ · SRRU Check</title>
+    <!--
+        Shown by public/sw.js when a page can't be loaded because the device
+        is offline. Fully self-contained (inline CSS, system fonts, no app
+        bundle) because nothing else may be reachable at that moment; the
+        only external file, the icon, is pre-cached by the service worker.
+    -->
+    <style>
+        :root { --bg: #faf9fd; --card: #ffffff; --line: #e7e4ef; --ink: #1d1a29; --muted: #6f6a85; --accent: #6d28d9; --accent-ink: #ffffff; --soft: #f3eefe; }
+        @media (prefers-color-scheme: dark) {
+            :root { --bg: #0f0d16; --card: #18151f; --line: #2a2634; --ink: #f4f2f8; --muted: #a29db3; --accent: #7c3aed; --soft: #241a3d; }
+        }
+        * { box-sizing: border-box; }
+        html, body { margin: 0; height: 100%; }
+        body {
+            background: var(--bg); color: var(--ink);
+            font-family: "Noto Sans Thai", "Leelawadee UI", "Thonburi", "Sukhumvit Set", system-ui, sans-serif;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            padding: 24px 16px; -webkit-font-smoothing: antialiased;
+        }
+        .brand { display: flex; align-items: center; gap: 10px; margin-bottom: 28px; }
+        .brand img { width: 40px; height: 40px; border-radius: 12px; }
+        .brand b { display: block; font-size: 17px; }
+        .brand small { display: block; font-size: 11px; color: var(--muted); }
+        .card { width: 100%; max-width: 400px; background: var(--card); border: 1px solid var(--line); border-radius: 24px; padding: 32px 28px; text-align: center; }
+        .icon { width: 64px; height: 64px; margin: 0 auto; border-radius: 18px; background: var(--soft); color: var(--accent); display: flex; align-items: center; justify-content: center; }
+        .icon svg { width: 32px; height: 32px; }
+        h1 { margin: 20px 0 6px; font-size: 22px; font-weight: 600; }
+        p { margin: 0; font-size: 14px; line-height: 1.6; color: var(--muted); }
+        button { margin-top: 24px; width: 100%; height: 46px; border: 0; border-radius: 16px; background: var(--accent); color: var(--accent-ink); font: inherit; font-size: 15px; font-weight: 600; cursor: pointer; }
+        button:active { transform: scale(0.99); }
+        .status { margin-top: 14px; font-size: 12px; color: var(--muted); display: flex; align-items: center; justify-content: center; gap: 6px; }
+        .dot { width: 8px; height: 8px; border-radius: 50%; background: #f59e0b; }
+        .tips { margin: 20px 0 0; padding: 0; list-style: none; text-align: left; font-size: 13px; color: var(--muted); }
+        .tips li { padding: 6px 0 6px 22px; position: relative; }
+        .tips li::before { content: ""; position: absolute; left: 6px; top: 13px; width: 6px; height: 6px; border-radius: 50%; background: var(--line); }
+    </style>
+</head>
+<body>
+    <div class="brand">
+        <img src="/images/icons/icon-192.png" alt="">
+        <span><b>SRRU Check</b><small>มหาวิทยาลัยราชภัฏสุรินทร์</small></span>
+    </div>
+
+    <div class="card">
+        <div class="icon" aria-hidden="true">
+            <svg fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3l18 18M8.288 15.038a5.25 5.25 0 017.424 0M5.106 11.856c.92-.92 1.977-1.629 3.106-2.126m10.682 2.126a10.5 10.5 0 00-3.94-2.468M1.924 8.674a15.04 15.04 0 014.103-2.784m15.049 2.784a15.04 15.04 0 00-9.05-4.288M12.53 18.22l-.53.53-.53-.53a.75.75 0 011.06 0z"/></svg>
+        </div>
+        <h1>ไม่มีการเชื่อมต่ออินเทอร์เน็ต</h1>
+        <p>SRRU Check ต้องใช้อินเทอร์เน็ตเพื่อเช็คชื่อและโหลดข้อมูล ตรวจการเชื่อมต่อแล้วลองใหม่อีกครั้ง</p>
+
+        <ul class="tips">
+            <li>เปิด Wi-Fi หรืออินเทอร์เน็ตมือถือ</li>
+            <li>ปิดโหมดเครื่องบิน</li>
+            <li>ถ้าเช็คชื่อไม่ทัน ยื่น “ขอเช็คชื่อย้อนหลัง” ได้หลังกิจกรรมปิด</li>
+        </ul>
+
+        <button type="button" onclick="location.reload()">ลองใหม่</button>
+        <div class="status"><span class="dot"></span><span id="status">ออฟไลน์อยู่ จะโหลดใหม่ให้เองเมื่อกลับมาออนไลน์</span></div>
+    </div>
+
+    <script>
+        // Come back on our own as soon as the connection returns.
+        window.addEventListener('online', () => location.reload());
+    </script>
+</body>
+</html>

@@ -11,11 +11,15 @@
 // the same name (e.g. the app icons): images are served cache-first, so
 // otherwise installed apps keep the old copy forever. activate() below
 // deletes every cache that isn't this one.
-const CACHE_NAME = 'srru-check-static-v2';
+const CACHE_NAME = 'srru-check-static-v3';
+// Pre-cached so the offline page (and its icon) can be shown with no network.
+const OFFLINE_URL = '/offline.html';
+const PRECACHE = [OFFLINE_URL, '/images/icons/icon-192.png'];
 const STATIC_PATH_PREFIXES = ['/build/', '/images/'];
 
 self.addEventListener('install', (event) => {
     self.skipWaiting();
+    event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(PRECACHE)));
 });
 
 self.addEventListener('activate', (event) => {
@@ -36,6 +40,16 @@ self.addEventListener('fetch', (event) => {
     const url = new URL(request.url);
 
     if (url.origin !== self.location.origin) {
+        return;
+    }
+
+    // Page loads go to the network as usual; only when that fails (no
+    // connection) do we answer with the offline page instead of the
+    // browser's own error screen.
+    if (request.mode === 'navigate') {
+        event.respondWith(
+            fetch(request).catch(async () => (await caches.match(OFFLINE_URL)) || Response.error())
+        );
         return;
     }
 

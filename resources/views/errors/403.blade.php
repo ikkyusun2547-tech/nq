@@ -1,40 +1,25 @@
-@extends('layouts.app')
+@extends('errors.layout')
 
-@section('content')
-<div class="relative flex min-h-dvh flex-col items-center justify-center px-4 py-12">
-    <div class="relative w-full max-w-sm rounded-3xl glass-card p-8 text-center">
-        <span class="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-red-50 text-red-500 dark:bg-red-500/10 dark:text-red-400">
-            <svg class="h-8 w-8" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/></svg>
-        </span>
-
-        <h1 class="font-display text-2xl text-slate-900 dark:text-white">{{ __('ไม่มีสิทธิ์เข้าถึงหน้านี้') }}</h1>
-
-        @auth
-            <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">
-                {{ __('คุณกำลังเข้าสู่ระบบด้วยบัญชี :name (:email) ซึ่งไม่มีสิทธิ์เข้าถึงหน้านี้', ['name' => auth()->user()->name_thai ?? auth()->user()->name, 'email' => auth()->user()->email]) }}
-            </p>
-
-            <div class="mt-6 flex flex-col gap-2.5">
-                <a href="{{ auth()->user()->isAdmin() ? route('admin.dashboard') : route('dashboard') }}"
-                    class="rounded-2xl bg-brand-purple-700 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-purple-800">
-                    {{ __('กลับไปหน้าของฉัน') }}
-                </a>
-                <form method="POST" action="{{ route('logout') }}">
-                    @csrf
-                    <button type="submit" class="w-full rounded-2xl border border-slate-200 px-4 py-2.5 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800">
-                        {{ __('ออกจากระบบเพื่อสลับบัญชี') }}
-                    </button>
-                </form>
-            </div>
-        @else
-            <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">
-                {{ __('กรุณาเข้าสู่ระบบก่อนใช้งาน') }}
-            </p>
-            <a href="{{ route('login') }}"
-                class="mt-6 block rounded-2xl bg-brand-purple-700 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-purple-800">
-                {{ __('ไปหน้าเข้าสู่ระบบ') }}
-            </a>
-        @endauth
-    </div>
-</div>
+@section('code', '403')
+@section('title', __('ไม่มีสิทธิ์เข้าถึงหน้านี้'))
+@section('tone', 'red')
+@section('icon', 'M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z')
+@section('message')
+    @auth
+        {{ __('คุณกำลังเข้าสู่ระบบด้วยบัญชี :name (:email) ซึ่งไม่มีสิทธิ์เข้าถึงหน้านี้', ['name' => auth()->user()->name_thai ?? auth()->user()->name, 'email' => auth()->user()->email]) }}
+    @else
+        {{ __('กรุณาเข้าสู่ระบบก่อนใช้งาน') }}
+    @endauth
+@endsection
+@section('actions')
+    @auth
+        <a href="{{ auth()->user()->isAdmin() ? route('admin.dashboard') : route('dashboard') }}"
+            class="flex h-11 items-center justify-center rounded-2xl bg-brand-purple-700 px-4 text-sm font-semibold text-white transition-colors hover:bg-brand-purple-800">{{ __('กลับไปหน้าของฉัน') }}</a>
+        <form method="POST" action="{{ route('logout') }}">
+            @csrf
+            <button type="submit" class="flex h-11 w-full items-center justify-center rounded-2xl border border-slate-200 px-4 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800">{{ __('ออกจากระบบเพื่อสลับบัญชี') }}</button>
+        </form>
+    @else
+        @include('errors._buttons', ['primary' => [route('login'), __('ไปหน้าเข้าสู่ระบบ')]])
+    @endauth
 @endsection
