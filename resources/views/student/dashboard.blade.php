@@ -48,22 +48,6 @@
         </x-slot:footer>
     </x-brand-header>
 
-    @if ($pendingSurveys->isNotEmpty())
-        <div class="mt-4 rounded-2xl bg-sky-50 p-4 shadow-soft ring-1 ring-sky-100 dark:bg-sky-500/10 dark:ring-sky-500/20">
-            <p class="text-sm font-semibold text-sky-800 dark:text-sky-300">
-                {{ __('มี :count กิจกรรมรอให้คุณประเมินความพึงพอใจ', ['count' => $pendingSurveys->count()]) }}
-            </p>
-            <div class="mt-2 flex flex-wrap gap-2">
-                @foreach ($pendingSurveys->take(3) as $activity)
-                    <a href="{{ route('activity-survey.show', $activity) }}"
-                        class="inline-flex max-w-full items-center gap-1 rounded-xl bg-white px-3 py-1.5 text-xs font-medium text-sky-700 shadow-soft ring-1 ring-sky-100 transition hover:-translate-y-0.5 dark:bg-slate-900 dark:text-sky-300 dark:ring-sky-500/20">
-                        <span class="truncate">{{ $activity->title }}</span> &rarr;
-                    </a>
-                @endforeach
-            </div>
-        </div>
-    @endif
-
     {{-- Three equal quick-action buttons for the most important actions
          (QR check-in, external activity, credit transfer) — "ติดต่อเรา" was
          dropped from here since it's reachable from the nav/menu already

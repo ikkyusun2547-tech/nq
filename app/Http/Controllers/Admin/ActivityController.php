@@ -12,7 +12,6 @@ use App\Notifications\ActivityMissed;
 use App\Notifications\ActivityUpdated;
 use App\Services\AcademicYearCalculator;
 use App\Services\ActivityCodeGenerator;
-use App\Services\ActivitySurvey;
 use App\Services\SafeNotifier;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -215,7 +214,6 @@ class ActivityController extends Controller
         // edit of an already-closed activity).
         if ($activity->status === 'closed' && ! $wasClosed) {
             $this->notifyMissingStudents($activity);
-            app(ActivitySurvey::class)->requestFromAttendees($activity);
         }
 
         return redirect()
@@ -262,7 +260,6 @@ class ActivityController extends Controller
 
         if ($activity->status === 'closed' && ! $wasClosed) {
             $this->notifyMissingStudents($activity);
-            app(ActivitySurvey::class)->requestFromAttendees($activity);
         }
 
         return back()->with('status', __('เปลี่ยนสถานะกิจกรรมสำเร็จ'));

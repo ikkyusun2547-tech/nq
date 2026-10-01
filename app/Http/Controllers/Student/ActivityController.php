@@ -7,7 +7,6 @@ use App\Models\Activity;
 use App\Models\Faculty;
 use App\Models\LateCheckInRequest;
 use App\Services\AcademicYearCalculator;
-use App\Services\ActivitySurvey;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 
@@ -163,14 +162,6 @@ class ActivityController extends Controller
             ->where('activity_id', $activity->id)
             ->value('status');
 
-        // 'pending' | 'done' | null (nothing to evaluate)
-        $survey = app(ActivitySurvey::class);
-        $surveyState = match (true) {
-            ! $survey->hasEnded($activity) || ! $survey->attended($user, $activity) => null,
-            $survey->hasSubmitted($user, $activity) => 'done',
-            default => 'pending',
-        };
-
-        return view('student.activities.show', compact('activity', 'checkedIn', 'lateCheckInStatus', 'surveyState'));
+        return view('student.activities.show', compact('activity', 'checkedIn', 'lateCheckInStatus'));
     }
 }

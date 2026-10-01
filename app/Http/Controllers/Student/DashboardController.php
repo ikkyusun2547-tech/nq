@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Student;
 
 use App\Http\Controllers\Controller;
 use App\Services\ActivityEvaluationService;
-use App\Services\ActivitySurvey;
 use App\Services\StudentActivityFeed;
 use Illuminate\Http\Request;
 
@@ -12,7 +11,7 @@ class DashboardController extends Controller
 {
     private const PREVIEW_LIMIT = 3;
 
-    public function show(Request $request, ActivityEvaluationService $evaluator, StudentActivityFeed $feed, ActivitySurvey $survey)
+    public function show(Request $request, ActivityEvaluationService $evaluator, StudentActivityFeed $feed)
     {
         $user = $request->user();
 
@@ -39,12 +38,9 @@ class DashboardController extends Controller
         $hasMorePending = $pending->count() > self::PREVIEW_LIMIT;
         $hasMoreRejected = $rejected->count() > self::PREVIEW_LIMIT;
 
-        $pendingSurveys = $survey->pendingFor($user);
-
         return view('student.dashboard', compact(
             'summary', 'approvedActivities', 'pendingActivities', 'rejectedActivities',
             'hasMoreApproved', 'hasMorePending', 'hasMoreRejected', 'currentPositionLabel',
-            'pendingSurveys',
         ));
     }
 }

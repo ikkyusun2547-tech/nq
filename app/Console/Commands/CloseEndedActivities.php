@@ -4,7 +4,6 @@ namespace App\Console\Commands;
 
 use App\Models\Activity;
 use App\Notifications\ActivityMissed;
-use App\Services\ActivitySurvey;
 use App\Services\SafeNotifier;
 use Illuminate\Console\Command;
 
@@ -35,7 +34,7 @@ class CloseEndedActivities extends Command
     /**
      * Execute the console command.
      */
-    public function handle(ActivitySurvey $survey): void
+    public function handle(): void
     {
         $activities = Activity::whereIn('status', ['open', 'ongoing', 'full'])
             ->where('end_at', '<', now())
@@ -48,8 +47,6 @@ class CloseEndedActivities extends Command
             if ($missing->isNotEmpty()) {
                 SafeNotifier::send($missing, new ActivityMissed($activity));
             }
-
-            $survey->requestFromAttendees($activity);
         }
 
         $this->info("Closed {$activities->count()} activity/activities.");
