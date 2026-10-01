@@ -239,8 +239,13 @@
                                     dotClass: @js($statusDot),
                                     toggle() {
                                         if (this.open) { this.open = false; return; }
+                                        // Open below the chip, or above it when the row is near the bottom of the screen.
                                         const r = this.$refs.trigger.getBoundingClientRect();
-                                        this.panelStyle = `top:${r.bottom + 8}px; left:${r.left}px;`;
+                                        const w = 176, h = Math.min(260, window.innerHeight - 24), m = 12;
+                                        const left = Math.max(m, Math.min(r.left, window.innerWidth - w - m));
+                                        this.panelStyle = (window.innerHeight - r.bottom > h + 16)
+                                            ? `top:${r.bottom + 8}px; left:${left}px; max-height:${h}px;`
+                                            : `bottom:${window.innerHeight - r.top + 8}px; left:${left}px; max-height:${h}px;`;
                                         this.open = true;
                                     },
                                     pick(value) {
@@ -276,14 +281,15 @@
                                 <template x-teleport="body">
                                     <div
                                         x-show="open" x-cloak role="listbox" :style="panelStyle"
-                                        @click.outside="open = false" @keydown.escape.window="open = false"
+                                        @click.outside="if (! $refs.trigger.contains($event.target)) open = false" @keydown.escape.window="open = false"
+                                        @scroll.window="open = false" @resize.window="open = false"
                                         x-transition:enter="transition ease-out duration-150"
                                         x-transition:enter-start="opacity-0 -translate-y-1 scale-95"
                                         x-transition:enter-end="opacity-100 translate-y-0 scale-100"
                                         x-transition:leave="transition ease-in duration-100"
                                         x-transition:leave-start="opacity-100"
                                         x-transition:leave-end="opacity-0"
-                                        class="fixed z-30 w-44 overflow-auto rounded-2xl border border-slate-100 bg-white/95 p-1.5 shadow-soft-lg backdrop-blur-sm dark:border-slate-700 dark:bg-slate-800/95"
+                                        class="fixed z-50 w-44 overflow-y-auto rounded-2xl border border-slate-200 bg-white p-1.5 shadow-soft-lg dark:border-slate-700 dark:bg-slate-800"
                                     >
                                         @foreach ($statusLabel as $statusKey => $label)
                                             <button
