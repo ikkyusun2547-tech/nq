@@ -52,6 +52,7 @@ class StoreActivityRequest extends FormRequest
             'checkin_opens_at' => [Rule::requiredIf(fn () => $this->input('checkin_method') === 'self_report'), 'nullable', 'date'],
             'checkin_closes_at' => [Rule::requiredIf(fn () => $this->input('checkin_method') === 'self_report'), 'nullable', 'date', 'after:checkin_opens_at'],
             'status' => ['required', Rule::in(Activity::SETTABLE_STATUSES)],
+            'target_program' => ['nullable', Rule::in(Activity::PROGRAMS)],
 
             'faculty_ids' => ['nullable', 'array'],
             'faculty_ids.*' => ['integer', 'exists:faculties,id'],

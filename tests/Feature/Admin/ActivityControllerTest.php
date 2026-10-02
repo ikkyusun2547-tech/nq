@@ -114,6 +114,41 @@ class ActivityControllerTest extends TestCase
         ]);
     }
 
+    public function test_an_activity_can_be_limited_to_one_programme(): void
+    {
+        $admin = $this->admin();
+        $this->actingAs($admin)->get(route('admin.activities.create'))->assertOk()->assertSee('name="target_program"', false);
+
+        $this->actingAs($admin)->post(route('admin.activities.store'), $this->validPayload(['target_program' => 'special']));
+
+        $activity = Activity::where('title', 'กิจกรรมทดสอบ')->firstOrFail();
+        $this->assertSame('special', $activity->target_program);
+
+        $special = User::factory()->create(['role' => 'student', 'email' => 'sp@srru.ac.th', 'program_type' => 'special']);
+        $normal = User::factory()->create(['role' => 'student', 'email' => 'nm@srru.ac.th', 'program_type' => 'normal']);
+        $unset = User::factory()->create(['role' => 'student', 'email' => 'un@srru.ac.th', 'program_type' => null]);
+
+        $this->assertTrue($activity->isEligibleFor($special));
+        $this->assertFalse($activity->isEligibleFor($normal));
+        $this->assertFalse($activity->isEligibleFor($unset));
+        $this->assertSame([$special->id], $activity->eligibleStudentsQuery()->pluck('id')->all());
+
+        // ภาคปกติ also covers students who never set a programme.
+        $activity->update(['target_program' => 'normal']);
+        $this->assertEqualsCanonicalizing([$normal->id, $unset->id], $activity->fresh()->eligibleStudentsQuery()->pluck('id')->all());
+
+        // Editing back to "ทุกภาค" clears it.
+        $this->actingAs($admin)->put(route('admin.activities.update', $activity), $this->validPayload(['target_program' => '']));
+        $this->assertNull($activity->fresh()->target_program);
+    }
+
+    public function test_target_program_must_be_a_known_programme(): void
+    {
+        $this->actingAs($this->admin())
+            ->post(route('admin.activities.store'), $this->validPayload(['target_program' => 'night']))
+            ->assertSessionHasErrors('target_program');
+    }
+
     public function test_store_requires_end_at_to_be_after_start_at(): void
     {
         $this->actingAs($this->admin())->post(route('admin.activities.store'), $this->validPayload([

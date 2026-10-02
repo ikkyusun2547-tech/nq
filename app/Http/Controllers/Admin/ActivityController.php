@@ -355,6 +355,7 @@ class ActivityController extends Controller
             'academic_year', 'semester', 'credit_hours', 'capacity',
             'location_name', 'location_lat', 'location_lng', 'allowed_radius',
             'checkin_method', 'start_at', 'end_at', 'checkin_opens_at', 'checkin_closes_at',
+            'target_program',
         ]));
         $copy->title = __(':title (สำเนา)', ['title' => $activity->title]);
         $copy->status = 'draft';

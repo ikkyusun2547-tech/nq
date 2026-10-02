@@ -221,6 +221,24 @@
         </a>
         <x-brand-header eyebrow="{{ __('กองพัฒนานักศึกษา') }}" :title="$thread->subject" class="!mb-0 border-b border-slate-200 bg-white py-3 pl-14 pr-4 dark:border-slate-800 dark:bg-slate-950 md:!mb-6 md:border-0 md:bg-transparent md:p-0 md:dark:bg-transparent">
             <x-slot:actions>
+                @php
+                    $dockEntry = [
+                        'id' => $thread->id,
+                        'title' => $thread->subject,
+                        'name' => __('กองพัฒนานักศึกษา'),
+                        'avatar' => null,
+                        'showUrl' => route('contact.show', $thread),
+                        'pollUrl' => route('contact.poll', $thread),
+                        'replyUrl' => route('contact.reply', $thread),
+                        'indexUrl' => route('contact.index'),
+                    ];
+                @endphp
+                <button type="button" title="{{ __('ย่อแชทไว้มุมจอ แล้วใช้หน้าอื่นต่อได้') }}"
+                    @click="minimizeChat({{ auth()->id() }}, Object.assign(@js($dockEntry), { lastSeenId: messages.length ? messages[messages.length - 1].id : 0 }))"
+                    class="hidden h-8 shrink-0 items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-600 transition-colors hover:border-brand-purple-300 hover:text-brand-purple-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:text-brand-purple-300 lg:inline-flex">
+                    <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 9V4.5M9 9H4.5M9 9L3.75 3.75M9 15v4.5M9 15H4.5M9 15l-5.25 5.25M15 9h4.5M15 9V4.5M15 9l5.25-5.25M15 15h4.5M15 15v4.5m0-4.5l5.25 5.25"/></svg>
+                    {{ __('ย่อแชท') }}
+                </button>
                 <span class="shrink-0 rounded-full bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-300" x-text="statusLabel[status]"></span>
             </x-slot:actions>
         </x-brand-header>

@@ -67,6 +67,11 @@
                     <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium {{ $typeMeta[$activity->activity_type]['class'] ?? 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400' }}">
                         {{ $typeMeta[$activity->activity_type]['label'] ?? $activity->activity_type }}
                     </span>
+                    @if ($activity->target_program)
+                        <span class="inline-flex items-center rounded-full bg-brand-purple-50 px-2.5 py-0.5 text-xs font-medium text-brand-purple-700 dark:bg-brand-purple-500/15 dark:text-brand-purple-300">
+                            {{ $activity->target_program === 'special' ? __('เฉพาะภาคพิเศษ') : __('เฉพาะภาคปกติ') }}
+                        </span>
+                    @endif
                     @if ($activity->wasRecentlyUpdatedSignificantly())
                         <span class="inline-flex items-center gap-1 rounded-full bg-sky-50 px-2.5 py-0.5 text-xs font-medium text-sky-700 dark:bg-sky-500/10 dark:text-sky-400">
                             <svg class="h-3 w-3 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"/></svg>

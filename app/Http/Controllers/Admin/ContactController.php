@@ -43,7 +43,7 @@ class ContactController extends Controller
     public function show(ContactThread $contactThread)
     {
         $contactThread->update(['admin_unread' => false]);
-        $contactThread->load(['messages.sender', 'student', 'assignedAdmin']);
+        $contactThread->load(['messages.sender', 'student.faculty', 'student.major', 'assignedAdmin']);
 
         return view('admin.contact.show', ['thread' => $contactThread, 'fullscreenChat' => true]);
     }
@@ -54,6 +54,11 @@ class ContactController extends Controller
      */
     public function poll(Request $request, ContactThread $contactThread)
     {
+        // ?seen=1: an open chat window (resources/js/chat-dock.js) is showing it.
+        if ($request->boolean('seen') && $contactThread->admin_unread) {
+            $contactThread->update(['admin_unread' => false]);
+        }
+
         return response()->json([
             'status' => $contactThread->status,
             'messages' => $contactThread->messages()

@@ -90,6 +90,11 @@ class ContactController extends Controller
     {
         abort_unless($contactThread->user_id === $request->user()->id, 403);
 
+        // ?seen=1: an open chat window (resources/js/chat-dock.js) is showing it.
+        if ($request->boolean('seen') && $contactThread->student_unread) {
+            $contactThread->update(['student_unread' => false]);
+        }
+
         $contactThread->loadMissing('assignedAdmin');
 
         return response()->json([

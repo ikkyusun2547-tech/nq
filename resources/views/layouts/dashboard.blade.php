@@ -369,6 +369,9 @@
 
     @include('partials.push-notification-banner')
 
+    @auth
+        @include('partials.chat-dock')
+    @endauth
     @stack('scripts')
 </body>
 </html>

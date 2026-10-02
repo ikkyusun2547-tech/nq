@@ -3,7 +3,20 @@
 @section('content')
 @php
     $statusLabel = ['open' => __('เปิดอยู่'), 'closed' => __('ปิดแล้ว')];
-    $studentName = $thread->student->name_thai ?? $thread->student->name;
+    $student = $thread->student;
+    $studentName = $student->name_thai ?? $student->name;
+    $isMine = $thread->assigned_admin_id === auth()->id();
+    $dockEntry = [
+        'id' => $thread->id,
+        'title' => $thread->subject,
+        'name' => $studentName,
+        'avatar' => $student->avatar_url,
+        'showUrl' => route('admin.contact.show', $thread),
+        'pollUrl' => route('admin.contact.poll', $thread),
+        'replyUrl' => route('admin.contact.reply', $thread),
+        'indexUrl' => route('admin.contact.index'),
+    ];
+    $handlerName = $thread->assignedAdmin ? ($isMine ? __('คุณ') : ($thread->assignedAdmin->name_thai ?? $thread->assignedAdmin->name)) : null;
     $viewerId = auth()->id();
     $initialMessages = $thread->messages->map(fn ($m) => [
         'id' => $m->id,
@@ -20,12 +33,14 @@
 @endphp
 
 <div
-    class="fixed inset-0 z-30 flex flex-col bg-white dark:bg-slate-950 lg:static lg:mx-auto lg:max-w-xl lg:bg-transparent lg:dark:bg-transparent"
+    class="fixed inset-0 z-30 flex flex-col bg-white dark:bg-slate-950 lg:static lg:mx-auto lg:grid lg:max-w-6xl lg:grid-cols-[minmax(0,1fr)_19rem] lg:items-start lg:gap-6 lg:bg-transparent lg:dark:bg-transparent"
     x-data="{
         status: '{{ $thread->status }}',
         messages: @js($initialMessages),
         body: '',
         sending: false,
+        menuOpen: false,
+        dayNames: @js(['today' => __('วันนี้'), 'yesterday' => __('เมื่อวาน')]),
         attachmentFile: null,
         attachmentPreview: null,
         attachmentName: '',
@@ -60,7 +75,7 @@
                 // correct if a horizontal scrollbar is eating into the
                 // visible vertical space.
                 const available = window.innerHeight - top - (2 * remPx);
-                this.$refs.chatCard.style.height = `${Math.min(available, 37 * remPx)}px`;
+                this.$refs.chatCard.style.height = `${Math.max(Math.min(available, 46 * remPx), 26 * remPx)}px`;
             };
             setHeight();
             window.addEventListener('resize', setHeight);
@@ -88,6 +103,22 @@
             if (next.is_mine !== current.is_mine || next.sender_name !== current.sender_name) return true;
             return (next.created_at_ts - current.created_at_ts) > 300;
         },
+        // created_at is d/m/Y H:i — a divider whenever the day changes.
+        dayOf(message) { return message.created_at.split(' ')[0]; },
+        timeOf(message) { return message.created_at.split(' ')[1] || ''; },
+        showDay(index) {
+            return index === 0 || this.dayOf(this.messages[index]) !== this.dayOf(this.messages[index - 1]);
+        },
+        dayLabel(message) {
+            const fmt = (d) => [d.getDate(), d.getMonth() + 1, d.getFullYear()].map((n, i) => i < 2 ? String(n).padStart(2, '0') : n).join('/');
+            const today = new Date();
+            const yesterday = new Date(Date.now() - 86400000);
+            const day = this.dayOf(message);
+            if (day === fmt(today)) return this.dayNames.today;
+            if (day === fmt(yesterday)) return this.dayNames.yesterday;
+            return day;
+        },
+        autoGrow(el) { el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, 128) + 'px'; },
         isImageOnly(message) {
             return !! (message.attachment_url && message.is_image_attachment && ! message.body);
         },
@@ -169,6 +200,7 @@
                     const data = await res.json();
                     this.messages.push(data.data);
                     this.body = '';
+                    this.$nextTick(() => this.$refs.composer && this.autoGrow(this.$refs.composer));
                     this.clearAttachment();
                     this.scrollToBottom();
                 }
@@ -183,142 +215,266 @@
         },
     }"
 >
-    <div class="relative shrink-0">
-        {{-- See Student\ContactController's contact/show.blade.php — same
-             one-page exception, hand-rolled rather than reintroducing the
-             removed back/leadingBack props on <x-brand-header> itself. --}}
-        <a href="{{ route('admin.contact.index') }}" aria-label="{{ __('กลับ') }}"
-            class="absolute left-2 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full text-slate-600 transition-colors hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800 lg:hidden">
-            <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"/></svg>
-        </a>
-        <x-brand-header eyebrow="{{ $studentName }} · {{ $thread->student->student_id }}" :title="$thread->subject" class="!mb-0 border-b border-slate-200 bg-white py-3 pl-14 pr-4 dark:border-slate-800 dark:bg-slate-950 lg:!mb-6 lg:border-0 lg:bg-transparent lg:p-0 lg:dark:bg-transparent">
-            <x-slot:actions>
-                <span class="shrink-0 rounded-full bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-300" x-text="statusLabel[status]"></span>
-            </x-slot:actions>
-        </x-brand-header>
-    </div>
+    @php
+        $ghostBtn = 'inline-flex h-10 w-full items-center justify-center gap-2 rounded-full border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800';
+        $primaryBtn = 'inline-flex h-10 w-full items-center justify-center gap-2 rounded-full bg-brand-purple-700 px-4 text-sm font-semibold text-white transition-colors hover:bg-brand-purple-800';
+        $menuItem = 'flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-left text-sm text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-800';
+    @endphp
 
-    <div class="mt-2 mb-2 flex shrink-0 flex-wrap items-center justify-between gap-2 px-3 lg:-mt-2 lg:px-0">
-        <div>
-            @if ($thread->assignedAdmin)
-                <span class="inline-flex items-center gap-1.5 rounded-full bg-brand-purple-50 px-3 py-1.5 text-xs font-medium text-brand-purple-700 dark:bg-brand-purple-500/10 dark:text-brand-purple-400">
-                    {{ __('กำลังดูแลโดย') }}:
-                    {{ $thread->assigned_admin_id === auth()->id() ? __('คุณ') : ($thread->assignedAdmin->name_thai ?? $thread->assignedAdmin->name) }}
+    {{-- Left column: the conversation --}}
+    <div class="flex min-h-0 flex-1 flex-col">
+        {{-- Phone top bar (the dashboard header is hidden for this page below md) --}}
+        <div class="relative flex shrink-0 items-center gap-2 border-b border-slate-200 bg-white px-2 py-2 dark:border-slate-800 dark:bg-slate-950 lg:hidden">
+            <a href="{{ route('admin.contact.index') }}" aria-label="{{ __('กลับ') }}"
+                class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-slate-600 transition-colors hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800">
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"/></svg>
+            </a>
+            <span class="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-brand-purple-700 text-sm font-semibold text-white">
+                @if ($student->avatar_url)
+                    <img src="{{ $student->avatar_url }}" alt="" class="h-full w-full object-cover">
+                @else
+                    {{ mb_substr($studentName, 0, 1) }}
+                @endif
+            </span>
+            <div class="min-w-0 flex-1">
+                <p class="truncate text-sm font-semibold text-slate-900 dark:text-white">{{ $studentName }}</p>
+                <p class="truncate text-xs text-slate-500 dark:text-slate-400">{{ $thread->subject }}</p>
+            </div>
+            <span class="shrink-0 rounded-full px-2.5 py-1 text-[0.7rem] font-semibold"
+                :class="status === 'open' ? 'bg-brand-green-50 text-brand-green-700 dark:bg-brand-green-500/15 dark:text-brand-green-300' : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'"
+                x-text="statusLabel[status]"></span>
+            <button type="button" @click="menuOpen = ! menuOpen" aria-label="{{ __('ตัวเลือก') }}"
+                class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-slate-600 transition-colors hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800">
+                <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="12" cy="19" r="1.8"/></svg>
+            </button>
+
+            <div x-show="menuOpen" x-cloak @click.outside="menuOpen = false"
+                x-transition:enter="transition ease-out duration-150" x-transition:enter-start="opacity-0 -translate-y-1" x-transition:enter-end="opacity-100 translate-y-0"
+                class="absolute right-2 top-full z-20 mt-1 w-64 rounded-2xl border border-slate-200 bg-white p-1.5 shadow-soft-lg dark:border-slate-800 dark:bg-slate-900">
+                <p class="px-3 pb-1.5 pt-2 text-xs text-slate-500 dark:text-slate-400">
+                    {{ $handlerName ? __('กำลังดูแลโดย').': '.$handlerName : __('ยังไม่มีใครรับเรื่องนี้') }}
+                </p>
+                <form method="POST" action="{{ $isMine ? route('admin.contact.release', $thread) : route('admin.contact.claim', $thread) }}">
+                    @csrf
+                    <button type="submit" class="{{ $menuItem }}">{{ $isMine ? __('ปล่อยเรื่อง') : ($thread->assignedAdmin ? __('รับช่วงต่อ') : __('รับเรื่องนี้')) }}</button>
+                </form>
+                <form method="POST" action="{{ route('admin.contact.close', $thread) }}" x-show="status === 'open'">
+                    @csrf
+                    <button type="submit" class="{{ $menuItem }}">{{ __('ปิดเรื่อง') }}</button>
+                </form>
+                <form method="POST" action="{{ route('admin.contact.reopen', $thread) }}" x-show="status === 'closed'">
+                    @csrf
+                    <button type="submit" class="{{ $menuItem }}">{{ __('เปิดเรื่องกลับ') }}</button>
+                </form>
+                <a href="{{ route('admin.students.show', $student) }}" class="{{ $menuItem }}">{{ __('ดูข้อมูลนักศึกษา') }}</a>
+            </div>
+        </div>
+
+        {{-- Desktop title --}}
+        <div class="mb-4 hidden lg:block">
+            <a href="{{ route('admin.contact.index') }}" class="inline-flex items-center gap-1 text-sm font-medium text-slate-500 transition-colors hover:text-brand-purple-700 dark:text-slate-400 dark:hover:text-brand-purple-300">
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"/></svg>
+                {{ __('กล่องข้อความ') }}
+            </a>
+            <div class="mt-2 flex items-start justify-between gap-4">
+                <h1 class="min-w-0 flex-1 font-display text-3xl leading-tight text-slate-900 dark:text-white">{{ $thread->subject }}</h1>
+                <button type="button" title="{{ __('ย่อแชทไว้มุมจอ แล้วใช้หน้าอื่นต่อได้') }}"
+                    @click="minimizeChat({{ auth()->id() }}, Object.assign(@js($dockEntry), { lastSeenId: messages.length ? messages[messages.length - 1].id : 0 }))"
+                    class="hidden h-8 shrink-0 items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-600 transition-colors hover:border-brand-purple-300 hover:text-brand-purple-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:text-brand-purple-300 lg:inline-flex">
+                    <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 9V4.5M9 9H4.5M9 9L3.75 3.75M9 15v4.5M9 15H4.5M9 15l-5.25 5.25M15 9h4.5M15 9V4.5M15 9l5.25-5.25M15 15h4.5M15 15v4.5m0-4.5l5.25 5.25"/></svg>
+                    {{ __('ย่อแชท') }}
+                </button>
+                <span class="mt-1.5 inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold"
+                    :class="status === 'open' ? 'bg-brand-green-50 text-brand-green-700 dark:bg-brand-green-500/15 dark:text-brand-green-300' : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'">
+                    <span class="h-1.5 w-1.5 rounded-full" :class="status === 'open' ? 'bg-brand-green-500' : 'bg-slate-400'"></span>
+                    <span x-text="statusLabel[status]"></span>
                 </span>
-            @else
-                <span class="text-xs text-slate-400 dark:text-slate-500">{{ __('ยังไม่มีใครรับเรื่องนี้') }}</span>
-            @endif
+            </div>
         </div>
 
-        <div class="flex gap-2">
-            @if ($thread->assigned_admin_id === auth()->id())
-                <form method="POST" action="{{ route('admin.contact.release', $thread) }}">
+        <div x-ref="chatCard" class="flex min-h-0 flex-1 flex-col overflow-hidden bg-white dark:bg-slate-900 lg:flex-none lg:rounded-3xl lg:border lg:border-slate-200 lg:shadow-soft dark:lg:border-slate-800">
+            {{-- Closed notice --}}
+            <div x-show="status === 'closed'" x-cloak class="flex shrink-0 items-center justify-between gap-3 border-b border-slate-100 bg-slate-50 px-4 py-2.5 text-sm dark:border-slate-800 dark:bg-slate-800/50">
+                <span class="text-slate-600 dark:text-slate-300">{{ __('เรื่องนี้ปิดแล้ว') }}</span>
+                <form method="POST" action="{{ route('admin.contact.reopen', $thread) }}">
                     @csrf
-                    <button type="submit" class="rounded-xl bg-white px-4 py-2 text-xs font-semibold text-slate-600 shadow-soft ring-1 ring-slate-200 transition-colors hover:bg-slate-100 dark:bg-slate-800 dark:text-slate-300 dark:ring-slate-700 dark:hover:bg-slate-700">
-                        {{ __('ปล่อยเรื่อง') }}
-                    </button>
+                    <button type="submit" class="text-sm font-semibold text-brand-purple-700 hover:underline dark:text-brand-purple-300">{{ __('เปิดเรื่องกลับ') }}</button>
                 </form>
-            @else
-                <form method="POST" action="{{ route('admin.contact.claim', $thread) }}">
-                    @csrf
-                    <button type="submit" class="rounded-xl bg-white px-4 py-2 text-xs font-semibold text-slate-600 shadow-soft ring-1 ring-slate-200 transition-colors hover:bg-slate-100 dark:bg-slate-800 dark:text-slate-300 dark:ring-slate-700 dark:hover:bg-slate-700">
-                        {{ $thread->assignedAdmin ? __('รับช่วงต่อ') : __('รับเรื่องนี้') }}
-                    </button>
-                </form>
-            @endif
-            <form method="POST" action="{{ route('admin.contact.close', $thread) }}" x-show="status === 'open'">
-                @csrf
-                <button type="submit" class="rounded-xl bg-white px-4 py-2 text-xs font-semibold text-slate-600 shadow-soft ring-1 ring-slate-200 transition-colors hover:bg-slate-100 dark:bg-slate-800 dark:text-slate-300 dark:ring-slate-700 dark:hover:bg-slate-700">
-                    {{ __('ปิดเรื่อง') }}
-                </button>
-            </form>
-            <form method="POST" action="{{ route('admin.contact.reopen', $thread) }}" x-show="status === 'closed'">
-                @csrf
-                <button type="submit" class="rounded-xl bg-white px-4 py-2 text-xs font-semibold text-slate-600 shadow-soft ring-1 ring-slate-200 transition-colors hover:bg-slate-100 dark:bg-slate-800 dark:text-slate-300 dark:ring-slate-700 dark:hover:bg-slate-700">
-                    {{ __('เปิดเรื่องกลับ') }}
-                </button>
-            </form>
-        </div>
-    </div>
+            </div>
 
-    <div x-ref="chatCard" class="flex min-h-0 flex-1 flex-col overflow-hidden rounded-none glass-card lg:flex-none lg:rounded-2xl lg:shadow-soft-lg">
-        <div x-ref="scrollBox" class="min-h-0 flex-1 overflow-y-auto bg-slate-50/60 p-4 dark:bg-slate-900/40">
-            <template x-for="(message, index) in messages" :key="message.id">
-                <div :class="[
-                    message.is_mine ? 'flex justify-end' : 'flex items-end gap-2 justify-start',
-                    showMeta(index) ? 'mb-3' : 'mb-0.5',
-                ]">
-                    <template x-if="! message.is_mine">
-                        <div class="h-7 w-7 shrink-0 overflow-hidden rounded-full ring-1 ring-slate-100 dark:ring-slate-700" :class="showMeta(index) ? '' : 'invisible'">
-                            <img x-show="message.sender_avatar" :src="message.sender_avatar" class="h-full w-full object-cover" alt="">
-                            <div x-show="! message.sender_avatar" class="flex h-full w-full items-center justify-center bg-brand-purple-700 text-[0.65rem] font-semibold text-white" x-text="message.sender_name.charAt(0)"></div>
+            <div x-ref="scrollBox" class="min-h-0 flex-1 overflow-y-auto bg-slate-50/70 px-4 py-5 dark:bg-slate-950/40 sm:px-6">
+                <template x-if="messages.length === 0">
+                    <p class="py-16 text-center text-sm text-slate-400 dark:text-slate-500">{{ __('ยังไม่มีข้อความ') }}</p>
+                </template>
+
+                <template x-for="(message, index) in messages" :key="message.id">
+                    <div>
+                        <template x-if="showDay(index)">
+                            <div class="my-4 flex items-center gap-3 first:mt-0">
+                                <span class="h-px flex-1 bg-slate-200 dark:bg-slate-800"></span>
+                                <span class="rounded-full bg-white px-3 py-1 text-[0.7rem] font-medium text-slate-500 ring-1 ring-slate-200 dark:bg-slate-900 dark:text-slate-400 dark:ring-slate-800" x-text="dayLabel(message)"></span>
+                                <span class="h-px flex-1 bg-slate-200 dark:bg-slate-800"></span>
+                            </div>
+                        </template>
+
+                        <div :class="[
+                            message.is_mine ? 'flex justify-end' : 'flex items-end gap-2 justify-start',
+                            showMeta(index) ? 'mb-4' : 'mb-1',
+                        ]">
+                            <template x-if="! message.is_mine">
+                                <div class="h-8 w-8 shrink-0 overflow-hidden rounded-full" :class="showMeta(index) ? '' : 'invisible'">
+                                    <img x-show="message.sender_avatar" :src="message.sender_avatar" class="h-full w-full object-cover" alt="">
+                                    <div x-show="! message.sender_avatar" class="flex h-full w-full items-center justify-center bg-brand-purple-700 text-xs font-semibold text-white" x-text="message.sender_name.charAt(0)"></div>
+                                </div>
+                            </template>
+                            <div class="flex max-w-[80%] flex-col sm:max-w-[70%]" :class="message.is_mine ? 'items-end' : 'items-start'">
+                                <div :class="[
+                                    'text-[0.95rem] leading-relaxed',
+                                    isImageOnly(message) ? 'overflow-hidden rounded-2xl' : 'px-4 py-2.5',
+                                    ! isImageOnly(message) && (message.is_mine ? 'rounded-2xl rounded-br-md' : 'rounded-2xl rounded-bl-md'),
+                                    message.is_mine
+                                        ? 'bg-brand-purple-700 text-white'
+                                        : 'bg-white text-slate-800 shadow-sm ring-1 ring-slate-200/70 dark:bg-slate-800 dark:text-slate-100 dark:ring-slate-700',
+                                ]">
+                                    <template x-if="message.attachment_url && message.is_image_attachment">
+                                        <button type="button" @click="openViewer(message)" :class="! isImageOnly(message) && 'mb-2 -mx-1.5 block'">
+                                            <img :src="message.attachment_url" class="max-h-64 w-full rounded-xl object-cover" :class="isImageOnly(message) && '!rounded-2xl'">
+                                        </button>
+                                    </template>
+                                    <template x-if="message.attachment_url && ! message.is_image_attachment">
+                                        <a :href="message.attachment_url" download
+                                            class="mb-2 flex items-center gap-2 rounded-xl px-3 py-2"
+                                            :class="message.is_mine ? 'bg-white/15' : 'bg-slate-100 dark:bg-slate-700/60'">
+                                            <svg class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 18H18a2.25 2.25 0 002.25-2.25V11.25a9 9 0 00-9-9H6.75A2.25 2.25 0 004.5 4.5v15a2.25 2.25 0 002.25 2.25z"/></svg>
+                                            <span class="truncate text-xs font-medium" x-text="message.attachment_name"></span>
+                                        </a>
+                                    </template>
+                                    <p x-show="message.body" class="whitespace-pre-wrap break-words" x-html="linkify(message.body, message.is_mine)"></p>
+                                </div>
+                                <p x-show="showMeta(index)" class="mt-1 px-1 text-[0.7rem] text-slate-400 dark:text-slate-500"
+                                    x-text="(message.is_mine ? '' : message.sender_name + ' · ') + timeOf(message)"></p>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+            </div>
+
+            {{-- Composer --}}
+            <form @submit.prevent="send()" class="shrink-0 border-t border-slate-100 bg-white px-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-3 dark:border-slate-800 dark:bg-slate-900 sm:px-4">
+                <div x-show="attachmentFile" x-cloak class="mb-2 flex items-center gap-2.5 rounded-2xl bg-slate-50 px-3 py-2 dark:bg-slate-800/60">
+                    <template x-if="attachmentIsImage">
+                        <img :src="attachmentPreview" class="h-10 w-10 shrink-0 rounded-lg object-cover">
+                    </template>
+                    <template x-if="! attachmentIsImage">
+                        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-slate-200 text-slate-500 dark:bg-slate-700 dark:text-slate-300">
+                            <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 18H18a2.25 2.25 0 002.25-2.25V11.25a9 9 0 00-9-9H6.75A2.25 2.25 0 004.5 4.5v15a2.25 2.25 0 002.25 2.25z"/></svg>
                         </div>
                     </template>
-                    <div class="flex max-w-[75%] flex-col" :class="message.is_mine ? 'items-end' : 'items-start'">
-                        <div :class="[
-                            'shadow-soft text-sm',
-                            isImageOnly(message) ? 'overflow-hidden rounded-2xl' : 'rounded-2xl px-3.5 py-2',
-                            message.is_mine
-                                ? 'bg-brand-purple-700 text-white'
-                                : 'bg-white text-slate-700 ring-1 ring-slate-100 dark:bg-slate-800 dark:text-slate-200 dark:ring-slate-700',
-                        ]">
-                            <template x-if="message.attachment_url && message.is_image_attachment">
-                                <button type="button" @click="openViewer(message)" :class="! isImageOnly(message) && 'mb-2 -mx-1 block'">
-                                    <img :src="message.attachment_url" class="max-h-64 w-full rounded-xl object-cover" :class="isImageOnly(message) && '!rounded-2xl'">
-                                </button>
-                            </template>
-                            <template x-if="message.attachment_url && ! message.is_image_attachment">
-                                <a :href="message.attachment_url" download
-                                    class="mb-2 flex items-center gap-2 rounded-xl px-3 py-2"
-                                    :class="message.is_mine ? 'bg-white/15' : 'bg-slate-100 dark:bg-slate-700/60'">
-                                    <svg class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 18H18a2.25 2.25 0 002.25-2.25V11.25a9 9 0 00-9-9H6.75A2.25 2.25 0 004.5 4.5v15a2.25 2.25 0 002.25 2.25z"/></svg>
-                                    <span class="truncate text-xs font-medium" x-text="message.attachment_name"></span>
-                                </a>
-                            </template>
-                            <p x-show="message.body" class="whitespace-pre-wrap break-words" x-html="linkify(message.body, message.is_mine)"></p>
-                        </div>
-                        <p x-show="showMeta(index)" :class="message.is_mine ? 'mt-1 text-[0.68rem] text-slate-400 dark:text-slate-500 mr-1 text-right' : 'mt-1 text-[0.68rem] text-slate-400 dark:text-slate-500 ml-1'" x-text="message.created_at"></p>
-                    </div>
+                    <span class="min-w-0 flex-1 truncate text-xs font-medium text-slate-600 dark:text-slate-300" x-text="attachmentName"></span>
+                    <button type="button" @click="clearAttachment()" aria-label="{{ __('เอาไฟล์ออก') }}" class="shrink-0 rounded-full p-1 text-slate-400 transition-colors hover:bg-slate-200 hover:text-slate-600 dark:hover:bg-slate-700 dark:hover:text-slate-300">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
                 </div>
-            </template>
+
+                <div class="flex items-end gap-2 rounded-3xl border border-slate-200 bg-slate-50 p-1.5 transition-colors focus-within:border-brand-purple-400 focus-within:bg-white focus-within:ring-4 focus-within:ring-brand-purple-500/10 dark:border-slate-700 dark:bg-slate-800/60 dark:focus-within:bg-slate-800">
+                    <input type="file" x-ref="attachmentInput" class="hidden" accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.txt" @change="onFileSelected($event)">
+                    <button type="button" @click="$refs.attachmentInput.click()" title="{{ __('แนบไฟล์') }}" aria-label="{{ __('แนบไฟล์') }}"
+                        class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-slate-500 transition-colors hover:bg-white hover:text-brand-purple-700 dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-brand-purple-300">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3 3 0 1119.5 7.372L8.552 18.32a1.5 1.5 0 01-2.122-2.121l7.81-7.81"/></svg>
+                    </button>
+
+                    <textarea x-ref="composer" x-model="body" rows="1" maxlength="2000"
+                        @input="autoGrow($el)"
+                        @keydown.enter="if (! $event.shiftKey && ! $event.isComposing) { $event.preventDefault(); send(); }"
+                        placeholder="{{ __('พิมพ์ข้อความถึง :name...', ['name' => $studentName]) }}"
+                        class="max-h-32 min-h-9 flex-1 resize-none border-0 bg-transparent px-1 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-0 dark:text-slate-100 dark:placeholder:text-slate-500"></textarea>
+
+                    <button type="submit" :disabled="sending || (! body.trim() && ! attachmentFile)" title="{{ __('ส่งข้อความ') }}" aria-label="{{ __('ส่งข้อความ') }}"
+                        class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-purple-700 text-white transition-all hover:bg-brand-purple-800 disabled:pointer-events-none disabled:bg-slate-300 dark:disabled:bg-slate-700">
+                        <svg x-show="! sending" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5"/></svg>
+                        <svg x-show="sending" x-cloak class="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+                    </button>
+                </div>
+                <p class="mt-1.5 hidden px-2 text-[0.7rem] text-slate-400 dark:text-slate-500 lg:block">{{ __('Enter เพื่อส่ง · Shift + Enter ขึ้นบรรทัดใหม่') }}</p>
+            </form>
         </div>
-
-        <form @submit.prevent="send()" class="shrink-0 space-y-2 border-t border-slate-100 bg-white p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] dark:border-slate-800 dark:bg-slate-900">
-            <div x-show="attachmentFile" class="flex items-center gap-2.5 rounded-xl bg-slate-50 px-3 py-2 dark:bg-slate-800/60">
-                <template x-if="attachmentIsImage">
-                    <img :src="attachmentPreview" class="h-10 w-10 shrink-0 rounded-lg object-cover">
-                </template>
-                <template x-if="! attachmentIsImage">
-                    <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-slate-200 text-slate-500 dark:bg-slate-700 dark:text-slate-300">
-                        <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 18H18a2.25 2.25 0 002.25-2.25V11.25a9 9 0 00-9-9H6.75A2.25 2.25 0 004.5 4.5v15a2.25 2.25 0 002.25 2.25z"/></svg>
-                    </div>
-                </template>
-                <span class="min-w-0 flex-1 truncate text-xs font-medium text-slate-600 dark:text-slate-300" x-text="attachmentName"></span>
-                <button type="button" @click="clearAttachment()" class="shrink-0 rounded-full p-1 text-slate-400 transition-colors hover:bg-slate-200 hover:text-slate-600 dark:hover:bg-slate-700 dark:hover:text-slate-300">
-                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
-                </button>
-            </div>
-
-            <div class="flex items-end gap-1.5">
-                <input type="file" x-ref="attachmentInput" class="hidden" accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.txt" @change="onFileSelected($event)">
-                <button type="button" @click="$refs.attachmentInput.click()" title="{{ __('แนบไฟล์') }}"
-                    class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-slate-400 transition-colors hover:bg-slate-100 hover:text-brand-purple-600 dark:text-slate-500 dark:hover:bg-slate-800 dark:hover:text-brand-purple-400">
-                    <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3 3 0 1119.5 7.372L8.552 18.32a1.5 1.5 0 01-2.122-2.121l7.81-7.81"/></svg>
-                </button>
-
-                <textarea x-model="body" rows="1" maxlength="2000"
-                    @keydown.enter="if (! $event.shiftKey) { $event.preventDefault(); send(); }"
-                    placeholder="{{ __('พิมพ์ข้อความ...') }}"
-                    class="max-h-24 flex-1 resize-none rounded-2xl border border-slate-200 bg-white px-3.5 py-2 text-sm transition-all duration-200 focus:border-brand-purple-500 focus:outline-none focus:ring-4 focus:ring-brand-purple-500/10 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"></textarea>
-
-                <button type="submit" :disabled="sending || (! body.trim() && ! attachmentFile)" title="{{ __('ส่งข้อความ') }}"
-                    class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-purple-700 text-white shadow-soft transition-all duration-300 disabled:pointer-events-none disabled:opacity-40 hover:bg-brand-purple-800">
-                    <svg x-show="! sending" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5"/></svg>
-                    <svg x-show="sending" x-cloak class="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
-                </button>
-            </div>
-        </form>
     </div>
+
+    {{-- Right column (desktop): who this is and what to do with it --}}
+    <aside class="hidden space-y-4 lg:sticky lg:top-24 lg:block">
+        <section class="rounded-3xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900">
+            <div class="flex items-center gap-3">
+                <span class="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-brand-purple-700 text-lg font-semibold text-white">
+                    @if ($student->avatar_url)
+                        <img src="{{ $student->avatar_url }}" alt="" class="h-full w-full object-cover">
+                    @else
+                        {{ mb_substr($studentName, 0, 1) }}
+                    @endif
+                </span>
+                <div class="min-w-0">
+                    <p class="truncate font-semibold text-slate-900 dark:text-white">{{ $studentName }}</p>
+                    <p class="font-mono text-xs text-slate-500 dark:text-slate-400">{{ $student->student_id }}</p>
+                </div>
+            </div>
+            <dl class="mt-4 space-y-2.5 text-sm">
+                @if ($student->faculty)
+                    <div><dt class="text-xs text-slate-500 dark:text-slate-400">{{ __('คณะ') }}</dt><dd class="text-slate-800 dark:text-slate-100">{{ $student->faculty->name_th }}</dd></div>
+                @endif
+                @if ($student->major)
+                    <div><dt class="text-xs text-slate-500 dark:text-slate-400">{{ __('สาขา') }}</dt><dd class="text-slate-800 dark:text-slate-100">{{ $student->major->name_th }}</dd></div>
+                @endif
+                @if ($student->year_level)
+                    <div><dt class="text-xs text-slate-500 dark:text-slate-400">{{ __('ชั้นปี') }}</dt><dd class="text-slate-800 dark:text-slate-100">{{ __('ปี :year', ['year' => $student->year_level]) }}</dd></div>
+                @endif
+                <div><dt class="text-xs text-slate-500 dark:text-slate-400">{{ __('อีเมล') }}</dt><dd class="break-all text-slate-800 dark:text-slate-100">{{ $student->email }}</dd></div>
+            </dl>
+            <a href="{{ route('admin.students.show', $student) }}" class="{{ $ghostBtn }} mt-4">
+                {{ __('ดูข้อมูลนักศึกษา') }}
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
+            </a>
+        </section>
+
+        <section class="rounded-3xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900">
+            <p class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">{{ __('การจัดการเรื่อง') }}</p>
+            <div class="mt-3 flex items-center gap-2.5 rounded-2xl bg-slate-50 px-3 py-2.5 dark:bg-slate-800/60">
+                <span @class([
+                    'h-2 w-2 shrink-0 rounded-full',
+                    'bg-brand-purple-500' => $handlerName,
+                    'bg-amber-400' => ! $handlerName,
+                ])></span>
+                <p class="min-w-0 text-sm text-slate-700 dark:text-slate-200">
+                    @if ($handlerName)
+                        {{ __('กำลังดูแลโดย') }} <span class="font-semibold">{{ $handlerName }}</span>
+                    @else
+                        {{ __('ยังไม่มีใครรับเรื่องนี้') }}
+                    @endif
+                </p>
+            </div>
+            <dl class="mt-3 grid grid-cols-2 gap-2 text-sm">
+                <div><dt class="text-xs text-slate-500 dark:text-slate-400">{{ __('เริ่มเมื่อ') }}</dt><dd class="text-slate-800 dark:text-slate-100">{{ $thread->created_at->format('d/m/Y') }}</dd></div>
+                <div><dt class="text-xs text-slate-500 dark:text-slate-400">{{ __('ข้อความ') }}</dt><dd class="text-slate-800 dark:text-slate-100" x-text="messages.length"></dd></div>
+            </dl>
+            <div class="mt-4 space-y-2">
+                <form method="POST" action="{{ $isMine ? route('admin.contact.release', $thread) : route('admin.contact.claim', $thread) }}">
+                    @csrf
+                    <button type="submit" class="{{ $isMine ? $ghostBtn : $primaryBtn }}">
+                        {{ $isMine ? __('ปล่อยเรื่อง') : ($thread->assignedAdmin ? __('รับช่วงต่อ') : __('รับเรื่องนี้')) }}
+                    </button>
+                </form>
+                <form method="POST" action="{{ route('admin.contact.close', $thread) }}" x-show="status === 'open'">
+                    @csrf
+                    <button type="submit" class="{{ $ghostBtn }}">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+                        {{ __('ปิดเรื่อง') }}
+                    </button>
+                </form>
+                <form method="POST" action="{{ route('admin.contact.reopen', $thread) }}" x-show="status === 'closed'" x-cloak>
+                    @csrf
+                    <button type="submit" class="{{ $ghostBtn }}">{{ __('เปิดเรื่องกลับ') }}</button>
+                </form>
+            </div>
+        </section>
+    </aside>
 
     {{-- See Student\ContactController's contact/show.blade.php — same
          in-page image viewer (download + close), instead of navigating to

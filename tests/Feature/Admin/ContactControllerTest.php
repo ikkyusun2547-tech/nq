@@ -67,6 +67,46 @@ class ContactControllerTest extends TestCase
         $this->assertDatabaseHas('contact_threads', ['id' => $thread->id, 'admin_unread' => false]);
     }
 
+    public function test_an_open_chat_window_marks_the_thread_read_but_a_plain_poll_does_not(): void
+    {
+        $admin = $this->admin();
+        $thread = $this->thread(['admin_unread' => true]);
+
+        $this->actingAs($admin)->getJson(route('admin.contact.poll', $thread))->assertOk();
+        $this->assertTrue($thread->fresh()->admin_unread);
+
+        $this->actingAs($admin)->getJson(route('admin.contact.poll', $thread).'?seen=1')->assertOk();
+        $this->assertFalse($thread->fresh()->admin_unread);
+    }
+
+    public function test_pages_carry_the_chat_dock_and_the_thread_page_can_minimise(): void
+    {
+        $admin = $this->admin();
+        $thread = $this->thread();
+
+        $this->actingAs($admin)->get(route('admin.dashboard'))->assertOk()->assertSee('chatDock(', false);
+        $this->actingAs($admin)->get(route('admin.contact.show', $thread))->assertOk()
+            ->assertSee('minimizeChat(', false)
+            ->assertSee('ย่อแชท');
+    }
+
+    public function test_the_thread_page_shows_the_student_panel_and_actions(): void
+    {
+        $admin = $this->admin();
+        $thread = $this->thread();
+
+        $html = $this->actingAs($admin)->get(route('admin.contact.show', $thread))
+            ->assertOk()
+            ->assertSee(route('admin.students.show', $thread->student), false)
+            ->assertSee(route('admin.contact.claim', $thread), false)
+            ->assertSee(route('admin.contact.close', $thread), false)
+            ->getContent();
+
+        // A stray double quote inside x-data would silently break the whole chat.
+        preg_match('/x-data="([^"]*)"/s', substr($html, strpos($html, 'pollUrl') - 2000), $m);
+        $this->assertStringContainsString('pollUrl', $m[1] ?? '');
+    }
+
     public function test_a_plain_admin_can_reply_and_the_student_is_notified(): void
     {
         Notification::fake();

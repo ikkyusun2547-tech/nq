@@ -294,6 +294,26 @@
         <h2 class="mb-1 flex items-center gap-2.5 font-display text-lg text-slate-900 dark:text-white"><span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-brand-purple-50 text-sm font-semibold text-brand-purple-700 dark:bg-brand-purple-500/15 dark:text-brand-purple-300">6</span>{{ __('ผู้มีสิทธิ์เข้าร่วม') }}</h2>
         <p class="mb-3 text-xs text-slate-400 dark:text-slate-500">{{ __('เลือกได้ว่าจะเปิดให้นักศึกษาทุกคนเข้าร่วม หรือจำกัดเฉพาะคณะ/สาขา/ชั้นปีที่ต้องการ') }}</p>
 
+        {{-- Programme: applies on top of the faculty/major/year choice below. --}}
+        @php $selectedProgram = old('target_program', $activity->target_program ?? ''); @endphp
+        <div class="mb-4">
+            <p class="mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">{{ __('ภาคการศึกษา') }}</p>
+            <div class="grid grid-cols-1 gap-2 sm:grid-cols-3">
+                @foreach (['' => [__('ทุกภาค'), __('ภาคปกติและภาคพิเศษ')], 'normal' => [__('ภาคปกติ'), __('เฉพาะนักศึกษาภาคปกติ')], 'special' => [__('ภาคพิเศษ (กศ.บป.)'), __('เฉพาะนักศึกษาภาคพิเศษ')]] as $value => [$label, $hint])
+                    <label class="flex cursor-pointer items-start gap-2 rounded-xl border border-slate-200 bg-slate-50/50 px-3 py-2.5 text-sm transition-all duration-200 has-[:checked]:border-brand-purple-500 has-[:checked]:bg-brand-purple-50 has-[:checked]:text-brand-purple-700 dark:border-slate-700 dark:bg-slate-800/40 dark:has-[:checked]:bg-brand-purple-500/10 dark:has-[:checked]:text-brand-purple-400">
+                        <input type="radio" name="target_program" value="{{ $value }}" @checked((string) $selectedProgram === (string) $value) class="mt-0.5 text-brand-purple-600 focus:ring-brand-purple-500">
+                        <span>
+                            <span class="block font-medium">{{ $label }}</span>
+                            <span class="block text-xs text-slate-400 dark:text-slate-500">{{ $hint }}</span>
+                        </span>
+                    </label>
+                @endforeach
+            </div>
+            @error('target_program')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
+        </div>
+
+        <p class="mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">{{ __('คณะ / สาขา / ชั้นปี') }}</p>
+
         <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <label class="flex cursor-pointer items-start gap-2 rounded-xl border border-slate-200 bg-slate-50/50 px-3 py-2.5 text-sm transition-all duration-200 has-[:checked]:border-brand-purple-500 has-[:checked]:bg-brand-purple-50 has-[:checked]:text-brand-purple-700 dark:border-slate-700 dark:bg-slate-800/40 dark:has-[:checked]:bg-brand-purple-500/10 dark:has-[:checked]:text-brand-purple-400">
                 <input type="radio" x-model="eligibilityMode" value="open" @change="clearEligibilityRestrictions()" class="mt-0.5 text-brand-purple-600 focus:ring-brand-purple-500">
