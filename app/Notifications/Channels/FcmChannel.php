@@ -19,8 +19,15 @@ use Throwable;
  */
 class FcmChannel
 {
-    public function __construct(private Messaging $messaging)
+    /**
+     * Firebase is resolved here, inside the try below, rather than injected:
+     * a missing or broken service-account key used to throw while the
+     * container built this channel — outside any catch — so the whole queued
+     * job failed instead of just skipping the push.
+     */
+    private function messaging(): Messaging
     {
+        return app(Messaging::class);
     }
 
     public function send(object $notifiable, Notification $notification): void
@@ -41,7 +48,7 @@ class FcmChannel
             ->withData(array_map('strval', array_filter($payload['data'] ?? [])));
 
         try {
-            $report = $this->messaging->sendMulticast(
+            $report = $this->messaging()->sendMulticast(
                 $message,
                 RegistrationTokens::fromValue($tokens->all()),
             );

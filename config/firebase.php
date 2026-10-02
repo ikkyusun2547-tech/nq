@@ -50,7 +50,12 @@ return [
              *
              */
 
-            'credentials' => env('FIREBASE_CREDENTIALS', env('GOOGLE_APPLICATION_CREDENTIALS')),
+            // Prefer the key's JSON straight from FIREBASE_CREDENTIALS_JSON (the
+            // SDK accepts JSON text as well as a path): every process gets it from
+            // the environment — including the scheduler/queue service, which never
+            // ran the web service's boot step that writes the key file, so every
+            // push it sent failed. The file path stays as the local-dev fallback.
+            'credentials' => trim((string) env('FIREBASE_CREDENTIALS_JSON')) ?: env('FIREBASE_CREDENTIALS', env('GOOGLE_APPLICATION_CREDENTIALS')),
 
             /*
              * ------------------------------------------------------------------------

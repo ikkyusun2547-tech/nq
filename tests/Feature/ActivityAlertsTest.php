@@ -281,6 +281,19 @@ class ActivityAlertsTest extends TestCase
         Notification::assertNotSentTo($this->admin, CheckInFlagSurge::class);
     }
 
+    public function test_scheduled_overlap_locks_expire_within_minutes_not_a_day(): void
+    {
+        // A deploy that kills a running job leaves its lock behind; it must
+        // clear itself quickly or notifications stop until it expires.
+        $events = collect(app(\Illuminate\Console\Scheduling\Schedule::class)->events())
+            ->filter(fn ($e) => $e->withoutOverlapping);
+
+        $this->assertNotEmpty($events);
+        foreach ($events as $event) {
+            $this->assertLessThanOrEqual(10, $event->expiresAt, $event->command);
+        }
+    }
+
     public function test_the_reminders_command_is_scheduled(): void
     {
         $this->artisan('schedule:list')->expectsOutputToContain('app:send-activity-reminders')->assertSuccessful();
