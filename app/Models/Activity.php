@@ -129,6 +129,33 @@ class Activity extends Model
         return $this->restrictions()->doesntExist();
     }
 
+    /**
+     * Statuses an admin can set. "กำลังดำเนินการ" is no longer one of them
+     * (it's worked out from the time — see displayStatus()) and "เต็มแล้ว"
+     * is gone: there's no sign-up to fill, and it silently blocked
+     * check-in. Old rows were moved to 'open' by a migration; the code below
+     * still tolerates them.
+     */
+    public const SETTABLE_STATUSES = ['draft', 'open', 'closed', 'cancelled'];
+
+    /**
+     * The status to *show*: an open activity between its start and end time
+     * reads "ongoing" without anyone having to switch it by hand.
+     */
+    public function displayStatus(): string
+    {
+        $status = match ($this->status) {
+            'full' => 'open',
+            default => $this->status,
+        };
+
+        if (in_array($status, ['open', 'ongoing'], true) && $this->start_at && $this->end_at) {
+            return now()->between($this->start_at, $this->end_at) ? 'ongoing' : 'open';
+        }
+
+        return $status;
+    }
+
     public function acceptsCheckIn(): bool
     {
         if (! in_array($this->status, ['open', 'ongoing'], true)) {

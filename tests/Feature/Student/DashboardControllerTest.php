@@ -93,7 +93,7 @@ class DashboardControllerTest extends TestCase
     public function test_it_highlights_activities_open_for_check_in_right_now(): void
     {
         $student = $this->student();
-        $open = Activity::factory()->create(['title' => 'Happening Now', 'status' => 'ongoing', 'start_at' => now()->subHour(), 'end_at' => now()->addHours(2)]);
+        $open = Activity::factory()->create(['title' => 'Happening Now', 'status' => 'open', 'start_at' => now()->subHour(), 'end_at' => now()->addHours(2)]);
         Activity::factory()->create(['title' => 'Later Today Draft', 'status' => 'draft', 'start_at' => now()->addHours(3), 'end_at' => now()->addHours(5)]);
         $attended = Activity::factory()->create(['title' => 'Already Attended', 'status' => 'open', 'start_at' => now()->subHour(), 'end_at' => now()->addHour()]);
         Attendance::factory()->create(['user_id' => $student->id, 'activity_id' => $attended->id]);
@@ -109,7 +109,7 @@ class DashboardControllerTest extends TestCase
     public function test_the_now_card_shows_the_activity_banner_when_there_is_one(): void
     {
         $student = $this->student();
-        Activity::factory()->create(['status' => 'ongoing', 'start_at' => now()->subHour(), 'end_at' => now()->addHour(), 'banner_url' => 'activity-banners/now.jpg']);
+        Activity::factory()->create(['status' => 'open', 'start_at' => now()->subHour(), 'end_at' => now()->addHour(), 'banner_url' => 'activity-banners/now.jpg']);
 
         $this->actingAs($student)->get(route('dashboard'))
             ->assertOk()

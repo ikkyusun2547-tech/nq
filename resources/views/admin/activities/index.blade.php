@@ -5,22 +5,18 @@
     $statusDot = [
         'draft' => 'bg-slate-400',
         'open' => 'bg-brand-green-500',
-        'full' => 'bg-amber-500',
-        'ongoing' => 'bg-brand-purple-500',
         'closed' => 'bg-slate-400',
         'cancelled' => 'bg-red-500',
     ];
     $statusBadge = [
         'draft' => 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400',
         'open' => 'bg-brand-green-50 text-brand-green-700 dark:bg-brand-green-500/10 dark:text-brand-green-400',
-        'full' => 'bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400',
-        'ongoing' => 'bg-brand-purple-50 text-brand-purple-700 dark:bg-brand-purple-500/10 dark:text-brand-purple-400',
         'closed' => 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400',
         'cancelled' => 'bg-red-50 text-red-700 dark:bg-red-500/10 dark:text-red-400',
     ];
     $statusLabel = [
-        'draft' => __('ร่าง'), 'open' => __('เปิดลงทะเบียน'), 'full' => __('เต็มแล้ว'),
-        'ongoing' => __('กำลังดำเนินการ'), 'closed' => __('ปิดกิจกรรม'), 'cancelled' => __('ถูกยกเลิก'),
+        'draft' => __('ร่าง'), 'open' => __('เปิดลงทะเบียน'),
+        'closed' => __('ปิดกิจกรรม'), 'cancelled' => __('ถูกยกเลิก'),
     ];
     $semesterShort = ['1' => __('เทอม 1'), '2' => __('เทอม 2'), '3' => __('ฤดูร้อน')];
 
@@ -30,8 +26,6 @@
     $statusChipColor = [
         'draft' => ['bg' => 'bg-slate-50 dark:bg-slate-800/60', 'border' => 'border-slate-200 dark:border-slate-700', 'dot' => 'bg-slate-400'],
         'open' => ['bg' => 'bg-brand-green-50 dark:bg-brand-green-500/10', 'border' => 'border-brand-green-100 dark:border-brand-green-500/20', 'dot' => 'bg-brand-green-500'],
-        'full' => ['bg' => 'bg-amber-50 dark:bg-amber-500/10', 'border' => 'border-amber-100 dark:border-amber-500/20', 'dot' => 'bg-amber-500'],
-        'ongoing' => ['bg' => 'bg-brand-purple-50 dark:bg-brand-purple-500/10', 'border' => 'border-brand-purple-100 dark:border-brand-purple-500/20', 'dot' => 'bg-brand-purple-500'],
         'closed' => ['bg' => 'bg-slate-50 dark:bg-slate-800/60', 'border' => 'border-slate-200 dark:border-slate-700', 'dot' => 'bg-slate-400'],
         'cancelled' => ['bg' => 'bg-red-50 dark:bg-red-500/10', 'border' => 'border-red-100 dark:border-red-500/20', 'dot' => 'bg-red-500'],
     ];
@@ -348,6 +342,13 @@
                                     </div>
                                 </template>
                             </div>
+                            {{-- "Ongoing" isn't a status to pick any more; it's shown from the time. --}}
+                            @if ($activity->displayStatus() === 'ongoing')
+                                <span class="mt-1 flex items-center gap-1 text-[0.7rem] font-semibold text-brand-purple-700 dark:text-brand-purple-300">
+                                    <span class="h-1.5 w-1.5 animate-pulse rounded-full bg-brand-purple-500"></span>
+                                    {{ __('กำลังจัดอยู่') }}
+                                </span>
+                            @endif
                         </td>
                         {{-- The two live-event actions stay visible, the rest go behind a "⋯" menu so the
                              table fits a desktop screen without scrolling. The menu

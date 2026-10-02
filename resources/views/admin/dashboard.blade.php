@@ -89,7 +89,6 @@
         $timelineStatus = [
             'ongoing' => ['label' => __('กำลังดำเนินการ'), 'class' => 'text-brand-purple-700 dark:text-brand-purple-300'],
             'open' => ['label' => __('เปิดลงทะเบียน'), 'class' => 'text-brand-green-700 dark:text-brand-green-300'],
-            'full' => ['label' => __('เต็มแล้ว'), 'class' => 'text-amber-700 dark:text-amber-300'],
             'draft' => ['label' => __('ร่าง · ยังไม่เผยแพร่'), 'class' => 'text-slate-500 dark:text-slate-400'],
             'closed' => ['label' => __('ปิดกิจกรรม'), 'class' => 'text-slate-500 dark:text-slate-400'],
         ];
@@ -245,8 +244,8 @@
                             <span class="whitespace-nowrap text-sm tabular-nums {{ $live ? 'font-semibold text-brand-purple-700 dark:text-brand-purple-300' : 'text-slate-500 dark:text-slate-400' }}">{{ $activity->start_at->isToday() ? $activity->start_at->format('H:i') : __('ต่อเนื่อง') }}</span>
                             <span class="min-w-0">
                                 <span class="block truncate text-sm font-medium text-slate-900 dark:text-white">{{ $activity->title }}</span>
-                                <span class="block truncate text-xs {{ $timelineStatus[$activity->status]['class'] ?? 'text-slate-500' }}">
-                                    {{ $live ? '● ' : '' }}{{ $timelineStatus[$activity->status]['label'] ?? $activity->status }} · {{ __('เช็คชื่อแล้ว :count คน', ['count' => $activity->attendances_count]) }}
+                                <span class="block truncate text-xs {{ $timelineStatus[$activity->displayStatus()]['class'] ?? 'text-slate-500' }}">
+                                    {{ $live ? '● ' : '' }}{{ $timelineStatus[$activity->displayStatus()]['label'] ?? $activity->status }} · {{ __('เช็คชื่อแล้ว :count คน', ['count' => $activity->attendances_count]) }}
                                 </span>
                             </span>
                         </a>
@@ -457,8 +456,8 @@
                             <p class="text-xs text-gray-400 dark:text-slate-500">{{ $activity->start_at->translatedFormat('d M Y H:i') }}</p>
                         </div>
                         <span class="shrink-0 text-xs tabular-nums text-gray-400 dark:text-slate-500">{{ $activity->attendances_count }}/{{ $activity->required_count }}</span>
-                        <span class="shrink-0 rounded-full px-2 py-0.5 text-xs font-medium {{ $statusBadge[$activity->status]['class'] ?? 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400' }}">
-                            {{ $statusBadge[$activity->status]['label'] ?? $activity->status }}
+                        <span class="shrink-0 rounded-full px-2 py-0.5 text-xs font-medium {{ $statusBadge[$activity->displayStatus()]['class'] ?? 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400' }}">
+                            {{ $statusBadge[$activity->displayStatus()]['label'] ?? $activity->status }}
                         </span>
                     </a>
                 @empty

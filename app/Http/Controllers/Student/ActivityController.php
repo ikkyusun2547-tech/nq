@@ -140,10 +140,9 @@ class ActivityController extends Controller
 
     /**
      * Main-feed priority, lowest first:
-     *  1–2. open right now (ongoing ahead of open) — can check in today
+     *  1–2. open — happening right now ahead of later ones (displayStatus())
      *  3.   not open yet but aimed at this student's faculty/major/year
      *  4.   not open yet, open to everyone
-     *  5.   full — can't join, but still worth seeing
      *  6.   already checked in — nothing left to do
      *  7.   ended (closed, or past its end time but not auto-closed yet)
      */
@@ -152,9 +151,8 @@ class ActivityController extends Controller
         return match (true) {
             $activity->status === 'closed' || $activity->end_at->isPast() => 7,
             $attended => 6,
-            $activity->status === 'ongoing' => 1,
-            $activity->status === 'open' => 2,
-            $activity->status === 'full' => 5,
+            $activity->displayStatus() === 'ongoing' => 1,
+            $activity->displayStatus() === 'open' => 2,
             $activity->restrictions->isNotEmpty() => 3,
             default => 4,
         };

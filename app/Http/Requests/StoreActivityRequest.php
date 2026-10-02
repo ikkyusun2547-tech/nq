@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Activity;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -50,7 +51,7 @@ class StoreActivityRequest extends FormRequest
             'allowed_radius' => [Rule::requiredIf(fn () => $this->input('checkin_method') === 'realtime' && $this->boolean('requires_gps')), 'nullable', 'integer', 'min:10', 'max:5000'],
             'checkin_opens_at' => [Rule::requiredIf(fn () => $this->input('checkin_method') === 'self_report'), 'nullable', 'date'],
             'checkin_closes_at' => [Rule::requiredIf(fn () => $this->input('checkin_method') === 'self_report'), 'nullable', 'date', 'after:checkin_opens_at'],
-            'status' => ['required', Rule::in(['draft', 'open', 'full', 'ongoing', 'closed', 'cancelled'])],
+            'status' => ['required', Rule::in(Activity::SETTABLE_STATUSES)],
 
             'faculty_ids' => ['nullable', 'array'],
             'faculty_ids.*' => ['integer', 'exists:faculties,id'],

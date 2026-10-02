@@ -12,7 +12,6 @@
     $statusBadge = [
         'open' => ['label' => __('เปิดลงทะเบียน'), 'class' => 'bg-brand-green-500/90 text-white'],
         'ongoing' => ['label' => __('กำลังดำเนินการ'), 'class' => 'bg-brand-purple-500/90 text-white'],
-        'full' => ['label' => __('เต็มแล้ว'), 'class' => 'bg-amber-500/90 text-white'],
         'draft' => ['label' => __('ยังไม่เปิด'), 'class' => 'bg-slate-500/90 text-white'],
         'closed' => ['label' => __('จบไปแล้ว'), 'class' => 'bg-slate-500/90 text-white'],
     ];
@@ -165,8 +164,8 @@
                             </div>
                         @endif
 
-                        <span class="absolute right-3 top-3 rounded-full px-2.5 py-1 text-xs font-medium shadow-soft backdrop-blur {{ $statusBadge[$activity->status]['class'] ?? 'bg-slate-500/90 text-white' }}">
-                            {{ $statusBadge[$activity->status]['label'] ?? $activity->status }}
+                        <span class="absolute right-3 top-3 rounded-full px-2.5 py-1 text-xs font-medium shadow-soft backdrop-blur {{ $statusBadge[$activity->displayStatus()]['class'] ?? 'bg-slate-500/90 text-white' }}">
+                            {{ $statusBadge[$activity->displayStatus()]['label'] ?? $activity->status }}
                         </span>
 
                         @if ($checkedInActivityIds->contains($activity->id))

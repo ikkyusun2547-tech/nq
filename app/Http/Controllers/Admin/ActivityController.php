@@ -320,7 +320,7 @@ class ActivityController extends Controller
     public function updateStatus(Request $request, Activity $activity)
     {
         $validated = $request->validate([
-            'status' => ['required', Rule::in(['draft', 'open', 'full', 'ongoing', 'closed', 'cancelled'])],
+            'status' => ['required', Rule::in(Activity::SETTABLE_STATUSES)],
         ]);
 
         $wasClosed = $activity->status === 'closed';

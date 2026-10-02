@@ -61,7 +61,7 @@ class DashboardTest extends TestCase
     public function test_the_dashboard_renders_the_inbox_and_todays_activities(): void
     {
         $this->seedPendingWork();
-        Activity::factory()->create(['title' => 'Today Event', 'status' => 'ongoing', 'start_at' => now()->startOfDay()->addHours(9), 'end_at' => now()->endOfDay()->subHour()]);
+        Activity::factory()->create(['title' => 'Today Event', 'status' => 'open', 'start_at' => now()->startOfDay()->addHours(9), 'end_at' => now()->endOfDay()->subHour()]);
         Activity::factory()->create(['title' => 'Cancelled Today', 'status' => 'cancelled', 'start_at' => now()->startOfDay()->addHours(9), 'end_at' => now()->endOfDay()->subHour()]);
 
         $this->actingAs($this->admin())->get(route('admin.dashboard'))

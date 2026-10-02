@@ -42,13 +42,13 @@ class ActivityFeedOrderTest extends TestCase
 
         $attended = $this->activity('Attended Activity', 'open', 0);
         Attendance::factory()->create(['user_id' => $student->id, 'activity_id' => $attended->id]);
-        $this->activity('Full Activity', 'full', 1);
         $this->activity('General Upcoming', 'draft', 2);
         $targeted = $this->activity('Targeted Upcoming', 'draft', 5);
         ActivityRestriction::create(['activity_id' => $targeted->id, 'target_year' => 2]);
         $this->activity('Open Later', 'open', 4);
         $this->activity('Open Soon', 'open', 3);
-        $this->activity('Ongoing Now', 'ongoing', 0);
+        // "Ongoing" is no longer a stored status: an open activity that is happening right now.
+        Activity::factory()->create(['title' => 'Ongoing Now', 'status' => 'open', 'start_at' => now()->subHour(), 'end_at' => now()->addHours(2)]);
 
         $this->actingAs($student)->get(route('activities.index'))
             ->assertOk()
@@ -58,7 +58,6 @@ class ActivityFeedOrderTest extends TestCase
                 'Open Later',
                 'Targeted Upcoming',
                 'General Upcoming',
-                'Full Activity',
                 'Attended Activity',
             ]);
     }

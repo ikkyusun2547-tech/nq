@@ -218,10 +218,35 @@ class ActivityControllerTest extends TestCase
         $activity = Activity::factory()->create(['status' => 'open']);
 
         $response = $this->actingAs($this->admin())
-            ->patch(route('admin.activities.update-status', $activity), ['status' => 'ongoing']);
+            ->patch(route('admin.activities.update-status', $activity), ['status' => 'closed']);
 
         $response->assertRedirect()->assertSessionHas('status');
-        $this->assertSame('ongoing', $activity->fresh()->status);
+        $this->assertSame('closed', $activity->fresh()->status);
+    }
+
+    public function test_full_and_ongoing_can_no_longer_be_set_by_hand(): void
+    {
+        $activity = Activity::factory()->create(['status' => 'open']);
+        $admin = $this->admin();
+
+        foreach (['full', 'ongoing'] as $status) {
+            $this->actingAs($admin)
+                ->patch(route('admin.activities.update-status', $activity), ['status' => $status])
+                ->assertSessionHasErrors('status');
+        }
+
+        $this->assertSame('open', $activity->fresh()->status);
+    }
+
+    public function test_an_open_activity_reads_ongoing_only_while_it_is_happening(): void
+    {
+        $now = Activity::factory()->create(['status' => 'open', 'start_at' => now()->subHour(), 'end_at' => now()->addHour()]);
+        $later = Activity::factory()->create(['status' => 'open', 'start_at' => now()->addDay(), 'end_at' => now()->addDay()->addHour()]);
+        $legacyFull = Activity::factory()->create(['status' => 'full', 'start_at' => now()->addDay(), 'end_at' => now()->addDay()->addHour()]);
+
+        $this->assertSame('ongoing', $now->displayStatus());
+        $this->assertSame('open', $later->displayStatus());
+        $this->assertSame('open', $legacyFull->displayStatus());
     }
 
     public function test_transitioning_into_closed_notifies_students_who_never_checked_in(): void

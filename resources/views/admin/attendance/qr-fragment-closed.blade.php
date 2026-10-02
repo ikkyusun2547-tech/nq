@@ -1,6 +1,6 @@
 @php
     $statusLabel = [
-        'draft' => __('ร่าง'), 'open' => __('เปิดลงทะเบียน'), 'full' => __('เต็มแล้ว'),
+        'draft' => __('ร่าง'), 'open' => __('เปิดลงทะเบียน'),
         'ongoing' => __('กำลังดำเนินการ'), 'closed' => __('ปิดกิจกรรม'), 'cancelled' => __('ถูกยกเลิก'),
     ];
 @endphp
@@ -13,5 +13,5 @@
     <p class="text-sm text-slate-500">
         {{ __('สถานะปัจจุบัน:') }} <span class="font-medium text-rose-600">{{ $statusLabel[$activity->status] ?? $activity->status }}</span>
     </p>
-    <p class="mt-3 max-w-[16rem] text-xs text-slate-500">{{ __('เปลี่ยนสถานะกิจกรรมเป็น "เปิดลงทะเบียน" หรือ "กำลังดำเนินการ" เพื่อเปิดใช้ QR เช็คชื่ออีกครั้ง') }}</p>
+    <p class="mt-3 max-w-[16rem] text-xs text-slate-500">{{ __('เปลี่ยนสถานะกิจกรรมเป็น "เปิดลงทะเบียน" เพื่อเปิดใช้ QR เช็คชื่ออีกครั้ง') }}</p>
 </div>

@@ -34,7 +34,7 @@ class ActivityListOrderTest extends TestCase
         $this->make('Draft', 'draft', now()->addDays(10));
         $this->make('Upcoming far', 'open', now()->addDays(30));
         $this->make('Upcoming soon', 'open', now()->addDays(3));
-        $this->make('Live now', 'ongoing', now()->subHour());
+        $this->make('Live now', 'open', now()->subHour());
         $needsReview = $this->make('Needs review', 'closed', now()->subDays(40));
         Attendance::factory()->for($needsReview)->flagged()->create();
 

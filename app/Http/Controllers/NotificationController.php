@@ -19,10 +19,16 @@ class NotificationController extends Controller
 
         return response()->json([
             'unread_count' => $user->unreadNotifications()->count(),
-            'notifications' => $user->notifications()->latest()->limit(8)->get()->map(fn ($n) => [
+            'notifications' => $user->notifications()->latest()->limit(12)->get()->map(fn ($n) => [
                 'id' => $n->id,
                 'read' => $n->read_at !== null,
                 'created_at' => $n->created_at->diffForHumans(),
+                // Section heading in the bell panel.
+                'group' => match (true) {
+                    $n->created_at->isToday() => __('วันนี้'),
+                    $n->created_at->isYesterday() => __('เมื่อวาน'),
+                    default => __('ก่อนหน้านี้'),
+                },
                 'icon' => $n->data['icon'] ?? 'check',
                 'title' => __($n->data['title_key'] ?? ''),
                 'body' => __($n->data['body_key'] ?? '', $n->data['body_params'] ?? []),
@@ -70,6 +76,11 @@ class NotificationController extends Controller
     public function readAll(Request $request)
     {
         $request->user()->unreadNotifications->markAsRead();
+
+        // The bell panel calls this with fetch and updates itself in place.
+        if ($request->expectsJson()) {
+            return response()->json(['ok' => true]);
+        }
 
         return back();
     }
