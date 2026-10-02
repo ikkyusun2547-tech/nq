@@ -11,6 +11,7 @@ use App\Notifications\ActivityCreated;
 use App\Notifications\ActivityMissed;
 use App\Notifications\ActivityUpdated;
 use App\Services\AcademicYearCalculator;
+use App\Services\ActivityAlerts;
 use App\Services\ActivityCodeGenerator;
 use App\Services\SafeNotifier;
 use Illuminate\Http\Request;
@@ -214,7 +215,7 @@ class ActivityController extends Controller
         // Skip draft/cancelled/full — nothing yet for students to act on, so
         // notifying now would just be noise (and full has no room anyway).
         if (in_array($activity->status, ['open', 'ongoing'], true)) {
-            $this->notifyEligibleStudentsOfNewActivity($activity);
+            app(ActivityAlerts::class)->published($activity);
         }
 
         return redirect()
@@ -239,6 +240,7 @@ class ActivityController extends Controller
     public function update(StoreActivityRequest $request, Activity $activity)
     {
         $wasClosed = $activity->status === 'closed';
+        $previousStatus = $activity->status;
         $before = $this->significantSnapshot($activity);
 
         $validated = $request->validated();
@@ -269,8 +271,10 @@ class ActivityController extends Controller
         );
 
         // Only once restrictions are back in their final state so
-        // eligibility is computed correctly for both notifications below.
-        if ($significantlyChanged) {
+        // eligibility is computed correctly for the notifications below.
+        // A cancellation is its own notice, so it replaces "updated".
+        $this->announceStatusChange($activity, $previousStatus);
+        if ($significantlyChanged && $activity->status !== 'cancelled') {
             $this->notifyEligibleStudentsOfUpdate($activity);
         }
 
@@ -320,7 +324,9 @@ class ActivityController extends Controller
         ]);
 
         $wasClosed = $activity->status === 'closed';
+        $previousStatus = $activity->status;
         $activity->update(['status' => $validated['status']]);
+        $this->announceStatusChange($activity, $previousStatus);
 
         if ($activity->status === 'closed' && ! $wasClosed) {
             $this->notifyMissingStudents($activity);
@@ -408,16 +414,26 @@ class ActivityController extends Controller
     }
 
     /**
-     * Notify every eligible student the moment a newly created activity is
-     * actually joinable, so it shows up on their bell right away instead of
-     * only being discoverable by browsing the activities list.
+     * Student-facing notices for a status transition (create, edit or the
+     * quick status menu all funnel through here):
+     * - draft -> open/ongoing: the activity is announced as new;
+     * - anything -> cancelled: eligible students are told it's off;
+     * - cancelled -> anything else: a later cancellation may notify again.
+     * ActivityAlerts records each one, so toggling back and forth never
+     * repeats an announcement.
      */
-    protected function notifyEligibleStudentsOfNewActivity(Activity $activity): void
+    protected function announceStatusChange(Activity $activity, string $previousStatus): void
     {
-        $students = $activity->eligibleStudentsQuery()->get();
+        $alerts = app(ActivityAlerts::class);
 
-        if ($students->isNotEmpty()) {
-            SafeNotifier::send($students, new ActivityCreated($activity));
+        if ($previousStatus === 'draft' && in_array($activity->status, ['open', 'ongoing'], true)) {
+            $alerts->published($activity);
+        }
+        if ($activity->status === 'cancelled' && $previousStatus !== 'cancelled') {
+            $alerts->cancelled($activity);
+        }
+        if ($previousStatus === 'cancelled' && $activity->status !== 'cancelled') {
+            $alerts->uncancelled($activity);
         }
     }
 

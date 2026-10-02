@@ -24,4 +24,9 @@ class LateCheckInRequestReviewed extends BaseNotification
             'url' => route('activities.index', ['status_group' => 'ended']),
         ];
     }
+
+    protected function sendsMail(): bool
+    {
+        return true;
+    }
 }

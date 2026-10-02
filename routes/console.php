@@ -19,6 +19,11 @@ Schedule::command('app:close-ended-activities')->hourly();
 // this can't double-notify the same activity even on a daily cadence.
 Schedule::command('app:notify-upcoming-activities')->dailyAt('09:00');
 
+// "Check-in is open", "closing within the hour" and "starts within the hour"
+// (App\Services\ActivityAlerts). Each fires once per activity, so a short
+// interval only makes them timelier, never duplicated.
+Schedule::command('app:send-activity-reminders')->everyFiveMinutes()->withoutOverlapping();
+
 // Drains the notification queue (see BaseNotification's ShouldQueue) every
 // minute. --stop-when-empty exits as soon as the queue is empty instead of
 // running forever, which is what lets this piggyback on the scheduler's

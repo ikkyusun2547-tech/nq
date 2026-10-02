@@ -92,7 +92,7 @@ class AttendanceAutomationService
         $photoPath = $photo->store('attendance-selfies', 'public');
 
         try {
-            return Attendance::create([
+            $attendance = Attendance::create([
                 'user_id' => $user->id,
                 'activity_id' => $activity->id,
                 'checkin_method' => 'realtime',
@@ -116,6 +116,16 @@ class AttendanceAutomationService
 
             throw $e;
         }
+
+        // Organiser heads-up if GPS flags are piling up at this activity. Never
+        // allowed to fail the student's check-in, which is already saved.
+        try {
+            app(ActivityAlerts::class)->afterCheckIn($attendance);
+        } catch (\Throwable $e) {
+            report($e);
+        }
+
+        return $attendance;
     }
 
     /**

@@ -51,7 +51,20 @@ abstract class BaseNotification extends Notification implements ShouldQueue
      */
     public function via(object $notifiable): array
     {
-        return ['database', FcmChannel::class, 'mail'];
+        return $this->sendsMail()
+            ? ['database', FcmChannel::class, 'mail']
+            : ['database', FcmChannel::class];
+    }
+
+    /**
+     * Every notification lands on the bell and as a push; email is kept for
+     * the ones worth a trace in the inbox (request outcomes, announcements,
+     * cancellations) so a busy week doesn't bury students in mail.
+     * Override to opt in.
+     */
+    protected function sendsMail(): bool
+    {
+        return false;
     }
 
     public function toMail(object $notifiable): MailMessage

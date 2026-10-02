@@ -24,4 +24,9 @@ class Announcement extends BaseNotification
             'url' => route('dashboard'),
         ];
     }
+
+    protected function sendsMail(): bool
+    {
+        return true;
+    }
 }

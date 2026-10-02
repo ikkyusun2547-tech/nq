@@ -24,4 +24,9 @@ class ExternalActivityRequestReviewed extends BaseNotification
             'url' => route('hour-requests.index', ['tab' => 'external']),
         ];
     }
+
+    protected function sendsMail(): bool
+    {
+        return true;
+    }
 }

@@ -24,4 +24,9 @@ class CreditTransferRequestReviewed extends BaseNotification
             'url' => route('hour-requests.index', ['tab' => 'credit']),
         ];
     }
+
+    protected function sendsMail(): bool
+    {
+        return true;
+    }
 }
