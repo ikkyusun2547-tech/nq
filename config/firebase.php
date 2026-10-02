@@ -217,7 +217,9 @@ return [
                  * https://github.com/kreait/firebase-php/blob/6.x/src/Firebase/Http/HttpClientOptions.php
                  */
 
-                'timeout' => env('FIREBASE_HTTP_CLIENT_TIMEOUT'),
+                // Never unlimited: a push request that hangs would block the
+                // single queue worker, and every notification behind it.
+                'timeout' => env('FIREBASE_HTTP_CLIENT_TIMEOUT', 10),
 
                 'guzzle_middlewares' => [
                     // MyInvokableMiddleware::class,
