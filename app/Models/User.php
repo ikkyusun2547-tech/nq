@@ -35,6 +35,8 @@ class User extends Authenticatable
         'program_type',
         'account_status',
         'graduated_at',
+        'notification_preferences',
+        'cleared_notified_at',
     ];
 
     /**
@@ -60,6 +62,8 @@ class User extends Authenticatable
             'enrollment_year' => 'integer',
             'year_level' => 'integer',
             'graduated_at' => 'datetime',
+            'notification_preferences' => 'array',
+            'cleared_notified_at' => 'datetime',
         ];
     }
 

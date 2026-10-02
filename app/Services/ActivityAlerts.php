@@ -8,6 +8,7 @@ use App\Models\Attendance;
 use App\Models\User;
 use App\Notifications\ActivityCancelled;
 use App\Notifications\ActivityCreated;
+use App\Notifications\ActivityEndedSummary;
 use App\Notifications\ActivityStartingSoon;
 use App\Notifications\CheckInClosingSoon;
 use App\Notifications\CheckInFlagSurge;
@@ -71,6 +72,20 @@ class ActivityAlerts
     public function uncancelled(Activity $activity): void
     {
         Log::release($activity, Log::CANCELLED);
+    }
+
+    /** The activity just closed (by the hourly sweep or an admin): how it went, for the organiser. */
+    public function ended(Activity $activity): void
+    {
+        if (! Log::claim($activity, Log::ENDED_SUMMARY)) {
+            return;
+        }
+
+        $attended = $activity->attendances()->count();
+        $eligible = $activity->eligibleStudentsCount();
+        $toReview = $activity->attendances()->where('status', 'flagged')->count();
+
+        SafeNotifier::send($this->organisers($activity), new ActivityEndedSummary($activity, $attended, $eligible, $toReview));
     }
 
     // --- Timed reminders (the app:send-activity-reminders command) --------

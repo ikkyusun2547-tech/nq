@@ -24,6 +24,10 @@ Schedule::command('app:notify-upcoming-activities')->dailyAt('09:00');
 // interval only makes them timelier, never duplicated.
 Schedule::command('app:send-activity-reminders')->everyFiveMinutes()->withoutOverlapping(10);
 
+// Admins' morning summary of everything waiting for review (skipped when
+// there's nothing waiting).
+Schedule::command('app:send-admin-digest')->dailyAt('08:00')->withoutOverlapping(10);
+
 // Drains the notification queue (see BaseNotification's ShouldQueue) every
 // minute. --stop-when-empty exits as soon as the queue is empty instead of
 // running forever, which is what lets this piggyback on the scheduler's

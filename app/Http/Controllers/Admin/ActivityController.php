@@ -449,6 +449,8 @@ class ActivityController extends Controller
         if ($missing->isNotEmpty()) {
             SafeNotifier::send($missing, new ActivityMissed($activity));
         }
+
+        app(ActivityAlerts::class)->ended($activity);
     }
 
     /**

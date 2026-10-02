@@ -192,7 +192,7 @@
                         <td class="muted">{{ $i + 1 }}</td>
                         <td>{{ $buddhistDate($item->date) }}</td>
                         <td><span class="title">{{ $item->title }}</span><br><span class="src">{{ $item->source }}</span></td>
-                        <td><span class="chip" style="{{ $chip[$item->category] ?? 'background: #efedf5; color: #4b4763;' }}">{{ $categoryLabels[$item->category] ?? $item->category }}</span></td>
+                        <td><span class="chip" style="{{ $chip[$item->category] ?? 'background: #efedf5; color: #4b4763;' }}">{{ $item->category ? ($categoryLabels[$item->category] ?? $item->category) : '—' }}</span></td>
                         <td class="num hours">{{ $item->hours }} <span>ชม.</span></td>
                     </tr>
                 @empty

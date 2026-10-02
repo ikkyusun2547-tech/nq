@@ -70,7 +70,7 @@
                                     <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $meta['path'] }}"/></svg>
                                 </span>
                                 <span class="min-w-0 flex-1">
-                                    <span class="block text-sm font-medium text-gray-900 dark:text-slate-100">{{ __($notification->data['title_key'] ?? '') }}</span>
+                                    <span class="block text-sm font-medium text-gray-900 dark:text-slate-100">{{ __($notification->data['title_key'] ?? '', $notification->data['title_params'] ?? []) }}</span>
                                     <span class="mt-0.5 block text-sm text-gray-500 dark:text-slate-400">{{ __($notification->data['body_key'] ?? '', $notification->data['body_params'] ?? []) }}</span>
                                     <span class="mt-1.5 block text-xs text-gray-400 dark:text-slate-500">{{ $notification->created_at->diffForHumans() }}</span>
                                 </span>

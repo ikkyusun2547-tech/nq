@@ -26,7 +26,6 @@
     // Same badge/label sets apply to late check-ins and credit transfers —
     // all three request types share the pending/approved/rejected enum.
     $positionLabels = collect(\App\Models\CreditTransferPosition::labelsMap())->map(fn ($label) => __($label))->all();
-    $categoryOptions = collect($categoryMeta)->map(fn ($meta) => $meta['label'])->all();
     $currentAcademicYear = \App\Services\AcademicYearCalculator::forDate(now());
     $missingActivities = max(0, $summary['required_activities'] - $summary['total_activities']);
     $missingHours = max(0, $summary['required_hours'] - $summary['total_hours']);
@@ -110,14 +109,10 @@
             <form method="POST" action="{{ route('admin.credit-transfers.grant', $student) }}" enctype="multipart/form-data"
                 class="space-y-3 border-t border-slate-100 p-5 dark:border-slate-800 sm:px-6">
                 @csrf
-                <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div>
                     <div>
                         <span class="mb-1.5 block text-xs font-medium text-slate-600 dark:text-slate-400">{{ __('ตำแหน่ง') }}</span>
                         <x-premium-select name="position" :options="$positionLabels" :selected="old('position')" placeholder="{{ __('-- เลือกตำแหน่ง --') }}" />
-                    </div>
-                    <div>
-                        <span class="mb-1.5 block text-xs font-medium text-slate-600 dark:text-slate-400">{{ __('หมวดหมู่') }}</span>
-                        <x-premium-select name="activity_category" :options="$categoryOptions" :selected="old('activity_category')" placeholder="{{ __('-- เลือกหมวดหมู่ --') }}" />
                     </div>
                 </div>
 

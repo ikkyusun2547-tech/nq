@@ -220,7 +220,10 @@ class DashboardController extends Controller
                 $breakdown[$category] += (int) $hours;
             });
 
+        // Position credits are approved without a category now; only older
+        // rows that were given one belong in this per-category chart.
         CreditTransferRequest::where('status', 'approved')
+            ->whereNotNull('activity_category')
             ->when($academicYear !== '', fn ($query) => $query->where('academic_year', $academicYear))
             ->selectRaw('activity_category as category, sum(COALESCE(hours_approved, hours_requested)) as hours')
             ->groupBy('activity_category')

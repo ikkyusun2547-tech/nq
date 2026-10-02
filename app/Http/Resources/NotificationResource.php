@@ -20,7 +20,7 @@ class NotificationResource extends JsonResource
         return [
             'id' => $this->id,
             'icon' => $data['icon'] ?? null,
-            'title' => __($data['title_key'] ?? ''),
+            'title' => __($data['title_key'] ?? '', $data['title_params'] ?? []),
             'body' => __($data['body_key'] ?? '', $data['body_params'] ?? []),
             'url' => $data['url'] ?? null,
             'read' => $this->read_at !== null,

@@ -3,6 +3,7 @@
 namespace App\Notifications;
 
 use App\Notifications\Channels\FcmChannel;
+use App\Support\NotificationPreferences;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -51,9 +52,33 @@ abstract class BaseNotification extends Notification implements ShouldQueue
      */
     public function via(object $notifiable): array
     {
-        return $this->sendsMail()
-            ? ['database', FcmChannel::class, 'mail']
-            : ['database', FcmChannel::class];
+        // The bell always gets it; push and email follow the recipient's
+        // "ตั้งค่าการแจ้งเตือน" choices for this notification's category.
+        $category = NotificationPreferences::categoryOf($this, $notifiable);
+        $channels = ['database'];
+
+        $quiet = NotificationPreferences::quietHoursEnabled($notifiable) && NotificationPreferences::isQuietNow();
+        if (! $quiet && NotificationPreferences::wants($notifiable, $category, 'push')) {
+            $channels[] = FcmChannel::class;
+        }
+        if ($this->sendsMail() && NotificationPreferences::wants($notifiable, $category, 'email')) {
+            $channels[] = 'mail';
+        }
+
+        return $channels;
+    }
+
+    /**
+     * The bell entry is written right away, in the request that caused it
+     * ('sync'), so it shows up on the next bell refresh instead of waiting
+     * for the queue worker; push and email stay queued (they talk to outside
+     * services and must never slow the request down).
+     *
+     * @return array<string, string>
+     */
+    public function viaConnections(): array
+    {
+        return ['database' => 'sync'];
     }
 
     /**
@@ -73,7 +98,7 @@ abstract class BaseNotification extends Notification implements ShouldQueue
         $name = $notifiable->name_thai ?? $notifiable->name;
 
         return (new MailMessage)
-            ->subject('[SRRU Check] '.__($data['title_key']))
+            ->subject('[SRRU Check] '.__($data['title_key'], $data['title_params'] ?? []))
             ->greeting(__('สวัสดีคุณ :name', ['name' => $name]))
             ->line(__($data['body_key'], $data['body_params'] ?? []))
             ->when(isset($data['url']), fn (MailMessage $mail) => $mail->action(__('ดูรายละเอียด'), $data['url']))
@@ -88,7 +113,7 @@ abstract class BaseNotification extends Notification implements ShouldQueue
         $data = $this->toDatabase($notifiable);
 
         return [
-            'title' => __($data['title_key']),
+            'title' => __($data['title_key'], $data['title_params'] ?? []),
             'body' => __($data['body_key'], $data['body_params'] ?? []),
             'data' => ['icon' => $data['icon'] ?? null, 'url' => $data['url'] ?? null],
         ];

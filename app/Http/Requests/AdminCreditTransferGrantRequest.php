@@ -29,7 +29,6 @@ class AdminCreditTransferGrantRequest extends FormRequest
         return [
             'position' => ['required', Rule::in(array_keys(CreditTransferPosition::hoursMap()))],
             'academic_year' => ['required', 'integer', 'min:2560', 'max:'.AcademicYearCalculator::forDate(now())],
-            'activity_category' => ['required', Rule::in(['culture', 'academic', 'sports', 'volunteer', 'ethics'])],
             'hours_approved' => ['nullable', 'integer', 'min:0', 'max:200'],
             'proof_image' => ['nullable', 'mimes:jpg,jpeg,png,pdf', 'max:2048'],
         ];

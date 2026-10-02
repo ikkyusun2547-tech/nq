@@ -18,7 +18,6 @@ class CreditTransferApprovalController extends Controller
     private const SORTABLE = [
         'position' => 'position',
         'academic_year' => 'academic_year',
-        'activity_category' => 'activity_category',
         'hours_requested' => 'hours_requested',
         'created_at' => 'created_at',
     ];
@@ -73,7 +72,6 @@ class CreditTransferApprovalController extends Controller
         abort_if($creditTransferRequest->status !== 'pending', 422, __('คำร้องนี้ถูกดำเนินการไปแล้ว'));
 
         $validated = $request->validate([
-            'activity_category' => ['required', Rule::in(['culture', 'academic', 'sports', 'volunteer', 'ethics'])],
             'hours_approved' => ['nullable', 'integer', 'min:0', 'max:200'],
             'admin_comment' => ['nullable', 'string', 'max:500'],
         ]);
@@ -88,7 +86,6 @@ class CreditTransferApprovalController extends Controller
 
         $creditTransferRequest->update([
             'status' => 'approved',
-            'activity_category' => $validated['activity_category'],
             'hours_approved' => $hoursApproved,
             'admin_comment' => $validated['admin_comment'] ?? null,
             'reviewed_by' => $request->user()->id,
@@ -152,7 +149,6 @@ class CreditTransferApprovalController extends Controller
             'academic_year' => $validated['academic_year'],
             'hours_requested' => $hoursRequested,
             'hours_approved' => $hoursApproved,
-            'activity_category' => $validated['activity_category'],
             'proof_image_path' => $request->file('proof_image')?->store('credit-transfer-proofs', 'public'),
             'status' => 'approved',
             'reviewed_by' => $request->user()->id,

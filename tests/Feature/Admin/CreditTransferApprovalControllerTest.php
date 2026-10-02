@@ -52,7 +52,7 @@ class CreditTransferApprovalControllerTest extends TestCase
         $student = User::factory()->create(['role' => 'student', 'email' => 'other@srru.ac.th']);
 
         $this->actingAs($student)
-            ->post(route('admin.credit-transfers.approve', $request), ['activity_category' => 'culture'])
+            ->post(route('admin.credit-transfers.approve', $request))
             ->assertForbidden();
     }
 
@@ -62,15 +62,14 @@ class CreditTransferApprovalControllerTest extends TestCase
         $admin = $this->admin();
         $request = $this->pendingRequest();
 
-        $response = $this->actingAs($admin)->post(route('admin.credit-transfers.approve', $request), [
-            'activity_category' => 'culture',
-        ]);
+        // Position credits are approved without picking a category.
+        $response = $this->actingAs($admin)->post(route('admin.credit-transfers.approve', $request));
 
         $response->assertRedirect();
         $this->assertDatabaseHas('credit_transfer_requests', [
             'id' => $request->id,
             'status' => 'approved',
-            'activity_category' => 'culture',
+            'activity_category' => null,
             'hours_approved' => null, // unchanged from the requested amount -> no override stored
             'reviewed_by' => $admin->id,
         ]);
@@ -83,20 +82,10 @@ class CreditTransferApprovalControllerTest extends TestCase
         $request = $this->pendingRequest(['hours_requested' => 50]);
 
         $this->actingAs($admin)->post(route('admin.credit-transfers.approve', $request), [
-            'activity_category' => 'culture',
             'hours_approved' => 30,
         ]);
 
         $this->assertDatabaseHas('credit_transfer_requests', ['id' => $request->id, 'hours_approved' => 30]);
-    }
-
-    public function test_approving_requires_a_valid_activity_category(): void
-    {
-        $request = $this->pendingRequest();
-
-        $this->actingAs($this->admin())
-            ->post(route('admin.credit-transfers.approve', $request), ['activity_category' => 'not-a-real-category'])
-            ->assertSessionHasErrors('activity_category');
     }
 
     public function test_approving_an_already_resolved_request_is_rejected(): void
@@ -104,7 +93,7 @@ class CreditTransferApprovalControllerTest extends TestCase
         $request = $this->pendingRequest(['status' => 'approved']);
 
         $this->actingAs($this->admin())
-            ->post(route('admin.credit-transfers.approve', $request), ['activity_category' => 'culture'])
+            ->post(route('admin.credit-transfers.approve', $request))
             ->assertStatus(422);
     }
 
@@ -191,11 +180,10 @@ class CreditTransferApprovalControllerTest extends TestCase
         $student = $this->student();
         $year = AcademicYearCalculator::forDate(now());
 
-        $response = $this->actingAs($this->superAdmin())
+        $response = $this->actingAs($superAdmin = $this->superAdmin())
             ->post(route('admin.credit-transfers.grant', $student), [
                 'position' => 'class_leader',
                 'academic_year' => $year,
-                'activity_category' => 'volunteer',
             ]);
 
         $response->assertRedirect(route('admin.students.show', $student));
@@ -205,7 +193,7 @@ class CreditTransferApprovalControllerTest extends TestCase
             'position' => 'class_leader',
             'academic_year' => $year,
             'hours_requested' => CreditTransferPosition::hoursMap()['class_leader'],
-            'activity_category' => 'volunteer',
+            'activity_category' => null,
             'status' => 'approved',
             'proof_image_path' => null,
         ]);
@@ -218,7 +206,11 @@ class CreditTransferApprovalControllerTest extends TestCase
 
         $summary = app(ActivityEvaluationService::class)->summarize($student->fresh());
         $this->assertSame(CreditTransferPosition::hoursMap()['class_leader'], $summary['total_hours']);
-        $this->assertSame(CreditTransferPosition::hoursMap()['class_leader'], $summary['category_hours']['volunteer']);
+        // Counted in the total but not under any of the five categories.
+        $this->assertSame(0, array_sum($summary['category_hours']));
+
+        // The admin dashboard's per-category chart must cope with it too.
+        $this->actingAs($superAdmin)->get(route('admin.dashboard'))->assertOk();
     }
 
     public function test_super_admin_grants_hours_for_a_position_created_through_the_crud(): void
@@ -239,7 +231,6 @@ class CreditTransferApprovalControllerTest extends TestCase
             ->post(route('admin.credit-transfers.grant', $student), [
                 'position' => 'secretary',
                 'academic_year' => $year,
-                'activity_category' => 'volunteer',
             ]);
 
         $response->assertRedirect(route('admin.students.show', $student));
@@ -259,7 +250,6 @@ class CreditTransferApprovalControllerTest extends TestCase
             ->post(route('admin.credit-transfers.grant', $student), [
                 'position' => 'class_leader',
                 'academic_year' => AcademicYearCalculator::forDate(now()),
-                'activity_category' => 'volunteer',
                 'hours_approved' => 30,
             ]);
 
@@ -277,7 +267,6 @@ class CreditTransferApprovalControllerTest extends TestCase
             ->post(route('admin.credit-transfers.grant', $student), [
                 'position' => 'class_leader',
                 'academic_year' => AcademicYearCalculator::forDate(now()),
-                'activity_category' => 'volunteer',
                 'hours_approved' => CreditTransferPosition::hoursMap()['class_leader'],
             ]);
 
@@ -293,7 +282,6 @@ class CreditTransferApprovalControllerTest extends TestCase
             ->post(route('admin.credit-transfers.grant', $student), [
                 'position' => 'class_leader',
                 'academic_year' => AcademicYearCalculator::forDate(now()),
-                'activity_category' => 'volunteer',
             ])
             ->assertForbidden();
 
@@ -308,7 +296,6 @@ class CreditTransferApprovalControllerTest extends TestCase
             ->post(route('admin.credit-transfers.grant', $student), [
                 'position' => 'class_leader',
                 'academic_year' => AcademicYearCalculator::forDate(now()),
-                'activity_category' => 'volunteer',
             ])
             ->assertForbidden();
 
@@ -325,14 +312,13 @@ class CreditTransferApprovalControllerTest extends TestCase
             ->post(route('admin.credit-transfers.grant', $student), [
                 'position' => 'club_president',
                 'academic_year' => $year,
-                'activity_category' => 'volunteer',
             ])
             ->assertSessionHasErrors('academic_year');
 
         $this->assertDatabaseCount('credit_transfer_requests', 1);
     }
 
-    public function test_grant_requires_a_valid_position_and_category(): void
+    public function test_grant_requires_a_valid_position(): void
     {
         $student = $this->student();
 
@@ -340,9 +326,8 @@ class CreditTransferApprovalControllerTest extends TestCase
             ->post(route('admin.credit-transfers.grant', $student), [
                 'position' => 'not_a_real_position',
                 'academic_year' => AcademicYearCalculator::forDate(now()),
-                'activity_category' => 'not_a_real_category',
             ])
-            ->assertSessionHasErrors(['position', 'activity_category']);
+            ->assertSessionHasErrors('position');
 
         $this->assertDatabaseCount('credit_transfer_requests', 0);
     }

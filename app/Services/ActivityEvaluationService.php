@@ -365,8 +365,11 @@ class ActivityEvaluationService
                 $breakdown[$category] += (int) $hours;
             });
 
+        // Position credits no longer carry a category (they count toward the
+        // totals only); older rows that were given one still show up here.
         CreditTransferRequest::query()
             ->where('status', 'approved')
+            ->whereNotNull('activity_category')
             ->when($user, fn ($q) => $q->where('user_id', $user->id))
             ->selectRaw('activity_category as category, sum(COALESCE(hours_approved, hours_requested)) as hours')
             ->groupBy('activity_category')

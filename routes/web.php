@@ -131,6 +131,9 @@ Route::middleware(['auth', 'srru.email'])->group(function () {
     Route::view('/check-in-methods', 'guide.check-in-methods')->name('checkin-guide');
     Route::view('/install-app', 'guide.install-app')->name('install-guide');
 
+    Route::get('/settings/notifications', [\App\Http\Controllers\NotificationSettingsController::class, 'edit'])->name('notification-settings.edit');
+    Route::put('/settings/notifications', [\App\Http\Controllers\NotificationSettingsController::class, 'update'])->name('notification-settings.update');
+
     Route::middleware('profile.completed')->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'show'])->name('dashboard');
 

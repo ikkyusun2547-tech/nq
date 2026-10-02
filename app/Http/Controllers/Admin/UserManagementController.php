@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Notifications\AccountUpdated;
 use App\Services\AuditLogger;
+use App\Services\SafeNotifier;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
@@ -97,6 +99,7 @@ class UserManagementController extends Controller
         }
 
         $user->update(['role' => 'student']);
+        SafeNotifier::send($user, new AccountUpdated('demoted'));
         AuditLogger::log('demoted', __('ผู้ใช้งาน'), __(':name เป็นนักศึกษา', ['name' => $user->name_thai ?? $user->name]), $user);
 
         return back()->with('status', __('ลดสิทธิ์ :name เป็นนักศึกษาแล้ว', ['name' => $user->name_thai ?? $user->name]));
@@ -114,6 +117,7 @@ class UserManagementController extends Controller
     public function unban(Request $request, User $user)
     {
         $user->update(['account_status' => 'active']);
+        SafeNotifier::send($user, new AccountUpdated('unbanned'));
         AuditLogger::log('unbanned', __('ผู้ใช้งาน'), __('บัญชี :name', ['name' => $user->name_thai ?? $user->name]), $user);
 
         return back()->with('status', __('ปลดระงับบัญชี :name แล้ว', ['name' => $user->name_thai ?? $user->name]));
@@ -182,6 +186,7 @@ class UserManagementController extends Controller
         }
 
         $user->update(['role' => 'admin']);
+        SafeNotifier::send($user, new AccountUpdated('promoted'));
         AuditLogger::log('promoted', __('ผู้ใช้งาน'), __(':name เป็นแอดมิน', ['name' => $user->name_thai ?? $user->name]), $user);
 
         return true;
@@ -194,6 +199,7 @@ class UserManagementController extends Controller
         }
 
         $user->update(['account_status' => 'banned']);
+        SafeNotifier::send($user, new AccountUpdated('banned'));
         AuditLogger::log('banned', __('ผู้ใช้งาน'), __('บัญชี :name', ['name' => $user->name_thai ?? $user->name]), $user);
 
         return true;
@@ -206,6 +212,7 @@ class UserManagementController extends Controller
         }
 
         $user->update(['graduated_at' => now()]);
+        SafeNotifier::send($user, new AccountUpdated('graduated'));
         AuditLogger::log('graduated', __('ผู้ใช้งาน'), __(':name เป็นผู้จบการศึกษา', ['name' => $user->name_thai ?? $user->name]), $user);
 
         return true;
@@ -218,6 +225,7 @@ class UserManagementController extends Controller
         }
 
         $user->update(['graduated_at' => null]);
+        SafeNotifier::send($user, new AccountUpdated('ungraduated'));
         AuditLogger::log('ungraduated', __('ผู้ใช้งาน'), __(':name กลับเป็นนักศึกษาปัจจุบัน', ['name' => $user->name_thai ?? $user->name]), $user);
 
         return true;

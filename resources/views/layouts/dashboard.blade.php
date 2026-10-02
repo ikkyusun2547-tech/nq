@@ -173,6 +173,7 @@
                         @if ($isAdmin)
                         <a href="{{ route('checkin-guide') }}" class="block rounded-xl px-3 py-2.5 text-sm text-slate-700 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800">{{ __('วิธีเช็คชื่อ') }}</a>
                         @endif
+                        <a href="{{ route('notification-settings.edit') }}" class="block rounded-xl px-3 py-2.5 text-sm text-slate-700 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800">{{ __('ตั้งค่าการแจ้งเตือน') }}</a>
 
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
@@ -310,6 +311,13 @@
 
                     {{-- Settings + sign out --}}
                     <div class="space-y-2.5 border-t border-slate-200 bg-white p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] dark:border-slate-800 dark:bg-slate-900">
+                        <a href="{{ route('notification-settings.edit') }}" class="flex items-center justify-between rounded-2xl bg-slate-50 px-3 py-2.5 text-sm text-slate-700 hover:bg-slate-100 dark:bg-slate-800/60 dark:text-slate-200 dark:hover:bg-slate-800">
+                            <span class="flex items-center gap-2">
+                                <svg class="h-4 w-4 text-slate-500" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0"/></svg>
+                                {{ __('ตั้งค่าการแจ้งเตือน') }}
+                            </span>
+                            <svg class="h-4 w-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
+                        </a>
                         <div class="flex items-center justify-between rounded-2xl bg-slate-50 px-3 py-2 dark:bg-slate-800/60">
                             <span class="text-xs font-medium text-slate-500 dark:text-slate-400">{{ __('ธีมและภาษา') }}</span>
                             <span class="flex items-center gap-1.5">

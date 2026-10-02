@@ -57,11 +57,18 @@
     <section class="mb-6">
         <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-slate-600 dark:text-slate-400">
             <span>{{ $greeting }}, <span class="font-display text-xl text-slate-900 dark:text-white">{{ $user->name_thai }}</span></span>
+            {{-- Beside the name from sm up; on phones it sits under the student line instead. --}}
             @if ($currentPositionLabel)
-                <span class="rounded-full bg-brand-purple-50 px-2.5 py-0.5 text-xs font-medium text-brand-purple-700 dark:bg-brand-purple-500/15 dark:text-brand-purple-300">{{ __('ดำรงตำแหน่ง') }}: {{ $currentPositionLabel }}</span>
+                <span class="hidden rounded-full bg-brand-purple-700 px-2.5 py-0.5 text-xs font-semibold text-white dark:bg-brand-purple-600 sm:inline-flex">{{ __('ดำรงตำแหน่ง') }}: {{ $currentPositionLabel }}</span>
             @endif
         </div>
-        <h1 class="mt-2 font-display text-[1.65rem] leading-snug text-slate-900 dark:text-white sm:text-3xl" style="text-wrap: balance;">
+        <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
+            {{ __('ชั้นปีที่ :year', ['year' => $summary['current_year'] ?? '-']) }} · {{ $user->program_type === 'special' ? __('ภาคพิเศษ (กศ.บป.)') : __('ภาคปกติ') }} · {{ __('รหัส :id', ['id' => $user->student_id]) }}
+        </p>
+        @if ($currentPositionLabel)
+            <span class="mt-2 inline-flex rounded-full bg-brand-purple-700 px-2.5 py-0.5 text-xs font-semibold text-white dark:bg-brand-purple-600 sm:hidden">{{ __('ดำรงตำแหน่ง') }}: {{ $currentPositionLabel }}</span>
+        @endif
+        <h1 class="mt-3 font-display text-[1.65rem] leading-snug text-slate-900 dark:text-white sm:text-3xl" style="text-wrap: balance;">
             @if ($nowActivities->isNotEmpty())
                 {{ __('วันนี้คุณมี') }} <span class="text-brand-purple-700 dark:text-brand-purple-300">{{ __(':count กิจกรรม', ['count' => $nowActivities->count()]) }}</span> {{ __('ที่เช็คชื่อได้ตอนนี้') }}
             @elseif ($upcomingActivities->isNotEmpty())
@@ -70,9 +77,6 @@
                 {{ __('ยังไม่มีกิจกรรมที่กำลังจะมาถึง') }}
             @endif
         </h1>
-        <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
-            {{ __('ชั้นปีที่ :year', ['year' => $summary['current_year'] ?? '-']) }} · {{ $user->program_type === 'special' ? __('ภาคพิเศษ (กศ.บป.)') : __('ภาคปกติ') }} · {{ __('รหัส :id', ['id' => $user->student_id]) }}
-        </p>
     </section>
 
     <div class="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">

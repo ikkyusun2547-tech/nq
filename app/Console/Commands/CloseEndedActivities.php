@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Models\Activity;
 use App\Notifications\ActivityMissed;
+use App\Services\ActivityAlerts;
 use App\Services\SafeNotifier;
 use Illuminate\Console\Command;
 
@@ -47,6 +48,8 @@ class CloseEndedActivities extends Command
             if ($missing->isNotEmpty()) {
                 SafeNotifier::send($missing, new ActivityMissed($activity));
             }
+
+            app(ActivityAlerts::class)->ended($activity);
         }
 
         $this->info("Closed {$activities->count()} activity/activities.");

@@ -10,6 +10,7 @@ use App\Models\Attendance;
 use App\Models\Faculty;
 use App\Notifications\AttendanceApproved;
 use App\Notifications\AttendanceRejected;
+use App\Services\ClearanceWatcher;
 use App\Services\DynamicQrTokenGenerator;
 use App\Services\SafeNotifier;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -168,6 +169,8 @@ class AttendanceController extends Controller
 
         foreach ($newlyApproved as $attendance) {
             SafeNotifier::send($attendance->user, new AttendanceApproved($attendance));
+            // The bulk update above skips model events, so check here.
+            app(ClearanceWatcher::class)->check($attendance->user);
         }
 
         return back()->with('status', __('อัปเดตสถานะสำเร็จ :count รายการ', ['count' => $count]));

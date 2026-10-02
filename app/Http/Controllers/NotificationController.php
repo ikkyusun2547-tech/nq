@@ -30,7 +30,7 @@ class NotificationController extends Controller
                     default => __('ก่อนหน้านี้'),
                 },
                 'icon' => $n->data['icon'] ?? 'check',
-                'title' => __($n->data['title_key'] ?? ''),
+                'title' => __($n->data['title_key'] ?? '', $n->data['title_params'] ?? []),
                 'body' => __($n->data['body_key'] ?? '', $n->data['body_params'] ?? []),
                 'url' => $n->data['url'] ?? null,
             ]),

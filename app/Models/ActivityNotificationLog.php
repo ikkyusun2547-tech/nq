@@ -16,6 +16,7 @@ class ActivityNotificationLog extends Model
     public const CHECK_IN_CLOSING = 'check_in_closing';
     public const STARTING_SOON = 'starting_soon';
     public const FLAG_SURGE = 'flag_surge';
+    public const ENDED_SUMMARY = 'ended_summary';
 
     public $timestamps = false;
 
