@@ -30,6 +30,12 @@ class ActivityHistoryController extends Controller
             'rejected' => $feed->rejected($user),
         };
 
+        $type = $request->query('type');
+        $type = in_array($type, StudentActivityFeed::TYPE_FILTERS, true) ? $type : 'all';
+        if ($type !== 'all') {
+            $items = $items->where('type', $type)->values();
+        }
+
         $page = LengthAwarePaginator::resolveCurrentPage();
         $items = new LengthAwarePaginator(
             $items->forPage($page, self::PER_PAGE)->values(),
@@ -39,6 +45,6 @@ class ActivityHistoryController extends Controller
             ['path' => LengthAwarePaginator::resolveCurrentPath(), 'query' => $request->query()]
         );
 
-        return view('student.activity-history.index', compact('items', 'status'));
+        return view('student.activity-history.index', compact('items', 'status', 'type'));
     }
 }

@@ -17,11 +17,12 @@
         'pending' => 'bg-amber-50/50 dark:bg-amber-500/5',
         'rejected' => 'bg-red-50/50 dark:bg-red-500/5',
     };
-    $typeLabel = fn ($item) => match ($item->type) {
-        'external' => __('กิจกรรมเทียบชั่วโมง'),
+    $typeFilters = [
+        'all' => __('ทั้งหมด'),
+        'checkin' => __('กิจกรรม'),
+        'external' => __('กิจกรรมภายนอก'),
         'credit_transfer' => __('เทียบโอนตำแหน่ง'),
-        default => ($item->checkin_method ?? null) === 'late_request' ? __('เช็คชื่อย้อนหลัง') : null,
-    };
+    ];
     $href = fn ($item) => match (true) {
         $item->type === 'external' => route('hour-requests.index', ['tab' => 'external']),
         $item->type === 'credit_transfer' => route('hour-requests.index', ['tab' => 'credit']),
@@ -35,11 +36,24 @@
 
     <div class="mt-4 flex gap-2">
         @foreach ($tabs as $key => $label)
-            <a href="{{ route('activity-history.index', ['status' => $key]) }}"
+            <a href="{{ route('activity-history.index', array_filter(['status' => $key, 'type' => $type === 'all' ? null : $type])) }}"
                 @class([
                     'flex-1 rounded-xl px-3 py-2.5 text-center text-sm font-semibold shadow-soft transition-all duration-200',
                     'bg-brand-purple-700 text-white' => $status === $key,
                     'bg-white text-brand-purple-700 ring-1 ring-brand-purple-100 dark:bg-slate-900 dark:text-brand-purple-400 dark:ring-brand-purple-500/20' => $status !== $key,
+                ])>
+                {{ $label }}
+            </a>
+        @endforeach
+    </div>
+
+    <div class="mt-3 flex gap-2 overflow-x-auto [scrollbar-width:none]">
+        @foreach ($typeFilters as $key => $label)
+            <a href="{{ route('activity-history.index', array_filter(['status' => $status, 'type' => $key === 'all' ? null : $key])) }}"
+                @class([
+                    'shrink-0 whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-medium transition-colors',
+                    'bg-brand-purple-700 text-white' => $type === $key,
+                    'bg-white text-slate-600 ring-1 ring-slate-200 hover:bg-slate-50 dark:bg-slate-900 dark:text-slate-300 dark:ring-slate-700 dark:hover:bg-slate-800' => $type !== $key,
                 ])>
                 {{ $label }}
             </a>
@@ -55,11 +69,10 @@
                     <div class="flex items-start justify-between gap-3">
                         <div class="min-w-0">
                             <p class="truncate text-sm font-medium text-slate-800 dark:text-slate-200">{{ $item->title }}</p>
-                            <p class="text-xs text-slate-400 dark:text-slate-500">
+                            <p class="mt-0.5 flex flex-wrap items-center gap-1.5 text-xs text-slate-400 dark:text-slate-500">
+                                <x-history-type-badge :type="$item->type" />
                                 {{ $item->date->translatedFormat('d M Y') }}
-                                @if ($typeLabel($item))
-                                    · <span class="text-brand-purple-500 dark:text-brand-purple-400">{{ $typeLabel($item) }}</span>
-                                @endif
+                                @if (($item->checkin_method ?? null) === 'late_request') · {{ __('เช็คชื่อย้อนหลัง') }} @endif
                             </p>
                         </div>
                         @if (isset($item->hours) && $item->hours !== null)

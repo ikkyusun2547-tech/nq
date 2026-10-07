@@ -51,7 +51,7 @@
     };
 @endphp
 
-<div class="mx-auto max-w-6xl" x-data="{ showDetail: false, detail: null, historyTab: 'approved' }">
+<div class="mx-auto max-w-6xl" x-data="{ showDetail: false, detail: null, historyTab: 'approved', historyType: 'all' }">
 
     {{-- Greeting + headline --}}
     <section class="mb-6">
@@ -284,6 +284,15 @@
             @endif
 
             {{-- History --}}
+            @php
+                $typeFilters = [
+                    'all' => __('ทั้งหมด'),
+                    'checkin' => __('กิจกรรม'),
+                    'external' => __('กิจกรรมภายนอก'),
+                    'credit_transfer' => __('เทียบโอนตำแหน่ง'),
+                ];
+                $pendingCount = $history['pending']['all']['count'];
+            @endphp
             <section aria-label="{{ __('ประวัติล่าสุด') }}" class="rounded-3xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
                 <div class="flex flex-wrap items-end justify-between gap-3 px-5 pt-4">
                     <h2 class="text-sm font-semibold text-slate-900 dark:text-white">{{ __('ประวัติล่าสุด') }}</h2>
@@ -291,7 +300,7 @@
                 <div role="tablist" class="mt-3 flex gap-5 border-b border-slate-100 px-5 text-sm dark:border-slate-800">
                     @foreach ([
                         'approved' => __('อนุมัติแล้ว'),
-                        'pending' => __('รอตรวจสอบ').($pendingActivities->isNotEmpty() ? ' ('.$pendingActivities->count().($hasMorePending ? '+' : '').')' : ''),
+                        'pending' => __('รอตรวจสอบ').($pendingCount > 0 ? ' ('.$pendingCount.')' : ''),
                         'rejected' => __('ถูกปฏิเสธ'),
                     ] as $key => $label)
                         <button type="button" role="tab" @click="historyTab = '{{ $key }}'" :aria-selected="historyTab === '{{ $key }}'"
@@ -302,9 +311,21 @@
                     @endforeach
                 </div>
 
+                {{-- Type filter --}}
+                <div class="flex gap-2 overflow-x-auto px-5 pt-3 [scrollbar-width:none]">
+                    @foreach ($typeFilters as $type => $label)
+                        <button type="button" @click="historyType = '{{ $type }}'" :aria-pressed="historyType === '{{ $type }}'"
+                            class="shrink-0 whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-medium transition-colors"
+                            :class="historyType === '{{ $type }}' ? 'bg-brand-purple-700 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'">
+                            {{ $label }}
+                        </button>
+                    @endforeach
+                </div>
+
                 {{-- Approved --}}
-                <div x-show="historyTab === 'approved'" class="p-2">
-                    @forelse ($approvedActivities as $item)
+                @foreach ($history['approved'] as $type => $group)
+                <div x-show="historyTab === 'approved' && historyType === '{{ $type }}'" @if ($type !== 'all') x-cloak @endif class="p-2">
+                    @forelse ($group['items'] as $item)
                         @php $rowClass = 'flex w-full items-center justify-between gap-3 rounded-2xl px-3 py-3 text-left transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/60'; @endphp
                         @if ($item->type === 'external')
                             <a href="{{ route('hour-requests.index', ['tab' => 'external']) }}" class="{{ $rowClass }}">
@@ -323,12 +344,10 @@
                         @endif
                             <span class="min-w-0">
                                 <span class="block truncate text-sm font-medium text-slate-900 dark:text-slate-100">{{ $item->title }}</span>
-                                <span class="block text-xs text-slate-500 dark:text-slate-400">
+                                <span class="mt-0.5 flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
+                                    <x-history-type-badge :type="$item->type" />
                                     {{ $item->date->translatedFormat('d M Y') }}
-                                    @if ($item->type === 'external') · {{ __('กิจกรรมเทียบชั่วโมง') }}
-                                    @elseif ($item->type === 'credit_transfer') · {{ __('เทียบโอนตำแหน่ง') }}
-                                    @elseif ($item->checkin_method === 'late_request') · {{ __('เช็คชื่อย้อนหลัง') }}
-                                    @endif
+                                    @if (($item->checkin_method ?? null) === 'late_request') · {{ __('เช็คชื่อย้อนหลัง') }} @endif
                                 </span>
                             </span>
                             <span class="shrink-0 rounded-full bg-brand-green-50 px-2.5 py-1 text-xs font-semibold text-brand-green-700 dark:bg-brand-green-500/10 dark:text-brand-green-300">+{{ __(':hours ชม.', ['hours' => $item->hours]) }}</span>
@@ -338,24 +357,24 @@
                             </button>
                         @endif
                     @empty
-                        <p class="px-3 py-8 text-center text-sm text-slate-500 dark:text-slate-400">{{ __('ยังไม่มีกิจกรรมที่ได้รับการอนุมัติ') }}</p>
+                        <p class="px-3 py-8 text-center text-sm text-slate-500 dark:text-slate-400">{{ $type === 'all' ? __('ยังไม่มีกิจกรรมที่ได้รับการอนุมัติ') : __('ยังไม่มีรายการประเภทนี้ที่ได้รับการอนุมัติ') }}</p>
                     @endforelse
-                    @if ($hasMoreApproved)
-                        <a href="{{ route('activity-history.index', ['status' => 'approved']) }}" class="block px-3 py-2.5 text-sm font-medium text-brand-purple-700 hover:underline dark:text-brand-purple-300">{{ __('ดูทั้งหมด') }} →</a>
+                    @if ($group['has_more'])
+                        <a href="{{ route('activity-history.index', array_filter(['status' => 'approved', 'type' => $type === 'all' ? null : $type])) }}" class="block px-3 py-2.5 text-sm font-medium text-brand-purple-700 hover:underline dark:text-brand-purple-300">{{ __('ดูทั้งหมด') }} →</a>
                     @endif
                 </div>
+                @endforeach
 
                 {{-- Pending --}}
-                <div x-show="historyTab === 'pending'" x-cloak class="p-2">
-                    @forelse ($pendingActivities as $item)
+                @foreach ($history['pending'] as $type => $group)
+                <div x-show="historyTab === 'pending' && historyType === '{{ $type }}'" x-cloak class="p-2">
+                    @forelse ($group['items'] as $item)
                         <div class="flex items-start justify-between gap-3 rounded-2xl px-3 py-3">
                             <div class="min-w-0">
                                 <p class="truncate text-sm font-medium text-slate-900 dark:text-slate-100">{{ $item->title }}</p>
-                                <p class="text-xs text-slate-500 dark:text-slate-400">
+                                <p class="mt-0.5 flex flex-wrap items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
+                                    <x-history-type-badge :type="$item->type" />
                                     {{ $item->date->translatedFormat('d M Y') }} · {{ __('รอเจ้าหน้าที่ตรวจสอบ') }}
-                                    @if ($item->type === 'external') · {{ __('กิจกรรมเทียบชั่วโมง') }}
-                                    @elseif ($item->type === 'credit_transfer') · {{ __('เทียบโอนตำแหน่ง') }}
-                                    @endif
                                 </p>
                                 @if (! empty($item->flag_reason))
                                     <p class="mt-1 text-xs text-amber-700 dark:text-amber-400">{{ __('เหตุผลที่ต้องตรวจสอบ:') }} {{ $item->flag_reason }}</p>
@@ -368,14 +387,16 @@
                     @empty
                         <p class="px-3 py-8 text-center text-sm text-slate-500 dark:text-slate-400">{{ __('ไม่มีรายการที่รอตรวจสอบ') }}</p>
                     @endforelse
-                    @if ($hasMorePending)
-                        <a href="{{ route('activity-history.index', ['status' => 'pending']) }}" class="block px-3 py-2.5 text-sm font-medium text-brand-purple-700 hover:underline dark:text-brand-purple-300">{{ __('ดูทั้งหมด') }} →</a>
+                    @if ($group['has_more'])
+                        <a href="{{ route('activity-history.index', array_filter(['status' => 'pending', 'type' => $type === 'all' ? null : $type])) }}" class="block px-3 py-2.5 text-sm font-medium text-brand-purple-700 hover:underline dark:text-brand-purple-300">{{ __('ดูทั้งหมด') }} →</a>
                     @endif
                 </div>
+                @endforeach
 
                 {{-- Rejected --}}
-                <div x-show="historyTab === 'rejected'" x-cloak class="p-2">
-                    @forelse ($rejectedActivities as $item)
+                @foreach ($history['rejected'] as $type => $group)
+                <div x-show="historyTab === 'rejected' && historyType === '{{ $type }}'" x-cloak class="p-2">
+                    @forelse ($group['items'] as $item)
                         @php
                             // A rejected external/credit request can be resubmitted and a
                             // rejected late check-in has its own page; a rejected
@@ -394,12 +415,10 @@
                             @else
                                 <p class="truncate text-sm font-medium text-slate-900 dark:text-slate-100">{{ $item->title }}</p>
                             @endif
-                            <p class="text-xs text-slate-500 dark:text-slate-400">
+                            <p class="mt-0.5 flex flex-wrap items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
+                                <x-history-type-badge :type="$item->type" />
                                 {{ $item->date->translatedFormat('d M Y') }}
-                                @if ($item->type === 'external') · {{ __('กิจกรรมเทียบชั่วโมง') }}
-                                @elseif ($item->type === 'credit_transfer') · {{ __('เทียบโอนตำแหน่ง') }}
-                                @elseif (($item->checkin_method ?? null) === 'late_request') · {{ __('เช็คชื่อย้อนหลัง') }}
-                                @endif
+                                @if (($item->checkin_method ?? null) === 'late_request') · {{ __('เช็คชื่อย้อนหลัง') }} @endif
                             </p>
                             @if ($item->reject_reason)
                                 <p class="mt-1 text-xs text-rose-600 dark:text-rose-400">{{ __('เหตุผล:') }} {{ $item->reject_reason }}</p>
@@ -408,12 +427,13 @@
                             @endif
                         </div>
                     @empty
-                        <p class="px-3 py-8 text-center text-sm text-slate-500 dark:text-slate-400">{{ __('ไม่มีกิจกรรมที่ถูกปฏิเสธ') }}</p>
+                        <p class="px-3 py-8 text-center text-sm text-slate-500 dark:text-slate-400">{{ $type === 'all' ? __('ไม่มีกิจกรรมที่ถูกปฏิเสธ') : __('ไม่มีรายการประเภทนี้ที่ถูกปฏิเสธ') }}</p>
                     @endforelse
-                    @if ($hasMoreRejected)
-                        <a href="{{ route('activity-history.index', ['status' => 'rejected']) }}" class="block px-3 py-2.5 text-sm font-medium text-brand-purple-700 hover:underline dark:text-brand-purple-300">{{ __('ดูทั้งหมด') }} →</a>
+                    @if ($group['has_more'])
+                        <a href="{{ route('activity-history.index', array_filter(['status' => 'rejected', 'type' => $type === 'all' ? null : $type])) }}" class="block px-3 py-2.5 text-sm font-medium text-brand-purple-700 hover:underline dark:text-brand-purple-300">{{ __('ดูทั้งหมด') }} →</a>
                     @endif
                 </div>
+                @endforeach
             </section>
         </div>
 

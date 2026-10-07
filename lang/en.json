@@ -1281,5 +1281,7 @@
     "เฉพาะนักศึกษาภาคพิเศษ": "Special programme students only",
     "คณะ / สาขา / ชั้นปี": "Faculty / major / year",
     "เฉพาะภาคพิเศษ": "Special programme only",
-    "เฉพาะภาคปกติ": "Regular programme only"
+    "เฉพาะภาคปกติ": "Regular programme only",
+    "ยังไม่มีรายการประเภทนี้ที่ได้รับการอนุมัติ": "No approved items of this type yet",
+    "ไม่มีรายการประเภทนี้ที่ถูกปฏิเสธ": "No rejected items of this type"
 }

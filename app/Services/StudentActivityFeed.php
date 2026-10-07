@@ -17,6 +17,9 @@ use Illuminate\Support\Collection;
  */
 class StudentActivityFeed
 {
+    /** The history filter chips: everything, or one feed item `type`. */
+    public const TYPE_FILTERS = ['all', 'checkin', 'external', 'credit_transfer'];
+
     /**
      * Approved and pending check-ins/external requests/credit transfers,
      * newest first. Callers filter on `is_approved` for the two dashboard

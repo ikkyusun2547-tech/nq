@@ -30,16 +30,20 @@ class DashboardController extends Controller
         $pending = $items->where('is_approved', false);
         $rejected = $feed->rejected($user);
 
-        $approvedActivities = $approved->take(self::PREVIEW_LIMIT);
-        $pendingActivities = $pending->take(self::PREVIEW_LIMIT);
-        $rejectedActivities = $rejected->take(self::PREVIEW_LIMIT);
+        // One preview per status × type filter, so filtering to e.g. credit
+        // transfers still shows the latest few of those rather than whichever
+        // happened to be in the overall top three. "ดูทั้งหมด" only makes
+        // sense once the preview is actually hiding something.
+        $history = collect(['approved' => $approved, 'pending' => $pending, 'rejected' => $rejected])
+            ->map(fn ($list) => collect(StudentActivityFeed::TYPE_FILTERS)->mapWithKeys(function ($type) use ($list) {
+                $filtered = $type === 'all' ? $list : $list->where('type', $type);
 
-        // "ดูทั้งหมด" only makes sense once the preview is actually hiding
-        // something — otherwise it's a link to a page showing the same
-        // rows the student is already looking at.
-        $hasMoreApproved = $approved->count() > self::PREVIEW_LIMIT;
-        $hasMorePending = $pending->count() > self::PREVIEW_LIMIT;
-        $hasMoreRejected = $rejected->count() > self::PREVIEW_LIMIT;
+                return [$type => [
+                    'items' => $filtered->take(self::PREVIEW_LIMIT)->values(),
+                    'has_more' => $filtered->count() > self::PREVIEW_LIMIT,
+                    'count' => $filtered->count(),
+                ]];
+            }));
 
         // "Today" panel: what can be checked into right now, this week at a
         // glance, and what's coming up — all limited to activities this
@@ -107,8 +111,7 @@ class DashboardController extends Controller
         });
 
         return view('student.dashboard', compact(
-            'summary', 'approvedActivities', 'pendingActivities', 'rejectedActivities',
-            'hasMoreApproved', 'hasMorePending', 'hasMoreRejected', 'currentPositionLabel',
+            'summary', 'history', 'currentPositionLabel',
             'nowActivities', 'upcomingActivities', 'week', 'missedActivity', 'missedLateStatus', 'latestAttendance',
         ));
     }
