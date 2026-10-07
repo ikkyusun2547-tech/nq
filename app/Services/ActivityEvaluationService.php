@@ -145,6 +145,12 @@ class ActivityEvaluationService
             ->selectRaw('COALESCE(SUM(COALESCE(hours_approved, hours_requested)), 0) as total')
             ->value('total');
 
+        // Shown beside total_activities on the dashboard, but deliberately not
+        // part of it: external activities earn hours, not graduation-count activities.
+        $externalActivities = ExternalActivityRequest::where('user_id', $user->id)
+            ->where('status', 'approved')
+            ->count();
+
         $creditTransferHours = (int) CreditTransferRequest::where('user_id', $user->id)
             ->where('status', 'approved')
             ->selectRaw('COALESCE(SUM(COALESCE(hours_approved, hours_requested)), 0) as total')
@@ -160,6 +166,7 @@ class ActivityEvaluationService
         return [
             'total_activities' => $totalActivities,
             'required_activities' => $criteria['required_activities'],
+            'external_activities' => $externalActivities,
             'total_hours' => $totalHours,
             'required_hours' => $criteria['required_hours'],
             'current_year' => $currentYear,

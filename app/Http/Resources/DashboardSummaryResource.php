@@ -19,6 +19,7 @@ class DashboardSummaryResource extends JsonResource
         return [
             'total_activities' => $this->resource['total_activities'],
             'required_activities' => $this->resource['required_activities'],
+            'external_activities' => $this->resource['external_activities'] ?? 0,
             'total_hours' => $this->resource['total_hours'],
             'required_hours' => $this->resource['required_hours'],
             'current_year' => $this->resource['current_year'],

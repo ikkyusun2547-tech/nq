@@ -5,6 +5,7 @@ namespace Tests\Feature\Student;
 use App\Models\Activity;
 use App\Models\Attendance;
 use App\Models\CreditTransferRequest;
+use App\Models\ExternalActivityRequest;
 use App\Models\Faculty;
 use App\Models\User;
 use App\Services\AcademicYearCalculator;
@@ -213,5 +214,26 @@ class DashboardControllerTest extends TestCase
         Activity::factory()->create(['title' => 'Tomorrow Thing', 'status' => 'open', 'start_at' => now()->addDay()->setTime(8, 0), 'end_at' => now()->addDay()->setTime(10, 0)]);
 
         $this->actingAs($student)->get(route('dashboard'))->assertOk()->assertSee('พรุ่งนี้');
+    }
+
+    public function test_approved_external_activities_are_counted_separately_from_the_activity_requirement(): void
+    {
+        $student = $this->student();
+        foreach (['approved', 'approved', 'pending'] as $i => $status) {
+            ExternalActivityRequest::create(['user_id' => $student->id, 'title' => "Outside $i", 'organization' => 'Org', 'activity_date' => now()->subWeek(), 'activity_category' => 'academic', 'hours_requested' => 3, 'proof_image_path' => 'proofs/x.jpg', 'status' => $status]);
+        }
+
+        $summary = app(\App\Services\ActivityEvaluationService::class)->summarize($student);
+
+        $this->assertSame(2, $summary['external_activities']);
+        $this->assertSame(0, $summary['total_activities']);
+        $this->actingAs($student)->get(route('dashboard'))->assertOk()->assertSee('กิจกรรมภายนอก');
+    }
+
+    public function test_the_page_title_is_not_overwritten_by_a_view_loop_variable(): void
+    {
+        $this->actingAs($this->student())->get(route('dashboard'))
+            ->assertOk()
+            ->assertSee('<title>'.__('ระบบเช็คชื่อกิจกรรมนักศึกษา SRRU').'</title>', false);
     }
 }
