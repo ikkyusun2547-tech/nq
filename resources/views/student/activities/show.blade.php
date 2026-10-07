@@ -40,8 +40,13 @@
                 </div>
             @endif
 
-            <span class="absolute right-4 top-4 rounded-full px-3 py-1.5 text-sm font-medium shadow-soft backdrop-blur {{ $statusBadge[$activity->displayStatus()]['class'] ?? 'bg-slate-500/90 text-white' }}">
-                {{ $statusBadge[$activity->displayStatus()]['label'] ?? $activity->status }}
+            {{-- The admin-set status leads ("เปิดลงทะเบียน" stays visible during the event); "กำลังจัดอยู่" is added beneath it while the event is on. --}}
+            @php $badgeKey = $activity->displayStatus() === 'ongoing' ? 'open' : $activity->displayStatus(); @endphp
+            <span class="absolute right-4 top-4 flex flex-col items-end gap-1">
+                <span class="rounded-full px-3 py-1.5 text-sm font-medium shadow-soft backdrop-blur {{ $statusBadge[$badgeKey]['class'] ?? 'bg-slate-500/90 text-white' }}">{{ $statusBadge[$badgeKey]['label'] ?? $activity->status }}</span>
+                @if ($activity->displayStatus() === 'ongoing')
+                    <span class="flex items-center gap-1 rounded-full bg-white/90 px-2.5 py-1 text-xs font-semibold text-brand-green-700 shadow-soft backdrop-blur dark:bg-slate-900/90 dark:text-brand-green-300"><span class="h-1.5 w-1.5 animate-pulse rounded-full bg-brand-green-500"></span>{{ __('กำลังจัดอยู่') }}</span>
+                @endif
             </span>
 
             @if ($checkedIn)
