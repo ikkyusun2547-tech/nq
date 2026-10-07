@@ -40,6 +40,12 @@ class ActivityController extends Controller
      */
     public function index(Request $request)
     {
+        // The card list's "เรียงตาม" picker sends one combined value, e.g. "start_at:desc".
+        if ($request->filled('order')) {
+            [$sort, $dir] = array_pad(explode(':', (string) $request->input('order'), 2), 2, 'asc');
+            $request->merge(['sort' => $sort, 'dir' => $dir]);
+        }
+
         $sortColumn = self::SORTABLE[$request->input('sort')] ?? null;
         $sortDir = $request->input('dir') === 'desc' ? 'desc' : 'asc';
 

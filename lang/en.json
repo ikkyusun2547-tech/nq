@@ -1283,5 +1283,13 @@
     "เฉพาะภาคพิเศษ": "Special programme only",
     "เฉพาะภาคปกติ": "Regular programme only",
     "ยังไม่มีรายการประเภทนี้ที่ได้รับการอนุมัติ": "No approved items of this type yet",
-    "ไม่มีรายการประเภทนี้ที่ถูกปฏิเสธ": "No rejected items of this type"
+    "ไม่มีรายการประเภทนี้ที่ถูกปฏิเสธ": "No rejected items of this type",
+    ":count คนมีสิทธิ์": ":count eligible",
+    "วันที่จัด เก่า → ใหม่": "Date, oldest first",
+    "วันที่จัด ใหม่ → เก่า": "Date, newest first",
+    "ผู้เช็คชื่อมากสุด": "Most check-ins",
+    "ชื่อกิจกรรม ก–ฮ": "Title A–Z",
+    "เรียง: ต้องจัดการก่อน": "Sort: needs attention first",
+    "เรียงตาม": "Sort by",
+    "ต้องจัดการก่อน": "Needs attention first"
 }
