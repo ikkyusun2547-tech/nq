@@ -5,18 +5,34 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\Faculty;
 use App\Models\User;
+use App\Services\AcademicYearCalculator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 /**
  * Lets evaluators (e.g. thesis advisors) try the system without a
  * university Google account: the admin and student views each have their
- * own password, and whichever one is typed picks the account. The two demo
- * accounts are created on first use, so enabling this on a deployment only
- * takes setting DEMO_ADMIN_PASSWORD and/or DEMO_STUDENT_PASSWORD.
+ * own password, and whichever one is typed picks the account. The student
+ * password signs in as the original demo student; the same password with a
+ * "-1" … "-4" suffix signs in as that year level's demo student. All demo accounts are
+ * created on first use, so enabling this on a deployment only takes setting
+ * DEMO_ADMIN_PASSWORD and/or DEMO_STUDENT_PASSWORD.
  */
 class DemoLoginController extends Controller
 {
+    /**
+     * The demo students on offer: key => [email local part, Thai name,
+     * student ID, year level]. 'default' is the original demo student (the
+     * bare student password); the others are the password plus "-<key>".
+     */
+    public const STUDENTS = [
+        'default' => ['demo.student', 'นายนักศึกษา ทดลอง', '99999999999', 2],
+        '1' => ['demo.student.y1', 'นักศึกษาทดลอง ชั้นปีที่ 1', '99999999901', 1],
+        '2' => ['demo.student.y2', 'นักศึกษาทดลอง ชั้นปีที่ 2', '99999999902', 2],
+        '3' => ['demo.student.y3', 'นักศึกษาทดลอง ชั้นปีที่ 3', '99999999903', 3],
+        '4' => ['demo.student.y4', 'นักศึกษาทดลอง ชั้นปีที่ 4', '99999999904', 4],
+    ];
+
     public function show()
     {
         abort_unless($this->enabled(), 404);
@@ -30,9 +46,11 @@ class DemoLoginController extends Controller
 
         $password = $request->validate(['password' => ['required', 'string']])['password'];
 
+        $studentKey = $this->matchingStudent($password);
+
         $user = match (true) {
             $this->matches('demo_admin_password', $password) => $this->demoAdmin(),
-            $this->matches('demo_student_password', $password) => $this->demoStudent(),
+            $studentKey !== null => $this->demoStudent($studentKey),
             default => null,
         };
 
@@ -66,6 +84,26 @@ class DemoLoginController extends Controller
         return filled($expected) && hash_equals((string) $expected, $password);
     }
 
+    /** Which demo student (a STUDENTS key) this password signs in as, if any. */
+    private function matchingStudent(string $password): ?string
+    {
+        $base = (string) config('services.srru.demo_student_password');
+
+        if (blank($base)) {
+            return null;
+        }
+
+        foreach (array_keys(self::STUDENTS) as $key) {
+            $expected = $key === 'default' ? $base : "$base-$key";
+
+            if (hash_equals($expected, $password)) {
+                return (string) $key;
+            }
+        }
+
+        return null;
+    }
+
     private function email(string $localPart): string
     {
         return $localPart.'@'.config('services.srru.email_domain');
@@ -88,11 +126,13 @@ class DemoLoginController extends Controller
         return $user;
     }
 
-    private function demoStudent(): User
+    private function demoStudent(string $key): User
     {
+        [$localPart, $nameThai, $studentId, $yearLevel] = self::STUDENTS[$key];
+
         $user = User::firstOrCreate(
-            ['email' => $this->email('demo.student')],
-            ['name' => 'Demo Student', 'name_thai' => 'นายนักศึกษา ทดลอง'],
+            ['email' => $this->email($localPart)],
+            ['name' => 'Demo Student'.($key === 'default' ? '' : " Y$key"), 'name_thai' => $nameThai],
         );
 
         $user->update(['role' => 'student', 'account_status' => 'active']);
@@ -104,15 +144,14 @@ class DemoLoginController extends Controller
         if (! $user->hasCompletedProfile()) {
             $faculty = Faculty::whereHas('majors')->with('majors')->orderBy('id')->first();
 
-            if ($faculty && ! User::where('student_id', '99999999999')->exists()) {
-                $currentBuddhistYear = (int) now()->year + 543;
-
+            if ($faculty && ! User::where('student_id', $studentId)->exists()) {
                 $user->update([
-                    'student_id' => '99999999999',
+                    'student_id' => $studentId,
                     'faculty_id' => $faculty->id,
                     'major_id' => $faculty->majors->first()->id,
-                    'enrollment_year' => $currentBuddhistYear - 1,
-                    'year_level' => 2,
+                    // A year-N student enrolled N-1 academic years ago.
+                    'enrollment_year' => AcademicYearCalculator::forDate(now()) - ($yearLevel - 1),
+                    'year_level' => $yearLevel,
                     'program_type' => 'normal',
                 ]);
             }

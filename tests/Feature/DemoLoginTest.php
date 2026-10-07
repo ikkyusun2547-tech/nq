@@ -88,6 +88,36 @@ class DemoLoginTest extends TestCase
         $this->get(route('dashboard'))->assertOk();
     }
 
+    public function test_each_year_level_demo_student_has_its_own_password(): void
+    {
+        $faculty = Faculty::factory()->create();
+        Major::factory()->create(['faculty_id' => $faculty->id]);
+
+        foreach ([1, 2, 3, 4] as $year) {
+            $this->post(route('demo-login.store'), ['password' => "student-demo-{$year}"])
+                ->assertRedirect(route('dashboard'));
+
+            $user = User::where('email', "demo.student.y{$year}@srru.ac.th")->firstOrFail();
+            $this->assertAuthenticatedAs($user);
+            $this->assertSame($year, $user->year_level);
+            $this->assertSame("9999999990{$year}", $user->student_id);
+            $this->assertTrue($user->hasCompletedProfile());
+
+            $this->post(route('logout'));
+        }
+
+        $this->assertSame(4, User::count());
+    }
+
+    public function test_an_unknown_year_suffix_is_rejected(): void
+    {
+        $this->post(route('demo-login.store'), ['password' => 'student-demo-9'])
+            ->assertSessionHasErrors('password');
+
+        $this->assertGuest();
+        $this->assertDatabaseCount('users', 0);
+    }
+
     public function test_the_demo_student_goes_to_profile_setup_when_no_faculties_exist(): void
     {
         $this->post(route('demo-login.store'), ['password' => 'student-demo'])
