@@ -67,6 +67,7 @@ class AttendanceController extends Controller
         $pdf = Pdf::loadView('admin.attendance.qr-print-pdf', [
             'activity' => $activity,
             'qrDataUri' => $qrDataUri,
+            'logoDataUri' => 'data:image/png;base64,'.base64_encode(file_get_contents(public_path('images/logo.png'))),
             'generatedAt' => now(),
         ])->setPaper('a4', 'portrait');
 
