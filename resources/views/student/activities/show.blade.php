@@ -11,7 +11,7 @@
     ];
     $statusBadge = [
         'open' => ['label' => __('เปิดลงทะเบียน'), 'class' => 'bg-brand-green-500/90 text-white'],
-        'ongoing' => ['label' => __('กำลังดำเนินการ'), 'class' => 'bg-brand-purple-500/90 text-white'],
+        'ongoing' => ['label' => __('กำลังจัดอยู่'), 'class' => 'bg-brand-green-500/90 text-white'],
         'draft' => ['label' => __('ยังไม่เปิด'), 'class' => 'bg-slate-500/90 text-white'],
         'closed' => ['label' => __('จบไปแล้ว'), 'class' => 'bg-slate-500/90 text-white'],
     ];

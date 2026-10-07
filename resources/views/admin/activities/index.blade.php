@@ -160,13 +160,14 @@
     @php
         // Group headings for the default "needs attention first" order (see ActivityController::listGroup()).
         $groupLabels = [1 => __('ต้องตรวจสอบ'), 2 => __('กำลังจัด / วันนี้'), 3 => __('ใกล้ถึง'), 4 => __('ร่าง · ยังไม่เผยแพร่'), 5 => __('จบแล้ว'), 6 => __('ถูกยกเลิก')];
-        $groupTone = [1 => 'text-amber-700 dark:text-amber-300', 2 => 'text-brand-purple-700 dark:text-brand-purple-300'];
+        $groupTone = [1 => 'text-amber-700 dark:text-amber-300', 2 => 'text-brand-green-700 dark:text-brand-green-300'];
         // Month sub-headings only make sense while the list runs in date order.
         $byDate = in_array(request('sort'), [null, '', 'start_at'], true);
         $yearOf = fn ($date) => app()->getLocale() === 'th' ? $date->year + 543 : $date->year;
         $dateTile = [
             'draft' => 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300',
-            'open' => 'bg-brand-purple-50 text-brand-purple-700 dark:bg-brand-purple-500/15 dark:text-brand-purple-200',
+            'open' => 'bg-brand-green-50 text-brand-green-700 dark:bg-brand-green-500/10 dark:text-brand-green-300',
+            'ongoing' => 'bg-brand-green-50 text-brand-green-700 dark:bg-brand-green-500/10 dark:text-brand-green-300',
             'closed' => 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400',
             'cancelled' => 'bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-300',
         ];
@@ -177,7 +178,7 @@
     <div class="mt-2 space-y-2">
         @forelse ($activities as $activity)
             @php
-                $status = $activity->displayStatus() === 'ongoing' ? 'open' : ($activity->status === 'full' ? 'open' : $activity->status);
+                $status = $activity->displayStatus() === 'ongoing' ? 'ongoing' : ($activity->status === 'full' ? 'open' : $activity->status);
                 $month = $activity->start_at->format('Y-m');
                 $newGroup = isset($activity->list_group) && $activity->list_group !== $lastGroup;
             @endphp
@@ -213,8 +214,8 @@
                                 <span class="max-w-[16rem] truncate">{{ $activity->location_name }}</span>
                             @endif
                             @if ($activity->displayStatus() === 'ongoing')
-                                <span class="inline-flex items-center gap-1 font-semibold text-brand-purple-700 dark:text-brand-purple-300">
-                                    <span class="h-1.5 w-1.5 animate-pulse rounded-full bg-brand-purple-500"></span>{{ __('กำลังจัดอยู่') }}
+                                <span class="inline-flex items-center gap-1 font-semibold text-brand-green-700 dark:text-brand-green-300">
+                                    <span class="h-1.5 w-1.5 animate-pulse rounded-full bg-brand-green-500"></span>{{ __('กำลังจัดอยู่') }}
                                 </span>
                             @endif
                         </p>

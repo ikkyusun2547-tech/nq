@@ -20,7 +20,7 @@
     ];
     $statusLabel = [
         'draft' => __('ร่าง'), 'open' => __('เปิดลงทะเบียน'),
-        'ongoing' => __('กำลังดำเนินการ'), 'closed' => __('ปิดกิจกรรม'), 'cancelled' => __('ถูกยกเลิก'),
+        'ongoing' => __('กำลังจัดอยู่'), 'closed' => __('ปิดกิจกรรม'), 'cancelled' => __('ถูกยกเลิก'),
     ];
 
     // Thai readers expect the Buddhist-era year.
