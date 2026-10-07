@@ -31,7 +31,8 @@ class AttendanceAutomationService
         string $deviceUuid,
         UploadedFile $photo,
     ): Attendance {
-        [$activity, $isPrintedQr] = $this->qrTokens->resolveActivity($qrToken);
+        // The printed QR goes through the same GPS/device checks as the live one.
+        [$activity] = $this->qrTokens->resolveActivity($qrToken);
 
         if (! $activity->acceptsCheckIn()) {
             throw ValidationException::withMessages([
@@ -79,14 +80,6 @@ class AttendanceAutomationService
 
         if ($deviceReusedByOthers) {
             $reasons[] = 'DEVICE_SHARING_SUSPECTED';
-        }
-
-        // The printable QR can't rotate, so it can't rule out a screenshot
-        // being reused by someone who wasn't actually there — GPS and selfie
-        // still get recorded and checked as normal, but the check-in itself
-        // can never auto-approve on this weaker guarantee alone.
-        if ($isPrintedQr) {
-            $reasons[] = 'PRINTED_QR_USED';
         }
 
         $photoPath = $photo->store('attendance-selfies', 'public');

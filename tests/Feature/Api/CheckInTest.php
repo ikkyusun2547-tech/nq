@@ -126,8 +126,8 @@ class CheckInTest extends TestCase
         $this->assertDatabaseHas('attendances', ['user_id' => $userB->id, 'flag_reason' => 'DEVICE_SHARING_SUSPECTED']);
     }
 
-    // 5. Static/printable QR -> always flagged / PRINTED_QR_USED
-    public function test_static_qr_never_auto_approves(): void
+    // 5. Static/printable QR -> judged like the live QR: auto-approved when GPS is fine
+    public function test_static_qr_auto_approves_like_the_live_qr(): void
     {
         $activity = $this->activityAt(14.0, 103.0);
         $user = $this->studentUser();
@@ -135,8 +135,19 @@ class CheckInTest extends TestCase
 
         $response = $this->submit($user, $activity, $token, 14.0, 103.0, 'device-5');
 
-        $response->assertOk()->assertJson(['status' => 'flagged']);
-        $this->assertDatabaseHas('attendances', ['user_id' => $user->id, 'flag_reason' => 'PRINTED_QR_USED']);
+        $response->assertOk()->assertJson(['status' => 'auto_approved']);
+        $this->assertDatabaseHas('attendances', ['user_id' => $user->id, 'flag_reason' => null]);
+    }
+
+    // 5b. ...and still flagged by the normal rules, e.g. GPS out of bounds
+    public function test_static_qr_is_still_flagged_when_gps_is_out_of_bounds(): void
+    {
+        $activity = $this->activityAt(14.0, 103.0);
+        $user = $this->studentUser();
+
+        $this->submit($user, $activity, $this->tokens->generateStatic($activity), 15.0, 103.0, 'device-5b')
+            ->assertOk()->assertJson(['status' => 'flagged']);
+        $this->assertDatabaseHas('attendances', ['user_id' => $user->id, 'flag_reason' => 'GPS_OUT_OF_BOUNDS']);
     }
 
     // 6. Duplicate check-in by the same user -> 422
@@ -166,7 +177,7 @@ class CheckInTest extends TestCase
         $activity = $this->activityAt(14.0, 103.0);
         $user = $this->studentUser();
 
-        $this->submit($user, $activity, $this->tokens->generateStatic($activity), 14.0, 103.0, 'device-7')
+        $this->submit($user, $activity, $this->tokens->generate($activity), 15.0, 103.0, 'device-7')
             ->assertOk()->assertJson(['status' => 'flagged']);
 
         Notification::assertNothingSentTo($admin);

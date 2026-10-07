@@ -51,9 +51,9 @@ class AttendanceController extends Controller
 
     /**
      * Printable backup QR for when there's no live screen at the venue
-     * (dead projector, no signal for the kiosk page). Doesn't rotate, so any
-     * check-in made with it always lands as flagged — see
-     * AttendanceAutomationService::checkIn().
+     * (dead projector, no signal for the kiosk page). Doesn't rotate, but
+     * check-ins made with it are approved under the same GPS/device rules
+     * as the live QR — see AttendanceAutomationService::checkIn().
      */
     public function qrPrint(Activity $activity, DynamicQrTokenGenerator $qrTokens)
     {

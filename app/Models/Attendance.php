@@ -22,6 +22,7 @@ class Attendance extends Model
         'GPS_OUT_OF_BOUNDS' => 'ตำแหน่ง GPS อยู่นอกพื้นที่จัดกิจกรรม',
         'DEVICE_SHARING_SUSPECTED' => 'ระบบตรวจพบว่าอาจใช้เครื่องร่วมกับผู้อื่น',
         'SELF_REPORTED' => 'รายงานตนเองโดยไม่มีการยืนยัน GPS',
+        // No longer raised (printed-QR check-ins are judged like live ones); kept so older rows still get a label.
         'PRINTED_QR_USED' => 'เช็คชื่อด้วย QR สำรอง (แบบพิมพ์)',
     ];
 

@@ -45,9 +45,8 @@ class DynamicQrTokenGenerator
      * (dead projector, no internet for the kiosk page, etc). Unlike the
      * rotating token, this one doesn't expire by itself, which is exactly
      * what makes it printable — but it also means it can't offer the same
-     * anti-screenshot-reuse guarantee. Every check-in made with it must be
-     * treated as lower-trust by the caller (see resolveActivity()'s
-     * $isStatic return value) — never auto-approved.
+     * anti-screenshot-reuse guarantee; check-ins made with it still pass
+     * through the normal GPS and device-sharing checks.
      */
     public function generateStatic(Activity $activity): string
     {
