@@ -259,18 +259,29 @@ class ActivityControllerTest extends TestCase
         $this->assertSame('closed', $activity->fresh()->status);
     }
 
-    public function test_full_and_ongoing_can_no_longer_be_set_by_hand(): void
+    public function test_full_can_no_longer_be_set_by_hand(): void
     {
         $activity = Activity::factory()->create(['status' => 'open']);
-        $admin = $this->admin();
 
-        foreach (['full', 'ongoing'] as $status) {
-            $this->actingAs($admin)
-                ->patch(route('admin.activities.update-status', $activity), ['status' => $status])
-                ->assertSessionHasErrors('status');
-        }
+        $this->actingAs($this->admin())
+            ->patch(route('admin.activities.update-status', $activity), ['status' => 'full'])
+            ->assertSessionHasErrors('status');
 
         $this->assertSame('open', $activity->fresh()->status);
+    }
+
+    public function test_an_admin_can_mark_an_activity_as_in_progress_whatever_its_times(): void
+    {
+        $activity = Activity::factory()->create(['status' => 'open', 'start_at' => now()->addDay(), 'end_at' => now()->addDay()->addHour()]);
+
+        $this->actingAs($this->admin())
+            ->patch(route('admin.activities.update-status', $activity), ['status' => 'ongoing'])
+            ->assertSessionHasNoErrors();
+
+        $activity->refresh();
+        $this->assertSame('ongoing', $activity->status);
+        $this->assertSame('ongoing', $activity->displayStatus());
+        $this->assertTrue($activity->acceptsCheckIn());
     }
 
     public function test_an_open_activity_reads_ongoing_only_while_it_is_happening(): void

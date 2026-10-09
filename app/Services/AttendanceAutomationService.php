@@ -40,6 +40,13 @@ class AttendanceAutomationService
             ]);
         }
 
+        // A QR minted before the method was switched to self-report.
+        if ($activity->usesSelfReportCheckIn()) {
+            throw ValidationException::withMessages([
+                'qr_token' => __('กิจกรรมนี้เช็คชื่อด้วยการแนบรูปหลักฐาน ไม่ใช่สแกน QR'),
+            ]);
+        }
+
         if (! $activity->isEligibleFor($user)) {
             throw ValidationException::withMessages([
                 'qr_token' => __('คุณไม่มีสิทธิ์เข้าร่วมกิจกรรมนี้'),

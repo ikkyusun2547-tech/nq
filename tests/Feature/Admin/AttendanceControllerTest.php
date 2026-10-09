@@ -363,4 +363,20 @@ class AttendanceControllerTest extends TestCase
         $response->assertOk();
         $response->assertViewIs('admin.attendance.qr-fragment');
     }
+
+    public function test_self_report_activities_have_no_qr(): void
+    {
+        $activity = Activity::factory()->selfReport()->create(['status' => 'open']);
+        $admin = $this->admin();
+
+        $this->actingAs($admin)->get(route('admin.attendance.qr-display', $activity))->assertNotFound();
+        $this->actingAs($admin)->get(route('admin.attendance.qr-fragment', $activity))->assertNotFound();
+        $this->actingAs($admin)->get(route('admin.attendance.qr-print', $activity))->assertNotFound();
+
+        $this->actingAs($admin)->get(route('admin.attendance.index', $activity))
+            ->assertOk()
+            ->assertDontSee(route('admin.attendance.qr-display', $activity));
+        $this->actingAs($admin)->get(route('admin.activities.index'))
+            ->assertDontSee(route('admin.attendance.qr-display', $activity));
+    }
 }

@@ -9,7 +9,6 @@
     "เมื่อวาน": "Yesterday",
     "ก่อนหน้านี้": "Earlier",
     "เปลี่ยนสถานะกิจกรรมเป็น \"เปิดลงทะเบียน\" เพื่อเปิดใช้ QR เช็คชื่ออีกครั้ง": "Change the activity status to \"Open\" to re-enable the check-in QR",
-    "กำลังจัดอยู่": "Happening now",
     "เปิดให้ส่งหลักฐานเช็คชื่อแล้ว": "Evidence submission is open",
     "เปิดเช็คชื่อแล้ว": "Check-in is open",
     "กิจกรรม \":title\" เปิดให้แนบรูปหลักฐานแล้ว ส่งได้ถึง :until": "\":title\" is accepting photo evidence until :until",
@@ -96,8 +95,6 @@
     "ไปหน้า :page": "Go to page :page",
     "หน้าถัดไป": "Next page",
     "ต้องตรวจสอบ": "Needs review",
-    "กำลังจัด / วันนี้": "Happening now / today",
-    "ใกล้ถึง": "Coming up",
     "จบแล้ว": "Ended",
     "เข้าสู่ระบบด้วยอีเมล": "Signed in as",
     "เช็คชื่อด้วย QR": "Check in with QR",
@@ -1322,5 +1319,11 @@
     "ตามที่มา": "By source",
     "ชั่วโมงสะสมแยกเป็น": "Hours breakdown",
     "ได้สูงสุด :cap ชม./ปี": "Up to :cap hrs/year",
-    "สำหรับผู้ดำรงตำแหน่ง": "For position holders"
+    "สำหรับผู้ดำรงตำแหน่ง": "For position holders",
+    "7 วันข้างหน้า": "Next 7 days",
+    "ผ่านไปแล้ว": "Past",
+    "ยังไม่เผยแพร่": "Not published",
+    "ไม่ได้เผยแพร่": "Never published",
+    "กำลังจัดกิจกรรม": "In progress",
+    "กิจกรรมนี้เช็คชื่อด้วยการแนบรูปหลักฐาน ไม่ใช่สแกน QR": "This activity checks in with photo evidence, not a QR code"
 }

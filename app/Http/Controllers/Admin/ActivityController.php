@@ -117,10 +117,12 @@ class ActivityController extends Controller
     }
 
     /**
-     * Default list order — what the admin has to act on first:
-     * 1 has check-ins / late requests waiting for review, 2 happening now or
-     * today, 3 coming up (open/full), 4 draft, 5 ended, 6 cancelled.
-     * Groups 1–4 run soonest first; ended and cancelled run latest first.
+     * Default list order, grouped by *when* rather than by status — drafts
+     * sit among published activities on their own date (the row flags them
+     * "ยังไม่เผยแพร่"), so something on today never hides under next month:
+     * 1 has check-ins / late requests waiting for review, 2 today (or running
+     * right now), 3 within the next 7 days, 4 later, 5 past (ended or
+     * closed), 6 cancelled. Groups 1–4 run soonest first; 5–6 latest first.
      * listGroup() mirrors the same rules in PHP for the group dividers.
      */
     private function orderByWhatNeedsAttention($query)
@@ -128,19 +130,20 @@ class ActivityController extends Controller
         $now = now()->toDateTimeString();
         $todayStart = now()->startOfDay()->toDateTimeString();
         $todayEnd = now()->endOfDay()->toDateTimeString();
+        $weekEnd = now()->addDays(7)->endOfDay()->toDateTimeString();
 
         $group = "CASE
             WHEN activities.status = 'cancelled' THEN 6
             WHEN EXISTS (SELECT 1 FROM attendances a WHERE a.activity_id = activities.id AND a.status = 'flagged')
               OR EXISTS (SELECT 1 FROM late_check_in_requests l WHERE l.activity_id = activities.id AND l.status = 'pending') THEN 1
-            WHEN activities.status = 'ongoing'
-              OR (activities.status IN ('open', 'full') AND activities.start_at <= ? AND activities.end_at >= ?)
-              OR (activities.status IN ('open', 'full') AND activities.start_at BETWEEN ? AND ?) THEN 2
-            WHEN activities.status IN ('open', 'full') AND activities.end_at >= ? THEN 3
-            WHEN activities.status = 'draft' THEN 4
-            ELSE 5
+            WHEN activities.status = 'closed' THEN 5
+            WHEN (activities.start_at <= ? AND activities.end_at >= ?)
+              OR activities.start_at BETWEEN ? AND ? THEN 2
+            WHEN activities.end_at < ? THEN 5
+            WHEN activities.start_at <= ? THEN 3
+            ELSE 4
         END";
-        $bindings = [$now, $now, $todayStart, $todayEnd, $now];
+        $bindings = [$now, $now, $todayStart, $todayEnd, $now, $weekEnd];
 
         return $query
             ->orderByRaw("$group ASC", $bindings)
@@ -161,17 +164,17 @@ class ActivityController extends Controller
         if (($activity->flagged_count ?? 0) > 0 || ($activity->pending_late_checkin_count ?? 0) > 0) {
             return 1;
         }
-        $openish = in_array($activity->status, ['open', 'full'], true);
-        if ($activity->status === 'ongoing'
-            || ($openish && $activity->start_at->lte(now()) && $activity->end_at->gte(now()))
-            || ($openish && $activity->start_at->isToday())) {
+        if ($activity->status === 'closed') {
+            return 5;
+        }
+        if (now()->between($activity->start_at, $activity->end_at) || $activity->start_at->isToday()) {
             return 2;
         }
-        if ($openish && $activity->end_at->gte(now())) {
-            return 3;
+        if ($activity->end_at->isPast()) {
+            return 5;
         }
 
-        return $activity->status === 'draft' ? 4 : 5;
+        return $activity->start_at->lte(now()->addDays(7)->endOfDay()) ? 3 : 4;
     }
 
     /**

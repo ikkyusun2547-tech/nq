@@ -24,7 +24,7 @@ class ActivityListOrderTest extends TestCase
         ], $extra));
     }
 
-    public function test_the_default_order_puts_what_needs_attention_first(): void
+    public function test_the_default_order_groups_by_when_with_review_first(): void
     {
         $this->travelTo(now()->setTime(10, 0));
 
@@ -42,10 +42,25 @@ class ActivityListOrderTest extends TestCase
         $response = $this->actingAs($admin)->get(route('admin.activities.index'))->assertOk();
 
         $this->assertSame(
-            ['Needs review', 'Live now', 'Upcoming soon', 'Upcoming far', 'Draft', 'Ended recent', 'Ended old', 'Cancelled'],
+            ['Needs review', 'Live now', 'Upcoming soon', 'Draft', 'Upcoming far', 'Ended recent', 'Ended old', 'Cancelled'],
             $response->viewData('activities')->pluck('title')->all()
         );
-        $response->assertSeeInOrder(['ต้องตรวจสอบ', 'กำลังจัด / วันนี้', 'ใกล้ถึง', 'ร่าง · ยังไม่เผยแพร่', 'จบแล้ว', 'ถูกยกเลิก']);
+        $response->assertSeeInOrder(['ต้องตรวจสอบ', 'วันนี้', '7 วันข้างหน้า', 'ถัดไป', 'ผ่านไปแล้ว', 'ถูกยกเลิก']);
+    }
+
+    public function test_drafts_sit_on_their_own_date_and_are_flagged(): void
+    {
+        $this->travelTo(now()->setTime(8, 0));
+
+        $this->make('Next month', 'open', now()->addDays(30));
+        $this->make('Draft today', 'draft', now()->addHours(2));
+        $this->make('Draft past', 'draft', now()->subDays(5));
+
+        $admin = User::factory()->create(['role' => 'admin', 'email' => 'admin@srru.ac.th']);
+        $response = $this->actingAs($admin)->get(route('admin.activities.index'))->assertOk();
+
+        $this->assertSame(['Draft today', 'Next month', 'Draft past'], $response->viewData('activities')->pluck('title')->all());
+        $response->assertSeeInOrder(['วันนี้', 'Draft today', 'ยังไม่เผยแพร่', 'ถัดไป', 'Next month', 'ผ่านไปแล้ว', 'Draft past', 'ไม่ได้เผยแพร่']);
     }
 
     public function test_an_explicit_column_sort_still_wins_and_hides_the_group_headings(): void
@@ -57,6 +72,6 @@ class ActivityListOrderTest extends TestCase
         $response = $this->actingAs($admin)->get(route('admin.activities.index', ['sort' => 'title', 'dir' => 'asc']))->assertOk();
 
         $this->assertSame(['A', 'B'], $response->viewData('activities')->pluck('title')->all());
-        $response->assertDontSee('ใกล้ถึง');
+        $response->assertDontSee('ผ่านไปแล้ว');
     }
 }

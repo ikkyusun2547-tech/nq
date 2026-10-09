@@ -22,6 +22,9 @@ class AttendanceController extends Controller
 {
     public function qrDisplay(Activity $activity, DynamicQrTokenGenerator $qrTokens)
     {
+        // Self-report activities are checked in with photo evidence, never a QR.
+        abort_if($activity->usesSelfReportCheckIn(), 404);
+
         return view('admin.attendance.qr-display', [
             'activity' => $activity,
             'rotationSeconds' => DynamicQrTokenGenerator::WINDOW_SECONDS,
@@ -32,6 +35,8 @@ class AttendanceController extends Controller
 
     public function qrFragment(Activity $activity, DynamicQrTokenGenerator $qrTokens)
     {
+        abort_if($activity->usesSelfReportCheckIn(), 404);
+
         // Don't mint a live, scannable token for an activity that can't
         // actually accept a check-in — the QR display page stops polling
         // this once closed, but guard the endpoint itself too.
@@ -57,6 +62,8 @@ class AttendanceController extends Controller
      */
     public function qrPrint(Activity $activity, DynamicQrTokenGenerator $qrTokens)
     {
+        abort_if($activity->usesSelfReportCheckIn(), 404);
+
         $token = $qrTokens->generateStatic($activity);
         $svg = QrCode::format('svg')->size(420)->margin(1)->generate($token);
 

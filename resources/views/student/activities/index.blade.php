@@ -11,7 +11,7 @@
     ];
     $statusBadge = [
         'open' => ['label' => __('เปิดลงทะเบียน'), 'class' => 'bg-brand-green-500/90 text-white'],
-        'ongoing' => ['label' => __('กำลังจัดอยู่'), 'class' => 'bg-brand-green-500/90 text-white'],
+        'ongoing' => ['label' => __('กำลังจัดกิจกรรม'), 'class' => 'bg-brand-purple-600/90 text-white'],
         'draft' => ['label' => __('ยังไม่เปิด'), 'class' => 'bg-slate-500/90 text-white'],
         'closed' => ['label' => __('จบไปแล้ว'), 'class' => 'bg-slate-500/90 text-white'],
     ];
@@ -164,14 +164,9 @@
                             </div>
                         @endif
 
-                        {{-- The admin-set status leads ("เปิดลงทะเบียน" stays visible during the event); "กำลังจัดอยู่" is added beneath it while the event is on. --}}
-                        @php $badgeKey = $activity->displayStatus() === 'ongoing' ? 'open' : $activity->displayStatus(); @endphp
-                        <span class="absolute right-3 top-3 flex flex-col items-end gap-1">
-                            <span class="rounded-full px-2.5 py-1 text-xs font-medium shadow-soft backdrop-blur {{ $statusBadge[$badgeKey]['class'] ?? 'bg-slate-500/90 text-white' }}">{{ $statusBadge[$badgeKey]['label'] ?? $activity->status }}</span>
-                            @if ($activity->displayStatus() === 'ongoing')
-                                <span class="flex items-center gap-1 rounded-full bg-white/90 px-2 py-0.5 text-[0.7rem] font-semibold text-brand-green-700 shadow-soft backdrop-blur dark:bg-slate-900/90 dark:text-brand-green-300"><span class="h-1.5 w-1.5 animate-pulse rounded-full bg-brand-green-500"></span>{{ __('กำลังจัดอยู่') }}</span>
-                            @endif
-                        </span>
+                        {{-- Shows the status the admin set (ร่าง / เปิดลงทะเบียน / กำลังจัดกิจกรรม / ปิดกิจกรรม). --}}
+                        @php $badgeKey = $activity->status === 'full' ? 'open' : $activity->status; @endphp
+                        <span class="absolute right-3 top-3 rounded-full px-2.5 py-1 text-xs font-medium shadow-soft backdrop-blur {{ $statusBadge[$badgeKey]['class'] ?? 'bg-slate-500/90 text-white' }}">{{ $statusBadge[$badgeKey]['label'] ?? $activity->status }}</span>
 
                         @if ($checkedInActivityIds->contains($activity->id))
                             <span class="absolute left-3 top-3 inline-flex items-center gap-1 rounded-full bg-white/90 px-2.5 py-1 text-xs font-medium text-brand-green-700 shadow-soft dark:bg-slate-900/90 dark:text-brand-green-400">

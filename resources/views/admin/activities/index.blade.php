@@ -5,17 +5,19 @@
     $statusDot = [
         'draft' => 'bg-slate-400',
         'open' => 'bg-brand-green-500',
+        'ongoing' => 'bg-brand-purple-500',
         'closed' => 'bg-slate-400',
         'cancelled' => 'bg-red-500',
     ];
     $statusBadge = [
         'draft' => 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400',
         'open' => 'bg-brand-green-50 text-brand-green-700 dark:bg-brand-green-500/10 dark:text-brand-green-400',
+        'ongoing' => 'bg-brand-purple-50 text-brand-purple-700 dark:bg-brand-purple-500/10 dark:text-brand-purple-300',
         'closed' => 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400',
         'cancelled' => 'bg-red-50 text-red-700 dark:bg-red-500/10 dark:text-red-400',
     ];
     $statusLabel = [
-        'draft' => __('ร่าง'), 'open' => __('เปิดลงทะเบียน'),
+        'draft' => __('ร่าง'), 'open' => __('เปิดลงทะเบียน'), 'ongoing' => __('กำลังจัดกิจกรรม'),
         'closed' => __('ปิดกิจกรรม'), 'cancelled' => __('ถูกยกเลิก'),
     ];
     $semesterShort = ['1' => __('เทอม 1'), '2' => __('เทอม 2'), '3' => __('ฤดูร้อน')];
@@ -26,6 +28,7 @@
     $statusChipColor = [
         'draft' => ['bg' => 'bg-slate-50 dark:bg-slate-800/60', 'border' => 'border-slate-200 dark:border-slate-700', 'dot' => 'bg-slate-400'],
         'open' => ['bg' => 'bg-brand-green-50 dark:bg-brand-green-500/10', 'border' => 'border-brand-green-100 dark:border-brand-green-500/20', 'dot' => 'bg-brand-green-500'],
+        'ongoing' => ['bg' => 'bg-brand-purple-50 dark:bg-brand-purple-500/10', 'border' => 'border-brand-purple-100 dark:border-brand-purple-500/20', 'dot' => 'bg-brand-purple-500'],
         'closed' => ['bg' => 'bg-slate-50 dark:bg-slate-800/60', 'border' => 'border-slate-200 dark:border-slate-700', 'dot' => 'bg-slate-400'],
         'cancelled' => ['bg' => 'bg-red-50 dark:bg-red-500/10', 'border' => 'border-red-100 dark:border-red-500/20', 'dot' => 'bg-red-500'],
     ];
@@ -159,7 +162,7 @@
 
     @php
         // Group headings for the default "needs attention first" order (see ActivityController::listGroup()).
-        $groupLabels = [1 => __('ต้องตรวจสอบ'), 2 => __('กำลังจัด / วันนี้'), 3 => __('ใกล้ถึง'), 4 => __('ร่าง · ยังไม่เผยแพร่'), 5 => __('จบแล้ว'), 6 => __('ถูกยกเลิก')];
+        $groupLabels = [1 => __('ต้องตรวจสอบ'), 2 => __('วันนี้').' · '.now()->translatedFormat('l j M'), 3 => __('7 วันข้างหน้า'), 4 => __('ถัดไป'), 5 => __('ผ่านไปแล้ว'), 6 => __('ถูกยกเลิก')];
         $groupTone = [1 => 'text-amber-700 dark:text-amber-300', 2 => 'text-brand-green-700 dark:text-brand-green-300'];
         // Month sub-headings only make sense while the list runs in date order.
         $byDate = in_array(request('sort'), [null, '', 'start_at'], true);
@@ -167,7 +170,7 @@
         $dateTile = [
             'draft' => 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300',
             'open' => 'bg-brand-green-50 text-brand-green-700 dark:bg-brand-green-500/10 dark:text-brand-green-300',
-            'ongoing' => 'bg-brand-green-50 text-brand-green-700 dark:bg-brand-green-500/10 dark:text-brand-green-300',
+            'ongoing' => 'bg-brand-purple-50 text-brand-purple-700 dark:bg-brand-purple-500/10 dark:text-brand-purple-300',
             'closed' => 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400',
             'cancelled' => 'bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-300',
         ];
@@ -178,7 +181,7 @@
     <div class="mt-2 space-y-2">
         @forelse ($activities as $activity)
             @php
-                $status = $activity->displayStatus() === 'ongoing' ? 'ongoing' : ($activity->status === 'full' ? 'open' : $activity->status);
+                $status = $activity->status === 'full' ? 'open' : $activity->status;
                 $month = $activity->start_at->format('Y-m');
                 $newGroup = isset($activity->list_group) && $activity->list_group !== $lastGroup;
             @endphp
@@ -213,10 +216,16 @@
                                 <span class="text-slate-300 dark:text-slate-600">·</span>
                                 <span class="max-w-[16rem] truncate">{{ $activity->location_name }}</span>
                             @endif
-                            @if ($activity->displayStatus() === 'ongoing')
-                                <span class="inline-flex items-center gap-1 font-semibold text-brand-green-700 dark:text-brand-green-300">
-                                    <span class="h-1.5 w-1.5 animate-pulse rounded-full bg-brand-green-500"></span>{{ __('กำลังจัดอยู่') }}
-                                </span>
+                            {{-- Drafts now sit among published activities by date, so flag them. --}}
+                            @if ($activity->status === 'draft')
+                                @if ($activity->end_at->isFuture())
+                                    <span class="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 font-semibold text-amber-700 ring-1 ring-amber-200 dark:bg-amber-500/10 dark:text-amber-300 dark:ring-amber-500/30">
+                                        <svg class="h-3 w-3 shrink-0" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m0 3.75h.008M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                        {{ __('ยังไม่เผยแพร่') }}
+                                    </span>
+                                @else
+                                    <span class="rounded-full bg-slate-100 px-2 py-0.5 font-medium text-slate-500 dark:bg-slate-800 dark:text-slate-400">{{ __('ไม่ได้เผยแพร่') }}</span>
+                                @endif
                             @endif
                         </p>
                         @if ($activity->flagged_count > 0 || $activity->pending_late_checkin_count > 0)
@@ -252,7 +261,7 @@
                         @include('admin.activities._status-picker')
 
                         {{-- Only the actions that make sense for the status are shown; the rest live in "⋯". --}}
-                        @if (in_array($activity->status, ['open', 'ongoing', 'full'], true))
+                        @if (in_array($activity->status, ['open', 'ongoing', 'full'], true) && ! $activity->usesSelfReportCheckIn())
                             <a href="{{ route('admin.attendance.qr-display', $activity) }}" class="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm font-semibold text-brand-green-700 transition-colors hover:bg-brand-green-50 dark:text-brand-green-300 dark:hover:bg-brand-green-500/15">
                                 <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.9" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 013.75 9.375v-4.5zM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5zM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0113.5 9.375v-4.5z"/></svg>
                                 QR

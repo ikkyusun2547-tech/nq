@@ -20,7 +20,7 @@
     ];
     $statusLabel = [
         'draft' => __('ร่าง'), 'open' => __('เปิดลงทะเบียน'),
-        'ongoing' => __('กำลังจัดอยู่'), 'closed' => __('ปิดกิจกรรม'), 'cancelled' => __('ถูกยกเลิก'),
+        'ongoing' => __('กำลังจัดกิจกรรม'), 'closed' => __('ปิดกิจกรรม'), 'cancelled' => __('ถูกยกเลิก'),
     ];
 
     // Thai readers expect the Buddhist-era year.
@@ -154,7 +154,7 @@
                         </span>
                         <span class="flex shrink-0 flex-col items-end gap-1 sm:flex-row sm:items-center sm:gap-2">
                             @if ($showStatus)
-                                <span class="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-300">{{ $statusLabel[$activity->displayStatus()] ?? $activity->status }}</span>
+                                <span class="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-300">{{ $statusLabel[$activity->status === 'full' ? 'open' : $activity->status] ?? $activity->status }}</span>
                             @endif
                             @if (in_array($activity->id, $checkedInIds, true))
                                 <span class="inline-flex items-center gap-1 rounded-full bg-brand-green-50 px-2.5 py-1 text-[11px] font-medium text-brand-green-700 dark:bg-brand-green-500/10 dark:text-brand-green-300">
