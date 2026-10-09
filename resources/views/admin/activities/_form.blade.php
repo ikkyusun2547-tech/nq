@@ -237,20 +237,20 @@
             class="mb-4 w-full rounded-2xl border bg-white px-3.5 py-2.5 text-sm text-slate-700 placeholder:text-slate-400 transition-all duration-200 focus:outline-none focus:ring-4 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 @error('location_name') border-red-400 focus:border-red-500 focus:ring-red-500/10 dark:border-red-500/70 @else border-slate-300 focus:border-brand-purple-500 focus:ring-brand-purple-500/10 dark:border-slate-600 @enderror">
 
         <div x-show="checkinMethod === 'realtime' && requiresGps" x-cloak>
-            <label class="mb-2 block text-sm font-medium text-slate-600 dark:text-slate-400">{{ __('ปักหมุดสถานที่จัดกิจกรรม (คลิกบนแผนที่)') }}</label>
+            <label class="mb-2 block text-sm font-medium text-slate-600 dark:text-slate-400">{{ __('ปักหมุดสถานที่จัดกิจกรรม (คลิกบนแผนที่ หรือพิมพ์พิกัดด้านล่าง)') }}</label>
             <div id="activity-map" class="h-72 w-full overflow-hidden rounded-2xl ring-1 ring-brand-purple-100 dark:ring-brand-purple-500/20"></div>
             <div class="mt-3 grid grid-cols-3 gap-3">
                 <div>
                     <label class="mb-1 block text-xs text-slate-400 dark:text-slate-500">Latitude</label>
-                    <input type="text" id="location_lat" name="location_lat" readonly
+                    <input type="text" id="location_lat" name="location_lat" inputmode="decimal" autocomplete="off" placeholder="14.8818"
                         value="{{ old('location_lat', $activity->location_lat ?? '') }}"
-                        class="w-full rounded-xl border bg-slate-100/70 px-3.5 py-2.5 text-sm text-slate-500 dark:bg-slate-800 dark:text-slate-400 @error('location_lat') border-red-400 dark:border-red-500/70 @else border-slate-200 dark:border-slate-600 @enderror">
+                        class="w-full rounded-2xl border bg-white px-3.5 py-2.5 text-sm text-slate-700 placeholder:text-slate-400 transition-all duration-200 focus:outline-none focus:ring-4 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 @error('location_lat') border-red-400 focus:border-red-500 focus:ring-red-500/10 dark:border-red-500/70 @else border-slate-300 focus:border-brand-purple-500 focus:ring-brand-purple-500/10 dark:border-slate-600 @enderror">
                 </div>
                 <div>
                     <label class="mb-1 block text-xs text-slate-400 dark:text-slate-500">Longitude</label>
-                    <input type="text" id="location_lng" name="location_lng" readonly
+                    <input type="text" id="location_lng" name="location_lng" inputmode="decimal" autocomplete="off" placeholder="103.4936"
                         value="{{ old('location_lng', $activity->location_lng ?? '') }}"
-                        class="w-full rounded-xl border bg-slate-100/70 px-3.5 py-2.5 text-sm text-slate-500 dark:bg-slate-800 dark:text-slate-400 @error('location_lng') border-red-400 dark:border-red-500/70 @else border-slate-200 dark:border-slate-600 @enderror">
+                        class="w-full rounded-2xl border bg-white px-3.5 py-2.5 text-sm text-slate-700 placeholder:text-slate-400 transition-all duration-200 focus:outline-none focus:ring-4 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 @error('location_lng') border-red-400 focus:border-red-500 focus:ring-red-500/10 dark:border-red-500/70 @else border-slate-300 focus:border-brand-purple-500 focus:ring-brand-purple-500/10 dark:border-slate-600 @enderror">
                 </div>
                 <div>
                     <label class="mb-1 block text-xs text-slate-400 dark:text-slate-500">{{ __('รัศมีปลอดภัย (เมตร)') }}</label>
@@ -259,6 +259,7 @@
                         class="w-full rounded-2xl border bg-white px-3.5 py-2.5 text-sm text-slate-700 placeholder:text-slate-400 transition-all duration-200 focus:outline-none focus:ring-4 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 @error('allowed_radius') border-red-400 focus:border-red-500 focus:ring-red-500/10 dark:border-red-500/70 @else border-slate-300 focus:border-brand-purple-500 focus:ring-brand-purple-500/10 dark:border-slate-600 @enderror">
                 </div>
             </div>
+            <p class="mt-2 text-xs text-slate-400 dark:text-slate-500">{{ __('คัดลอกพิกัดจาก Google Maps (เช่น 14.8818, 103.4936) มาวางในช่อง Latitude ได้เลย ระบบจะแยกให้เอง') }}</p>
         </div>
 
         <div x-show="checkinMethod === 'self_report'" x-cloak>
@@ -482,6 +483,27 @@
         }
 
         map.on('click', (e) => setPoint(e.latlng.lat, e.latlng.lng));
+
+        // Typed coordinates move the pin. A pasted "lat, lng" pair (how
+        // Google Maps copies a point) is split across both fields.
+        function fromInputs() {
+            const pair = latInput.value.match(/^\s*(-?\d+(?:\.\d+)?)\s*[,\s]\s*(-?\d+(?:\.\d+)?)\s*$/)
+                || lngInput.value.match(/^\s*(-?\d+(?:\.\d+)?)\s*[,\s]\s*(-?\d+(?:\.\d+)?)\s*$/);
+            if (pair) {
+                latInput.value = pair[1];
+                lngInput.value = pair[2];
+            }
+            const lat = parseFloat(latInput.value);
+            const lng = parseFloat(lngInput.value);
+            if (Number.isNaN(lat) || Number.isNaN(lng) || Math.abs(lat) > 90 || Math.abs(lng) > 180) {
+                return;
+            }
+            marker.setLatLng([lat, lng]);
+            circle.setLatLng([lat, lng]);
+            map.panTo([lat, lng]);
+        }
+        latInput.addEventListener('input', fromInputs);
+        lngInput.addEventListener('input', fromInputs);
         marker.on('dragend', () => {
             const pos = marker.getLatLng();
             setPoint(pos.lat, pos.lng);
